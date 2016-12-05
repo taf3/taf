@@ -13,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-@file openvswitch.py
+@file  openvswitch.py
 
-@summary Class to abstract openvswitch operations
+@summary  Class to abstract openvswitch operations
 @note
 Examples of openvswitch usage in tests:
 env.lhost[1].ui.openvswitch.start()
@@ -49,9 +49,9 @@ class OpenvSwitch(object):
     def update_map(self, iface_name, delete=False):
         """
         @brief  Update switch_map and name_to_switchid_map
-        @param  name:  name of ovs bridge or interface
-        @type  name:  str
-        @param  delete:  if delete - remove from switch_map and name_to_switchid_map
+        @param  iface_name:  name of ovs bridge or interface
+        @type  iface_name:  str
+        @param  delete:  if True - remove from switch_map and name_to_switchid_map
         @type  delete:  bool
         """
         if delete:
@@ -87,6 +87,24 @@ class OpenvSwitch(object):
         """
         return self.service_manager.restart()
 
+    def status(self, exp_rc=frozenset({0, 3})):
+        """
+        @brief  Get openvswitch process status
+        @param  exp_rc:  expected return code
+        @type  exp_rc:  int | set | list | frozenset
+        @rtype:  named tuple
+        """
+        return self.service_manager.status(expected_rcs=exp_rc)
+
+    def get_status(self):
+        """
+        @brief  Method for get openvswitch status
+        @rtype:  list
+        @return:  ovs status 'active' or 'inactive'
+        """
+        output = self.status().stdout
+        return re.findall(r'Active:\s(\S+)', output)
+
     def add_bridge(self, br_name):
         """
         @brief  Add new openvswitch bridge
@@ -105,7 +123,7 @@ class OpenvSwitch(object):
         self.cli_send_command(command="ovs-vsctl del-br {}".format(br_name))
         self.update_map(br_name, delete=True)
 
-    def add_interface(self, br_name, iface_name, iface_type):
+    def add_interface(self, br_name, iface_name, iface_type, **kwargs):
         """
         @brief  Add new openvswitch interface
         @param  br_name:  name of ovs bridge
@@ -114,12 +132,14 @@ class OpenvSwitch(object):
         @type  iface_name:  str
         @param  iface_type:  type of added interface
         @type  iface_type:  str
+        @param  kwargs:  interface options
+        @type  kwargs:  dict
         """
-        self.cli_send_command("ovs-vsctl add-port {0} {1} -- set interface {1} type={2}".format(
-            br_name,
-            iface_name,
-            iface_type))
-
+        # options available
+        options = ''.join(map(lambda x: ' options:{}={}'.format(*x), kwargs.items()))
+        command = 'ovs-vsctl add-port {0} {1} -- set interface {1} type={2}{3}'.format(br_name, iface_name, iface_type,
+                                                                                       options)
+        self.cli_send_command(command)
         self.update_map(iface_name)
 
     def del_interface(self, br_name, iface_name):
@@ -188,3 +208,33 @@ class OpenvSwitch(object):
         """
         bridges, _ = self.get_existing_bridges_interfaces()
         [self.del_bridge(bridge) for bridge in bridges]
+
+    def add_bond(self, br_name, bond_name, ports):
+        """
+        @brief  Method for bonding ovs interfaces
+        @param  br_name:  name of ovs bridge
+        @type  br_name:  str
+        @param  bond_name:  name of the bond
+        @type  bond_name:  str
+        @param  ports:  ports to bond
+        @type  ports:  list
+        """
+        command = "ovs-vsctl add-bond {0} {1} {2}".format(br_name, bond_name, ' '.join(ports))
+        self.cli_send_command(command)
+
+    def set_bridge_port_interface(self, inst_type, name, **kwargs):
+        """
+        @brief  Method set parameters for bridge, port ot interface
+        @param  inst_type:  could be Bridge, Port or Interface
+        @type  inst_type:  str
+        @param  name:  name of ovs bridge, port or interface
+        @type  name:  str
+        @param  kwargs:  options to be set for bridge, port or interface
+        @type  kwargs:  dict
+        @raise:  CustomException
+        """
+        if not kwargs:
+            raise CustomException("Arguments are required for current method")
+        options = ''.join(map(lambda x: ' {}={}'.format(*x), kwargs.items()))
+        command = "ovs-vsctl set {0} {1}{2}".format(inst_type, name, options)
+        self.cli_send_command(command)
