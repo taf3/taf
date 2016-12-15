@@ -43,7 +43,7 @@ HEADER = [
 # as globals().  WARNING: when using exec this way
 # __name__ == '__builtin__' not '__main__'.  This is confusing
 FOOTER = [
-    '""".encode())).decode()); exec payload["module"] in payload',
+    '""".encode("utf-8"))).decode("utf-8")); globals().update(payload); exec(payload["module"], globals())',
     "'",
 ]
 
@@ -57,7 +57,7 @@ def decode(payload_str):
     @return: original byte-stream
     @rtype: str
     """
-    return bz2.decompress(base64.urlsafe_b64decode(payload_str.encode()).decode())
+    return bz2.decompress(base64.urlsafe_b64decode(payload_str.encode('utf-8')).decode('utf-8'))
 
 
 def encode(payload):
@@ -72,7 +72,7 @@ def encode(payload):
     @return: base64 encoded, bz2 compressed string
     @rtype: str
     """
-    return base64.urlsafe_b64encode(bz2.compress(payload.encode())).decode()
+    return base64.urlsafe_b64encode(bz2.compress(payload.encode('utf-8'))).decode('utf-8')
 
 # max is 1024**127
 PAYLOAD_CUTOFF = 1024 * 96
@@ -146,7 +146,7 @@ def generate_calls(cmd_list, parallel_limit=None, remote_module_template=remote_
     stripped = "\n".join(l for l in runner.splitlines() if not l.strip().startswith('#'))
     payload_gen = partial(gen_payload, stripped, parallel_limit)
     for batch_payload_str in bisect_if_too_large(cmd_list, payload_gen):
-        yield ''.join(itertools.chain(HEADER, [batch_payload_str.decode()], FOOTER))
+        yield ''.join(itertools.chain(HEADER, [batch_payload_str], FOOTER))
 
 
 def gen_payload(runner, parallel_limit, cmd_list):
@@ -170,7 +170,7 @@ def _ssh_cli_test():
 
     for batch_payload_str in bisect_if_too_large(cmd_list, payload_gen, 1024 * 3):
         cmd_line = ''.join(itertools.chain(HEADER, [batch_payload_str], FOOTER))
-        cmd_line = cmd_line.encode()
+        cmd_line = cmd_line.encode('utf-8')
         print("cmd_line len = %s" % len(cmd_line))
         # convert to back to bytes before sending
         proc = Popen(["ssh"] + sys.argv[1:] + [cmd_line], stdout=PIPE,
@@ -180,7 +180,7 @@ def _ssh_cli_test():
             print(err)
         else:
             try:
-                results = json.loads(output.decode())
+                results = json.loads(output.decode('utf-8'))
             except ValueError:
                 sys.stderr.write(output)
             else:

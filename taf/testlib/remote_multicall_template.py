@@ -55,7 +55,7 @@ def main():
 
 
 def call(cmd):
-    shell = True if isinstance(cmd, str) else False
+    shell = True if hasattr(cmd, "strip") else False
     return Popen(cmd, stdout=PIPE, stderr=PIPE, shell=shell)
 
 
@@ -63,7 +63,8 @@ def multicall(cmd_list, chunk):
     for batch in grouper_it(cmd_list, chunk):
         started_procs = [(cmd, call(cmd)) for cmd in batch]
         for cmd, p in started_procs:
-            yield (cmd,) + p.communicate() + (p.wait(),)
+            out, err = p.communicate()
+            yield (cmd, out.decode("utf-8"), err.decode("utf-8"), p.wait())
 
 
 # __name__ is  __builtin__ when called remotely via exec
