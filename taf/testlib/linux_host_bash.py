@@ -44,6 +44,7 @@ from testlib.linux import collectd
 from testlib.linux import hugepages
 from testlib.linux import openvswitch
 from testlib.linux import dpdk
+from testlib.linux import ipmitool
 
 
 ENABLE_DISABLE_MAP = {
@@ -108,6 +109,9 @@ class LinuxHostBash(LinuxHostInterface):
 
         # DPDK
         self.dpdk = dpdk.Dpdk(self.cli_send_command)
+
+        # Ipmitool
+        self.ipmitool = ipmitool.IpmiTool(self.cli_send_command)
 
         # Initialize lag/vlan map
         self.vlans = [{"vlanId": 1, "name": "VLAN-1"}]

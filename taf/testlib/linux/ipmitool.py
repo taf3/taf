@@ -14,55 +14,68 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-@file ipmitool.py
+@file  ipmitool.py
 
-@summary Class to abstract ipmitool operations
+@summary  Class to abstract ipmitool operations
 """
-from testlib.custom_exceptions import SwitchException
+import re
+
+import pytest
 
 
 class IpmiTool(object):
 
     SERVICE = 'ipmitool'
 
-    def __init__(self, run_command, ipmi_config, tray=""):
+    def __init__(self, run_command):
         """
         @brief Initialize IpmiTool class.
         """
         super(IpmiTool, self).__init__()
         self.run_command = run_command
-        self.ipmi_host = ipmi_config['ipmi_host']
-        self.ipmi_user = ipmi_config['ipmi_user']
-        self.ipmi_pass = ipmi_config['ipmi_pass']
-        self.ipmi_reset_string = ipmi_config['ipmi_reset']
-        self.ipmi_status_string = ipmi_config['ipmi_status']
-        self.tray = tray
 
-    def reset(self):
+    def get_sdr_list(self):
         """
-        @brief:  Uses ipmi to issue the reset command.
+        @brief  Get all available Sensor Data Repository entries
+        @return:  Returns list of sdr
+        @rtype:  list
         """
-        command = '{0} -H {1} -U {2} -P {3} -b {4} -t {5}'.format(
-            self.SERVICE, self.ipmi_host, self.ipmi_user,
-            self.ipmi_pass, self.tray, self.ipmi_reset_string)
-        result = self.run_command(command=command)
+        sdr = self.run_command('"{}" sdr list'.format(self.SERVICE)).stdout
+        return re.findall(r'^(.*?)\s+\|', sdr, re.MULTILINE)
 
-        if result.stderr:
-            raise SwitchException("Error during IPMI power cycle: {0}".format(result.stderr))
-
-    def status(self):
+    def get_sensors_states(self, sensor, expected_rcs=frozenset({0, 1})):
         """
-        @brief:  Uses ipmi to issue get status command.
-        @raise:  SwitchException
-        @return:  Returns the result.stdout
-        @rtype:  str
+        @brief  Get all available sensor states for sensor
+        @param  sensor:  name of sensor
+        @type  sensor:  str
+        @param  expected_rcs: if sensor is not available in HW rc=1, but events for sensor could be generated
+        @type  expected_rcs:  set
+        @return:  Returns list of sensor states
+        @rtype:  list
         """
-        command = '{0} -H {1} -U {2} -P {3} -b {4} -t {5}'.format(
-            self.SERVICE, self.ipmi_host, self.ipmi_user,
-            self.ipmi_pass, self.tray, self.ipmi_status_string)
-        result = self.run_command(command=command)
+        sensor_states_list = self.run_command("{0} event '{1}'".format(self.SERVICE, sensor),
+                                              expected_rcs=expected_rcs).stdout
+        return re.findall(r'\s{3}(.+)', sensor_states_list, re.MULTILINE)
 
-        if result.stderr:
-            raise SwitchException("Error during IPMI get status: {0}".format(result.stderr))
+    def generate_event(self, sensor, sensor_state):
+        """
+        @brief  Method for generating event for sensor with sensor state
+        @param  sensor:  name of sensor
+        @type  sensor:  str
+        @param  sensor_state:  name of sensor state
+        @type  sensor_state:  str
+        """
+        self.run_command('"{0}" event "{1}" "{2}"'.format(self.SERVICE, sensor, sensor_state.strip()))
 
-        return result.stdout
+    def clear_sel(self):
+        """
+        @brief  Method for clear System Event Log
+        """
+        self.run_command('"{0}" sel clear'.format(self.SERVICE))
+
+    def is_ipmi_supported_by_system(self):
+        """
+        @brief  Method for check if ipmi is supported by device
+        """
+        if 'IPMI' not in self.run_command('dmidecode -t38').stdout:
+            pytest.skip('ipmi does not supported on current machine')

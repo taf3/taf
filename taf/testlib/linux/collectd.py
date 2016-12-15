@@ -51,7 +51,7 @@ from testlib.linux import service_lib
 
 
 PLUGINS = ("python", "csv", "dpdkstat", "dpdkevents", "hugepages", "intel_rdt", "mcelog", "ovs_stats", "ovs_events",
-           "snmp_agent", "syslog", "exec")
+           "snmp_agent", "syslog", "exec", "ipmi")
 
 GLOBAL_PLUGIN_LOAD_BOILERPLATE = """
 <LoadPlugin {plugin}>
