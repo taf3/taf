@@ -86,7 +86,7 @@ doxypy \n\
 
 
 # always need /etc/environment for IXIA and TCL vars
-COPY environment /etc/environment
+COPY docker_environment_variables /etc/environment
 
 ARG TAF_ROOT=/root/taf3
 # copy TAF repo to docker image
