@@ -68,7 +68,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 
 # download the latest pip
-RUN curl "https://bootstrap.pypa.io/get-pip.py" | python3 -
+RUN curl -s "https://bootstrap.pypa.io/get-pip.py" | python3 -
 
 # install ci requirements
 RUN echo '# Use 2.13 version instead of 2.14 based on issue https://github.com/eliben/pycparser/issues/147 \n\
