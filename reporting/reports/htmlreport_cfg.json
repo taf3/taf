@@ -1,0 +1,5 @@
+{
+"xslt_style": "xslt/junit.xsl",
+"xslt_concat": "xslt/junit_concat.xsl",
+"html_resources": "xslt/"
+}

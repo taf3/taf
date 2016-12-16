@@ -1,0 +1,5 @@
+{
+  "xsl": "junit.xsl",
+  "info_dict": {},
+  "connectors": ["synapsert"]
+}

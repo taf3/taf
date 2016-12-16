@@ -1,0 +1,37 @@
+/*!
+\page system_architecture_page System Architecture
+
+\image html taf_architecture.png \"Figure 1. Test Automation Framework Architecture\"
+\image rtf taf_architecture.png \"Figure 1. Test Automation Framework Architecture\"
+
+
+The TAF is based on py.test (<a href="http://pytest.org/latest/">http://pytest.org/latest/</a>). The basic concept is to create library with all necessary functionality, to define how the environment configuration will be supplied to test suites, and to create reporting processing functionality. 
+
+
+TAF package consists of two folders: ./taf-repo and ./testcases-repo. taf-repo folder holds library modules (or plugins) for py.test, and testcases-repo contains test cases including test configuration and test scenarios. ./taf-repo/testlib contains of the following modules.
+
+
+<b> Common functionality and helper functions: </b>
+- \b loggers - integration of standard python logging library into Framework;
+- \b *helpers - contains different helper functions which might be used from test suites;
+- \b common3 - contains base class to handle test environment.
+
+
+<b> Groups of modules to handle environment-specific functionality: </b>
+- \b environment - functions for manipulation with operating system environment variables etc.
+
+
+<b> Hardware-related libraries: </b>
+- \b dev_* - modules which contain classes to handle particular environment type;
+- \b powerboard - startup/shutdown of the devices using SNMP via APC power boards;
+
+Typical sequence of actions and operations:
+    -# Execution starts from calling py.test with necessary command line arguments.
+    -# Py.test collects test cases according to its discovery rules.
+    -# Py.test analyses conftest.py file(s) according to its discovery rules.
+    -# Py.test performs setup procedure defined in conftest.py file.
+    -# Py.test starts test suites execution one by one.
+    -# Py.test performs tear down procedure defined in conftest.py file.
+    -# Logs are stored and ready for further processing.
+
+*/

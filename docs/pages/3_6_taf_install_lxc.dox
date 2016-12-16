@@ -1,0 +1,229 @@
+/*!
+\page run_lxc_page Running LXC Environment with ONS Builds
+
+\tableofcontents
+
+This section describes how to run the LXC environment with ONS builds.
+\section run_lxc_sec1 Preparation
+    Get the latest distribution of SimSwitch and Quagga. Look for release files at:
+     \verbatim
+     $ cp <ONS_product_installation_path>/prebuild-binaries/<quagga_tar_file> ~
+     $ cp <ONS_product_installation_path>/prebuild-binaries/<swtichpp_tar_file> ~
+     \endverbatim
+     File name examples for switchpp and quagga:
+     \verbatim
+     quagga-bin-x86_64-Ubuntu-12.04-0.99.22.tar.bz2
+     switchpp-bin-x86_64-Ubuntu-12.04-<version>.tar.bz2
+     \endverbatim
+\section run_lxc_sec2 Install LXC (Linux Container)
+     Install LXC:
+     \verbatim
+     $ sudo apt-get install lxc
+     \endverbatim
+     Prepare the cgroup for the linux container:
+     \verbatim
+     $ sudo mkdir /cgroup
+     $ sudo mount none -t cgroup /cgroup
+     \endverbatim
+     \note
+     If you see an error after last command, just ignore it and continue.
+
+     To store the mount permanently, add the following line to /etc/fstab:
+     \verbatim
+     $ sudo vim /etc/fstab
+     none /cgroup cgroup defaults 0 0
+     \endverbatim
+\section run_lxc_sec3 Tunnel interfaces
+     Check if you have uml-utilities installed:
+     \verbatim
+     $ dpkg -l | grep uml-utilities
+     \endverbatim
+     If the command response is empty, install uml-utilities, which are necessary for creating the tun and
+     tap interfaces used for the virtual host-only network.
+     \verbatim
+     $ sudo apt-get install uml-utilities
+     \endverbatim
+     Just for testing that everything is ok, create and delete one tap interface:\n
+     Create:
+     \verbatim
+     $ sudo tunctl -b -u <your local admin user or root> -t tap0
+     \endverbatim
+     Delete:
+     \verbatim
+     $ sudo tunctl -d tap0
+     \endverbatim
+     To create a persistent interface, add the following to /etc/network/interfaces:
+     \verbatim
+     auto tap0
+     iface tap0 inet manual
+        pre-up /usr/sbin/tunctl -b -u root -t tap0
+        post-down /usr/sbin/tunctl -d tap0
+     \endverbatim
+
+\section run_lxc_sec4 Bridge Interfaces
+    Check if you have bridge-utils installed.
+    \verbatim
+    $ dpkg -l | grep bridge-utils
+    \endverbatim
+    If the command response is empty, install bridge-utils.
+    \verbatim
+    $ sudo apt-get install bridge-utils
+    \endverbatim
+    Check your network environment with the ifconfig command; however, if you already have br0 interface
+    with inet addr:10.0.5.100, skip this step.
+
+    \note
+    The tap0 interface must be created and up.
+
+    This step is just for testing that everything is ok.
+    In a terminal with sudo permissions:
+    \verbatim
+    $ sudo brctl addbr br0
+    $ sudo brctl addif br0 tap0
+    $ brctl show
+    $ sudo ifconfig br0 up
+    $ sudo ifconfig br0 10.0.5.100/24
+    $ ifconfig br0
+    \endverbatim
+    Now, br0 should be up and has ip addr: 10.0.5.100, mask: 255.255.255.0 Check network availability
+    with ping.\n\n
+    Here, network '10.0.5.0' will be used for the lxc and vlab environment. IP '10.0.5.100' in network
+    '10.0.5.0' will be used by vlab.\n\n
+    To store network changes permanently, add to /etc/network/interfaces:
+    \verbatim
+    auto br0
+    iface br0 inet static
+        address 10.0.5.100
+        netmask 255.255.255.0
+        bridge_ports tap0
+        bridge_stp off
+        bridge_fd 0
+        bridge_maxwait 0
+    \endverbatim
+    <b> !!! Check your network settings !!! </b>
+    \verbatim
+    $ sudo /etc/init.d/networking restart
+    \endverbatim
+    The result of network restart should be [OK].\n\n
+    If not, check '/etc/network/interfaces' where you made changes.
+
+\section run_lxc_sec5 Install Quagga
+    - Create the directory /opt/simswitch OR clear it if it already exist and contains an older build.
+    \verbatim
+    $ sudo mkdir /opt/simswitch
+    \endverbatim
+    - Extract the Quagga distribution.
+    \verbatim
+    $ sudo tar xjf ~/quagga-bin-x86_64-Ubuntu-12.04-0.99.22.tar.bz2 -C /opt/simswitch/
+    \endverbatim
+\section run_lxc_sec6 Starting SimSwitch Inside LXC
+    - Extract the simswitch tar file to /opt/simswitch (create one if needed).
+    \verbatim
+    $ sudo tar xjf ~/switchpp-bin-x86_64-Ubuntu-12.04-1.0.1.1316-2.tar.bz2 -C /opt/simswitch/
+    \endverbatim
+    - Start the first linux container with simswitch inside using ons-lxc shell script.
+    \verbatim
+    $ cd /opt/simswitch/bin/
+    $ sudo ./ons-ctl start -n 1 -i br0 -a 10.0.5.101/24
+    \endverbatim
+    - Parameters usage: <tt>./ons-ctl start -n <instance number> -i br0 -a <containter-ipaddr>/<
+    mask> -p <number of simswitch ports> </tt>
+
+    \attention
+    <b>After ons-ctl execution you are alredy placed inside lxc console !!!</b>
+
+    LXC IP will be '10.0.5.101', switch instance is '1'.
+      - Also, ons-ctl script will start vlab if it is not started manually before.\n
+
+    To run several instances of LXCs with switchpp, you should modify <containter-ip-addr> and
+    <instance>:
+
+    \verbatim
+    $ sudo ./ons-lxc -n 2 -i br0 -a 10.0.5.102/24
+    $ sudo ./ons-lxc -n 3 -i br0 -a 10.0.5.103/24
+    \endverbatim
+
+    - Manually start vlab:
+
+    \verbatim
+    $ cd /opt/simswitch/
+    $ sudo env LD_LIBRARY_PATH=$PWD/lib bin/vlab
+    \endverbatim
+
+\section run_lxc_sec7 Useful LXC Commands
+    Show running containers:
+    \verbatim
+    $ sudo lxc-ls
+    \endverbatim
+    Stop container:
+    \verbatim
+    $ sudo lxc-stop --name <container name>
+    \endverbatim
+    Also, if in lxc console and you type 'exit', the lxc container will be stopped:
+    \verbatim
+    $ root@1:/opt/simswitch# exit
+    \endverbatim
+
+\section run_lxc_sec8 Running SimSwitch
+    After system reboot, to start simswitch into the LXC environment, you only need to run the ons-ctl
+    shell script without any additional actions:
+    \verbatim
+    $ sudo ./ons-lxc -n 1 -i br0 -a 10.0.5.101/24
+    \endverbatim
+\section run_lxc_sec9 XML-RPC Notice
+    For XML-RPC connection in Python to VLAB and Switch, use IP addresses:
+    \verbatim
+    vlab = xmlrpclib.ServerProxy("http://10.0.5.100:8050/RPC2")
+    sw1 = xmlrpclib.ServerProxy("http://10.0.5.101:8081/RPC2")
+    \endverbatim
+\section run_lxc_sec10 Uninstalling Quagga
+    If you have Quagga installed and you need to remove it, go where you installed quagga before
+    (probably in '~/quagga') and simply run uninstall:
+    \verbatim
+    $ cd ~/quagga/
+    $ sudo make uninstall
+    \endverbatim
+
+\section run_lxc_sec11 Preparing the Linux Environment to Run CLI Test Cases on LXC SimSwitch
+    To be able run CLI test cases on LXC SimSwitch, you should add a special user on your system. Here is
+    a list of commands that should be run:
+    \verbatim
+    $ sudo useradd lxc_admin
+    $ sudo passwd lxc_admin
+    $ Enter new UNIX password: lxc_admin
+    $ Retype new UNIX password: lxc_admin
+    \endverbatim
+
+\section run_lxc_sec12 All-In-One Edition
+    \verbatim
+    $ sudo apt-get install lxc uml-utilities bridge-utils
+    $ sudo vim /etc/fstab
+
+    none /cgroup cgroup defaults 0 0
+
+    $ sudo vim /etc/network/interfaces
+
+    auto tap0
+    iface tap0 inet manual
+        pre-up /usr/sbin/tunctl -b -u root -t tap0
+        post-down /usr/sbin/tunctl -d tap0
+    auto br0
+    iface br0 inet static
+        address 10.0.5.100
+        netmask 255.255.255.0
+        bridge_ports tap0
+        bridge_stp off
+        bridge_fd 0
+        bridge_maxwait 0
+
+    $ sudo /etc/init.d/networking restart
+    $ cp <ONS_product_installation_path>/prebuild-binaries/<quagga_tar_file> ~
+    $ cp <ONS_product_installation_path>/prebuild-binaries/<swtichpp_tar_file> ~
+    $ sudo mkdir /opt/simswitch
+    $ sudo tar xjf ~/switchpp-bin-x86_64-Ubuntu-12.04-1.0.1.1316-2.tar.bz2 -C /opt/simswitch/
+    $ sudo tar xjf ~/quagga-bin-x86_64-Ubuntu-12.04-0.99.22.tar.bz2 -C /opt/simswitch/
+    $ sudo useradd lxc_admin
+    $ sudo passwd lxc_admin
+    \endverbatim
+
+*/$

@@ -1,0 +1,27 @@
+How to run transportation procedures from WRTM to SynapseRT:
+
+Pre-install:
+
+Make sure that TMCLI utilities are located in /opt/TMCLI.
+
+1. Go to taf/plugins/connectors:
+   $ cd $HOME/<git_project_path>/taf/plugins/connectors
+   
+2. Create there two sym-links:
+   $ ln -s ../../utils/wrtm_export/transportation.py transportation.py
+   $ ln -s ../../utils/wrtm_export/WRTM_export.py WRTM_export.py
+   
+3. Run transportation script:
+
+   This script contains two main functions:
+       - create_test_cases(wrtm, synapsert)
+             transport all test cases from WRTM to SynapseRT;
+             uncomment to enable in main() function;
+             have to be run before create_test_plans() and only once.
+              
+       - create_test_plans(wrtm, synapsert, builds)
+             transport all history (suites and sub-tests);
+             uncomment to enable in main() function;
+             have to be run after all cases were transported by create_test_cases().
+             
+   $ sudo python transportation.py

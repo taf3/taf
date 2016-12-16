@@ -1,0 +1,16 @@
+{
+"HTTP Client": {
+    "HTTP Bytes": "kSum",
+    "TCP Resets Sent": "kSum",
+    "TCP Resets Received": "kSum",
+    "TCP Retries": "kSum",
+    "TCP Timeouts": "kSum"
+    },
+"HTTP Server": {
+    "TCP Resets Sent": "kSum",
+    "TCP Resets Received": "kSum",
+    "TCP Retries": "kSum",
+    "TCP Timeouts": "kSum"
+    }
+}
+

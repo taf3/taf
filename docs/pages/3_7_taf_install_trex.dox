@@ -1,0 +1,141 @@
+/*!
+\page env_trex_page Preparing the Test Environment to Work with TRex
+
+\tableofcontents
+
+\section env_trex_page_sec1 TAF and TRex control plane
+
+\image html taf_and_trex_control_plane.png \"Figure 2. TAF and TRex control plane\"
+\image rtf taf_and_trex_control_plane.png \"Figure 2. TAF and TRex control plane\"
+
+\section env_trex_page_sec2 Download and installation TRex server
+
+- \b Check \b environment:
+    - hardware recommendation;
+    - supported Linux versions: * Fedora 18-21, 64-bit kernel (not 32-bit) * Ubuntu 14.04.1 LTS, 64-bit kernel (not 32-bit).
+
+- \b  Obtain \b the \b TRex \b package:
+    Latest release:
+      \verbatim
+      $ mkdir trex
+      $ cd trex
+      $ wget --no-cache http://trex-tgn.cisco.com/trex/release/latest
+      $ $tar -xzvf latest
+      \endverbatim
+
+    To obtain a specific version(X.XX=Version number):
+      \verbatim
+      $ wget --no-cache http://trex-tgn.cisco.com/trex/release/vX.XX.tar.gz
+      \endverbatim
+
+\section env_trex_page_sec3 Run TRex server
+
+- \b Identify \b the \b ports:
+      \verbatim
+      $ cd trex
+      $ sudo ./dpdk_setup_ports.py –s
+      \endverbatim
+
+- \b  Create \b simple \b configuration \b file: \n
+    Copy a basic configuration file from cfg folder:
+      \verbatim
+      $ cp  cfg/simple_cfg.yaml /etc/trex_cfg.yaml
+      \endverbatim
+    Edit the configuration file:
+      \verbatim
+      $ vim  /etc/trex_cfg.yaml
+      port_limit      : 2         # this option can limit the number of port of the platform
+      version         : 2
+      interfaces      : ["03:00.0","03:00.1"] #the interfaces using ./dpdk_setup_ports.py –s
+      \endverbatim
+
+- \b Run \b TRex \b for \b the \b first \b time: \n
+    Use the following command to begin operation of a 2x10Gb/sec TRex:
+      \verbatim
+      $ sudo ./t-rex-64 -i -c 2 –cfg /etc/ trex_cfg.yaml
+      \endverbatim
+
+\section env_trex_page_sec4 Download and installation Client Machine
+
+- \b Obtain \b the \b TRex \b client \b package: \n
+    Latest release:
+      \verbatim
+      $ mkdir trex_client
+      $ cd trex_client
+      $ wget --no-cache http://trex-tgn.cisco.com/trex/release/latest
+      $ tar -xzvf latest
+      $ cd vX.XX
+      # X.XX=Version number
+      $ tar -xzvf trex_client_v2.03.tar.gz
+      \endverbatim
+
+- \b Clone \b TAF \b and \b TCs \b repositories:
+      \verbatim
+      $ git clone https://github.com/taf3/taf.git
+      $ git clone https://github.com/taf3/testcases.git
+      \endverbatim
+
+- \b Create \b setup \b file \b and \b update \b env \b file \b based \b on \b diagram \b bellow:
+
+\image html trex_ixia_diagram.png \"Figure 3. IXIA and TRex connections\"
+\image rtf trex_ixia_diagram.png \"Figure 3. IXIA and TRex connections\"
+
+<b> TRex config in ENV JSON file: </b>
+\code{.json}
+{"name": "TRex", "entry_type": "tg", "instance_type": "trex", "id": "1001", "ipaddr": "X.X.X.X", "ssh_user": "", "ssh_pass": "", "ports": [0, 1]}
+\endcode
+
+<b> TRex setup file: </b>
+\code{.json}
+{"env": [
+        {"id": "02", "port_list": [[[1, 1, 3], 10000], [[1, 1, 4], 10000]]},
+        {"id": "1001"},
+        {"id": "5", "related_id": ["02", "1001"]}],
+"cross": { "5": [["02",1,"1001",1], ["02",2,"1001",2]] }}
+\endcode
+
+\section env_trex_page_sec5 TAF Execution
+
+- \b Sample \b Test:
+
+\code{.py}
+class TestLinks(object):
+
+    def test_links(self, env):
+        """ Test links between Trex TG and IXIA"""
+        # Define TGs
+        ixia = env.tg[1].id
+        trex = env.tg[2].id
+        # Define active ports and packet
+        ports = env.get_ports()
+        packet_definition = (
+             {"Ethernet": {"dst": "ff:ff:ff:ff:ff:ff",
+                           "src": "00:00:00:00:00:02"}},
+             {"IP": {"src": '10.1.1.1', "dst": '20.1.1.1'}})
+        packet_count = 1
+        # Set traffic stream on TRex
+        stream_id = env.tg[2]. sey_stream(
+                   packet_definition,
+                   count=packet_count,
+                   iface=ports[(trex, ixia)][1],
+                   adjust_size=True)
+        # Start sniff on Ixia
+        env.tg[1].start_sniff([ixia, trex)][1])
+        # Send packet
+        env.tg[2].start_streams([stream_id])
+        time.sleep(1)
+        # Stop sniff
+        data = env.tg[1].stop_sniff([ports[(ixia, trex)][1]])
+        # Verify that packet was received
+        assert len(data[ports[(ixia, trex)][1]]) == 1
+\endcode
+
+
+
+Example TAF command line, run in the testcase directory.
+
+      \verbatim
+      $ env PYTHONPATH=../taf-repo/taf:<path to Trex client library  /trex_client/stl/ or use $TREX_CLIENT_LIB> py.test --env=config/env/environment.json --setup=config/setup/trex_ixia_simplified.json testcases/test_links.py --loglevel=DEBUG
+      \endverbatim
+
+*/

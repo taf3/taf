@@ -1,0 +1,29 @@
+/*!
+\page class_names_page Class Names
+
+- CapWords convention
+
+  e.g.: TestAclCopyToCpuAction
+
+Some of the bad examples that are existing in TAF are as follows:
+- Lowercaseall
+
+  e.g.: cv
+
+- lowerThenUpper
+
+  e.g.: helpersUI
+ 
+- lower_with_underscores
+
+  e.g.: compare_color
+
+- Beginning with underscore
+
+  e.g.: _EncryptAndVerify
+
+- Caps_With_Underscore
+
+  e.g.: DHCP6_Decline
+
+*/

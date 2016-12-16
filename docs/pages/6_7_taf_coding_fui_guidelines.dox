@@ -1,0 +1,168 @@
+/*!
+\page fui_guide_page FUI Guidelines
+
+\tableofcontents
+
+\section fui_sec1 General Information About FUI
+    FUI is used for testing different ONS User interfaces, using CLI and SNMP.
+
+    The main idea of FUI testing is to use different parametrized test cases which compare
+    UI input/output with XML-RPC output/input:
+
+    \verbatim
+    -# test_cli_set__xmlrpc_get
+    -# test_xmlrpc_set_cli_get
+    -# test_snmp_set_xmlrpc_get
+    -# test_xmlrpc_set_snmp_get
+    \endverbatim
+
+    Input values for each test case are taken from the same configuration file, but each test
+    case has its own sets of fields (see \ref fui_sec2_1).
+
+    The JSON configuration file may contain as many test cases as you need to cover your
+    functionality. But there present a logical structure:
+
+    Configuration files are located at:
+
+    \verbatim
+    $TEST_ROOT/tests/ui/ui_tests/{simple I P2}}/{mib_name}/{XMLRPC Table name}.json.
+    \endverbatim
+
+    - <b> {simple I P2} </b> - 'simple' if the test case requires configuration with a standalone
+    device, 'P2P' if the test case requires configuration with two switches with links
+    between them;
+    - <b> {mib name} </b> - enterprise mib name which covers necessary functionality;
+    - <b> {XMLRPC Table name}.json </b> - table name from XMLRPC.
+
+\section fui_sec2 How to Create FUI Test Case
+    To create a FUI test case, you need to write a JSON configuration file with special records
+    (xmlrpc call, snmp requests, CLI commands).\n\n
+    The structure of FUI test cases is described in \ref fui_sec2_2.
+    \section fui_sec2_1 JSON File Structure
+    JSON object type schema where key is TC name, values are TC body. TC Body contains
+    the following fields:
+    - <b> doc_string </b> - brief description of TC\n\n
+    - <b> xmlrpc_setup </b> - pre-configuration, if needed (not applicable for
+    test_cli_set__xmlrpc_get).\n\n
+    - <b> xmlrpc_set </b> - list of xml/rpc set commands that will be executed on device,
+    commands separated by dashes.\n\n
+    - <b> xmlrpc_get </b> - list of xml/rpc get commands that will be executed on device,
+    commands separated by dashes.\n\n
+    - <b> snmp_set </b> - list of SNMP set requests that will be executed on device, commands
+    separated by dashes.\n\n
+    - <b> snmp_get </b> - list of SNMP get requests that will be executed on device, commands
+    separated by dashes.\n\n
+    - <b> cli_set </b> - list of full CLI commands that will be executed on device, commands
+    separated by dashes.\n\n
+    - <b> cli_get </b> - list of CLI get request that will be executed on device.\n
+
+        - CLI get requests have the following format:\n
+            - <b> [CLI table name] </b> – Name which will added to “show” and will be executed on
+            the device.\n\n
+            - <b> [Table Identifier] </b> – Unique table identifier which consists from two parts: 1st
+            part is column name, and the second is row id in same column.\n\n
+            - <b> [Column name] </b> – Column name from which the value will be taken.\n\n
+
+    - <b> xmlrpc_set_result </b> - expected result after “ xmlrpc_set” commands executions.\n\n
+    - <b> xmlrpc_get_result </b> - expected result after “ xmlrpc_get” commands executions.\n\n
+    - <b> snmp_set_result </b> - expected result after “snmp_set” request executions.\n\n
+    - <b> snmp_get_result </b> - expected result after “snmp_get” request executions.\n\n
+    - <b> cli_set_result </b> - expected result after “cli_set” commands executions.\n\n
+    - <b> cli_get_result </b> - expected result after “cli_get” commands executions.\n\n
+    \section fui_sec2_2 FUI Test Case Example
+
+    \verbatim
+    {
+        "test_vlans_name_vlan10": {
+            "doc_string": ["@brief Verify Vlans name vlan 10."],
+            "xmlrpc_setup": [],
+            "xmlrpc_set": [{"1":["nb.Vlans.addRow(10, 'VLAN-10')"]}],
+            "xmlrpc_get": [{"1":["nb.Vlans.get.name(2)"]}],
+            "snmp_set": [],
+            "snmp_get": [{"1":["onsSnmpAgentVlansName 10"]}],
+            "cli_set": [{"1":["enable", "vlan-database", "vlan 10"]}],
+            "cli_get": [{"1":["enable, none 0, none", "vlan, VLAN 10, Name"]}],
+            "xmlrpc_set_result": [{"1":["0"]}],
+            "xmlrpc_get_result": [{"1":["VLAN-10"]}],
+            "snmp_set_result": [],
+            "snmp_get_result": [{"1":["vlan10"]}],
+            "cli_set_result": [{"1":["Switch++ #","Switch++ (vlan)#", "Switch++(vlan)#"]}],
+            "cli_get_result": [{"1":["Switch++ #","VLAN-10"]}]
+        }
+    }
+    \endverbatim
+
+\section fui_sec3 FUI Test Name Convention
+    During TC execution, the first part of the name will be generated automatically and it
+    looks like the following:
+
+    \verbatim
+    test_[parametrized testcases name]_[configuration name]_[mibname]_[xml table name]
+    \endverbatim
+    In JSON, you should specify if it is a row action or not, the parameter name which you
+    are verifying, the action which will be done with the parameter, and if a few similar
+    actions should be done with the same parameter, then divide them by different numeric
+    value. Therefore, the name part from JSON should look like following:
+
+    \verbatim
+    [row(if it needed)]_[parameter name]_[very short action description]_[numeric value(if it needed)]
+    \endverbatim
+    Examples of the name part from JSON:
+
+    \verbatim
+    portId_VALID_VALUE
+    portId_Negative_Get_Wrong_portId
+    row_add_selector_Tcp
+    \endverbatim
+    Same name during TC execution:
+
+    \verbatim
+    test__xmlrpc_set__snmp_get_P2P_ons_dcbx_DcbxRemotes_portId_VALID_VALUE
+    test__cli_set__xmlrpc_get_P2P_ons_dcbx_DcbxRemotes_portId_Negative_Get_Wrong_portId
+    test__xmlrpc_set__cli_get_P2P_ons_dcbx_DcbxRemotes_row_add_selector_Tcp
+    \endverbatim
+\section fui_sec4 Variables Used in JSON
+    There present some variables for tests purpose:\n\n
+        - <b> ports_list </b> - list of ports on device. Access to elements in TC: “$ports_list|1|$” - 1st
+        element, “$ports_list|-1|$” - last elements\n\n
+        - <b> connected_ports </b> - list of connected ports on device\n\n
+        - <b> not_connected_ports </b> - list of not connected ports on device\n\n
+        - <b> nonexisting_ports </b> - list of non existed ports on device\n\n
+        - <b> ports_name_list </b> - list of ports name on device\n\n
+        - <b> port_max </b> - port number max+1\n\n
+        - <b> port_min </b> - port number min-1\n\n
+\section fui_sec5 Launch Examples
+    To launch all available TCs, you should use one of the following commands:\n
+
+CLI:
+    \verbatim
+    sudo py.test ui/test_ui.py --setup=real_dev_fui.json -k test_xmlrpc_set__cli_get_simple
+    sudo py.test ui/test_ui.py --setup=real_dev_fui.json -k test_cli_set__xmlrpc_get_simple
+    \endverbatim
+
+SNMP:
+    \verbatim
+    sudo py.test ui/test_ui.py --setup=real_dev_fui.json -k test_xmlrpc_set__snmp_get_simple
+    \endverbatim
+
+CLI point-to-point:
+CLI point-to-point:
+    \verbatim
+    sudo py.test ui/test_ui.py --setup=real_p2p_fui.json -k test_xmlrpc_set__cli_get_P2P
+    sudo py.test ui/test_ui.py --setup=real_p2p_fui.json -k test_cli_set__xmlrpc_get_P2P
+    \endverbatim
+
+SNMP point-to-point:
+    \verbatim
+    sudo py.test ui/test_ui.py --setup=real_p2p_fui.json -k
+    test_xmlrpc_set__snmp_get_P2P
+    \endverbatim
+
+    If you need to launch some specific test case(s), you should create your own command using the following rule:
+
+    \verbatim
+    sudo py.test ui/test_ui.py --setup=real_dev_fui.json -k test_{test_template}_{simple | P2}}_{mib_name}_{XMLRPC Table name}_{test name}
+    sudo py.test ui/test_ui.py --setup=sim_lxc_p2p_fui.json -k test_xmlrpc_set__snmp_get_P2P_ons_dcbx_DcbxRemotes_test_dcbx_DcbxRemotes_portId_VALID_VALUE --loglevel=DEBUG
+    \endverbatim
+
+*/

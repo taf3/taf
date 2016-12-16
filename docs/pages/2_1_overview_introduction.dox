@@ -1,0 +1,11 @@
+/*!
+
+\page introduct_page Introduction to TAF
+
+TAF is an integrated cross-platform system that sets the guidelines and provides tools for automation testing of a specific product in Networking.
+
+The function libraries, test data sources, test object details and various reusable modules are integrated in one system. The platform provides an outline of test automation process and reduces the automation efforts.
+
+With this framework, automation or validation engineer may run testing suites on different environments and obtain the test results with detail reports.
+
+*/

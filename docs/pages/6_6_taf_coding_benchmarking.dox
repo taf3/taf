@@ -1,0 +1,23 @@
+/*!
+\page benchmarking_page Benchmarking and scalability
+
+If high performance isn't required and measured value has to be returned after test (instead of just pass or fail) then \@pytest.mark.returns should be added at the beginning of the test function or test class, and a return statement should be added at the end of the test function:
+
+\code{.py}
+@pytest.mark.returns
+def test_function(self, env):
+    ...
+    return SOME_RETURN_VALUE
+\endcode
+or
+\code{.py}
+@pytest.mark.returns
+class TestClass(object):
+    def test_function(self, env):
+        ...
+        return SOME_RETURN_VALUE
+\endcode
+
+In such cases, SOME_RETURN_VALUE will be reflected in the generated report instead of PASS word.
+
+*/

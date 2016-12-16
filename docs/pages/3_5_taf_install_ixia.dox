@@ -1,0 +1,142 @@
+/*!
+\page env_ixia_page Preparing the Test Environment to Work with IXIA
+
+\tableofcontents
+
+\section sec1 IxTclHal API
+
+TAF might require an IXIA TCL hal library and Python bindings for Tcl available in the Tkinter library depending on test scenarios. Ixia is one of traffic generators which generate traffic, or monitor the traffic transmitted by peers such as a switch. The latest Ixia software can be downloaded from Ixia website with eligible account.
+
+
+Install Python Tk library:
+
+\verbatim
+$ sudo apt-get install python-tk
+\endverbatim
+
+Get the IxOS binary (version X.XX) and install it (into/opt folder):
+
+\verbatim
+$ chmod +x ixosX.XX.XXX.XLinux.bin
+$ sudo ./ixosX.XX.XXX.XLinux.bin
+\endverbatim
+    - Select Tcl version: \b Tcl8.4
+    - Choose install folder: \b /opt/ixos
+
+Add symlink to /opt/ixos/lib/ixTcl1.0 directory into /usr/share/tcltk/tcl8.4/:
+
+\verbatim
+$ sudo ln -s /opt/ixos/lib/ixTcl1.0 /usr/share/tcltk/tcl8.4/
+\endverbatim
+
+Check if IXIA library was installed properly:
+
+\verbatim
+$ env IXIA_VERSION=X.XX tclsh
+% package req IxTclHal
+Tcl Client is running Ixia Software version: X.XX
+X.XX
+\endverbatim
+
+\note 
+Add "export IXIA_VERSION=X.XX" to your /etc/profile if necessary.
+
+Possible issues:
+    - Can't create directory "/opt/ixos/Logs": permission denied - create necessary directories manually with sudo.
+
+    \verbatim
+    $ sudo mkdir /opt/ixos/Logs && sudo mkdir /opt/ixos/Results
+    \endverbatim
+
+    - In case you're getting 'Segmentation fault' error - reinstall Tcl:
+
+    \verbatim
+    $ sudo apt-get purge tcl8.4
+    $ sudo apt-get install tcl
+    \endverbatim
+
+
+\section sec2 IxNetwork and HLTAPI
+
+New (IxNetwork) API requires additional steps to be performed, as described in this section.
+
+\subsection subsec1 Install IxNetwork Tcl Client
+
+Get the IxOS binary (version X.XX or better X.XX) and Install it.
+
+\verbatim
+$ chmod +x IxNetworkTclClientX.X.XXX.XXLinux.bin
+$ sudo ./IxNetworkTclClientX.X.XXX.XXLinux.bin
+\endverbatim
+\note Install the client software where IxOS is already installed!
+
+IxNetwork adds environment variables into /etc/profile, so reload profiles.
+
+\verbatim
+$ source /etc/profile && source ~/.bashrc
+\endverbatim
+
+How to check that IxNetwork Tcl Client has been installed properly.
+
+\verbatim
+$ /opt/ixos/bin/ixnetwish
+% package req ix_tc
+3.20
+% package req tbcload
+1.4
+% package req Thread
+2.6.5
+%
+\endverbatim
+
+\subsection subsec2 Configure HLTAPI
+
+Install additional tcl pckages:
+
+\verbatim
+$ sudo apt-get install tcl8.4 tclx8.4
+\endverbatim
+
+\note 
+HLTAPI can work properly only under tcl8.4.
+
+Check if configuration is correct:
+
+\verbatim
+$ env IXIA_VERSION=X.XX tclsh
+% package req Ixia
+Tcl X.X is installed on 64bit architecture.
+Using products based on HLTSET138
+Tcl Client is running Ixia Software version: X.XX
+Loaded IxTclHal X.XX
+Loaded IxTclServices X.XX
+Loaded IxTclProtocol X.XX.XXX.XX
+Loaded IxTclNetwork X.X.XXX.XX
+HLT release X.XX.X.XXX
+Loaded ixia_hl_lib-X.X
+X.XX
+%
+\endverbatim
+
+
+\section sec3 IxLoad
+
+
+Install IxLoad libraries to the same location with IxTclClient.
+
+\verbatim
+$ chmod +x IxLoadTclApiX.XX.XX.XLinux.bin
+$ sudo ./IxLoadTclApiX.XX.XX.XLinux.bin
+$ source /etc/profile && source ~/.bashrc
+\endverbatim
+
+Check if IxLoad installed correctly.
+
+\verbatim
+$ env IXIA_VERSION=X.XX tclsh
+% package req IxLoad
+Tcl Client is running Ixia Software version: X.XX
+X.XX.XX.X
+\endverbatim
+
+*/

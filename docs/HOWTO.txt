@@ -1,0 +1,71 @@
+######
+### How to generate TAF documentation:
+######
+
+##
+# Requirements:
+##
+
+1. doxygen 1.8.4 or higher
+2. doxypy
+
+##
+# How to install doxygen 1.8.4 on Ubuntu 12.04:
+##
+
+Download doxygen packages (or register ppa repository) from here: https://launchpad.net/ubuntu/+source/doxygen
+For Ubuntu 12.04 x86_64:
+$ wget https://launchpad.net/ubuntu/+archive/primary/+files/doxygen-latex_1.8.4-1_all.deb
+$ wget https://launchpad.net/ubuntu/+archive/primary/+files/doxygen_1.8.4-1_amd64.deb
+
+Launch the following commands:
+$ sudo apt-get install texlive-fonts-recommended texlive-latex-extra
+$ cd to/folder/where/you/put/downloaded/files
+$ sudo dpkg -i doxygen*
+
+##
+# How to install doxypy:
+##
+
+$ sudo apt-get install doxypy 
+
+##
+# Generating documentation
+##
+1. Generate documentation using python script
+
+# Generate HTML and RTF documentation
+$ cd <taf_root>/taf/utils
+$ python generate_documentation.py --rtf --html
+
+# Option descriptions
+$ python generate_documentation.py -h
+
+NOTE: Doxygen combines the RTF output to a single file called refman.rtf. This file is optimized for importing into the Microsoft Word.
+Certain information is encoded using so called fields. To show the actual value you need: select all->right click->Update Field
+
+2. Generate documentation using doxygen utility
+
+# Generate HTML documentation
+$ cd <taf_root>/docs
+$ (cat Doxyfile.in; echo "LAYOUT_FILE=DoxygenLayout.xml") | doxygen -
+
+# Generate RTF documentation
+$ cd <taf_root>/docs
+$ (cat Doxyfile.in; echo "GENERATE_HTML=NO"; echo "GENERATE_RTF=YES"; echo "RTF_HYPERLINKS=YES"; \
+   echo "EXCLUDE_PATTERNS=._* */.git/* */taf/tests/* */unittests/* __init__.py *internal.dox *gerrit.dox *git.dox *teamforge.dox") | doxygen -
+
+# Generate HTML documentation for internal use
+$ cd <taf_root>/docs
+$ (cat Doxyfile.in; echo "LAYOUT_FILE=DoxygenLayoutInternal.xml") | doxygen -
+
+# Generate RTF documentation for internal use
+$ cd <taf_root>/docs
+$ (cat Doxyfile.in; echo "GENERATE_HTML=NO"; echo "GENERATE_RTF=YES"; echo "RTF_HYPERLINKS=YES"; \
+   echo "EXCLUDE_PATTERNS=._* */.git/* */taf/tests/* */unittests/* __init__.py */2_6_overview_directory_structure.dox */3_2_taf_install_environment.dox") | doxygen -
+
+# Change version
+$ (cat Doxyfile.in ; echo "PROJECT_NUMBER=2.0") | doxygen -
+or
+# Get the most recent version tag from GIT
+$ (cat Doxyfile.in ; echo "PROJECT_NUMBER=$(git describe --abbrev=0)") | doxygen -

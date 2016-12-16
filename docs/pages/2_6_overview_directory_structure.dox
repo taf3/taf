@@ -1,0 +1,36 @@
+/*!
+\page directory_structure_page Directory Structure
+
+The current implementation of the testing framework has the following directory structure (only high-level directories are shown):
+\verbatim
+  + taf-repo
+    + docs
+    + reporting
+    + taf
+      - plugins
+      - testlib
+    + tests
+    + unittests
+    + utils
+\endverbatim
+
+\verbatim
+  + testcases-repo
+    + config
+      - env
+      - setup
+    + general
+    + l2
+    + l3
+\endverbatim
+
+
+Directory \b "docs" contains documentation generated using doxygen and docutils tools, which are described later.
+
+Directory \b "plugins" contains TAF related plugins wich extends py.test and TAF testlib functionality and could be enabled/disabled for particular tests ot group of tests.
+
+Directory \b "testlib" contains common functionality for the majority of tests, platform-specific libraries and various helper functions, described in \ref system_architecture_page.
+
+Directory \b "unittests" contains TAF unittests and TAF functional tests.
+
+*/

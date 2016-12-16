@@ -1,0 +1,130 @@
+/*!
+\page docker Docker container
+
+\tableofcontents
+
+\section docker_sec1 Introduction
+
+Docker can build images automatically by reading the instructions from a Dockerfile, a text document that contains all the commands a user could call on the command line to assemble an image. Using Docker build users can create an automated build that executes several command-line instructions in succession.
+TAF3 has configuration file, called Dockerfile, located in the root of the taf repo (master branch) and based on Ubuntu14.04 and Python 3.4.0.
+
+\section docker_sec2 Install and configure Docker
+
+In order to install Docker, refer https://docs.docker.com/engine/installation/linux/ubuntulinux/ .\n
+If your environment requires specific proxy settings accordingly, you need to perform following steps.
+
+\b Define \b proxy \b settings \b for \b Docker:
+
+\b Ubuntu \b 14.04
+  1. Open file  /etc/default/docker.
+  2. Add proxy settings in lines:
+     \verbatim
+      $ export http_proxy=http://<proxy server>:<port>
+      $ export no_proxy=localhost,127.0.0.1,.<example.com>
+     \endverbatim
+  3. Restart Docker service:
+     \verbatim
+      $ root@ 14-04:~#service docker restart
+     \endverbatim
+
+\b Ubuntu \b 16.04
+  1. Create a systemd drop-in directory for the Docker service:
+     \verbatim
+      $ root@ 16-04:~# mkdir /etc/systemd/system/docker.service.d
+     \endverbatim
+
+  2. Create a file called /etc/systemd/system/docker.service.d/http-proxy.conf that adds the HTTP_PROXY environment variable:
+     \verbatim
+      [Service]
+      Environment="HTTP_PROXY=http://<proxy server>:<port>/"
+     \endverbatim
+     If you have internal Docker registries that you need to contact without proxying you can specify them via the NO_PROXY environment variable:
+     \verbatim
+      [Service]
+      Environment="HTTP_PROXY=http://<proxy server>:<port>/"
+      Environment="NO_PROXY=localhost,127.0.0.1,.<example.com>"
+     \endverbatim
+  3. Flush changes:
+     \verbatim
+      $ root@ 16-04:~# systemctl daemon-reload
+     \endverbatim
+  4. Verify that the configuration has been loaded:
+     \verbatim
+      $ root@ 16-04:~# systemctl show --property Environment docker
+        Environment=HTTP_PROXY=http://proxy.example.com:80/export
+     \endverbatim
+  5. Restart Docker:
+     \verbatim
+      $ root@ 16-04:~# service docker restart
+     \endverbatim
+
+\section docker_sec3 Settings
+If your environment requires specific proxy settings accordingly, you need to perform next steps:
+
+ - \b Update \b or \b add \b proxy \b settings \b in \b Dockerfile \b for \b building \b TAF3 \b Docker \b image. \n
+Below are specified proxy settings which Dockerfile uses to build TAF3 image, by default:
+        \verbatim
+        ENV http_proxy 'http://<proxy server>:<port>'
+        ENV https_proxy 'http://<proxy server>:<port>'
+        ENV ftp_proxy='http://<proxy server>:<port>'
+        ENV socks_proxy='socks://<proxy server>:<port>'
+        ENV no_proxy='localhost,127.0.0.1,.<example.com>'
+        \endverbatim
+
+ - \b Update \b or \b specify \b environment \b variables \b in \b file ‘docker_environment_variables’ \b that \b should \b be \b run \b inside \b container. \n
+This file is located in the root of the taf repo.
+
+\section docker_sec4 Build image
+To build TAF3 image you need to execute command:
+    \verbatim
+    docker build -t <image_name>:<tag> -f Dockerfile .
+    E.g. :root@14-04:~/taf# docker build -t ubuntu:taf3 -f Dockerfile .
+    \endverbatim
+Building of TAF image from a Dockerfile can take over 15 minutes.
+
+\section docker_sec5 Run container
+For the first time to run TAF image and login into container you need to execute command:
+    \verbatim
+    docker run -i -t  <image_name>:<tag>
+    E.g.: root@14-04:~# docker run -i -t ubuntu:taf3
+    \endverbatim
+After execution of previous command your promt should be changed to:
+    \verbatim
+    root@<container_id>:~#
+    E.g.: root@fa3ced1fdcbf:~#
+    \endverbatim
+In root directory you can find taf repo. It was copied on image building stage.
+Once you are in the taf3 container, run the sample testcases:
+    \verbatim
+    $ cd unittests
+    $ /root/taf/unittests/ py.test test_common3.py
+    \endverbatim
+
+\section docker_sec6 Start container which is in exited state
+If container has exited status you can restart and reattach via commands:
+    \verbatim
+    docker start <container_id>
+    docker attach <container_id>
+    E.g.: $ root@14-04:~# docker start fa3ced1fdcbf
+          $ root@14-04:~# docker attach fa3ced1fdcbf
+    \endverbatim
+
+
+\section docker_sec7 Useful commands:
+ - Show all images
+    \verbatim
+    docker images
+    \endverbatim
+
+ - See running containers:
+    \verbatim
+    docker ps
+    \endverbatim
+
+ - See all containers and their status:
+    \verbatim
+    docker ps -a
+    \endverbatim
+
+
+*/

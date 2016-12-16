@@ -1,0 +1,7 @@
+{
+  "host": "http://<jira - url>:<port>",
+  "username": "user_name",
+  "project": "Project_name",
+  "password": "pass",
+  "default_platform": "All"
+}

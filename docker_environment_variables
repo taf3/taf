@@ -1,0 +1,19 @@
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"
+
+# define proxy environment variables for TAF image
+# if environment requires
+# http_proxy=http://<proxy server>:<port>
+# https_proxy=http://<proxy server>:<port>
+# ftp_proxy=http://<proxy server>:<port>
+# socks_proxy=socks://<proxy server>:<port>
+# no_proxy=localhost,127.0.0.1,<domain_name.com>,<*.domain_name.com>
+
+# define Ixia environment variable and TCL path
+# TCLLIBPATH=<path to Ixia cleent lib e.g. /opt/ixos/lib>
+# IXIA_VERSION=X.X
+
+# Set the locale to C.UTF-8 for Python 3
+LANG=C.UTF-8
+
+# define TRex client library path
+TREX_CLIENT_LIB=/opt/trex_client/stl/

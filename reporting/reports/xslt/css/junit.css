@@ -1,0 +1,103 @@
+*{margin:0;padding:0}
+body{font-family:arial,helvetica,sans-serif;background:#fff; padding:20px}
+a{color:#044E8E}
+a:hover{text-decoration:none}
+a img{border:none}
+p{font-size:0.75em;margin-bottom:10px}
+h1{margin-top:0.5em;margin-bottom:0.5em;font-size:1.5em;}
+h2{margin-top:1em;margin-bottom:0.5em;font-size:1.2em;}
+h2 a {font-size:1em;}
+code{font-size:0.8em;color:#000;overflow: scroll;}
+.infoTable{border:0px solid black;border-collapse:collapse;width:50%;font-size:0.9em;}
+.infoTable th{background-color:#acf;border:1px solid white;padding:3px}
+.infoTable td{border:1px solid white;text-align:left;background-color:#ccf;padding:3px}
+.infoTable .tdName{text-align:left;background-color:#acf}
+.infoTable .tdValue{text-align:left;background-color:#eee}
+
+.summaryTable{border:0px solid black;border-collapse:collapse;width:100%}
+.summaryTable th{background-color:#acf;border:1px solid white;padding:2px}
+.summaryTable td{border:1px solid white;text-align:center;background-color:#eee;padding:2px}
+.summaryTable .sfailure{font:bold;color:red}
+.summaryTable .sskipped{font:bold;color:#e93}
+
+.suiteTable{border:1px solid white;border-collapse:collapse;width:100%;}
+.suiteTable td{background-color:#eee;border:1px solid white;padding:3px 10px;}
+.suiteTable th{background-color:#acf;border:1px solid white;padding:3px 10px;}
+.suiteTable .tdCaseId{text-align:right;width:10px}
+.suiteTable .tdStatus{text-align:center;width:10px}
+.suiteTable .tdComment{text-align:center;width:10px}
+.suiteTable .tdCaseTime{text-align:left;width:20px}
+.suiteTable .tdDefectId{text-align:center;width:20px}
+.suiteTable .tdPrevBuild{text-align:center;width:30px}
+.suiteTable .tdPrevResult{text-align:center;width:80px}
+.suiteTable .caseResult{width:70px}
+
+.suiteTable tbody tr:nth-child(odd) td {background: #F2F2F2}
+
+.tsuite{font-size:0.9em;font-weight:bold;margin:0;color:#005}
+.theader{font-size:0.8em;font-weight:bold;margin:0;color:#000}
+.tcase{font-size:0.8em;margin:0;color:#000}
+.tcase_red_text {font-size:0.8em;margin:0;color: #ff0000;}
+.tcase_green_text {font-size:0.8em;margin:0;color: #088A4B}
+.failure{font-size:0.8em;margin:0;color:#f00}
+.success{font-size:0.8em;margin:0;color:#0a0}
+.skipped{font-size:0.8em;margin:0;color:#e93}
+.error{font-size:0.8em;margin:0;color:#f0f}
+
+.testIssue{padding:0px;position:relative;margin:0px}
+.testIssue p{cursor:pointer;text-decoration:underline}
+.testIssue .issueEntry{display:none;margin-top:20px;padding:5px 0;}
+#dynamicTable{
+    display:none;
+    padding: 10px;
+}
+
+#dynamicTable table td{
+    padding: 0 10px;
+}
+
+.clear{
+    display: none;
+    clear: both;
+}
+
+#close {
+    background: url(../img/close.gif) no-repeat;
+    display:block;
+    float: right;
+    height: 16px;
+    margin-top: 8px;
+    margin-right: 8px;
+    width: 16px;
+}
+
+.history {
+    background: url(../img/history_small24.png) no-repeat;
+    cursor: pointer;
+    display: block;
+    height: 24px;
+    width: 24px;
+    margin: 0 auto;
+}
+
+.graphDiv{
+    width: 1840px;
+    float: left;
+}
+
+.graphItem{
+    width: 920px;
+    height: 300px;
+    float: left;
+    padding: 5px 0;
+}
+
+.graphTitle{
+    float: left;
+    padding: 0 0 0 850px;
+}
+.graphTitle p{
+    font-size:1.8em;
+    margin:0;
+    color:#0a0;
+}

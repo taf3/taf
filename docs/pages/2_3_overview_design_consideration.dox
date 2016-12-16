@@ -1,0 +1,21 @@
+/*!
+\page design_page Design Considerations
+
+\tableofcontents
+
+\section design_sec1 System Requirements and Dependencies
+The framework is designed for use in Linux systems which have Python programming tools and the necessary libraries installed. The framework has been tested on following systems. 
+
+- Ubuntu 12.04 LTS running Python 3.4.0, py.test 2.9.2 and higher versions.
+- Ubuntu 14.04.1 LTS running Python 3.4.0, py.test 2.9.2 and higher versions.
+
+Test cases running with TAF might require additional software packages such as Ixia, Jira depending upon test scenarios which can be downloaded from internet or company website.
+
+
+\section design_sec2 Constraints
+The framework is originally intended to work with remote systems, so quality of network may affect testing results. In real testing environment, TAF uses an Ixia traffic generator via Tcl API which may cause to slow down overall system performance, since TAF has to use the Tkinter Python library to bind Tcl and Python. Furthermore, Ixia is Windows-based system but fortunately has Tcl server component allowing to access to the device from Linux hosts. Ixia Tcl library (IxTclHAL) does not thread-safe which may add difficulties in future. 
+
+\section design_sec3 Goals and Guidelines
+The TAF framework follows the \"principle of atomicity\" by splitting complex test cases into parts if it is possible and also DRY (Don't Repeat Yourself) principle by moving shared parts of code into helper functions and modules. TAF will define the testing along the development phase and the responsible parties which will expedite and enable testers to configure the test environment, execute the test, and measure success/failure and coverage. Modular approach of TAF enables development of new test without impacting existing tests which increases the reusability of tests developed by developers. 
+
+*/

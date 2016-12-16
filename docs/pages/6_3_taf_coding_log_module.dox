@@ -1,0 +1,140 @@
+/*!
+\page use_log_module_page Using Loggers Module
+
+\tableofcontents
+
+\par The main purpose of usage TAF loggers module is to determinate clear enough path to log message source and to perform whole framework logging configuration in one place.
+
+\section use_log_module_sec1 Using loggers in test classes
+
+\note Check logger usage example in <git_root>/taf-repo/tests/examples/logger_usage
+
+\subsection use_log_autolog Using of autolog fixture
+
+This method allows you to register all suite loggers in a single place in conftest.py.
+\a "autolog" fixture creates new logger instance for each class and delete this instance at class level teardown.
+In case you set autouse option you don't need to pass this fixture to test case (it will be passed automatically).
+
+Read fixture template documentation here: \ref testlib::fixtures::autolog
+
+-# Define autolog fixture at the top level conftest.py file:
+\code{.py}
+import pytest
+from testlib import fixtures
+
+@pytest.fixture(scope="class", autouse=True)
+def autolog(request):
+    return fixtures.autolog(request, "suite_logger")
+\endcode
+
+-# Now you can use logger in test cases:
+\code{.py}
+class TestClass(object):
+    def test_one():
+        self.suite_logger.info("Hello!")
+\endcode
+
+\subsection use_log_subsection1_1 (Obsoleted) define test suite logger
+
+\warning This method is obsoleted and shouldn't be used for new suites. It's left here only as notice.
+
+In each test class, add the following method:
+\code{.py}
+from testlib import loggers
+
+class TestClass(object):
+    def setup_class(self):
+        self.suite_logger = loggers.ClassLogger()
+        self.suite_logger.info("Starting <THE NAME OF TEST SUITE> test suite.")
+\endcode
+
+\subsection log_message Using logger object
+
+Directly in test cases, use the following operator for logging:
+\code{.py}
+self.suite_logger.<severity>("Log text.")
+\endcode
+\b Where:\n
+\a severity - one of "critical", "error", "warning", "info", "debug"
+\code{.py}
+self.suite_logger.info("Setting new value to some property...")
+self.suite_logger.debug("Local variables: %s" % locals())
+self.suite_logger.error("Test fail :'( ...")
+\endcode
+
+\subsection use_log_subsection1_2 SimSwitch and Vlab Output
+In case running tests on simulated environments and selecting logging to file, SimSwitch and Vlab output also will be captured and placed to the files simswitch<configID>.output.log/vlab<configID>.output.log in the same folder with the main log.
+
+\subsection use_log_sshlog Log ssh connections output in separate file
+
+\a "sshlog" fixture allows you to create separate file for each opened ssh session for each test case.
+
+\b 1. \b Define \b fixture:
+\code{.py}
+from testlib import dev_switches
+
+@pytest.fixture(autouse=True)
+def ssh_logger(request):
+    fixtures.sshlog(request, "env", SwitchGeneral)
+\endcode
+
+\b Where:
+- \a "env" - name of environment fixture
+- \a SwitchGeneral - class (or tuple of classes) which contain \a "ssh" attribute and require SSH logger registration.
+
+\b 2. \b Usage:
+\code{.py}
+def test_something(env):
+    env.switch[1].ssh.exec_command("bla-bla-bla")
+\endcode
+
+After this you will see additional file in \a logdir.
+File name pattern: <b><test_func_name>_<py.test PID>_id_<entry id>_type_<entry type>.log</b>
+E.g.: test_something_765_id_71_type_real.log
+
+Read fixture template documentation here: \ref testlib::fixtures::sshlog
+
+\section use_log_module_testlib Using loggers in testlib modules
+
+The main purpose of usage loggers module is to determinate clear enough path to log message source.
+
+\subsection use_log_module_classes Define class level logger
+
+Class level logger has to be defined in <b>class level</b> scope.
+\code{.py}
+import Loggers
+
+class SomeClass(object):
+    class_logger = loggers.ClassLogger()
+\endcode
+
+\subsection use_log_module_modules Define module level logger
+
+Module logger has to be used in all module functions and  has to be defined in module global scope.
+
+\code{.py}
+#!/usr/bin/env python
+
+import loggers
+
+mod_logger = loggers.module_logger("current_module_name")
+
+def func():
+    mod_logger.info("Hello!")
+\endcode
+
+\section use_log_module_cli_options Loggers py.test CLI Options
+When running test cases use this additional options:
+
+\b \--loglevel=LOGLEVEL         - logging level, 'INFO' by default.
+
+\b \--logdir=LOGDIR             - name of directory where should be stored all log files, None by default.
+
+\b \--silent                    - do not print logging to console. Disabled.
+
+\b Example:
+\verbatim
+$ sudo py.test --loglevel=DEBUG --logdir=/somewhere/on/pc --setup_file=setup.json functional/fdb/
+\endverbatim
+
+*/

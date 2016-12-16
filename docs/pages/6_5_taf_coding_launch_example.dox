@@ -1,0 +1,72 @@
+/*!
+\page launch_examples_page Launch Examples
+
+\tableofcontents
+
+Test cases can be run with supplying of py.test options:
+- All standart py.test options can be used for performing test cases.
+- General TAF specific options.
+- Additional ons-specific options.
+- Options provided by plugins.
+
+\section launch_examples_subsection1 General Options
+
+These options have to be registered in top level conftest.py file and they are checked by testlib modules.
+
+\b \--env=ENV                       - sesting environment option, identify devices, 'None' by default.
+
+\b \--setup_file=SETUP              - environment setup option, define environment configurations, 'sim_lxc_simplified.json' by default.
+
+\b \--loglevel=LOGLEVEL             - logging level, print logging to console. 'INFO' by default.
+
+\b \--logfile=LOGFILE               - logging file, store logs into file. None by default.
+
+\b \--silent                        - do not print logging to console. Default - Disabled.
+
+\b \--get_only                      - do not start environment, only connect to exists one. False by default.
+
+\b \--leave_on                      - do not shutdown environment after the end of tests. False by default.
+
+\b \--use_parallel_init             - use threads for simultaneous devices processing. False by default.
+
+\note option \--setup_file are obligatory.
+
+\section launch_examples_subsection2 Additional Options
+
+These options are described in top level conftest.py file and mostly they also analyzed in conftest.py files.
+
+\b \--setup_scope=SETUP_SCOPE       - setup scope, select from 'session', 'module', 'class', 'function'. 'module' by default.
+
+\b \--call_check=CALL_CHECK         - check method for devices on test case call (none|complete|fast|sanity_check_only) 'fast' by default.
+
+\b \--teardown_check=TEARDOWN_CHECK - check method for devices on test case teardown (none|complete|fast|sanity_check_only) 'sanity_check_only' by default.
+
+\section launch_examples_subsection3 ONS-specific Options
+
+This options are analyzed in ONS specific teslib modules (e.g. switches module).
+
+\b \--fail_ctrl=FAIL_CTRL           - action on device failure (stop|restart|ignore). 'restart' by default.
+
+\b \--build_path                    - BUILD_PATH Path to build, '/opt/simswitch' by default.
+
+\b \--testenv                       - {none, simplified2, simplified3, simplified4, simplified5, golden, diamond, mixed} Verify environment before starting tests (none | simplified2 | simplified3 | simplified4 | simplified2 | golden | diamond | mixed). 'none' by default.
+
+\section launch_examples_subsection4 Plugin Options
+
+These options are provided by plugins.
+
+\b \--pidcheck_disable              - disable pid check for test.
+
+\b \--log_storage                   - {none,host,tms,both} Where to store run logs (none | host | tms | both).
+
+\b \--log_type                      - {Failed,All} What kind of tests logs to store (Failed | All). 'Failed' by default.
+
+\b \--log_enable                    - {False,True} Enable/Disable log tool for test (False | True). 'False' by default.
+
+\section launch_examples_subsection5 Launch Examples
+
+\verbatim
+$ env PYTHONPATH=/path/to/taf/taf-repo py.test --setup_file=real_device_ovs.json testcases-repo/l2/acl/test_acl_samples.py --loglevel=DEBUG
+\endverbatim
+
+*/

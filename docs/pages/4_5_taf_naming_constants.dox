@@ -1,0 +1,12 @@
+/*!
+\page constant_names_page Constants and Variables
+
+\section constants Constants
+- Capital letters with underscores separating words.
+
+  e.g.: MAX_OVERFLOW, TOTAL
+\section variables Variables
+- Should be lowercase, with words separated by underscores.
+- Global variables, attributes of the class and instance variables come under this category.
+
+*/
