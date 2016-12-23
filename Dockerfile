@@ -11,11 +11,7 @@ MAINTAINER intel.com
 #ENV no_proxy 'localhost,127.0.0.1,.<example.com>'
 
 # create apt proxy
-#RUN echo 'Acquire::http::Proxy "<proxy server>";' >>/etc/apt/apt.cond.d/20proxy
-
-# set git proxy
-#RUN git config --global http.proxy <proxy server>:<port>; \
-#git config --global https.proxy <proxy server>:<port>
+#RUN echo 'Acquire::http::Proxy "<proxy server>";' >>/etc/apt/apt.conf.d/20proxy
 
 
 
@@ -43,6 +39,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libcurl4-openssl-dev \
     tk8.6 \
     tcl8.6 \
+    tclx \
+    libzmq3-dev \
+    iproute2 \
+    iputils-ping \
     wget \
     openssh-client \
     doxygen \
@@ -56,6 +56,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get autoremove \
     && apt-get clean
 
+
 # need to specify path to Ixia client library and
 # copy ixia files where X.XX is Ixia version
 #ARG IXNET_PATH="share/Tools/IXIA/IxNetwork_X.XX"
@@ -64,6 +65,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 #RUN mkdir -p /opt ; wget -nv $IXIA_MIRROR_URL/$IXNET_PATH/$IXNET_FILE -P /opt/ && tar -C /opt/ -xvf /opt/$IXNET_FILE && ls -l /opt/${IXNET_FILE%????} && /opt/${IXNET_FILE%????} -DUSER_INSTALL_DIR=/opt/ixos -i silent && rm /opt/$IXNET_FILE
 
 
+# set git proxy
+#RUN git config --global http.proxy <proxy server>:<port>; \
+#git config --global https.proxy <proxy server>:<port>
 
 
 
@@ -82,13 +86,14 @@ pytest \n\
 pytest-xdist \n\
 # for doxygen \n\
 doxypy \n\
+mock \n\
 ' > /root/requirements.txt && pip install --upgrade -r /root/requirements.txt && rm /root/requirements.txt && rm -rf /root/.cache/pip
 
 
 # always need /etc/environment for IXIA and TCL vars
 COPY docker_environment_variables /etc/environment
 
-ARG TAF_ROOT=/root/taf3
+ARG TAF_ROOT=/root/taf
 # copy TAF repo to docker image
 COPY /  $TAF_ROOT/
 
