@@ -407,42 +407,6 @@ class TestPortConfigSnapshot(object):
             OnpssRawOutput.SWITCH_ATTRIBUTES, "", 0))
         self.ui.get_port_configuration = MagicMock(return_value=0)
 
-    def test_get_port_configuration_snapshot_cpuport(self):
-        table = self.ui.get_port_configuration_snapshot(port=0, stats='attributes')
-        assert table == {
-            'bcast_capacity': 0,
-            'bcast_flooding': 0,
-            'bcast_pruning': 0,
-            'bcast_rate': 0,
-            'def_cfi': 0,
-        }
-
-    def test_get_port_configuration_snapshot_switchport(self):
-        table = self.ui.get_port_configuration_snapshot(port=1, stats='attributes')
-        assert table == {
-            'autoneg': 0,
-            'bcast_capacity': 0,
-            'bcast_pruning': 0,
-            'bcast_rate': 0,
-            'def_cfi': 0,
-        }
-
-    def test_get_port_configuration_snapshot_lagport(self):
-        table = self.ui.get_port_configuration_snapshot(port=4, stats='attributes')
-        assert table == {
-            'bcast_pruning': 0,
-            'def_cfi': 0,
-        }
-
-    def test_get_port_configuration_skip(self):
-        table = self.ui.get_port_configuration_snapshot(
-            port=2, stats='attributes', skip_list=['autoneg', 'def_cfi'])
-        assert table == {
-            'bcast_capacity': 0,
-            'bcast_pruning': 0,
-            'bcast_rate': 0,
-        }
-
 
 def test_cli_get_all(ui):
 
