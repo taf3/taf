@@ -21,7 +21,6 @@ limitations under the License.
 import pytest
 
 from testlib import common3
-from testlib.dev_ixia import Ixia
 
 
 # simplified setup
@@ -46,8 +45,41 @@ SETUP_GOLDEN = {"env": [{"id": 0, "ports": [[1, 1, 1], [1, 1, 2], [1, 1, 3], [1,
                                  [0, 6, 413, 1], [0, 7, 413, 2], [0, 8, 413, 3], [0, 9, 413, 4]]}}
 
 # config of environment
-ENV = [{"name": "IXIA-103", "entry_type": "tg", "instance_type": "ixiahl", "id": 0, "ip_host": "127.0.0.1"},
-       {"name": "Zero Cross", "entry_type": "cross", "instance_type": "zero", "id": "31"},]
+ENV = [{"name": "tg1", "entry_type": "tg", "instance_type": "riperf", "id": 0, "ip_host": "127.0.0.1"},
+       {"name": "Zero Cross", "entry_type": "cross", "instance_type": "zero", "id": "31"},
+       {"name": "seacliff15", "entry_type": "switch", "instance_type": "seacliff", "id": 415,
+        "ip_host": "127.0.1.146", "ip_port": "8081",
+        "use_sshtun": 1, "sshtun_user": "admin", "sshtun_pass": "admin", "sshtun_port": 22,
+        "default_gw": "127.0.1.1", "net_mask": "255.255.255.0",
+        "ports_count": "52", "pwboard_host": "127.0.1.94", "pwboard_port": "15", "halt": 0,
+        "portserv_host": "127.0.1.93", "portserv_user": "root", "portserv_pass": "dbps", "portserv_tty": 15, "portserv_port": 2015,
+        "telnet_loginprompt": "seacliff15 login:", "telnet_passprompt": "Password:",
+        "telnet_user": "admin", "telnet_pass": "admin", "telnet_prompt": "[admin@seacliff15 ~]$",
+        "cli_user": "admin", "cli_user_passw": "admin", "cli_user_prompt": "Switch",
+        "ports": [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50],
+        "related_id": ["31"]},
+       {"name": "seacliff13", "entry_type": "switch", "instance_type": "seacliff", "id": 413,
+        "ip_host": "127.0.1.137", "ip_port": "8081",
+        "use_sshtun": 1, "sshtun_user": "admin", "sshtun_pass": "admin", "sshtun_port": 22,
+        "default_gw": "127.0.1.1", "net_mask": "255.255.255.0",
+        "ports_count": "52", "pwboard_host": "127.0.1.94", "pwboard_port": "13", "halt": 0,
+        "portserv_host": "127.0.1.93", "portserv_user": "root", "portserv_pass": "dbps", "portserv_tty": 13, "portserv_port": 2013,
+        "telnet_loginprompt": "seacliff13 login:", "telnet_passprompt": "Password:",
+        "telnet_user": "admin", "telnet_pass": "admin", "telnet_prompt": "[admin@seacliff13 ~]$",
+        "cli_user": "admin", "cli_user_passw": "admin", "cli_user_prompt": "Switch",
+        "ports": [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50],
+        "related_id": ["31"]},
+       {"name": "seacliff12", "entry_type": "switch", "instance_type": "seacliff", "id": 412,
+        "ip_host": "127.0.1.145", "ip_port": "8081",
+        "use_sshtun": 1, "sshtun_user": "admin", "sshtun_pass": "admin", "sshtun_port": 22,
+        "default_gw": "127.0.1.1", "net_mask": "255.255.255.0",
+        "ports_count": "52", "pwboard_host": "127.0.1.94", "pwboard_port": "12", "halt": 0,
+        "portserv_host": "127.0.1.93", "portserv_user": "root", "portserv_pass": "dbps", "portserv_tty": 12, "portserv_port": 2012,
+        "telnet_loginprompt": "seacliff12 login:", "telnet_passprompt": "Password:",
+        "telnet_user": "admin", "telnet_pass": "admin", "telnet_prompt": "[admin@seacliff12 ~]$",
+        "cli_user": "admin", "cli_user_passw": "admin", "cli_user_prompt": "Switch",
+        "ports": [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50],
+        "related_id": ["31"]}]
 
 
 # fake class for options
@@ -83,8 +115,6 @@ def env_golden(request, monkeypatch):
     # monkeypatching methods _get_conf and _get_setup
     monkeypatch.setattr(common3.Environment, "_get_conf", _conf)
     monkeypatch.setattr(common3.Environment, "_get_setup", _setup)
-    # monkeypatching method _init_tcl from class Ixia
-    monkeypatch.setattr(Ixia, "_init_tcl", _init)
     # define environment with fake class
     env = common3.Environment(FakeOpts())
     return env
@@ -108,8 +138,6 @@ def env_simple(request, monkeypatch):
     # monkeypatching methods _get_conf and _get_setup
     monkeypatch.setattr(common3.Environment, "_get_conf", _conf)
     monkeypatch.setattr(common3.Environment, "_get_setup", _setup)
-    # monkeypatching method _init_tcl from class Ixia
-    monkeypatch.setattr(Ixia, "_init_tcl", _init)
     # define environment with fake class
     env = common3.Environment(FakeOpts())
     return env
