@@ -1,6 +1,7 @@
 dist: trusty
 sudo: false
 language: python
+cache: pip
 python:
   - "3.4"
 # command to install dependencies
