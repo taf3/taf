@@ -1,5 +1,5 @@
 """
-@copyright Copyright (c) 2015 - 2016, Intel Corporation.
+@copyright Copyright (c) 2015 - 2017, Intel Corporation.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ class LinuxHostBash(LinuxHostInterface):
         self.iperf = iperf.Iperf(self.cli_send_command)
         self.testpmd = testpmd.TestPmd(self.host)
         # Collectd tool
-        self.collectd = collectd.Collectd(self.cli_send_command, self.cli_set,
+        self.collectd = collectd.Collectd(self.cli_send_command,
                                           self.host.config.get('collectd_conf_path'))
         # Hugepages
         self.hugepages = hugepages.HugePages(self.cli_send_command)

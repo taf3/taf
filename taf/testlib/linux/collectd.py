@@ -1,5 +1,5 @@
 """
-@copyright Copyright (c) 2016, Intel Corporation.
+@copyright Copyright (c) 2016-2017, Intel Corporation.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-@file collectd.py
+@file  collectd.py
 
-@summary Class to abstract collectd operations
+@summary  Class to abstract collectd operations
 @note
 collectd.conf path is retrieved from testcases/config/setup/setup.json in format:
 {
@@ -34,118 +34,44 @@ Examples of collectd usage in tests:
 env.lhost[1].ui.collectd.start()
 env.lhost[1].ui.collectd.stop()
 env.lhost[1].ui.collectd.restart()
-
-Example of collectd.conf modifications:
-format: instance.ui.collectd.<action>.<plugin_name>()
-env.lhost[1].ui.collectd.enable.csv(DataDir='"/path/to/logs"')
-env.lhost[1].ui.collectd.disable.csv()
-env.lhost[1].ui.collectd.enable_defaults.csv()
-env.lhost[1].ui.collectd.change_param.csv(DataDir='"/path/to/logs"')
-env.lhost[1].ui.collectd.insert_param.csv(DataDir='"/path/to/logs"')
+env.lhost[1].ui.collectd.update_config_file()
 """
 
-import re
+import os
+import time
+from collections import OrderedDict
 
-from testlib.custom_exceptions import CustomException
 from testlib.linux import service_lib
 
 
-PLUGINS = ("python", "csv", "dpdkstat", "dpdkevents", "hugepages", "intel_rdt", "mcelog", "ovs_stats", "ovs_events",
-           "snmp_agent", "syslog", "exec", "ipmi", "cpu", "memory", "network", "interface")
+OPTION_BOILERPLATE = '{}{} {}'
 
-GLOBAL_PLUGIN_LOAD_BOILERPLATE = """
-<LoadPlugin {plugin}>
-    {params_to_insert}
-</LoadPlugin>
-"""
-
-LOAD_PLUGIN_WITH_PARAM_BOILERPLATE = """
-LoadPlugin {plugin}
-
-<Plugin {plugin}>
-    {params_to_insert}
-</Plugin>
-"""
-
-ACTIONS = {'enable': {'cmd': [r"printf  '{0}' >> {{collectd_conf}}".format(LOAD_PLUGIN_WITH_PARAM_BOILERPLATE)],
-                      'kwargs_required': True},
-           'enable_default': {'cmd': [r"sed -i '/[^<]LoadPlugin {plugin}/s/^\(#\)\+//gw /dev/stdout' {collectd_conf}",
-                                      r"sed -i '/#<Plugin \({plugin}\|\"{plugin}\"\)>/,/#<\/Plugin>/s/^\(#\)\+//w /dev/stdout' {collectd_conf}"],
-                              'kwargs_required': False},
-           'enable_global': {'cmd': [r"printf  '{0}' >> {{collectd_conf}}".format(GLOBAL_PLUGIN_LOAD_BOILERPLATE)],
-                             'kwargs_required': True},
-           'enable_global_default': {'cmd': [r"sed -i '/<LoadPlugin \({plugin}\|\"{plugin}\"\)>/,/<\/LoadPlugin>/s/^\(#\)\+//gw /dev/stdout' {collectd_conf}"],
-                                     'kwargs_required': False},
-           'change_param': {'cmd': [r"sed -i '/^<Plugin \({plugin}\|\"{plugin}\"\)>/,/^<\/Plugin>/s/\(^\s*\)\({par}.*\)/\1{par} {val}/w /dev/stdout' {collectd_conf}"],
-                            'kwargs_required': True},
-           'change_global': {'cmd': [r"sed -i '/^<LoadPlugin \({plugin}\|\"{plugin}\"\)>/,/^<\/LoadPlugin>/s/\(^\s*\)\({par}.*\)/\1{par} {val}/w /dev/stdout' {collectd_conf}"],
-                             'kwargs_required': True},
-           'insert_param': {'cmd': [r"sed -i '/^<Plugin \({plugin}\|\"{plugin}\"\)>/a\\t{par} {val}' {collectd_conf}"],
-                            'kwargs_required': True},
-           'disable': {'cmd': [r"sed  -i '/^LoadPlugin {plugin}/s/^[^#]/#&/w /dev/stdout' {collectd_conf}",
-                               r"sed  -i '/^<Plugin \({plugin}\|\"{plugin}\"\)>/,/^<\/Plugin>/s/^[^#]/#&/w /dev/stdout' {collectd_conf}"],
-                       'kwargs_required': False},
-           'disable_global': {'cmd': [r"sed  -i '/^<LoadPlugin \({plugin}\|\"{plugin}\"\)>/,/^<\/LoadPlugin>/s/^[^#]/#&/w /dev/stdout' {collectd_conf}"],
-                              'kwargs_required': False},
-           }
+TAG_BOILERPLATE = (
+    "\n<{tag_name} {plugin_name}>"
+    "{params}"
+    "\n</{tag_name}>")
 
 
-class CollectdConfCommandGenerator(object):
-    def __init__(self, action, command_generator, collectd_conf, plugin_list=PLUGINS):
-        """
-        @brief  Initialize collectd conf command generator class
-        """
-        super(CollectdConfCommandGenerator, self).__init__()
-        self.plugin_list = plugin_list
-        for plugin in self.plugin_list:
-            setattr(self, plugin, command_generator(action, plugin, collectd_conf))
-
-
-class CollectdPluginsManager(object):
-    def __init__(self, action, collectd_conf_commands, run):
-        """
-        @brief  Initialize collectd conf manager class
-        """
-        super(CollectdPluginsManager, self).__init__()
-        for cmd in collectd_conf_commands.plugin_list:
-            setattr(self, cmd,
-                    self.generate_run_function(run, getattr(collectd_conf_commands, cmd), action))
-
-    @staticmethod
-    def generate_run_function(run_func, command, action):
-        def run(**kwargs):
-            return run_func(command(**kwargs))
-        return run
-
-
-def collectd_conf_action(action, run_func, collectd_conf):
-    collectd_conf_commands = CollectdConfCommandGenerator(action, command_generator, collectd_conf, PLUGINS)
-    return CollectdPluginsManager(action, collectd_conf_commands, run_func)
-
-
-def command_generator(action, plugin, collectd_conf):
+def _fill_text(tag_name, data):
     """
-    @brief Wrapper to map collectd operations with related commands
+    @brief  Fill in data into text block
+
+    @param  tag_name:  Tag name
+    @type  tag_name:  str
+    @param  data:  iterable containing plugin parameters
+    @type  data:  dict | OrderedDict
+    @return:  text block representing part of collectd configuration file
+    @rtype:  str
     """
-    def method(**params):
-        command_list = []
-        if ACTIONS[action]['kwargs_required'] and not params:
-            raise CustomException("Arguments are required for current method")
-        if not ACTIONS[action]['kwargs_required'] and params:
-            raise CustomException("Arguments are not required for current method")
-        if params:
-            if action in {'insert_param', 'change_param', 'change_global'}:
-                for par, val in params.items():
-                    command_list.append([ACTIONS[action]['cmd'][0].format(plugin=plugin, par=par, val=re.escape(str(val)), collectd_conf=collectd_conf)])
-            else:
-                params_to_insert = '\n'.join(['\t{0} {1}'.format(par, val) for par, val in params.items()])
-                for cmd in ACTIONS[action]['cmd']:
-                    command_list.append([cmd.format(plugin=plugin, params_to_insert=params_to_insert, collectd_conf=collectd_conf)])
-        else:
-            for cmd in ACTIONS[action]['cmd']:
-                command_list.append([cmd.format(plugin=plugin, collectd_conf=collectd_conf)])
-        return command_list
-    return method
+    text = ''
+    for name, params in data.items():
+        opts = ''
+        for key, value in params.items():
+            opts = os.linesep.join([opts, OPTION_BOILERPLATE.format('\t', key, value)])
+        text = ''.join([text, TAG_BOILERPLATE.format(tag_name=tag_name,
+                                                     plugin_name='{}'.format(name),
+                                                     params=opts)])
+    return text
 
 
 class Collectd(object):
@@ -153,47 +79,54 @@ class Collectd(object):
     SERVICE = 'collectd'
     DEFAULT_COLLECTD_CONF = '/etc/collectd.conf'
 
-    def __init__(self, cli_send_command, cli_set_command, collectd_conf=None):
+    def __init__(self, cli_send_command, collectd_conf=None):
         """
         @brief Initialize Collectd class.
         """
         super(Collectd, self).__init__()
         self.send_command = cli_send_command
-        self.cli_set_command = cli_set_command
         self.collectd_conf = collectd_conf if collectd_conf else self.DEFAULT_COLLECTD_CONF
-        self.service_manager = service_lib.SpecificServiceManager(self.SERVICE, self.send_command)
+        self.service_manager = service_lib.specific_service_manager_factory(self.SERVICE, self.send_command)
 
-        for action in ACTIONS:
-            setattr(self, action, collectd_conf_action(action, self.cli_set_command, self.collectd_conf))
+        # Below objects types: dict() | OrderedDict()
+        # Global options: OrderedDict([(param1_name: param1_value), ...]}
+        self.global_options = OrderedDict()
+        # LoadPlugin data: OrderedDict([(plugin_name: {param1_name: param1_value}), ...]
+        self.loadplugin_tags = OrderedDict()
+        # Plugin data: OrderedDict([(plugin_name: {param1_name: param1_value}), ...]
+        self.plugins_options = OrderedDict()
+
+        self.config_text = ''
 
     def start(self):
         """
-        @brief Start collectd service
+        @brief  Start collectd service
         """
         return self.service_manager.start()
 
     def stop(self):
         """
-        @brief Stop collectd service
+        @brief  Stop collectd service
         """
         return self.service_manager.stop()
 
-    def status(self):
-        return self.service_manager.status(expected_rcs={0, 3})
-
     def restart(self):
         """
-        @brief Restart collectd service
+        @brief  Restart collectd service
         """
         return self.service_manager.restart()
 
-    def reconfiguration(self):
-        return service_lib.ServiceConfigChangeContext(self.service_manager)
+    def update_config_file(self):
+        """
+        @brief  Create collectd configuration text and write it to collectd.conf file
+        """
+        # Form configuration text blocks from data structures
+        global_opts_text = os.linesep.join(OPTION_BOILERPLATE.format('', k, v) for k, v in self.global_options.items())
+        loadplugin_text = _fill_text("LoadPlugin", self.loadplugin_tags)
+        plugins_opts_text = _fill_text("Plugin", self.plugins_options)
 
-    def add_globals(self, **kwargs):
-        """
-        @brief Add global collectd variables in collectd.conf
-        """
-        inserts = r'\n'.join("{} {}".format(param, re.escape(str(val))) for param, val in kwargs.items())
-        command = r"sed -i '1s/^/{}\n/' {}"
-        self.send_command(command.format(inserts, self.collectd_conf))
+        # Keep resulting configuration for possible data extraction/parsing
+        self.config_text = os.linesep.join([global_opts_text, '', loadplugin_text, '', plugins_opts_text])
+        self.send_command('cat > {} <<EOF\n{}\nEOF'.format(self.collectd_conf, self.config_text))
+        # Make sure that following collectd service start will use updated configuration
+        time.sleep(1)
