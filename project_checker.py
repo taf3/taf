@@ -220,6 +220,13 @@ get_exit_status = operator.itemgetter(2)
 
 
 class Tester(object):
+    UNITTEST_PREFIX = "unittests"
+    PYTEST_DISABLED = {
+        "traffic_generator",
+        "test_switches",
+        "test_dev_linux_host",
+        # "test_fixtures"
+    }
 
     def __init__(self, test_dir, project_root, python_interp,
                  checkers=DEFAULT_CHECKERS, blocking_failure_log='',
@@ -258,11 +265,11 @@ class Tester(object):
         return errors
 
     def run_pytest(self):
-        """
-        :return: list of errors
-        :rtype: list
-        """
-        return []
+        # Add for Ixia tests
+        py_test_error = WrappedPopen(
+            ['py.test', "-vv", "--junitxml=pytest.xml", self.UNITTEST_PREFIX]).wait()
+        errors = [py_test_error]
+        return self.process_errors(errors)
 
     def pre_clean(self):
         pass
@@ -513,7 +520,7 @@ class Tester(object):
         flake8_opts = []
         try:
             config_path = os.path.join(self.project_root, "flake8.ini")
-            with open(config_path) as _:
+            with open(config_path):
                 pass
         except (OSError, IOError) as e:
             if e.errno == errno.ENOENT:
