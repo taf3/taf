@@ -222,10 +222,25 @@ get_exit_status = operator.itemgetter(2)
 class Tester(object):
     UNITTEST_PREFIX = "unittests"
     PYTEST_DISABLED = {
-        "traffic_generator",
-        "test_switches",
-        "test_dev_linux_host",
-        # "test_fixtures"
+        "traffic_generator": os.path.join(UNITTEST_PREFIX,
+                                          "traffic_generator"),
+        "test_multiple_run":
+            os.path.join(UNITTEST_PREFIX,
+                         "test_plugins/test_multiple_run.py"),
+        "test_clissh": os.path.join(UNITTEST_PREFIX,
+                                    "test_clissh.py"),
+        "test_switches": os.path.join(UNITTEST_PREFIX,
+                                      "switches",
+                                      "test_switches.py"),
+        "test_pidchecker": os.path.join(UNITTEST_PREFIX,
+                                        "test_plugins",
+                                        "test_pidchecker.py"),
+        "test_dev_linux_host": os.path.join(UNITTEST_PREFIX,
+                                            "test_dev_linux_host.py"),
+        "test_linux_host_bash": os.path.join(UNITTEST_PREFIX,
+                                             "test_linux_host_bash.py"),
+        # "test_fixtures": os.path.join(UNITTEST_PREFIX,
+        #                               "test_fixtures.py"),
     }
 
     def __init__(self, test_dir, project_root, python_interp,
@@ -266,8 +281,12 @@ class Tester(object):
 
     def run_pytest(self):
         # Add for Ixia tests
+        exclude_str = " or ".join(self.PYTEST_DISABLED)
         py_test_error = WrappedPopen(
-            ['py.test', "-vv", "--junitxml=pytest.xml", self.UNITTEST_PREFIX]).wait()
+            # ['sudo', '-E', 'py.test', "-n", str(NUM_CPUS), "--junitxml=pytest.xml",
+            ['py.test', "-vv", "--junitxml=pytest.xml",
+             "-k", "not ({0})".format(exclude_str), self.UNITTEST_PREFIX],
+            ).wait()
         errors = [py_test_error]
         return self.process_errors(errors)
 
