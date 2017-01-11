@@ -22,6 +22,7 @@ limitations under the License.
 from __future__ import print_function
 from __future__ import absolute_import
 
+import json
 import logging
 import os
 import re
@@ -211,7 +212,7 @@ def multi_filter(predicates, iters):
     return iters
 
 
-DEFAULT_CHECKERS = ('flake8', 'pylint', 'pytest')
+DEFAULT_CHECKERS = ('flake8', 'pylint', 'pytest', 'collect-only')
 
 
 get_outputs = operator.itemgetter(0, 1)
@@ -1070,12 +1071,101 @@ class Tester(object):
             py_test_errors = self.run_pytest()
             errors.extend(py_test_errors)
         # do this last, and print to stdout so pycharm will find it
+        if 'collect-only' in self.checkers:
+            collect_only_errors = self.run_collect_only(changed_python_files)
+            errors.extend(collect_only_errors)
         if self.blocking_failures:
             self.print_failures(self.blocking_failures, sys.stdout)
             sys.stdout.flush()
         if any(errors):
             logging.error("errors = %s", errors)
             raise SystemExit(max(errors))
+
+    SETUP_ARG = '--setup_file'
+    EMPTY_SETUP = {
+        "env": [
+            {"id": "01"},
+            {"id": "02"}
+        ],
+        "cross": {}
+    }
+    ENV = [
+        {"name": "01", "entry_type": "switch", "instance_type": "rr", "id": "01",
+         "kprio": 100,
+         "ip_host": "127.0.7.1", "ip_port": "8081",
+         "use_sshtun": 1, "sshtun_user": "root", "sshtun_pass": "password", "sshtun_port": 22,
+         "default_gw": "127.0.6.1", "net_mask": "255.255.254.0",
+         "ports_count": 26, "pwboard_host": "127.0.0.132", "pwboard_port": "2", "halt": 0,
+         "pwboard_snmp_rw_community_string": "SNMP",
+         "use_serial": False,
+         "portserv_host": "127.0.4.106", "portserv_user": "admin", "portserv_pass": "password",
+         "portserv_tty": 15,
+         "portserv_port": 2501,
+         "telnet_loginprompt": "localhost login:", "telnet_passprompt": "Password:",
+         "telnet_user": "root", "telnet_pass": "password", "telnet_prompt": "[root@",
+         "cli_user": "root", "cli_user_passw": "password", "cli_user_prompt": "[root@",
+         "ports": [1, 2, 3, 4, 5],
+         "ports_map": [[1, [1, 2, 3, 4]], [5, [5, 6, 7, 8]]],
+         },
+        {"name": "linux_host_2", "entry_type": "linux_host", "instance_type": "generic",
+         "id": "02",
+         "ipaddr": "127.0.0.1", "ssh_port": 22, "ssh_user": "user",
+         "ssh_pass": "password",
+         "ssh_su_pass": "password"},
+
+    ]
+    TESTCASES_REPO = "https://github.com/taf3/testcases.git"
+
+    def clone_testcases(self, testcases_dir):
+        WrappedPopen(['git', 'clone', self.TESTCASES_REPO, testcases_dir]).check_exit()
+
+    def run_collect_only(self, changed_python_files=tuple()):
+        """
+
+        @param changed_python_files:
+        @type changed_python_files: list[unicode] | tuple
+        @return: exit statuses, 0 is success
+        @rtype: list[int]
+        """
+        testcases_dir = os.path.join(self.test_dir, "testcases")
+        self.clone_testcases(testcases_dir)
+        setup_json = os.path.join(self.test_dir, "setup.json")
+        env_json = os.path.join(self.test_dir, "environment.json")
+        with open(setup_json, "w") as js:
+            json.dump(self.EMPTY_SETUP, js)
+        with open(env_json, "w") as js:
+            json.dump(self.ENV, js)
+
+        # only use sanity
+        test_files = {"l2": ["l2"]}
+
+        err = WrappedPopen(
+            ['py.test', '--ui="\a"',
+             '--env={}'.format(env_json),
+             '{}={}'.format(self.SETUP_ARG, setup_json),
+             '--collect-only', '-m', 'nosuch',
+             ],
+            # chdir to self.test_dir, it is an abs path
+            cwd=testcases_dir, stderr=PIPE).communicate()[1].decode(u'utf-8')
+        logging.debug(err)
+        if u"onpss_shell" in err:
+            ui = "onpss_shell"
+        elif u"linux_bash" in err:
+            ui = "linux_bash"
+        else:
+            raise RuntimeError("unable to find suitable ui for collect-only")
+
+        pytest_errors = []
+        pytest_errors.extend(WrappedPopen(
+            ['py.test', "--junitxml=pytest-collect.xml",
+             '--env={}'.format(env_json),
+             '{}={}'.format(self.SETUP_ARG, setup_json),
+             # only check wrapped tests
+             '--collect-only',
+             '--ui={}'.format(ui)] + files,
+            # chdir to self.test_dir, it is an abs path
+            cwd=testcases_dir).wait() for files in test_files.values())
+        return self.process_errors(pytest_errors)
 
     def pip_update(self):
         WrappedPopen([
