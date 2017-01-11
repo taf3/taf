@@ -43,8 +43,8 @@ DEFAULT_GIT_HEAD = "HEAD"
 
 cgitb.enable(format="text")
 
-# logging.basicConfig(level=logging.INFO)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.DEBUG)
 
 PYTHON_VERSION = sys.version_info[0]
 
@@ -240,8 +240,8 @@ class Tester(object):
         "test_linux_host_bash": os.path.join(UNITTEST_PREFIX,
                                              "test_linux_host_bash.py"),
         "test_multipletg": os.path.join(UNITTEST_PREFIX,
-                                         "test_plugins",
-                                         "test_multipletg.py"),
+                                        "test_plugins",
+                                        "test_multipletg.py"),
         "test_fixtures": os.path.join(UNITTEST_PREFIX,
                                       "test_fixtures.py"),
     }
@@ -498,6 +498,7 @@ class Tester(object):
 
     @staticmethod
     def print_failures(failures, output=sys.stderr):
+        print("Fatal errors", file=output)
         for f in failures:
             print("{0[path]}:{0[line]} [{0[code]}] {0[message]}".format(f),
                   file=output)
@@ -597,6 +598,7 @@ class Tester(object):
     GENERATED_MEMBERS = [
     ]
     IGNORED_CLASSES = [
+        'SpecificServiceManager',  # fancy systemd wrapper with generated members
     ]
     DISABLED_STRING = ",".join(PYLINT_DISABLED_WARNINGS)
     IGNORED_MODULES_STRING = ','.join(IGNORED_MODULES)
