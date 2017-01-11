@@ -43,8 +43,8 @@ DEFAULT_GIT_HEAD = "HEAD"
 
 cgitb.enable(format="text")
 
-logging.basicConfig(level=logging.INFO)
-# logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 PYTHON_VERSION = sys.version_info[0]
 
@@ -1068,10 +1068,11 @@ class Tester(object):
             py_test_errors = self.run_pytest()
             errors.extend(py_test_errors)
         # do this last, and print to stdout so pycharm will find it
-        # if self.blocking_failures:
-        #     self.print_failures(self.blocking_failures, sys.stdout)
-        #     sys.stdout.flush()
+        if self.blocking_failures:
+            self.print_failures(self.blocking_failures, sys.stdout)
+            sys.stdout.flush()
         if any(errors):
+            logging.error("errors = %s", errors)
             raise SystemExit(max(errors))
 
     def pip_update(self):
