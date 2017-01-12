@@ -1,15 +1,20 @@
 dist: trusty
 sudo: false
 language: python
+addons:
+  apt:
+    packages:
+    - ccze
 cache: pip
 python:
   - "3.4"
 # command to install dependencies
 install:
-  - wget -P /tmp/  https://raw.githubusercontent.com/taf3/taf/ci/project_checker.py
-  - pip install flake8 pylint mock pytest-xdist
-  - pip install -r requirements.txt
+  - wget -P /tmp/  https://raw.githubusercontent.com/taf3/taf/ci/project_checker.py 2>&1 | ccze -A
+  - pip install flake8 pylint mock pytest-xdist 2>&1 | ccze -A
+  - pip install -r requirements.txt 2>&1 | ccze -A
 
 # command to run tests
 # we need to add taf3/taf/taf to PYTHONPATH so we can import from testlib
-script: python /tmp/project_checker.py --python_path="${TRAVIS_BUILD_DIR}"/taf --git_head=HEAD~1 --project_root="${TRAVIS_BUILD_DIR}" "${TRAVIS_BUILD_DIR}"
+# split the steps so travis can collapse the log outputs
+script: python /tmp/project_checker.py --python_path="${TRAVIS_BUILD_DIR}"/taf --git_head=HEAD~1 --project_root="${TRAVIS_BUILD_DIR}" "${TRAVIS_BUILD_DIR}" 2>&1 | ccze -A
