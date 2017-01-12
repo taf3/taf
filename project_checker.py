@@ -37,8 +37,8 @@ import cgitb
 import argparse
 import resource
 import operator
-from six.moves import filter
-from six.moves import range
+from six.moves import filter, range
+from six.moves import cStringIO as StringIO
 
 DEFAULT_GIT_HEAD = "HEAD"
 
@@ -287,7 +287,9 @@ class Tester(object):
         # Add for Ixia tests
         exclude_str = " or ".join(self.PYTEST_DISABLED)
         py_test_error = WrappedPopen(
-            ['py.test', "-vv", "--junitxml=pytest.xml",
+            # no verbose, only show-locals
+            ['py.test', "-ql",
+             "--junitxml=pytest.xml",
              "-k", "not ({0})".format(exclude_str), self.UNITTEST_PREFIX],
         ).wait()
         errors = [py_test_error]
@@ -994,6 +996,8 @@ class Tester(object):
             changed_python_files)
         for stdout, stderr in (get_outputs(p) for p in results):
             sys.stdout.write(stdout)
+            # remove useless flake8 config file warning
+            stderr = stderr.replace('No config file found, using default configuration\n', '')
             sys.stderr.write(stderr)
         # flush so we see if with logging
         sys.stdout.flush()
@@ -1139,14 +1143,15 @@ class Tester(object):
         # only use sanity
         test_files = {"l2": ["l2"]}
 
-        err = WrappedPopen(
+        out, err = WrappedPopen(
             ['py.test', '--ui="\a"',
              '--env={}'.format(env_json),
              '{}={}'.format(self.SETUP_ARG, setup_json),
              '--collect-only', '-m', 'nosuch',
              ],
             # chdir to self.test_dir, it is an abs path
-            cwd=testcases_dir, stderr=PIPE).communicate()[1].decode(u'utf-8')
+            cwd=testcases_dir, stdout=PIPE, stderr=PIPE).communicate()
+        out, err = out.decode(u'utf-8'), err.decode(u'utf-8')
         logging.debug(err)
         if u"onpss_shell" in err:
             ui = "onpss_shell"
@@ -1156,15 +1161,22 @@ class Tester(object):
             raise RuntimeError("unable to find suitable ui for collect-only")
 
         pytest_errors = []
-        pytest_errors.extend(WrappedPopen(
+        for files in test_files.values():
+            proc = WrappedPopen(
             ['py.test', "--junitxml=pytest-collect.xml",
              '--env={}'.format(env_json),
              '{}={}'.format(self.SETUP_ARG, setup_json),
              # only check wrapped tests
              '--collect-only',
              '--ui={}'.format(ui)] + files,
+            # just collect stdout so it doesn't go to output.
+            # stderr is still displayed so we should be okay
+            stdout=PIPE,
             # chdir to self.test_dir, it is an abs path
-            cwd=testcases_dir).wait() for files in test_files.values())
+            cwd=testcases_dir)
+            # discard stdout
+            proc.communicate()
+            pytest_errors.append(proc.wait())
         return self.process_errors(pytest_errors)
 
     def pip_update(self):
