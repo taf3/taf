@@ -11,7 +11,7 @@ python:
 # command to install dependencies
 install:
   - wget -P /tmp/  https://raw.githubusercontent.com/taf3/taf/ci/project_checker.py 2>&1 | ccze -A
-  - pip install flake8 pylint mock pytest-xdist 2>&1 | ccze -A
+  - pip install flake8 flake8-commas pylint mock pytest-xdist 2>&1 | ccze -A
   - pip install -r requirements.txt 2>&1 | ccze -A
 
 # command to run tests
