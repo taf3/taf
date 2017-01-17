@@ -6,8 +6,8 @@
 \section design_sec1 System Requirements and Dependencies
 The framework is designed for use in Linux systems which have Python programming tools and the necessary libraries installed. The framework has been tested on following systems. 
 
-- Ubuntu 12.04 LTS running Python 3.4.0, py.test 2.9.2 and higher versions.
 - Ubuntu 14.04.1 LTS running Python 3.4.0, py.test 2.9.2 and higher versions.
+- Ubuntu 16.04.1 LTS running Python 3.4.0, py.test 2.9.2 and higher versions.
 
 Test cases running with TAF might require additional software packages such as Ixia, Jira depending upon test scenarios which can be downloaded from internet or company website.
 
