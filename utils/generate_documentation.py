@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+@copyright Copyright (c) 2011 - 2017, Intel Corporation.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +17,16 @@ limitations under the License.
 @file  generate_documentation.py
 
 @summary  This script generates TAF Doxygen documentation(HTML and RTF files)
+
+@note  How to launch script:
+        To generate documentation you need specify to enter to utils folder:
+            $ cd taf/utils/
+        Run generate_documentation.py script with --html - option to generate HTML documentation:
+            $ python  generate_documentation.py --html
+        To set date in documentation instead of Git tag:
+            $ python  generate_documentation.py --html --version=$(date +%D/%T)
+        To see additional options use help:
+            $ python  generate_documentation.py --help
 """
 
 import os
@@ -37,11 +47,6 @@ def create_argparser():
     arg_parser.add_argument(
         '--rtf',
         help='Generate RTF documentation',
-        action="store_true"
-    )
-    arg_parser.add_argument(
-        '--internal',
-        help='Generate version for internal use',
         action="store_true"
     )
     arg_parser.add_argument(
@@ -95,27 +100,16 @@ def generate_documentation(option, doc_type):
         if doc_type == "html":
             settings.append("echo 'GENERATE_HTML=YES'")
             settings.append("echo 'GENERATE_RTF=NO'")
-            if option.internal:
-                layout_file = "../docs/DoxygenLayoutInternal.xml"
-                settings.append("echo 'LAYOUT_FILE={0}'".format(layout_file))
-            else:
-                layout_file = "../docs/DoxygenLayout.xml"
-                settings.append("echo 'LAYOUT_FILE={0}'".format(layout_file))
+            layout_file = "../docs/DoxygenLayout.xml"
+            settings.append("echo 'LAYOUT_FILE={0}'".format(layout_file))
             command = "({0})".format("; ".join(settings))
         # Define settings for RTF documentation
         else:
             settings.append("echo 'GENERATE_HTML=NO'")
             settings.append("echo 'GENERATE_RTF=YES'")
             settings.append("echo 'RTF_HYPERLINKS=YES'")
-            if option.internal:
-                patterns = "._* */.git/* */tests/* */unittests/* __init__.py " \
-                           "*/2_6_overview_directory_structure.dox " \
-                           "*/3_2_taf_install_environment.dox"
-                settings.append("echo 'EXCLUDE_PATTERNS={0}'".format(patterns))
-            else:
-                patterns = "._* */.git/* */tests/* */unittests/* " \
-                           "__init__.py *internal.dox *gerrit.dox *git.dox *teamforge.dox"
-                settings.append("echo 'EXCLUDE_PATTERNS={0}'".format(patterns))
+            patterns = "._* */.git/* */tests/* */unittests/* __init__.py"
+            settings.append("echo 'EXCLUDE_PATTERNS={0}'".format(patterns))
             command = "({0})".format("; ".join(settings))
 
         # Setup and generate Doxygen documentation
