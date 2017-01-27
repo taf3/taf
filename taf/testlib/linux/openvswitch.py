@@ -186,7 +186,8 @@ class OpenvSwitch(object):
         @return:  Output of OVS interface statistics
         """
         data = self.get_interface_info(iface_name)
-        return dict(re.findall(r'{?(\S+)=(\d+)', data["statistics"]))
+        # return dict(re.findall(r'{?\"*(\S+)\"*=(\d+)', data["statistics"]))
+        return dict(re.findall(r'{?"*(\w+)"*=(\d+)', data["statistics"]))
 
     def get_existing_bridges_interfaces(self):
         """
@@ -238,3 +239,16 @@ class OpenvSwitch(object):
         options = ''.join(map(lambda x: ' {}={}'.format(*x), kwargs.items()))
         command = "ovs-vsctl set {0} {1}{2}".format(inst_type, name, options)
         self.cli_send_command(command)
+
+    def get_interface_statistic_counter(self, iface_name, counter_name):
+        """
+        @brief  Get ovs interface statistic from ovsdb
+        @param  iface_name:  name of ovs interface
+        @type  iface_name:  str
+        @param  counter_name:  name of ovs interface counter
+        @type  counter_name:  str
+        @rtype:  dict
+        @return:  Output of OVS interface statistics
+        """
+        output = self.cli_send_command("ovs-vsctl get Interface {0} statistics:{1}".format(iface_name, counter_name))
+        return int(output.stdout.strip())
