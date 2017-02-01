@@ -61,9 +61,9 @@ The **TAF** is based on [py.test](http://pytest.org/latest/). The basic concept 
 
 ### Docker container
 
-**TAF** is very easy to install and deploy in a Docker container.
+**TAF** is very easy to install and deploy as a Docker container.
 
-**Docker** can build images automatically by reading the instructions from a Dockerfile, a text document that contains all the commands a user can call on the command line to assemble an image. Using Docker build, users can create an automated build that executes several command-line instructions in succession. **TAF** has a configuration file, called Dockerfile, located in the root of the **TAF**  directory. It is based on Ubuntu 16.04 and Python 3.4.0.
+**Docker** can build images automatically by reading instructions from a Dockerfile, a text document that contains all the commands a user can call on the command line to assemble an image. Using Docker build, users can create an automated build that executes several command-line instructions in succession. **TAF** has a configuration file, called Dockerfile, located in the root of the **TAF**  directory. It is based on Ubuntu 16.04 and Python 3.4.0.
 
 **Install and configure Docker**
 
@@ -77,7 +77,7 @@ To build **TAF** image you need to execute command:
     E.g. :root@14-04:~/taf# docker build -t ubuntu:taf3 -f Dockerfile .
 ```
 
-Building of **TAF** image from a Dockerfile can take over 15 minutes.
+Building the **TAF** image from Dockerfile can take over 15 minutes.
 
 **Run container**
 
@@ -93,7 +93,7 @@ After execution of previous command, the prompt should changed to:
     E.g.: root@fa3ced1fdcbf:~#
 ```
 
-The **TAF** repository can be found in the root directory. Once in the **TAF** container, the sample testcases can be run:
+The **TAF** repository can be found in the root directory. Once in the **TAF** container, sample testcases can be run:
 ```
     $ cd unittests
     $ /root/taf/unittests/ py.test test_common3.py
@@ -114,7 +114,7 @@ Link to repository [testcases](https://github.com/taf3/testcases)
 ```
 > Note:
 
-> Test example requires to install and configure OpenSSH server. Appropriate ssh credentials need to specify in environment_examples.json file where "entry_type"  is linux_host.
+> Test example requires to install and configure OpenSSH server. Appropriate ssh credentials need to be specified in environment_examples.json file with "entry_type" linux_host.
 
      env PYTHONPATH – set up PYTHONPATH variable with path to TAF repository;
 
@@ -122,10 +122,11 @@ Link to repository [testcases](https://github.com/taf3/testcases)
 
      setup – provide path to the setup*.json file.
 
- * More **detail information** can be found by the following link: [Test execution preconfiguration](https://github.com/taf3/taf/wiki/2.-Test-execution-preconfiguration)
+ * More **detailed information** can be found by the following link: [Test execution preconfiguration](https://github.com/taf3/taf/wiki/2.-Test-execution-preconfiguration)
 
 
 ## Support and contact
+
 Link to wiki [Сontribution guidelines](https://github.com/taf3/taf/wiki/4.-Contribution-guidelines).
 
 ## License
