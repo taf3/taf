@@ -1,5 +1,5 @@
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+@copyright Copyright (c) 2011 - 2017, Intel Corporation.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,11 +23,14 @@ import time
 import pytest
 
 from testlib import dev_ixia
+from testlib import dev_pypacker
 from testlib.custom_exceptions import PypackerException
 
 
 IXIA_CONFIG = {"name": "IXIA", "entry_type": "tg", "instance_type": "ixiahl", "id": 1, "ip_host": "X.X.X.X",
                "ports": [[1, 6, 13]]}
+
+PYPACKER_CONFIG = {"name": "Pypacker", "entry_type": "tg", "instance_type": "pypacker", "id": 2, "ifaces": ["lo"]}
 
 
 class FakeOpts(object):
@@ -38,26 +41,37 @@ class FakeOpts(object):
         self.lhost_ui = 'linux_bash'
 
 
-@pytest.fixture
-def tg(request):
-    tg = dev_ixia.Ixia(IXIA_CONFIG, request.config.option)
-    tg.create()
-    # traffic_generator.cleanup()
-    iface = tg.ports[0]
-    chassis, card, port = iface
-    tg.tcl("ixClearPortStats %(chassis)s %(card)s %(port)s; \
-                           port get %(chassis)s %(card)s %(port)s; \
-                           port config -rxTxMode gigLoopback; \
-                           port config -loopback portLoopback; \
-                           port set %(chassis)s %(card)s %(port)s; \
-                           port write %(chassis)s %(card)s %(port)s" %
-           {'chassis': chassis, 'card': card, 'port': port})
+@pytest.fixture(scope="session", params=["pypacker", "ixiahl"])
+def traffic_generator(request):
+    if request.param not in request.config.option.tgtype:
+        pytest.skip("{0} API is skipped for test.".format(request.param.upper()))
+    if request.param == "pypacker":
+        tg = dev_pypacker.PypackerTG(PYPACKER_CONFIG, request.config.option)
+    elif request.param == "ixiahl":
+        tg = dev_ixia.Ixia(IXIA_CONFIG, request.config.option)
     request.addfinalizer(tg.destroy)
+    tg.create()
     return tg
 
 
+@pytest.fixture
+def tg(request, traffic_generator):
+    traffic_generator.cleanup()
+    if traffic_generator.type == "ixiahl":
+        iface = tg.ports[0]
+        chassis, card, port = iface
+        tg.tcl("ixClearPortStats %(chassis)s %(card)s %(port)s; \
+                               port get %(chassis)s %(card)s %(port)s; \
+                               port config -rxTxMode gigLoopback; \
+                               port config -loopback portLoopback; \
+                               port set %(chassis)s %(card)s %(port)s; \
+                               port write %(chassis)s %(card)s %(port)s" %
+               {'chassis': chassis, 'card': card, 'port': port})
+    return traffic_generator
+
+
 @pytest.mark.unittests
-class TestIxia(object):
+class TestTG(object):
 
     packet_definition = ({"Ethernet": {"dst": "ff:ff:ff:ff:ff:ff", "src": "00:00:00:00:00:02"}}, {"IP": {"p": 17}}, {"UDP": {}},)
     packet_defs = [({"Ethernet": {"dst": "ff:ff:ff:ff:ff:ff", "src": "00:00:00:00:00:02"}}, {"IP": {"p": 17}}, {"UDP": {}},),
@@ -3158,7 +3172,7 @@ class TestIxia(object):
         # Verify that only packets with specified Dot1Q.ARP filter layer are sniffed
         assert len(data[iface]) == 1
 
-        assert tg.get_packet_layer(data[iface][0], "ARP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan") is not None
+        assert tg.get_packet_layer(data[iface][0], "ARP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan")
 
     def test_dot1q_arp_custom_filter(self, tg):
         """ Check Dot1Q.ARP filter """
@@ -3227,7 +3241,7 @@ class TestIxia(object):
         # Verify that only packets with specified Dot1Q filter layer are sniffed
         assert len(data[iface]) == 1
 
-        assert tg.get_packet_field(data[iface][0], "Ethernet", "vlan") is not None
+        assert tg.get_packet_field(data[iface][0], "Ethernet", "vlan")
 
     def test_dot1q_custom_filter(self, tg):
         """ Check Dot1Q filter """
@@ -3276,7 +3290,7 @@ class TestIxia(object):
         # Verify that only packets with specified IP filter layer are sniffed
         assert len(data[iface]) == 1
 
-        assert tg.get_packet_layer(data[iface][0], "IP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan") is None
+        assert tg.get_packet_layer(data[iface][0], "IP") is not None and not tg.get_packet_field(data[iface][0], "Ethernet", "vlan")
 
     def test_ip_custom_filter(self, tg):
         """ Check IP filter """
@@ -3325,7 +3339,7 @@ class TestIxia(object):
         # Verify that only packets with specified Dot1Q.IP filter layer are sniffed
         assert len(data[iface]) == 1
 
-        assert tg.get_packet_layer(data[iface][0], "IP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan") is not None
+        assert tg.get_packet_layer(data[iface][0], "IP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan")
 
     def test_dot1q_ip_custom_filter(self, tg):
         """ Check Dot1Q.IP filter """
@@ -3490,7 +3504,7 @@ class TestIxia(object):
         # Verify that only packets with specified Dot1Q.TCP layer are sniffed
         assert len(data[iface]) == 1
 
-        assert tg.get_packet_layer(data[iface][0], "TCP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan") is not None
+        assert tg.get_packet_layer(data[iface][0], "TCP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan")
 
     def test_dot1q_tcp_custom_filter(self, tg):
         """ Check Dot1Q.TCP filter"""
@@ -3536,7 +3550,7 @@ class TestIxia(object):
         # Verify that only packets with specified UDP layer are sniffed
         assert len(data[iface]) == 1
 
-        assert tg.get_packet_layer(data[iface][0], "UDP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan") is None
+        assert tg.get_packet_layer(data[iface][0], "UDP") is not None and not tg.get_packet_field(data[iface][0], "Ethernet", "vlan")
 
     def test_udp_custom_filter(self, tg):
         """ Check UDP filter"""
@@ -3581,7 +3595,7 @@ class TestIxia(object):
 
         # Verify that only packets with specified Dot1Q.UDP layer are sniffed
         assert len(data[iface]) == 1
-        assert tg.get_packet_layer(data[iface][0], "UDP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan") is not None
+        assert tg.get_packet_layer(data[iface][0], "UDP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan")
 
     def test_dot1q_udp_custom_filter(self, tg):
         """ Check Dot1Q.UDP filter """
@@ -3631,7 +3645,7 @@ class TestIxia(object):
         # Verify that only packets with specified ICMP layer are sniffed
         assert len(data[iface]) == 1
 
-        assert tg.get_packet_layer(data[iface][0], "ICMP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan") is None
+        assert tg.get_packet_layer(data[iface][0], "ICMP") is not None and not tg.get_packet_field(data[iface][0], "Ethernet", "vlan")
 
     def test_icmp_custom_filter(self, tg):
         """ Check ICMP filter """
@@ -3680,7 +3694,7 @@ class TestIxia(object):
         # Verify that only packets with specified Dot1Q.ICMP layer are sniffed
         assert len(data[iface]) == 1
 
-        assert tg.get_packet_layer(data[iface][0], "ICMP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan") is not None
+        assert tg.get_packet_layer(data[iface][0], "ICMP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan")
 
     def test_dot1q_icmp_custom_filter(self, tg):
         """ Check Dot1Q.ICMP filter """

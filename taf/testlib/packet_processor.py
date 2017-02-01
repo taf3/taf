@@ -1,6 +1,5 @@
-#! /usr/bin/env python
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+@copyright Copyright (c) 2011 - 2017, Intel Corporation.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,12 +17,13 @@ limitations under the License.
 
 @summary  Packet processor specific functionality.
 """
-#TODO: Intagrate Pypacker into methods assemble, assemble_fragmented_packets, packet_fragment, packet_dictionary, check_packet_field_multilayer
+# TODO: Intagrate Pypacker into methods assemble, assemble_fragmented_packets, packet_fragment, packet_dictionary, check_packet_field_multilayer
 
 import struct
 
 import codecs
 import pypacker
+from pypacker.pypacker import Packet
 from pypacker.layer12 import ethernet
 from pypacker.layer12 import arp
 from pypacker.layer12 import llc
@@ -37,6 +37,7 @@ from functools import reduce
 from . import loggers
 from .custom_exceptions import PypackerException
 
+
 class PacketProcessor(object):
     """
     @description  This class contents only one method to build packet from tuple of dictionaries.
@@ -45,37 +46,55 @@ class PacketProcessor(object):
     class_logger = loggers.ClassLogger()
 
     flt_patterns = {
-        "ARP": {'ptrn1': ["08 06", "00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1"},
-        "notARP": {'ptrn1': ["08 06", "00 00", "12"], 'mt1': "matchUser", 'cfp': "notPattern1"},
-        "Dot1Q.ARP": {'ptrn1': ["81 00 00 00 08 06", "00 00 FF FF 00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1"},
-        "Dot1Q": {'ptrn1': None, 'mt1': "matchVlan", 'cfp': "pattern1"},
-        "IP": {'ptrn1': ["08 00", "00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1"},
-        "IPv6": {'ptrn1': ["86 dd", "00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1"},
-        "notIP": {'ptrn1': ["08 00", "00 00", "12"], 'mt1': "matchUser", 'cfp': "notPattern1"},
-        "Dot1Q.IP": {'ptrn1': ["81 00 00 00 08 00", "00 00 FF FF 00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1"},
-        "Dot1Q.IPv6": {'ptrn1': ["81 00 00 00 86 dd", "00 00 FF FF 00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1"},
+        "ARP": {'ptrn1': ["08 06", "00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1",
+                'lfilter': lambda x: getattr(x, 'arp', None) and not x.vlan},
+        "notARP": {'ptrn1': ["08 06", "00 00", "12"], 'mt1': "matchUser", 'cfp': "notPattern1",
+                   'lfilter': lambda x: not getattr(x, 'arp', None) or x.vlan},
+        "Dot1Q.ARP": {'ptrn1': ["81 00 00 00 08 06", "00 00 FF FF 00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1",
+                      'lfilter': lambda x: getattr(x, 'arp', None) and x.vlan},
+        "Dot1Q": {'ptrn1': None, 'mt1': "matchVlan", 'cfp': "pattern1",
+                  'lfilter': lambda x: x.vlan != []},
+        "IP": {'ptrn1': ["08 00", "00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1",
+               'lfilter': lambda x: getattr(x, 'ip', None) and not x.vlan},
+        "IPv6": {'ptrn1': ["86 dd", "00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1",
+                 'lfilter': lambda x: getattr(x, 'ip6', None) and not x.vlan},
+        "notIP": {'ptrn1': ["08 00", "00 00", "12"], 'mt1': "matchUser", 'cfp': "notPattern1",
+                  'lfilter': lambda x: not getattr(x, 'ip', None) or x.vlan},
+        "Dot1Q.IP": {'ptrn1': ["81 00 00 00 08 00", "00 00 FF FF 00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1",
+                     'lfilter': lambda x: getattr(x, 'ip', None) and x.vlan},
+        "Dot1Q.IPv6": {'ptrn1': ["81 00 00 00 86 dd", "00 00 FF FF 00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1",
+                       'lfilter': lambda x: getattr(x, 'ip6', None) and x.vlan},
         "STP": {'ptrn1': ["42 42 03 00 00", "00 00 00 00 00", "14"], 'mt1': "matchUser", 'cfp': "pattern1"},
         "LLDP": {'ptrn1': ["01 80 c2 00 00 0e 00 00 00 00 00 00 88 cc", "00 00 00 00 00 00 FF FF FF FF FF FF 00 00", "0"], 'mt1': "matchUser",
                  'cfp': "pattern1"},
         "notSTP": {'ptrn1': ["42 42 03 00 00", "00 00 00 00 00", "14"], 'mt1': "matchUser", 'cfp': "notPattern1"},
         "TCP": {'ptrn1': ["08 00 00 00 00 00 00 00 00 00 00 06", "00 00 FF FF FF FF FF FF FF FF FF 00", "12"],
-                'mt1': "matchUser", 'cfp': "pattern1"},
+                'mt1': "matchUser", 'cfp': "pattern1",
+                'lfilter': lambda x: getattr(x, 'ip', None) and getattr(x.ip, 'tcp', None) and not x.vlan},
         "Dot1Q.TCP": {'ptrn1': ["81 00 00 00 08 00 00 00 00 00 00 00 00 00 00 06", "00 00 FF FF 00 00 FF FF FF FF FF FF FF FF FF 00", "12"],
-                      'mt1': "matchUser", 'cfp': "pattern1"},
+                      'mt1': "matchUser", 'cfp': "pattern1",
+                      'lfilter': lambda x: getattr(x, 'ip', None) and getattr(x.ip, 'tcp', None) and x.vlan},
         "UDP": {'ptrn1': ["08 00 00 00 00 00 00 00 00 00 00 11", "00 00 FF FF FF FF FF FF FF FF FF 00", "12"],
-                'mt1': "matchUser", 'cfp': "pattern1"},
+                'mt1': "matchUser", 'cfp': "pattern1",
+                'lfilter': lambda x: getattr(x, 'ip', None) and getattr(x.ip, 'udp', None) and not x.vlan},
         "notUDP": {'ptrn1': ["08 00 00 00 00 00 00 00 00 00 00 11", "00 00 FF FF FF FF FF FF FF FF FF 00", "12"],
-                   'mt1': "matchUser", 'cfp': "notPattern1"},
+                   'mt1': "matchUser", 'cfp': "notPattern1",
+                   'lfilter': lambda x: getattr(x, 'ip', None) and not getattr(x.ip, 'udp', None) and x.vlan},
         "Dot1Q.UDP": {'ptrn1': ["81 00 00 00 08 00 00 00 00 00 00 00 00 00 00 11", "00 00 FF FF 00 00 FF FF FF FF FF FF FF FF FF 00", "12"],
-                      'mt1': "matchUser", 'cfp': "pattern1"},
+                      'mt1': "matchUser", 'cfp': "pattern1",
+                      'lfilter': lambda x: getattr(x, 'ip', None) and getattr(x.ip, 'udp', None) and x.vlan},
         "ICMP": {'ptrn1': ["08 00 00 00 00 00 00 00 00 00 00 01", "00 00 FF FF FF FF FF FF FF FF FF 00", "12"],
-                 'mt1': "matchUser", 'cfp': "pattern1"},
+                 'mt1': "matchUser", 'cfp': "pattern1",
+                 'lfilter': lambda x: getattr(x, 'ip', None) and getattr(x.ip, 'icmp', None) and not x.vlan},
         "ICMPv6": {'ptrn1': ["86 dd 00 00 00 00 00 00 00 00 00 01", "00 00 FF FF FF FF FF FF FF FF FF 00", "12"],
-                   'mt1': "matchUser", 'cfp': "pattern1"},
+                   'mt1': "matchUser", 'cfp': "pattern1",
+                   'lfilter': lambda x: getattr(x, 'ip6', None) and getattr(x.ip, 'icmp6', None) and not x.vlan},
         "Dot1Q.ICMP": {'ptrn1': ["81 00 00 00 08 00 00 00 00 00 00 00 00 00 00 01", "00 00 FF FF 00 00 FF FF FF FF FF FF FF FF FF 00", "12"],
-                       'mt1': "matchUser", 'cfp': "pattern1"},
+                       'mt1': "matchUser", 'cfp': "pattern1",
+                       'lfilter': lambda x: getattr(x, 'ip', None) and getattr(x.ip, 'icmp', None) and x.vlan},
         "Dot1Q.ICMPv6": {'ptrn1': ["81 00 00 00 86 dd 00 00 00 00 00 00 00 00 00 01", "00 00 FF FF 00 00 FF FF FF FF FF FF FF FF FF 00", "12"],
-                         'mt1': "matchUser", 'cfp': "pattern1"},
+                         'mt1': "matchUser", 'cfp': "pattern1",
+                         'lfilter': lambda x: getattr(x, 'ip6', None) and getattr(x.ip, 'icmp6', None) and x.vlan},
         "PAUSE": {'ptrn1': ["88 08", "00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1"},
         "BOOTP": {'ptrn1': ["08 00", "00 00", "42"], 'mt1': "matchUser", 'cfp': "pattern1"},
     }
@@ -212,7 +231,7 @@ class PacketProcessor(object):
                                 struct.pack("!H", dot1q_definition["vlan"])
                 packet.vlan = pypacker_vlan
                 if packet._bodytypename:
-                    next_layer =packet._bodytypename.upper()
+                    next_layer = packet._bodytypename.upper()
                     next_layer_type = getattr(pypacker.layer12.ethernet, "ETH_TYPE_{0}".format(next_layer))
                 else:
                     next_layer_type = 0
@@ -429,7 +448,7 @@ class PacketProcessor(object):
                 return x
 
         packet_list = []
-        if not isinstance(packet, pypacker.Packet):
+        if not isinstance(packet, Packet):
             return packet
         payl = packet.copy()
         while payl:
@@ -468,8 +487,8 @@ class PacketProcessor(object):
             packet = self._build_pypacker_packet(packet, adjust_size, required_size)
 
         if fragsize is not None:
-            fragments = pypacker.fragment(packet, fragsize)
-            return fragments
+            # fragments = pypacker.fragment(packet, fragsize)
+            return packet
         else:
             return [packet, ]
 

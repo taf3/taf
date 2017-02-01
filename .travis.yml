@@ -5,6 +5,7 @@ addons:
   apt:
     packages:
     - ccze
+    - libpcap-dev
 cache: pip
 python:
   - "3.4"

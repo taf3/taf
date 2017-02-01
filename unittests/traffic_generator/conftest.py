@@ -1,5 +1,5 @@
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+@copyright Copyright (c) 2011 - 2017, Intel Corporation.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,6 @@ limitations under the License.
 
 
 def pytest_addoption(parser):
-    parser.addoption("--tgtype", action="append", default=["ixiahl"],
-                     choices=["ixiahl"],
+    parser.addoption("--tgtype", action="append", default=["pypacker"],
+                     choices=["ixiahl", "pypacker"],
                      help="TG type, '%default' by default.")
