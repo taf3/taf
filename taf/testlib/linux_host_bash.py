@@ -730,6 +730,8 @@ class LinuxHostBash(LinuxHostInterface):
                 commands.append("ip link set dev {0} address {1}".format(port, kwargs['macAddress']))
             if 'speed' in kwargs:
                 commands.append("ethtool -s {0} speed {1}".format(port, kwargs['speed']))
+            if 'autoneg' in kwargs:
+                commands.append("ethtool -s {0} autoneg {1}".format(port, kwargs['autoneg']))
 
             if 'ipAddr' in kwargs:
                 if not kwargs['ipAddr']:
