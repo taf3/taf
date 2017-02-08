@@ -1,0 +1,4 @@
+[gerrit]
+defaultremote=origin
+defaultrebase=0
+defaultbranch=master
