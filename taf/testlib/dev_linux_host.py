@@ -41,6 +41,7 @@ UI_MAP = {
 }
 
 
+
 class NICHelper(object):
     @staticmethod
     def NICS_IF_NO_LO(nic):
@@ -114,6 +115,8 @@ class GenericLinuxHost(entry_template.GenericEntry):
     ssh_pkey_file = None
     ssh_port = 22
 
+    DEFAULT_SERVER_WAIT_ON_TIMEOUT = 90
+
     def __init__(self, config, opts):
         """
         @brief  Initialize GenericLinuxHost class
@@ -145,9 +148,6 @@ class GenericLinuxHost(entry_template.GenericEntry):
         self.config_file = config.get('config_file')
 
         self.class_logger.info("Init Generic Linux Host: %s", self.ipaddr)
-
-        self.config = config
-        self.opts = opts
 
         self.status = False
 
@@ -743,7 +743,7 @@ class GenericLinuxHost(entry_template.GenericEntry):
         mapper = NICHelper.NIC_IP_ADDR
         return self.map_nics_if(f=f, mapper=mapper, force_check=force_check)
 
-    def get(self, init_start=False, retry_count=7):
+    def get(self, init_start=False, retry_count=1):
         """
         @brief  Get or start linux host instance.
         @param init_start:  Perform switch start operation or not
@@ -755,49 +755,36 @@ class GenericLinuxHost(entry_template.GenericEntry):
                fail_ctrl is set in py.test command line options (read py.test --help for more information).
         """
         # If fail_ctrl != "restart", restart retries won't be performed
-        if self.opts.fail_ctrl != "restart":
-            retry_count = 1
+        # as restart is not implemented for lhosts, retries makes no sense.
+        # if self.opts.fail_ctrl != "restart":
+        #    retry_count = 1
 
-        for retry in range(retry_count):
-            try:
-                if retry == 0:
-                    if init_start:
-                        self.start()
-                    else:
-                        self.waiton()
-                # else:
-                #     Restart not implemented for lhost yet
-                #     self.restart()
-                break
-            except KeyboardInterrupt as ex:
-                message = "KeyboardInterrupt while checking device {0}({1})...".format(
-                        self.name, self.ipaddr)
-                self.class_logger.info(message)
-                self.sanitize()
+        try:
+            if init_start:
+                self.start()
+            else:
+                self.waiton()
+        except KeyboardInterrupt as ex:
+            message = "KeyboardInterrupt while checking device {0}({1})...".format(
+                    self.name, self.ipaddr)
+            self.class_logger.info(message)
+            self.sanitize()
+            pytest.exit(message)
+        except Exception:
+            self.class_logger.error(
+                "Error while checking device %s(%s)...", self.name, self.ipaddr)
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            traceback_message = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            message = "Error while checking device {0}({1}):\n{2}".format(
+                self.name, self.ipaddr, "".join(traceback_message))
+            sys.stderr.write(message)
+            sys.stderr.flush()
+            if self.opts.fail_ctrl != "ignore":
                 pytest.exit(message)
-            except Exception:
-                self.class_logger.warning(
-                    "Error while checking device %s(%s)...", self.name, self.ipaddr)
-                retry += 1
-                exc_type, exc_value, exc_traceback = sys.exc_info()
-                traceback_message = traceback.format_exception(exc_type, exc_value, exc_traceback)
-                message = "Error while checking device {0}({1}):\n{2}".format(
-                    self.name, self.ipaddr, "".join(traceback_message))
-                sys.stderr.write(message)
-                sys.stderr.flush()
-                self.class_logger.error(message)
-                if retry >= retry_count + 1:
-                    message = "Could not complete start device method after {0} retries. " \
-                              "Something went wrong...\n".format(retry_count)
-                    sys.stderr.write(message)
-                    sys.stderr.flush()
-                    self.class_logger.error(message)
-                    if self.opts.fail_ctrl != "ignore":
-                        pytest.exit(message)
-                    else:
-                        pytest.fail(message)
+            else:
+                pytest.fail(message)
 
-    def waiton(self, timeout=90):
+    def waiton(self, timeout=DEFAULT_SERVER_WAIT_ON_TIMEOUT):
         """
         @brief  Wait until device is fully operational.
         @param  timeout:  Wait timeout
