@@ -51,7 +51,7 @@ from testlib.linux import service_lib
 
 
 PLUGINS = ("python", "csv", "dpdkstat", "dpdkevents", "hugepages", "intel_rdt", "mcelog", "ovs_stats", "ovs_events",
-           "snmp_agent", "syslog", "exec", "ipmi")
+           "snmp_agent", "syslog", "exec", "ipmi", "cpu", "memory", "network", "interface")
 
 GLOBAL_PLUGIN_LOAD_BOILERPLATE = """
 <LoadPlugin {plugin}>
@@ -70,7 +70,7 @@ LoadPlugin {plugin}
 ACTIONS = {'enable': {'cmd': [r"printf  '{0}' >> {{collectd_conf}}".format(LOAD_PLUGIN_WITH_PARAM_BOILERPLATE)],
                       'kwargs_required': True},
            'enable_default': {'cmd': [r"sed -i '/[^<]LoadPlugin {plugin}/s/^\(#\)\+//gw /dev/stdout' {collectd_conf}",
-                                      r"sed -i '/<Plugin \({plugin}\|\"{plugin}\"\)>/,/<\/Plugin>/s/^\(#\)\+//w /dev/stdout' {collectd_conf}"],
+                                      r"sed -i '/#<Plugin \({plugin}\|\"{plugin}\"\)>/,/#<\/Plugin>/s/^\(#\)\+//w /dev/stdout' {collectd_conf}"],
                               'kwargs_required': False},
            'enable_global': {'cmd': [r"printf  '{0}' >> {{collectd_conf}}".format(GLOBAL_PLUGIN_LOAD_BOILERPLATE)],
                              'kwargs_required': True},
@@ -161,7 +161,7 @@ class Collectd(object):
         self.send_command = cli_send_command
         self.cli_set_command = cli_set_command
         self.collectd_conf = collectd_conf if collectd_conf else self.DEFAULT_COLLECTD_CONF
-        self.service_manager = service_lib.specific_service_manager_factory(self.SERVICE, self.send_command)
+        self.service_manager = service_lib.SpecificServiceManager(self.SERVICE, self.send_command)
 
         for action in ACTIONS:
             setattr(self, action, collectd_conf_action(action, self.cli_set_command, self.collectd_conf))
@@ -178,11 +178,17 @@ class Collectd(object):
         """
         return self.service_manager.stop()
 
+    def status(self):
+        return self.service_manager.status(expected_rcs={0, 3})
+
     def restart(self):
         """
         @brief Restart collectd service
         """
         return self.service_manager.restart()
+
+    def reconfiguration(self):
+        return service_lib.ServiceConfigChangeContext(self.service_manager)
 
     def add_globals(self, **kwargs):
         """

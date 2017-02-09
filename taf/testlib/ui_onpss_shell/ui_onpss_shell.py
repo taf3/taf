@@ -1274,8 +1274,7 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
 
         self.cli_send_command(cpp_set_cmd)
         self.cli_send_command(port_set_cmd)
-        dcrp_srvc_manager = service_lib.specific_service_manager_factory(
-            self.DCRP_SRVC, self.cli_send_command)
+        dcrp_srvc_manager = service_lib.SpecificServiceManager(self.DCRP_SRVC, self.cli_send_command)
         dcrp_srvc_manager.restart(expected_rcs={0})
 
         # wait timeout until all daemons are running
@@ -1293,7 +1292,7 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
         @brief  Stopping DCRP service
         @return:  None
         """
-        dcrp_srvc_manager = service_lib.specific_service_manager_factory(
+        dcrp_srvc_manager = service_lib.SpecificServiceManager(
             self.DCRP_SRVC, self.cli_send_command)
         dcrp_srvc_manager.stop(expected_rcs={0})
 

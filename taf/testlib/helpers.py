@@ -25,6 +25,7 @@ import random
 import itertools
 from xmlrpc.client import Fault as XMLRPCFault
 from collections import OrderedDict
+import functools
 
 import py.code  # pylint: disable=no-name-in-module
 import pytest
@@ -1963,3 +1964,9 @@ def merge_dicts(*dict_args):
     for d in dict_args:
         result.update(d)
     return result
+
+
+def apply_action_and_add_finalizer(request, targets, action, reaction):
+    for a_target in targets:
+        action(a_target)
+        request.addfinalizer(functools.partial(reaction, a_target))

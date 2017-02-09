@@ -44,7 +44,7 @@ class OpenvSwitch(object):
         self.cli_send_command = cli_send_command
         self.switch_map = switch_map
         self.name_to_switchid_map = name_to_switchid_map
-        self.service_manager = service_lib.specific_service_manager_factory(self.SERVICE, self.cli_send_command)
+        self.service_manager = service_lib.SpecificServiceManager(self.SERVICE, self.cli_send_command)
 
     def update_map(self, iface_name, delete=False):
         """

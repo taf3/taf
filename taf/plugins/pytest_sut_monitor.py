@@ -32,7 +32,7 @@ import pytest
 
 from . import loggers
 from .pytest_onsenv import setup_scope
-from testlib.custom_exceptions import CLISSHException, UICmdException
+from testlib.custom_exceptions import UICmdException
 from testlib import clissh
 from testlib import rrdtool_graph
 from testlib import multicall
@@ -42,12 +42,12 @@ from testlib.cli_template import CmdStatus
 PATH_TO_RRD = '/var/lib/collectd/rrd'
 
 
-INCLUDES = {'rr'}
+INCLUDES = {'rr', 'linux_host', 'generic'}
 
 SUPPORTED_GRAPHS = {
     'MEMORY': 'memory',
     'CPU': 'cpu',
-#    'INTERFACE': 'interface-',
+    # 'INTERFACE': 'interface-',
     'INTERFACE_BYTES': 'interface-',
     'LOAD': 'load',
     'DISK': 'disk-'
@@ -96,12 +96,13 @@ class SutMonitor(object):
         @param env:  TAF environment instance
         @type  env:  testlib.common3.Environment
         """
+        super().__init__()
         self.env = env
         # Initialize start and stop time values
         self.start_time = time.time()
         self.end_time = time.time()
         # Initialize test name value
-        self.test = 'Underfined'
+        self.test = 'Undefined'
         # Store collectd folders in dict
         self.devices = {}
         # Store created graphs in list
@@ -197,7 +198,8 @@ class SutMonitor(object):
             # convert to CmdStatus objects
             if cmd_status.stdout:
                 results.extend(
-                    (result[0], CmdStatus(*result[1:])) for result in json.loads(cmd_status.stdout))
+                    (result[0], CmdStatus(*result[1:]))
+                    for result in json.loads(cmd_status.stdout))
         return [x[1].stdout for x in results]
 
     def copy_file(self, remote_file, local_file):
@@ -209,7 +211,7 @@ class SutMonitor(object):
         @type  local_file:  str
         """
         self.class_logger.debug("Copy file {0} to the local file {1}".format(remote_file,
-                                                                               local_file))
+                                                                             local_file))
         self.server.ssh.get_file(remote_file, local_file)
 
     def configure(self):
@@ -227,12 +229,14 @@ class SutMonitor(object):
         for dev_name in self.devices:
             collectd_folder = os.path.join(PATH_TO_RRD, dev_name)
             # List all RRD folder related to specific device
-            folders = self.exec_command('find {}/*'
-                ' -maxdepth 1 -type d -print0'.format(collectd_folder)).split('\0')
+            folders = self.exec_command(
+                'find {}/*' ' -maxdepth 1 -type d -print0'.format(collectd_folder)).split('\0')
             # Filter folder by supported graphs
             # Store results in dict {graph_type: list_of_folders}
-            folder_dict = {_key: [x for x in folders if x.split(os.path.sep)[-1].startswith(_value)]
-                           for _key, _value in list(SUPPORTED_GRAPHS.items())}
+            folder_dict = {
+                _key: [x for x in folders if x.split(os.path.sep)[-1].startswith(_value)]
+                for _key, _value in list(SUPPORTED_GRAPHS.items())
+            }
             # Update device info
             self.devices[dev_name]['folders'] = folder_dict
 
@@ -240,7 +244,8 @@ class SutMonitor(object):
         """
         @brief  Create RRD graphs on test teardown
         """
-        self.class_logger.debug("PROFILING: SutMonitor start time {}".format(time.time()))
+        self.class_logger.info("Generating graphs...")
+        self.class_logger.debug("PROFILING: SutMonitor start time %d", time.time())
         # Store rrdtool commands in list
         commands = []
         # Store graphs names in list
@@ -265,17 +270,18 @@ class SutMonitor(object):
                     rrd_folder = os.path.join(PATH_TO_RRD, name, folder)
                     # Exclude empty graphs
                     if self.is_not_empty(rrd_folder,
-                                         int(self.start_time - time.time()),
-                                         int(self.end_time - time.time()),
+                                         int(self.start_time),
+                                         int(self.end_time),
                                          gtype):
                         # Generate graph name as deviceName_RRDFolderName
                         file_name = "{0}_{1}.png".format(name, folder.split(os.path.sep)[-1])
                         file_names.append(file_name)
                         # Generate command for graph creation and append to commands list
                         # Store graph on Collectd server host in /tmp/ directory
-                        commands.append(rrdtool_graph.get_graph_command(rrd_folder,
-                            int(self.start_time - time.time()),
-                            int(self.end_time - time.time()),
+                        commands.append(rrdtool_graph.get_graph_command(
+                            rrd_folder,
+                            int(self.start_time),
+                            int(self.end_time),
                             gtype=gtype,
                             destination=os.path.join('/tmp', file_name)))
         # Create graphs on Collectd server host
@@ -323,6 +329,7 @@ class SutMonitor(object):
         # for res in results:
         #    for val in res.splitlines():
         #        values.extend(list(map(self.convert, val.split()[1:])))
+
         def convert(value):
             try:
                 return int(float(value))
@@ -348,6 +355,10 @@ class SutMonitorPlugin(object):
     @brief  SutMonitorPlugin implementation.
     """
 
+    def __init__(self):
+        super().__init__()
+        self.sut_monitor = None
+
     @pytest.fixture(autouse=True, scope='session')
     def monitor_init(self, env_init):
         """
@@ -359,7 +370,7 @@ class SutMonitorPlugin(object):
         return self.sut_monitor
 
     @pytest.fixture(scope=setup_scope(), autouse=True)
-    def monitor(self, request, env_main, monitor_init):
+    def monitor(self, request, env_main, monitor_init):  # pylint: disable=W0613
         """
         @brief  Start Collectd service on devices
         """
@@ -369,7 +380,7 @@ class SutMonitorPlugin(object):
         return monitor_init
 
     @pytest.fixture(autouse=True)
-    def test_monitor(self, request, env, monitor):
+    def test_monitor(self, request, env, monitor):  # pylint: disable=W0613
         """
         @brief  Gather collectd info for certain test case
         @param request:  pytest request object
@@ -383,7 +394,7 @@ class SutMonitorPlugin(object):
         request.addfinalizer(monitor.item_teardown)
 
     @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-    def pytest_runtest_makereport(self, item, call):
+    def pytest_runtest_makereport(self, item, call):   # pylint: disable=W0613
         """
         @brief  Add generated graphs to the pytest report in order to access from reporting plugin
         """

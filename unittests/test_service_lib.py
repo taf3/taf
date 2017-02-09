@@ -30,41 +30,31 @@ class TestSystemd(unittest.TestCase):
 
     def setUp(self):
         self.service_name = "fake_service"
-        init_name = "systemd"
-        command_generator = service_lib._command_generators[init_name]
+        return_codes = service_lib.SystemdReturnCodes
         self.service_command_generator = service_lib.ServiceCommandGenerator(
-            command_generator)
+            service_lib.systemd_command_generator,
+            return_codes
+        )
 
     def test_all_commands(self):
-        for cmd in (c for c in self.service_command_generator.commands if c != "list"):
+        for cmd in (c for c in self.service_command_generator.commands
+                    if c not in ["list", "daemon_reload"]):
             ret = getattr(
                 self.service_command_generator, cmd)(self.service_name)
-            if cmd == "is_enabled":
-                cmd = "is-enabled"
-            elif cmd == "is_active":
-                cmd = "is-active"
-            assert ret == ["systemctl", cmd, "%s.service" % self.service_name]
+            assert ret == ["systemctl", cmd.replace('_', '-'), "%s.service" % self.service_name]
 
 
 class TestSpecificServiceManager(unittest.TestCase):
 
     def setUp(self):
         self.run_mock = MagicMock()
-        self.init_name = "systemd"
-        command_generator = service_lib.systemd_command_generator
-        command_list = [c for c in service_lib.COMMANDS if c != "list"]
-        service_command_generator = service_lib.ServiceCommandGenerator(
-            command_generator, command_list)
-        self.service_manager = service_lib.SpecificServiceManager("lldpad",
-                                                                  service_command_generator,
-                                                                  self.run_mock)
+        self.service_manager = service_lib.SpecificServiceManager("lldpad", self.run_mock)
 
     def test_start(self):
         service = "lldpad"
         # should really use --generated-members, but start() is too generic
         self.service_manager.start()  # pylint: disable=no-member
-        assert self.run_mock.call_args[0][
-            0] == "systemctl start %s.service" % service
+        assert self.run_mock.call_args[0][0] == "systemctl start %s.service" % service
 
     def test_stop_with_args(self):
         service = "lldpad"
@@ -73,7 +63,7 @@ class TestSpecificServiceManager(unittest.TestCase):
                    0] == "systemctl stop %s.service" % service
         assert self.run_mock.call_args[1] == {'ignore_status': True}
 
-    def test_list_is_not_present_in_SpecifcServiceManager(self):
+    def test_list_is_not_present_in_SpecificServiceManager(self):
         assert not hasattr(self.service_manager, "list")
 
 
@@ -81,13 +71,7 @@ class TestSystemdServiceManager(unittest.TestCase):
 
     def setUp(self):
         self.run_mock = MagicMock()
-        self.init_name = "systemd"
-        command_generator = service_lib.systemd_command_generator
-        service_manager = service_lib.SystemdServiceManager
-        service_command_generator = service_lib.ServiceCommandGenerator(
-            command_generator)
-        self.service_manager = service_manager(
-            service_command_generator, self.run_mock)
+        self.service_manager = service_lib.SystemdServiceManager(self.run_mock)
 
     def test_start(self):
         service = "lldpad"

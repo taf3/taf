@@ -36,8 +36,7 @@ class NetworkD(object):
         super(NetworkD, self).__init__()
         self.run_command = run_command
         self.mgmt_ports = mgmt_ports
-        self.service_manager = service_lib.specific_service_manager_factory(
-            self.SERVICE, self.run_command)
+        self.service_manager = service_lib.SpecificServiceManager(self.SERVICE, self.run_command)
 
     def restart(self):
         """

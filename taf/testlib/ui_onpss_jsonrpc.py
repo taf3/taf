@@ -60,10 +60,10 @@ class UiOnpssJsonrpc(UiOnpssShell):
         # GAMI API doesn't support creating LAG without members
         # Initialize LAG map
         self.lags = []
-        self.rest_server_service = service_lib.specific_service_manager_factory(
-            "psme-rest-server", self.cli_send_command)
-        self.network_agent_service = service_lib.specific_service_manager_factory(
-            "psme-network", self.cli_send_command)
+        self.rest_server_service = service_lib.SpecificServiceManager("psme-rest-server",
+                                                                      self.cli_send_command)
+        self.network_agent_service = service_lib.SpecificServiceManager("psme-network",
+                                                                        self.cli_send_command)
 
     def _get_subcomponents_uuid(self):
         """
@@ -549,7 +549,7 @@ class UiOnpssJsonrpc(UiOnpssShell):
                              "pvpt": None,
                              "master": None,
                              "type": port["portClass"]}
-            except KeyError as err:
+            except KeyError:
                 raise UIException("Command 'getEthernetSwitchPortInfo' returned incorrect reply: {0}".format(port))
             else:
                 port_table.append(port_attr)

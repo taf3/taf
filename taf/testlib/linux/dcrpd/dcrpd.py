@@ -39,8 +39,7 @@ class Dcrpd(object):
         self.run_command = run_command
         self.switch = switch
         self.switch_driver = SwitchDriver(self, switch)
-        self.service_manager = service_lib.specific_service_manager_factory(
-            self.SERVICE, self.run_command)
+        self.service_manager = service_lib.SpecificServiceManager(self.SERVICE, self.run_command)
 
     def start(self):
         """

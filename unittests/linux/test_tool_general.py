@@ -177,7 +177,7 @@ def gen_tool(request, lh):
 
 @pytest.fixture
 def systemctl(gen_tool):
-    service_factory = service_lib.specific_service_manager_factory
+    service_factory = service_lib.SpecificServiceManager
     systemctl = service_factory(SERVICE_NAME, gen_tool.run_command)
     return systemctl
 

@@ -91,9 +91,7 @@ class GenericTool(object):
             'command': cmd_str,
             'instance_id': tool_instance_id,
             'service_name': service_name,
-            'service_manager': service_lib.specific_service_manager_factory(
-                service_name,
-                self.run_command)
+            'service_manager': service_lib.SpecificServiceManager(service_name, self.run_command),
         }
         # Wait for tool instance to start
         self.is_active(tool_instance_id)

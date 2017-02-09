@@ -29,7 +29,7 @@ systemd_cmd_gen = service_lib.systemd_command_generator()
 cmd = " ".join(systemd_cmd_gen.start("networkd"))
 
 # to directly call cli_send_command but still accepts kwargs for cli_send_command
-networkd = service_lib.specific_service_manager_factory("networkd", self.cli_send_command)
+networkd = service_lib.SpecificServiceManager("networkd", self.cli_send_command)
 networkd.stop(expected_rcs={0, 3})
 networkd.start(expected_rcs={1})
 
@@ -104,24 +104,25 @@ systemctl daemon-reload
 """
 
 
-def systemd_command_generator(command):
+class ReturnCodes(object):
+    SUCCESS = 0
+    RUNNING = 0
+    STOPPED = 3
+    UNKNOWN = None
 
-    command_name = "systemctl"
-    if command == "is_enabled":
-        command = "is-enabled"
-    elif command == "is_active":
-        command = "is-active"
-    elif command == "list":
-        # noinspection PyUnusedLocal
-        def list_command(service_name):
-            return [command_name, "list-unit-files", "--type=service"]
-        return list_command
 
-    def method(service_name):
-        return [command_name, command, "%s.service" % service_name]
-    return method
+class SystemdReturnCodes(ReturnCodes):
+    pass
 
-COMMANDS = (
+
+REPLACE_COMMAND_LIST = {
+    'is_enabled',
+    'is_active',
+    'daemon_reload',
+}
+
+
+COMMANDS = {
     "start",
     "stop",
     "reload",
@@ -133,71 +134,133 @@ COMMANDS = (
     "is_enabled",
     "is_active",
     "list",
-)
+    "daemon_reload",
+}
+
+
+def systemd_command_generator(command):
+
+    command_name = "systemctl"
+    if command in REPLACE_COMMAND_LIST:
+        command = command.replace('_', '-')
+
+    if command == "list":
+        # noinspection PyUnusedLocal
+        def list_command(_):
+            return [command_name, "list-unit-files", "--type=service"]
+        return list_command
+    elif command == "daemon-reload":
+        def daemon_reload_command(*_):
+            return [command_name, command, '']
+        return daemon_reload_command
+
+    def method(service_name):
+        return [command_name, command, "{}.service".format(service_name)]
+    return method
 
 
 class ServiceCommandGenerator(object):
 
-    def __init__(self, command_generator, command_list=COMMANDS):
+    def __getattr__(self, name):
+        if name not in self:
+            raise AttributeError(name)
+        command = self.command_generator(name)
+        setattr(self, name, command)
+        return command
+
+    def __iter__(self):
+        return iter(self.commands)
+
+    def __contains__(self, value):
+        return value in self.commands
+
+    def __init__(self, command_generator, return_codes=ReturnCodes, command_list=None):
         super(ServiceCommandGenerator, self).__init__()
+        if command_list is None:
+            command_list = COMMANDS
         self.commands = command_list
-        for command in self.commands:
-            setattr(self, command, command_generator(command))
-
-
-class SpecificServiceManager(object):
-
-    def __init__(self, service_name, service_command_generator, run):
-        super(SpecificServiceManager, self).__init__()
-        for cmd in service_command_generator.commands:
-            setattr(self, cmd,
-                    self.generate_run_function(run, getattr(service_command_generator, cmd), service_name))
-
-    @staticmethod
-    def generate_run_function(run_func, command, service_name):
-        def run(**kwargs):
-            return run_func(" ".join(command(service_name)), **kwargs)
-        return run
+        self.command_generator = command_generator
+        self.return_codes = return_codes
 
 
 class GenericServiceManager(object):
+    def __init__(self, run_func, command_list=None):
+        super().__init__()
+        if command_list is None:
+            command_list = COMMANDS
+        self.service_command_generator = ServiceCommandGenerator(systemd_command_generator,
+                                                                 SystemdReturnCodes,
+                                                                 command_list)
 
-    def __init__(self, service_command_generator, run):
-        super(GenericServiceManager, self).__init__()
-        for cmd in service_command_generator.commands:
-            setattr(self, cmd,
-                    self.generate_run_function(run, getattr(service_command_generator, cmd)))
+        self.return_codes = SystemdReturnCodes
+        self.run_func = run_func
 
-    @staticmethod
-    def generate_run_function(run_func, command):
-        def run(service="", **kwargs):
-            return run_func(" ".join(command(service)), **kwargs)
+    def __getattr__(self, name):
+        def run(service='', **kwargs):
+            return self.run_func(' '.join(command(service)), **kwargs)
+        command = getattr(self.service_command_generator, name)
+        setattr(self, name, run)
+        return run
+
+    def _get_running_status(self, service=''):
+        return self.status(service=service, expected_rcs={self.return_codes.RUNNING,
+                                                          self.return_codes.STOPPED})
+
+    def is_running(self, service=''):
+        rv = self._get_running_status(service)
+        return rv.rc == self.return_codes.RUNNING
+
+    def is_stopped(self, service=''):
+        rv = self._get_running_status(service)
+        return rv.rc == self.return_codes.STOPPED
+
+
+class SpecificServiceManager(GenericServiceManager):
+    def __init__(self, service_name, run_func):
+        command_list = [c for c in COMMANDS if c != "list"]
+        super().__init__(run_func, command_list)
+        self.service_name = service_name
+
+    def __getattr__(self, name):
+        def run(**kwargs):
+            kwargs.pop('service', None)  # remove any value associated with the service key
+            return self.run_func(command, **kwargs)
+        command = getattr(self.service_command_generator, name)
+        command = ' '.join(command(self.service_name))
+        setattr(self, name, run)
         return run
 
 
 class SystemdServiceManager(GenericServiceManager):
 
-    def __init__(self, service_command_generator, run):
-        super(SystemdServiceManager, self).__init__(service_command_generator, run)
+    def __init__(self, run):
+        super().__init__(run)
 
     @staticmethod
     def change_default_runlevel(runlevel='multi-user.target'):
         # atomic symlinking, symlink and then rename
         tmp_symlink = mktemp(dir="/etc/systemd/system")
-        os.symlink("/usr/lib/systemd/system/%s" % runlevel, tmp_symlink)
+        os.symlink("/usr/lib/systemd/system/{}".format(runlevel), tmp_symlink)
         os.rename(tmp_symlink, "/etc/systemd/system/default.target")
 
 
-_command_generators = {"systemd": systemd_command_generator}
+class ServiceConfigChangeContext(object):
+    """
+    Context manager suitable for service configuration
+    """
 
-_service_managers = {"systemd": SystemdServiceManager}
+    def __init__(self, specific_service_manager):
+        super().__init__()
+        self.rcs = specific_service_manager.return_codes
+        self.was_running = None
+        self.specific_service_manager = specific_service_manager
 
+    def __enter__(self):
+        self.was_running = self.specific_service_manager.is_running()
+        if self.was_running:
+            self.specific_service_manager.stop()
 
-def specific_service_manager_factory(service_name, run_func):
-    command_list = [c for c in COMMANDS if c != "list"]
-    service_command_generator = ServiceCommandGenerator(systemd_command_generator, command_list)
-    return SpecificServiceManager(service_name, service_command_generator, run_func)
-
-
-def systemd_manager_factory(run_func):
-    return SystemdServiceManager(ServiceCommandGenerator(systemd_command_generator), run_func)
+    def __exit__(self, exc_type, exc, exc_tb):
+        self.specific_service_manager.daemon_reload()
+        if self.was_running:
+            self.specific_service_manager.start()
