@@ -85,6 +85,7 @@ class LinuxHostBash(LinuxHostInterface):
         @param  host:  Switch instance
         @type  host:  SwitchGeneral
         """
+        super().__init__()
         self.host = host
         self.networks = []
 

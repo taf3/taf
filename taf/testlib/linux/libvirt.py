@@ -35,36 +35,32 @@ class Libvirt(object):
         """
         @brief  Initialize libvirt class.
         """
-        super(Libvirt, self).__init__()
+        super().__init__()
         self.cli_send_command = cli_send_command
         self.service_manager = service_lib.SpecificServiceManager(self.SERVICE, self.cli_send_command)
 
-    def start(self):
+    def __getattr__(self, name):
         """
-        @brief  Start libvirt service
+        @brief  Method for getting attribute from service_manager
+        @param  name:  attribute name
+        @type  name:  string
         """
-        self.service_manager.start()
+        attr = getattr(self.service_manager, name)
+        setattr(self, name, attr)
+        return attr
 
-    def stop(self):
+    def __call__(self, cmd, exp_rc):
         """
-        @brief  Stop libvirt service
-        """
-        self.service_manager.stop()
-
-    def restart(self):
-        """
-        @brief  Restart libvirt service
-        """
-        return self.service_manager.restart()
-
-    def status(self):
-        """
-        @brief  Get libvirt process status
+        @brief  Overloaded call method
+        @param  cmd:  command to execute
+        @type  cmd:  string
+        @param  exp_rc:  expected return code
+        @type  exp_rc:  int | set | list | frozenset
         @rtype:  named tuple
         """
-        return self.service_manager.status()
+        return self.cli_send_command('{}'.format(cmd), expected_rcs=exp_rc)
 
-    def virsh_execute_command(self, command, exp_rc=frozenset({0})):
+    def virsh_execute_command(self, command,  exp_rc=frozenset({0})):
         """
         @brief  Method for virsh command execution
         @param  command:  command to execute
@@ -73,4 +69,4 @@ class Libvirt(object):
         @type  exp_rc:  int | set | list | frozenset
         @rtype:  named tuple
         """
-        return self.cli_send_command('virsh {}'.format(command), expected_rcs=exp_rc)
+        return self('virsh {}'.format(command), exp_rc)
