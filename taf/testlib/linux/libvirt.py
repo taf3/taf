@@ -49,24 +49,24 @@ class Libvirt(object):
         setattr(self, name, attr)
         return attr
 
-    def __call__(self, cmd, exp_rc):
+    def __call__(self, cmd, expected_rc):
         """
         @brief  Overloaded call method
         @param  cmd:  command to execute
         @type  cmd:  string
-        @param  exp_rc:  expected return code
-        @type  exp_rc:  int | set | list | frozenset
+        @param  expected_rc:  expected return code
+        @type  expected_rc:  int | set | list | frozenset
         @rtype:  named tuple
         """
-        return self.cli_send_command('{}'.format(cmd), expected_rcs=exp_rc)
+        return self.cli_send_command(cmd, expected_rcs=expected_rc)
 
-    def virsh_execute_command(self, command,  exp_rc=frozenset({0})):
+    def virsh_execute_command(self, command,  expected_rc=frozenset({0})):
         """
         @brief  Method for virsh command execution
         @param  command:  command to execute
         @type  command:  string
-        @param  exp_rc:  expected return code
-        @type  exp_rc:  int | set | list | frozenset
+        @param  expected_rc:  expected return code
+        @type  expected_rc:  int | set | list | frozenset
         @rtype:  named tuple
         """
-        return self('virsh {}'.format(command), exp_rc)
+        return self('virsh {}'.format(command), expected_rc)
