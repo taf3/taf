@@ -43,6 +43,7 @@ from testlib.tempest_clients.magnum.clients.magnum_service_client import MagnumS
 import testlib.tempest_clients.magnum.models
 from plugins import loggers
 import pprint
+import copy
 
 
 DISTRO_METADATA = {
@@ -79,6 +80,7 @@ class Magnum(object):
         self.admin_manager = venv.handle.admin_manager
         self.manager = venv.handle.manager
         self.magnum_models = testlib.tempest_clients.magnum.models
+        self.tempest_lib = venv.tempest_lib
 
         try:
             self.manager.cluster_client = ClusterClient(self.manager.auth_provider)
@@ -124,7 +126,7 @@ class Magnum(object):
         assert resp['status'] == '202'
 
         if wait:
-            client.wait_for_created_cluster(cluster.uuid)
+            client.wait_for_created_cluster(cluster.uuid, delete_on_error=False)
             _, cluster = client.get_cluster(cluster.uuid)
             assert cluster.status == 'CREATE_COMPLETE'
 
@@ -139,6 +141,9 @@ class Magnum(object):
     def create_cluster_template(self, template, **kwargs):
 
         client = self.manager.cluster_template_client
+        image_client = self.manager.image_client_v2
+
+        template = copy.deepcopy(template)
 
         template.setdefault('external_network_id', self.config.network.public_network_id)
         template.setdefault('keypair_id', self.venv.key['name'])
@@ -148,7 +153,12 @@ class Magnum(object):
         for setting in ['dns_nameserver', 'http_proxy', 'https_proxy', 'no_proxy']:
             template.setdefault(setting, self.venv.env_settings.get(setting))
 
-        template['image_id'] = self.venv.get_image_by_name(template['image_id'])['id']
+        try:
+            image = image_client.show_image(template['image_id'])
+            assert image['id'] == template['image_id']
+        except self.tempest_lib.exceptions.NotFound:
+            template['image_id'] = self.venv.get_image_by_name(template['image_id'])['id']
+
         metadata = {'os_distro': kwargs.setdefault('os_distro', CLUSTER_CONSTS['os_distro'])}
 
         self.manager.compute_images_client.set_image_metadata(template['image_id'], metadata)
