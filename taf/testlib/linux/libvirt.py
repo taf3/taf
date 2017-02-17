@@ -45,9 +45,7 @@ class Libvirt(object):
         @param  name:  attribute name
         @type  name:  string
         """
-        attr = getattr(self.service_manager, name)
-        setattr(self, name, attr)
-        return attr
+        return getattr(self.service_manager, name)
 
     def __call__(self, cmd, expected_rc):
         """
