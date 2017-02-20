@@ -17,22 +17,15 @@ limitations under the License.
 
 @summary  Packet processor specific functionality.
 """
-# TODO: Intagrate Pypacker into methods assemble, assemble_fragmented_packets, packet_fragment, packet_dictionary, check_packet_field_multilayer
-
-import struct
 
 import codecs
-import pypacker
-from pypacker.pypacker import Packet
-from pypacker.layer12 import ethernet
-from pypacker.layer12 import arp
-from pypacker.layer12 import llc
-from pypacker.layer3 import ip
-from pypacker.layer3 import ip6
-from pypacker.layer3 import icmp
-from pypacker.layer4 import tcp
-from pypacker.layer4 import udp
 from functools import reduce
+from contextlib import suppress
+
+import pytest
+import pypacker
+from pypacker.layer3 import ip
+from pypacker.layer12 import ethernet
 
 from . import loggers
 from .custom_exceptions import PypackerException
@@ -151,22 +144,48 @@ class PacketProcessor(object):
             if packet_length < required_size:
                 packet.add_payload(b"\x00" * (required_size - packet_length))
             elif packet_length > required_size and required_size < 60:
-                self.class_logger.warning("required_size is less than actual size. Packet will be cut off.")
+                self.class_logger.warning("required_size is less than actual size. Packet will be cut off")
                 packet_string = bytes(packet)
                 packet_string = packet_string[0:required_size]
                 packet = TApi.Ether(packet_string)
 
         return packet
 
-    def __get_pypacker_layer(self, layer):
+    @staticmethod
+    def __get_pypacker_layer(layer):
+        """
+        @brief  Get Pypacker protocol object
+        @param  layer:  Protocol name
+        @type  layer:  str
+        @rtype:  pypacker.Packet
+        @return:  return Pypacker object
+        """
         if layer in ["Ethernet", "ARP", "LLC", "STP"]:
             return getattr(getattr(pypacker.layer12, layer.lower()), layer)
         elif layer in ["IP", "IP6", "ICMP", "IGMP"]:
             return getattr(getattr(pypacker.layer3, layer.lower()), layer)
         elif layer in ["TCP", "UDP"]:
             return getattr(getattr(pypacker.layer4, layer.lower()), layer)
+        elif layer == "FlowControl":
+            return getattr(getattr(pypacker.layer12, "flow_control"), layer)
+        elif layer in ["Pause", "PFC"]:
+            return getattr(getattr(getattr(pypacker.layer12, "flow_control"), "FlowControl"), layer)
 
-    # TODO: adjust_size=True must cut off all packets to required_size, include packet greater 64
+    @staticmethod
+    def __get_pypacker_layer_fields(packet):
+        """
+        @brief  Get packet fields
+        @param  packet:  pypacker packet
+        @type  packet:  pypacker.Packet
+        @rtype  set
+        @return  set of packet fields
+        """
+        # Get header fields
+        fields = {field.strip('_') for field in packet._header_field_names if not field.endswith("_s")}
+        # Get subfields that value is less than 1 byte
+        sub_fields = {f for f, v in packet.__class__.__dict__.items() if isinstance(v, property) and not f.endswith("_s")}
+        return fields.union(sub_fields)
+
     def _build_pypacker_packet(self, packet_definition, adjust_size=True, required_size=64):
         """
         @brief  Builds pypacker packet based on provided packet definition.
@@ -187,15 +206,6 @@ class PacketProcessor(object):
         @endcode
         """
 
-        def _value_repr(packet, field, value):
-            """
-            @brief  Check if value contains layers.
-            """
-            if getattr(packet, '{0}_s'.format(field), None):
-                setattr(packet, '{0}_s'.format(field), value)
-            else:
-                setattr(packet, field, value)
-
         def _pypacker_layer(layer_dict):
             """
             @brief  Return pypacker Packet object built according to definition.
@@ -213,43 +223,38 @@ class PacketProcessor(object):
                 # Skip undefined layers e.g. Dot1Q
                 else:
                     return None
-            field_list = (_fl.strip('_') for _fl in sl._header_field_names)
-            fields = layer_dict[layer_name]
-            list([_value_repr(sl, f, fields[f]) for f in [f for f in field_list if f in fields]])
+
+            for field, value in layer_dict[layer_name].items():
+                if getattr(sl, '{0}_s'.format(field), None):
+                    setattr(sl, '{0}_s'.format(field), value)
+                else:
+                    setattr(sl, field, value)
 
             return sl
 
         # Converting packet_definition to pypacker.Packet.
-        packet = reduce(lambda a, b: a + b, list(map(_pypacker_layer, packet_definition)))
-        # Handle Dot1Q layer in packet_definition
-        # TODO: Add handling of priority and CFI fields. Also check ability to build QinQ
+        packet = reduce(lambda a, b: a + b, map(_pypacker_layer, packet_definition))
+        # Handle Dot1Q layer and IP options in packet_definition
         for layer in packet_definition:
-            try:
+            with suppress(KeyError):
                 dot1q_definition = layer["Dot1Q"]
-
-                pypacker_vlan = struct.pack("!H", pypacker.layer12.ethernet.ETH_TYPE_8021Q) + \
-                                struct.pack("!H", dot1q_definition["vlan"])
-                packet.vlan = pypacker_vlan
-                if packet._bodytypename:
-                    next_layer = packet._bodytypename.upper()
-                    next_layer_type = getattr(pypacker.layer12.ethernet, "ETH_TYPE_{0}".format(next_layer))
-                else:
-                    next_layer_type = 0
-                packet.type = next_layer_type
-            except KeyError:
-                pass
+                pypacker_vlan = ethernet.Dot1Q(**dot1q_definition)
+                packet.vlan.append(pypacker_vlan)
+            with suppress(KeyError):
+                opts = layer["IP"]["opts"]
+                packet.ip.opts = [ip.IPOptMulti(**opt) for opt in opts]
 
         # Adjust packet size with padding.
         if adjust_size:
             packet_length = len(packet)
             if packet_length < required_size:
                 packet.padding = b"\x00" * (required_size - packet_length)
-            # TODO: Check that packet can be created less then 64 bytes via Pypacker
+            # packet length cannot be less 14 bytes for Ethernet layer due to pypacker behavior
             elif packet_length > required_size and required_size < 60:
-                self.class_logger.warning("required_size is less than actual size. Packet will be cut off.")
+                self.class_logger.warning("required_size is less than actual size. Packet will be cut off")
                 packet_string = packet.bin()
-                packet_string = packet_string[0:required_size]
-                packet = pypacker.layer12.ethernet.Ethernet(packet_string)
+                packet_string = packet_string[:required_size]
+                packet = ethernet.Ethernet(packet_string)
 
         return packet
 
@@ -273,71 +278,10 @@ class PacketProcessor(object):
         @endcode
         """
         try:
-            if layer == "Dot1Q":
-                try:
-                    vlan_number = struct.unpack('!HH', getattr(packet, field))[1]
-                    if value:
-                        return vlan_number == value
-                    else:
-                        return True
-                except TypeError:
-                    return False
-            else:
-                pypacker_layer = self.__get_pypacker_layer(layer)
-                packet_layer = packet[pypacker_layer]
-                if field is not None:
-                    packet_value = getattr(packet_layer, field)
-                    if value is not None:
-                        if isinstance(packet_value, bytes):
-                            return getattr(packet_layer, '{0}_s'.format(field)) == value
-                        else:
-                            return packet_value == value
-                return True
-        except AttributeError:
+            packet_value = self.get_packet_field(packet, layer, field)
+            return True if packet_value == value else False
+        except PypackerException:
             return False
-
-    @staticmethod
-    def check_packet_field_multilayer(packet=None, layer=None, field=None, value=None):
-        """
-        @brief  Check two if specified field is present (for specified layer) and checks if field value matches specified value.
-        @param  packet:  Packet to analyze
-        @type  packet:  pypacker.Packet
-        @param  layer:  Layer to analyze
-        @type  layer:  str
-        @param  field:  Field to look for
-        @type  field:  str
-        @param  value:  Filed value to compare (may be different types, depending on field)
-        @type  value:  str, int
-        @rtype:  bool
-        @return:  True or False
-        @par Example:
-        @code{.py}
-        assert check_packet_field_multilayer(packet=pypacker_packet, layer="Dot1Q", field="prio", value=4)
-        assert check_packet_field_multilayer(packet=pypacker_packet, layer="Dot1Q", field="type")
-        @endcode
-        """
-        if value is not None:
-            try:
-                index = 1
-                pack = packet[getattr(pypacker, layer):index]
-                while pack:
-                    packet_value = pack.fields[field]
-                    if isinstance(packet_value, bytes) and packet_value.decode("utf-8") == value:
-                        return True
-                    elif packet_value == value:
-                        return True
-                    else:
-                        index += 1
-                        pack = packet[getattr(pypacker, layer):index]
-                return False
-            except Exception:
-                return False
-        else:
-            try:
-                value = packet.getlayer(getattr(pypacker, layer)).fields[field]
-                return True
-            except Exception:
-                return False
 
     def get_packet_field(self, packet=None, layer=None, field=None):
         """
@@ -356,32 +300,25 @@ class PacketProcessor(object):
         value = get_packet_field(packet=pypacker_packet, layer="Dot1Q", field="vlan")
         @endcode
         """
+        tag_id = {"S-Dot1Q": 0, "C-Dot1Q": 1}
         try:
-            pypacker_layer = self.__get_pypacker_layer(layer)
-            packet_layer = packet[pypacker_layer]
+            if layer in tag_id:
+                vlan_tags = self.get_packet_field(packet, "Ethernet", "vlan")
+                try:
+                    return getattr(vlan_tags[tag_id[layer]], field)
+                except IndexError:
+                    raise PypackerException("VLAN tag is not defined")
+            else:
+                packet_layer = self.get_packet_layer(packet, layer)
+
+                if packet_layer is None:
+                    message = "Layer {0} is not defined".format(layer)
+                    raise PypackerException(message)
+                with suppress(AttributeError):
+                    return getattr(packet_layer, '{0}_s'.format(field))
+                return getattr(packet_layer, field)
         except AttributeError:
-            message = "Layer {0} is not defined.".format(layer)
-            raise PypackerException(message)
-
-        if packet_layer is None:
-            message = "Layer {0} is not defined.".format(layer)
-            raise PypackerException(message)
-
-        try:
-            result = getattr(packet_layer, field)
-            if isinstance(result, bytes) and field == "vlan":
-                result = struct.unpack('!HH', getattr(packet_layer, field))[1]
-            elif isinstance(result, bytes):
-                result = getattr(packet_layer, '{0}_s'.format(field))
-        except AttributeError:
-            message = "Field {0} is not defined in {1}.".format(field, layer)
-            raise PypackerException(message)
-
-        # verify that field is defined in correct layer
-        if field in [_fl.strip('_') for _fl in pypacker_layer._header_field_names]:
-            return result.decode('UTF-8') if isinstance(result, bytes) else result
-        else:
-            message = "Field {0} is defined in other layers.".format(field)
+            message = "Field {0} is not defined in {1}".format(field, layer)
             raise PypackerException(message)
 
     def get_packet_layer(self, packet=None, layer=None, output_format="pypacker"):
@@ -419,7 +356,6 @@ class PacketProcessor(object):
         except Exception:
             return None
 
-    # TODO: remove recursion
     def packet_dictionary(self, packet):
         """
         @brief  Get packet dictionary from pypacker.Packet
@@ -440,34 +376,24 @@ class PacketProcessor(object):
                       {'Padding': {'load': '\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00'}})
         @endcode
         """
-        def xr(x):
-            repr_x = repr(x)
-            if "\\x" in repr_x:
-                return eval(repr_x.replace("\\x", "\\\\x"))
-            else:
-                return x
-
-        packet_list = []
-        if not isinstance(packet, Packet):
-            return packet
-        payl = packet.copy()
-        while payl:
+        packet_def = []
+        vlans = []
+        for layer in packet:
             layer_dict = {}
-            class_name = payl.__class__.__name__
-            layer_dict[class_name] = payl.fields
-            for key in layer_dict[class_name]:
-                if isinstance(layer_dict[class_name][key], str):
-                    layer_dict[class_name][key] = "".join(map(xr, layer_dict[class_name][key]))
-                elif isinstance(layer_dict[class_name][key], list):
-                    for indx in range(len(layer_dict[class_name][key])):
-                        sub_layer = self.packet_dictionary(layer_dict[class_name][key][indx])
-                        if isinstance(sub_layer, tuple):
-                            layer_dict[class_name][key][indx] = sub_layer[0]
-                        else:
-                            layer_dict[class_name][key][indx] = sub_layer
-            packet_list.append(layer_dict)
-            payl = payl.payload
-        return tuple(packet_list)
+            class_name = layer.__class__.__name__
+            fields = self.__get_pypacker_layer_fields(layer)
+            layer_dict[class_name] = {}
+            for field in fields:
+                field = field.strip("_")
+                if field == "vlan" and self.get_packet_field(packet, "Ethernet", "vlan"):
+                    for vlan in self.get_packet_field(packet, "Ethernet", "vlan"):
+                        vlans.append({"Dot1Q": {f: getattr(vlan, f) for f in self.__get_pypacker_layer_fields(vlan)}})
+                elif field != "padding":
+                    layer_dict[class_name][field] = self.get_packet_field(layer, class_name, field)
+            packet_def.append(layer_dict)
+            if class_name == "Ethernet" and vlans:
+                packet_def.extend(vlans)
+        return tuple(packet_def)
 
     def packet_fragment(self, packet, adjust_size=True, required_size=64, fragsize=None):
         """
@@ -483,14 +409,7 @@ class PacketProcessor(object):
         @rtype:  list[pypacker.Packet]
         @return:  list of pypacker.Packets - fragments of received packet
         """
-        if isinstance(packet, tuple) or isinstance(packet, list):
-            packet = self._build_pypacker_packet(packet, adjust_size, required_size)
-
-        if fragsize is not None:
-            # fragments = pypacker.fragment(packet, fragsize)
-            return packet
-        else:
-            return [packet, ]
+        pytest.skip("Packet fragmentation is not integrated yet")
 
     def assemble_fragmented_packets(self, packets):
         """
@@ -500,85 +419,4 @@ class PacketProcessor(object):
         @rtype:  list[pypacker.Packet]
         @return:  List of assembled packets
         """
-        data = []
-        while len(packets) > 0:
-            pack = packets[0]
-            if self.get_packet_field(pack, 'IP', 'frag') == 0 and self.get_packet_field(pack, 'IP', 'flags') == 0:
-                packets.pop(packets.index(pack))
-                data.append(pack)
-            else:
-                pack = self.assemble(packets, self.get_packet_field(pack, 'IP', 'id'))
-                data.extend(pack)
-        return data
-
-    def assemble(self, packets, packet_id):
-        """
-        @brief  Method for finding fragments and packet assembling by packet["IP"].id value
-        @param  packets:  List of packets
-        @type  packets:  list[pypacker.Packet]
-        @param  packet_id:  Packet IP.id value
-        @type  packet_id:  int
-        @rtype:  list[pypacker.Packet]
-        @return:  List with assembled packet
-        """
-        packet = None
-        # Get all packets with packet_id
-        data = [x for x in packets if self.get_packet_field(x, 'IP', 'id') == packet_id]
-        # Sorted packets by frag
-        data = sorted(data, key=lambda x: self.get_packet_field(x, 'IP', 'frag'))
-        for pack in data:
-            packets.pop(packets.index(pack))
-        # Delete duplicated fragments:
-        fragments = data[:]
-        counter = 0
-        while counter < len(fragments):
-            fragment = fragments[counter]
-            frag = self.get_packet_field(fragment, 'IP', 'frag')
-            same_frags = [x for x in fragments if self.get_packet_field(x, 'IP', 'frag') == frag]
-            if len(same_frags) > 1:
-                same_frags = sorted(same_frags, key=lambda x: x.time)
-                for i in range(1, len(same_frags)):
-                    fragments.pop(fragments.index(same_frags[i]))
-            counter += 1
-        # Remove Padding (checksumm) from fragments:
-        for pack in fragments:
-            if pack.lastlayer().__class__.__name__ == 'Padding':
-                pack.set_field('Padding', 'load', '')
-        # Check first fragment:
-        if self.get_packet_field(fragments[0], 'IP', 'frag') != 0 or self.get_packet_field(fragments[0], 'IP', 'flags') != 1:
-            self.class_logger.warning("First fragment is wrong")
-            return data
-        # Check last fragment:
-        if self.get_packet_field(fragments[len(fragments) - 1], 'IP', 'frag') == 0 or self.get_packet_field(fragments[len(fragments) - 1], 'IP', 'flags') != 0:
-            self.class_logger.warning("Last fragment is wrong")
-            return data
-        # Check fragments for overlapping:
-        check_list = [(self.get_packet_field(x, 'IP', 'frag'), len(getattr(x.getlayer(getattr(pypacker, 'IP')), 'payload'))) for x in fragments]
-        for i in range(1, len(check_list)):
-            prev = check_list[i - 1][0] * 8 + check_list[i - 1][1]
-            current = check_list[i][0] * 8
-            if prev > current:
-                self.class_logger.warning("Fragment %s is overlapped with fragment %s" % (i, i + 1))
-                return data
-            if prev < current:
-                self.class_logger.warning("Fragment is missed between fragments %s and %s" % (i, i + 1))
-                return data
-        # Assembly fragmented packet
-        for pack in fragments:
-            if packet is None:
-                packet = pack
-            else:
-                packet.getlayer(getattr(pypacker, 'Raw')).load += pack.getlayer(getattr(pypacker, 'Raw')).load
-            packet.getlayer(getattr(pypacker, 'IP')).flags = 0
-        # Delete packet checksum and len (pypacker rewrites these values)
-        payl = packet.payload
-        while payl:
-            try:
-                del payl.chksum
-                del payl.len
-            except AttributeError:
-                pass
-            except Exception as err:
-                self.class_logger.warning("Error while processing packet %s" % err)
-            payl = payl.payload
-        return [packet, ]
+        pytest.skip("Packet fragmentation is not integrated yet")
