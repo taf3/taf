@@ -1,0 +1,40 @@
+ How to generate local TAF documentation:
+=========================================
+
+
+Requirements:
+-------------
+
+1. Python 3.x
+2. Sphinx 1.4 or newer.
+
+
+Installing Sphinx and dependencies
+----------------------------------
+
+$ pip install -r taf/requirements.txt
+
+
+Building docs
+-------------
+
+Move into taf/docs and run Makefile:
+
+$ cd docs
+$ make html
+
+This should run Sphinx in your shell, and output HTML. At the end, it should say something about the documents being ready in _build/html.
+
+
+Open documentation in your browser by typing:
+---------------------------------------------
+
+$ open _build/html/index.html
+
+or enter _build/html directory and open index.html in browser.
+
+You may optionally clean you _build folder from previous build:
+
+$ cd docs/
+$ make clean
+$ make html

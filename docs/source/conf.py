@@ -29,7 +29,7 @@ import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('../../'))
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.inheritance_diagram', 
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.inheritance_diagram',
               'sphinx.ext.coverage', 'sphinx.ext.ifconfig', 'sphinx.ext.graphviz', 'sphinxcontrib.napoleon', 'autoapi.sphinx',
               'sphinx.ext.intersphinx', 'sphinx.ext.viewcode']
 
@@ -63,8 +63,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'taf'
-copyright = '2017, Iryna Barna'
-author = 'Iryna Barna'
+copyright = '2017, taf3'
+author = 'taf3'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -86,7 +86,7 @@ language = '.rst'
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
 
-#exclude_patterns = [ ]
+# exclude_patterns = [ ]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -133,8 +133,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'taf.tex', 'taf Documentation',
-     'Iryna Barna', 'manual'),
+    (master_doc, 'taf.tex', 'TAF Documentation',
+     'taf3', 'manual'),
 ]
 
 
@@ -143,47 +143,34 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'taf', 'taf Documentation',
-     [author], 1)
-]
-
-
-# -- Options for Texinfo output -------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-texinfo_documents = [
-    (master_doc, 'taf', 'taf Documentation',
-     author, 'taf', 'One line description of project.',
-     'Miscellaneous'),
+    (master_doc, 'taf', 'TAF Documentation',
+     [author], 1),
 ]
 
 # autoapi configuration
 
 autoapi_modules = {
-   'taf': {
-      'override': False,
-      'output': 'auto'
-   },
-   'utils': {
-      'override': False,
-      'output': 'auto'
-   },
-   'tests': {
-      'override': False,
-      'output': 'auto'
-   },
-   'unittests': {
-      'override': False,
-      'output': 'auto'
-   },
-   'reporting': {
-      'override': False,
-      'output': 'auto'
-   }
+    'taf': {
+        'override': False,
+        'output': 'auto',
+    },
+    'utils': {
+        'override': False,
+        'output': 'auto',
+    },
+    'tests': {
+        'override': False,
+        'output': 'auto',
+    },
+    'unittests': {
+        'override': False,
+        'output': 'auto',
+    },
+    'reporting': {
+        'override': False,
+        'output': 'auto',
+    },
 }
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
-
