@@ -93,7 +93,7 @@ simulated switch in LXC container:
 
 \b Vlab:
 \code{.json}
-{"entry_type": "cross", "instance_type": "vlab", "id": "2", "ip_host": "localhost", "ip_port": "8050", "ifaces": ["vlab0", "vlab1", "vlab2", "vlab3", "vlab4"], "tgmap": [0], "related_id": [1]}
+{"entry_type": "cross", "instance_type": "vlab", "id": "2", "ip_host": "localhost", "ip_port": "8050", "ports": ["vlab0", "vlab1", "vlab2", "vlab3", "vlab4"], "tgmap": [0], "related_id": [1]}
 \endcode
 
 \subsection config_struct_subsection1_2 Setup Config
@@ -115,7 +115,7 @@ In general, you should define only ids of necessary devices; but you can also ov
 \n
 \code{.json}
 "env": [
-        {"id": 0, "ifaces": [[1, 1, 6], [1, 1, 7], [1, 1, 8], [1, 1, 9], [1, 1, 10], [1, 1, 11], [1, 1, 12], [1, 1, 13], [1, 1, 14]]},
+        {"id": 0, "ports": [[1, 1, 6], [1, 1, 7], [1, 1, 8], [1, 1, 9], [1, 1, 10], [1, 1, 11], [1, 1, 12], [1, 1, 13], [1, 1, 14]]},
         {"id": 1, "ports": [24, 25, 26, 33, 48, 39, 34, 35]},
         {"id": 4, "ports": [28, 29, 24, 25, 26, 27]},
         {"id": 3, "ports": [24, 25, 28, 29, 34, 35]},
@@ -152,7 +152,7 @@ Each connection is a list of four elements: [<device1 id>, <port id>, <device2 i
 \code{.json}
 {
 "env": [
-        {"id": 0, "ifaces": [[1, 1, 6], [1, 1, 7], [1, 1, 8], [1, 1, 9], [1, 1, 10]]},
+        {"id": 0, "ports": [[1, 1, 6], [1, 1, 7], [1, 1, 8], [1, 1, 9], [1, 1, 10]]},
         {"id": 1},
         {"id": "30"}
        ],
