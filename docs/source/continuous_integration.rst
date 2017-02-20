@@ -1,0 +1,3 @@
+Continuous integration
+======================
+Continuous integration can help catch bugs by running your tests automatically. Merge your code with confidence using one of our continuous integration providers. A continuous integration (CI) process is highly recommended and is extremely useful in ensuring that your application stays functional. The easiest way to do this will be with Jenkins....
