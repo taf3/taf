@@ -17,8 +17,9 @@ limitations under the License.
 
 @summary Traffic generator's unittests.
 """
-import random
+
 import time
+import random
 
 import pytest
 
@@ -30,7 +31,7 @@ from testlib.custom_exceptions import PypackerException
 IXIA_CONFIG = {"name": "IXIA", "entry_type": "tg", "instance_type": "ixiahl", "id": 1, "ip_host": "X.X.X.X",
                "ports": [[1, 6, 13]]}
 
-PYPACKER_CONFIG = {"name": "Pypacker", "entry_type": "tg", "instance_type": "pypacker", "id": 2, "ifaces": ["lo"]}
+PYPACKER_CONFIG = {"name": "Pypacker", "entry_type": "tg", "instance_type": "pypacker", "id": 2, "ports": ["lo"]}
 
 
 class FakeOpts(object):
@@ -58,9 +59,9 @@ def traffic_generator(request):
 def tg(request, traffic_generator):
     traffic_generator.cleanup()
     if traffic_generator.type == "ixiahl":
-        iface = tg.ports[0]
+        iface = traffic_generator.ports[0]
         chassis, card, port = iface
-        tg.tcl("ixClearPortStats %(chassis)s %(card)s %(port)s; \
+        traffic_generator.tcl("ixClearPortStats %(chassis)s %(card)s %(port)s; \
                                port get %(chassis)s %(card)s %(port)s; \
                                port config -rxTxMode gigLoopback; \
                                port config -loopback portLoopback; \
@@ -71,47 +72,47 @@ def tg(request, traffic_generator):
 
 
 @pytest.mark.unittests
-class TestTG(object):
+class TestTGs(object):
 
     packet_definition = ({"Ethernet": {"dst": "ff:ff:ff:ff:ff:ff", "src": "00:00:00:00:00:02"}}, {"IP": {"p": 17}}, {"UDP": {}},)
     packet_defs = [({"Ethernet": {"dst": "ff:ff:ff:ff:ff:ff", "src": "00:00:00:00:00:02"}}, {"IP": {"p": 17}}, {"UDP": {}},),
                    ({"Ethernet": {"dst": "ff:ff:ff:ff:ff:ff", "src": "00:00:00:00:00:03"}}, {"IP": {"p": 1}}, {"ICMP": {}},),
                    ({"Ethernet": {"dst": "ff:ff:ff:ff:ff:ff", "src": "00:00:00:00:00:04"}}, {"IP": {}}, {"TCP": {}},)]
 
-    pack_dot1q_ip_udp = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                         {"Dot1Q": {"vlan": 5}},
+    pack_dot1q_ip_udp = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                         {"Dot1Q": {"vid": 5}},
                          {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "p": 17}},
                          {"UDP": {"dport": 23, "sport": 23}},
                          )
 
-    pack_dot1q_ip_tcp = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                         {"Dot1Q": {"vlan": 5}},
+    pack_dot1q_ip_tcp = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                         {"Dot1Q": {"vid": 5}},
                          {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1"}},
                          {"TCP": {}},
                          )
 
-    pack_dot1q_ip_icmp = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                          {"Dot1Q": {"vlan": 5}},
+    pack_dot1q_ip_icmp = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                          {"Dot1Q": {"vid": 5}},
                           {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "p": 1}},
                           {"ICMP": {}}, {"ICMP.Echo": {}},
                           )
 
-    pack_dot1q_arp = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                      {"Dot1Q": {"vlan": 5}},
+    pack_dot1q_arp = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x0806}},
+                      {"Dot1Q": {"vid": 5}},
                       {"ARP": {"sha": "00:00:20:00:10:02", "spa": "1.1.1.1", "tha": "00:00:00:00:00:00", "tpa": "1.1.1.2"}},
                       )
 
-    pack_ip_icmp = ({"Ethernet": {"src": "00:00:20:00:10:01", "dst": "00:00:00:33:33:33", "type": 0x0800}},
+    pack_ip_icmp = ({"Ethernet": {"src": "00:00:20:00:10:01", "dst": "00:00:00:33:33:33"}},
                     {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "p": 1}},
                     {"ICMP": {"type": 6}}, {"ICMP.Echo": {"seq": 0}},
                     )
 
-    pack_ip_udp = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x0800}},
+    pack_ip_udp = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
                    {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "p": 17}},
                    {"UDP": {}},
                    )
 
-    pack_ip_tcp = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x0800}},
+    pack_ip_tcp = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
                    {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1"}},
                    {"TCP": {}},
                    )
@@ -120,14 +121,14 @@ class TestTG(object):
                 {"ARP": {"sha": "00:00:20:00:10:02", "spa": "1.1.1.1", "tha": "00:00:00:00:00:00", "tpa": "1.1.1.2"}},
                 )
 
-    pack_dot1q = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
+    pack_dot1q = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
                   )
 
-    pack_qinq = ({"Ether": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                 {"Dot1Q": {"vlan": 5, "type": 0x8100}},
-                 {"Dot1Q": {"vlan": 15}},
-                 {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1"}},
+    pack_qinq = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                 {"Dot1Q": {"vid": 5}},
+                 {"Dot1Q": {"vid": 15}},
+                 {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "p": 17}},
                  {"UDP": {"dport": 23, "sport": 23}},
                  )
 
@@ -156,7 +157,7 @@ class TestTG(object):
                                     "rootid": 7 * 4096 + 1, "rootmac": "00:00:00:11:11:11",
                                     "pathcost": 0, "bprio": 0, "pprio": 8, "rhops": 20}}, )
 
-    pack_lldp = ({"Ether": {"dst": "01:80:c2:00:00:0e", "src": "00:12:12:13:13:45", "type": 0x88cc}},
+    pack_lldp = ({"Ethernet": {"dst": "01:80:c2:00:00:0e", "src": "00:12:12:13:13:45", "type": 0x88cc}},
                  {"LLDP": {"tlvlist": [{"LLDPChassisId": {"type": 1, "length": 7, "subtype": "MAC address", "macaddr": "00:12:12:13:13:45"}},
                                        {"LLDPPortId": {"type": 2, "length": 4, "subtype": "Interface alias", "value": 'ge0'}},
                                        {"LLDPTTL": {"type": 3, "length": 2, "seconds": 65535}},
@@ -168,11 +169,11 @@ class TestTG(object):
                                                                   'ipaddr': '01.01.01.01', 'ifsubtype': 2, 'ifnumber': 1001, 'oidlen': 0, 'oid': ''}},
                                        {"LLDPDUEnd": {"type": 0, "length": 0}}]}})
 
-    pack_ipv6 = ({"Ether": {"src": '00:00:0a:00:02:08', "dst": "00:01:12:12:34:12"}}, {"IPv6": {"src": '2000::1:2', "dst": '2000::2:2'}})
+    pack_ipv6 = ({"Ethernet": {"src": '00:00:0a:00:02:08', "dst": "00:01:12:12:34:12", "type": 0x86DD}}, {"IP6": {"src": "2000::1:2", "dst": "2000::2:2"}})
 
-    pack_dot1q_ipv6 = ({"Ether": {"dst": "00:00:00:01:02:03", "src": "00:00:00:03:02:01", 'type': 0x8100}},
-                       {"Dot1Q": {"vlan": 2, "prio": 1}},
-                       {"IPv6": {"src": "2001:db8:1:2:60:8ff:fe52:f9d8", "dst": "2001:db8:1:2:60:8ff:fe52:f9d9"}}, {"TCP": {}})
+    pack_dot1q_ipv6 = ({"Ethernet": {"dst": "00:00:00:01:02:03", "src": "00:00:00:03:02:01", 'type': 0x86DD}},
+                       {"Dot1Q": {"vid": 2, "prio": 1}},
+                       {"IP6": {"src": "2001:db8:1:2:60:8ff:fe52:f9d8", "dst": "2001:db8:1:2:60:8ff:fe52:f9d9"}}, {"TCP": {}})
 
     def _check_packets_data(self, deff1, deff2):
         """ Check 2 packet definitions """
@@ -180,11 +181,8 @@ class TestTG(object):
             l_name = list(layer1.keys())[0]
             layer2 = deff2[deff1.index(layer1)]
             if l_name not in list(layer2.keys()):
-                print("l_name ", l_name)
                 return False
             for field1 in list(layer1[l_name].keys()):
-                print("field1 ", field1)
-                print("layer2", layer2[l_name])
                 if field1 not in list(layer2[l_name].keys()):
                     return False
                 if isinstance(layer1[l_name][field1], list):
@@ -203,7 +201,7 @@ class TestTG(object):
         stream_id = tg.set_stream(self.packet_definition, count=packet_count,
                                   iface=iface, adjust_size=True, required_size=1450)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:00:00:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:00:00:00:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -215,7 +213,7 @@ class TestTG(object):
     def test_single_packet(self, tg):
         """ Single packet """
         time_stamp = time.time()
-        stream_id = tg.set_stream(self.packet_definition, count=1, iface=tg.ports[0], adjust_size=True)
+        stream_id = tg.set_stream(self.packet_definition, count=1, iface=tg.ports[0])
         print("Stream set time %2.6fs." % (time.time() - time_stamp))
 
         time_stamp = time.time()
@@ -224,11 +222,10 @@ class TestTG(object):
 
     def test_single_stream(self, tg):
         """ Single stream """
-        stream_id = tg.set_stream(self.packet_definition, count=9, inter=2, iface=tg.ports[0], adjust_size=True)
+        stream_id = tg.set_stream(self.packet_definition, count=5, inter=1, iface=tg.ports[0], adjust_size=True)
         time_stamp = time.time()
         tg.start_streams([stream_id, ])
         print("Time to start stream %2.6fs." % (time.time() - time_stamp))
-        time.sleep(6)
         tg.stop_streams([stream_id, ])
 
     def test_multistreams_and_multifaces(self, tg):
@@ -241,7 +238,6 @@ class TestTG(object):
         time_stamp = time.time()
         tg.start_streams(stream_list)
         print("Time to start stream %2.6fs." % (time.time() - time_stamp))
-        time.sleep(6)
         tg.stop_streams(stream_list)
 
     def test_multistreams_on_single_iface(self, tg):
@@ -254,7 +250,6 @@ class TestTG(object):
         time_stamp = time.time()
         tg.start_streams(stream_list)
         print("Time to start stream %2.6fs." % (time.time() - time_stamp))
-        time.sleep(6)
         tg.stop_streams(stream_list)
 
     def test_multistreams_and_one(self, tg):
@@ -265,7 +260,6 @@ class TestTG(object):
             stream_list.append(stream_id)
 
         tg.start_streams(stream_list)
-        time.sleep(6)
         tg.stop_streams(stream_list)
 
         stream_id = tg.set_stream(self.packet_defs[2], count=2, inter=1, iface=tg.ports[0], adjust_size=True)
@@ -278,7 +272,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.packet_definition, count=packet_count, iface=iface, adjust_size=True, required_size=200, inter=0.005)
 
-        tg.start_sniff([iface, ], sniffing_time=25, filter_layer="IP", src_filter="00:00:00:00:00:02")
+        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:00:00:00:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -292,7 +286,7 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.packet_defs[0], count=10, iface=iface)
         stream_id_2 = tg.set_stream(self.packet_defs[1], count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", dst_filter="ff:ff:ff:ff:ff:ff")
+        tg.start_sniff([iface, ], sniffing_time=3, filter_layer="IP", dst_filter="ff:ff:ff:ff:ff:ff")
 
         tg.send_stream(stream_id_1)
         tg.send_stream(stream_id_2)
@@ -310,7 +304,7 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.packet_defs[0], iface=iface)
         stream_id_2 = tg.set_stream(self.packet_defs[1], iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=15, filter_layer="IP", dst_filter="ff:ff:ff:ff:ff:ff")
+        tg.start_sniff([iface, ], sniffing_time=3, filter_layer="IP", dst_filter="ff:ff:ff:ff:ff:ff")
         tg.start_streams([stream_id_1, ])
         tg.start_streams([stream_id_2, ])
         tg.stop_streams([stream_id_1, ])
@@ -324,7 +318,7 @@ class TestTG(object):
             if tg.get_packet_field(packet, "Ethernet", "src") == self.packet_defs[1][0]['Ethernet']['src']:
                 count += 1
 
-        assert 1 <= count <= 2
+        assert count == 1
 
     def test_streams_corruption_1(self, tg):
         """ Verify that set_stream does not corrupt already started streams. """
@@ -332,12 +326,10 @@ class TestTG(object):
 
         stream_id_1 = tg.set_stream(self.packet_defs[0], count=10, inter=0.1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=15, filter_layer="IP", dst_filter="ff:ff:ff:ff:ff:ff")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", dst_filter="ff:ff:ff:ff:ff:ff")
 
         tg.start_streams([stream_id_1, ])
         tg.set_stream(self.packet_defs[1], count=1, iface=iface)
-        time.sleep(4)
-        tg.stop_streams([stream_id_1, ])
 
         data = tg.stop_sniff([iface, ])
 
@@ -357,11 +349,11 @@ class TestTG(object):
 
         stream_id_1 = tg.set_stream(self.packet_defs[0], count=10, inter=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=15, dst_filter="ff:ff:ff:ff:ff:ff")
+        tg.start_sniff([iface, ], sniffing_time=10, dst_filter="ff:ff:ff:ff:ff:ff")
         tg.start_streams([stream_id_1, ])
         stream_id_2 = tg.set_stream(self.packet_defs[1], count=1, iface=iface)
         tg.start_streams([stream_id_2, ])
-        time.sleep(1)
+
         data = tg.stop_sniff([iface, ])
 
         tg.stop_streams([stream_id_1, stream_id_2, ])
@@ -384,7 +376,7 @@ class TestTG(object):
         stream_id_2 = tg.set_stream(self.packet_defs[1], count=10, inter=1, iface=iface)
 
         tg.start_streams([stream_id_1, stream_id_2, ])
-        time.sleep(3)
+
         tg.stop_streams([stream_id_1, stream_id_2, ])
 
         tg.start_sniff([iface, ], sniffing_time=5, dst_filter="ff:ff:ff:ff:ff:ff")
@@ -400,7 +392,7 @@ class TestTG(object):
         stream_id_2 = tg.set_stream(self.pack_arp, count=1, iface=iface)
         stream_id_3 = tg.set_stream(self.pack_dot1q_arp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ARP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ARP")
         tg.start_streams([stream_id_1, stream_id_2, stream_id_3, ])
         tg.stop_streams([stream_id_1, stream_id_2, stream_id_3, ])
         data = tg.stop_sniff([iface, ])
@@ -414,14 +406,13 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_arp, count=5, inter=0.02, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, packets_count=1, filter_layer="ARP")
+        tg.start_sniff([iface, ], sniffing_time=3, packets_count=1, filter_layer="ARP")
         tg.start_streams([stream_id, ])
         tg.stop_streams([stream_id, ])
         data = tg.stop_sniff([iface, ])
 
         assert len(data[iface]) == 0
 
-    @pytest.mark.skip("Pypacker does not support QinQ")
     def test_qinq_packets_sniffer(self, tg):
         """ Check QinQ packet send """
         iface = tg.ports[0]
@@ -444,7 +435,7 @@ class TestTG(object):
 
         tg.clear_statistics([iface, ])
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:00:00:00:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:00:00:00:02")
         tg.send_stream(stream_id_1)
         tg.stop_sniff([iface, ])
 
@@ -460,7 +451,7 @@ class TestTG(object):
 
         packet1 = ({"Ethernet": {'src': "00:00:00:00:00:04", 'dst': "00:00:00:00:00:02"}}, {"IP": {}})
         packet2 = ({"Ethernet": {'src': "00:00:00:00:00:05", 'dst': "00:00:00:00:00:02"}}, {"IP": {}})
-        packet3 = ({"Ethernet": {'src': "00:00:00:00:00:06", 'dst': "00:00:00:00:00:02"}}, {"IP": {}})
+        packet3 = ({"Ethernet": {'src': "00:00:00:00:00:06", 'dst': "00:00:00:00:00:02"}},)
         packet4 = ({"Ethernet": {'src': "00:00:00:00:00:07", 'dst': "00:00:00:00:00:02"}}, {"IP": {}})
         packet5 = ({"Ethernet": {'src': "00:00:00:00:00:08", 'dst': "00:00:00:00:00:02"}}, {"IP": {}})
         packet6 = ({"Ethernet": {'src': "00:00:00:00:00:09", 'dst': "00:00:00:00:00:02"}}, {"IP": {}})
@@ -480,7 +471,7 @@ class TestTG(object):
 
         tg.clear_statistics([iface, ])
 
-        tg.start_sniff([iface, ], sniffing_time=10, dst_filter="00:00:00:00:00:02")
+        tg.start_sniff([iface, ], sniffing_time=5, dst_filter="00:00:00:00:00:02")
         tg.start_streams([stream1, ])
         tg.stop_sniff([iface, ])
         tg.stop_streams([stream1, ])
@@ -493,7 +484,7 @@ class TestTG(object):
 
         tg.clear_statistics([iface, ])
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:00:00:00:05")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:00:00:05")
         tg.start_streams([stream2, ])
         tg.stop_sniff([iface, ])
         tg.stop_streams([stream2, ])
@@ -506,7 +497,7 @@ class TestTG(object):
 
         tg.clear_statistics([iface, ])
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="notIP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="notIP")
         tg.start_streams([stream3, ])
         tg.stop_sniff([iface, ])
         tg.stop_streams([stream3, ])
@@ -522,15 +513,11 @@ class TestTG(object):
         tg.start_sniff([iface, ], sniffing_time=5)
         tg.start_streams([stream4, ])
 
-        time.sleep(1)
-
         middle_receive_statistics = tg.get_received_frames_count(iface)
         middle_sent_statistics = tg.get_sent_frames_count(iface)
 
         assert middle_receive_statistics > 0
         assert middle_sent_statistics > 0
-
-        time.sleep(1)
 
         tg.stop_sniff([iface, ])
         tg.stop_streams([stream4, ])
@@ -546,15 +533,11 @@ class TestTG(object):
         tg.start_sniff([iface, ], sniffing_time=5)
         tg.start_streams([stream5, ])
 
-        time.sleep(1)
-
         middle_receive_statistics = tg.get_received_frames_count(iface)
         middle_sent_statistics = tg.get_sent_frames_count(iface)
 
         assert middle_receive_statistics > 0
         assert middle_sent_statistics > 0
-
-        time.sleep(1)
 
         tg.stop_sniff([iface, ])
         tg.stop_streams([stream5, ])
@@ -567,7 +550,7 @@ class TestTG(object):
 
         tg.clear_statistics([iface, ])
 
-        tg.start_sniff([iface, ], sniffing_time=10, dst_filter="00:00:00:00:00:02")
+        tg.start_sniff([iface, ], sniffing_time=5, dst_filter="00:00:00:00:00:02")
         tg.start_streams([stream6, ])
         tg.stop_sniff([iface, ])
         tg.stop_streams([stream6, ])
@@ -580,7 +563,7 @@ class TestTG(object):
 
         tg.clear_statistics([iface, ])
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:00:00:00:0a")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:00:00:0a")
         tg.start_streams([stream7, ])
         tg.stop_sniff([iface, ])
         tg.stop_streams([stream7, ])
@@ -596,15 +579,11 @@ class TestTG(object):
         tg.start_sniff([iface, ], sniffing_time=5)
         tg.start_streams([stream8, ])
 
-        time.sleep(1)
-
         middle_receive_statistics = tg.get_received_frames_count(iface)
         middle_sent_statistics = tg.get_sent_frames_count(iface)
 
         assert middle_receive_statistics > 0
         assert middle_sent_statistics > 0
-
-        time.sleep(1)
 
         tg.stop_sniff([iface, ])
         tg.stop_streams([stream8, ])
@@ -628,8 +607,6 @@ class TestTG(object):
         assert middle_receive_statistics > 0
         assert middle_sent_statistics > 0
 
-        time.sleep(1)
-
         tg.stop_sniff([iface, ])
         tg.stop_streams([stream9, ])
 
@@ -639,14 +616,13 @@ class TestTG(object):
         assert end_receive_statistics > middle_receive_statistics
         assert end_sent_statistics > middle_sent_statistics
 
-    @pytest.mark.skip("Fragmentation is not integrated yet")
     def test_packet_fragmentation(self, tg):
         """ Check packet fragmentation """
         ix_iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ip_icmp, count=1, iface=ix_iface, required_size=200, fragsize=110)
 
-        tg.start_sniff([ix_iface, ], sniffing_time=10, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
+        tg.start_sniff([ix_iface, ], sniffing_time=5, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([ix_iface, ])
 
@@ -660,7 +636,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_icmp, count=5, sa_increment=(1, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ICMP", dst_filter="00:00:00:33:33:33")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", dst_filter="00:00:00:33:33:33")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -696,7 +672,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_icmp, count=5, da_increment=(1, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -726,7 +702,6 @@ class TestTG(object):
             dst_mac_set.add(tg.get_packet_field(packet, "Ethernet", "dst"))
         assert len(dst_mac_set) == 5
 
-    @pytest.mark.skip("Fragmentation is not integrated yet")
     def test_sa_incrementation_and_packet_fragmentation(self, tg):
         """ Check SA incrementation + packet fragmentation. Count == Increment count """
         iface = tg.ports[0]
@@ -735,7 +710,7 @@ class TestTG(object):
                                   count=5, sa_increment=(1, 5),
                                   required_size=200, fragsize=110)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ICMP", dst_filter="00:00:00:33:33:33")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", dst_filter="00:00:00:33:33:33")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -755,7 +730,7 @@ class TestTG(object):
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ip_icmp, iface=iface,
-                                  count=1, required_size=('Random', 48, 2000))
+                                  count=1, required_size=("Random", 100, 1500))
 
         tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
         tg.send_stream(stream_id)
@@ -766,19 +741,19 @@ class TestTG(object):
         # Verify that sniffed count == 1
         assert len(data[iface]) == 1
 
-        # Verify that length of packet is random value between 48 and 2000 bytes
+        # Verify that length of packet is random value between 100 and 1500 bytes
         packet_length = len(data[iface][0])
-        assert packet_length <= 2000
-        assert packet_length >= 48
+        assert packet_length <= 1500
+        assert packet_length >= 100
 
     def test_packet_random_size_2(self, tg):
         """ Check packet random size setting. Count=5 """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ip_icmp, iface=iface,
-                                  count=5, required_size=('Random', 1530, 14000))
+                                  count=5, required_size=("Random", 1000, 1500))
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -791,18 +766,18 @@ class TestTG(object):
         size_set = set()
         for packet in data[iface]:
             size_set.add(len(packet))
-        assert 1 <= len(size_set) <= 5
+        assert len(size_set) == 5
 
-        # Verify that length of packet is random value between 64 and 14000 bytes
+        # Verify that length of packet is random value between 1000 and 1500 bytes
         for _size in size_set:
-            assert _size <= 14000
-            assert _size >= 1530
+            assert _size <= 1500
+            assert _size >= 1000
 
     def test_packet_size_incrementing_1(self, tg):
         """ Check packet size incrementing. Count=1, increment count=5 """
         iface = tg.ports[0]
 
-        stream_id = tg.set_stream(self.pack_ip_icmp, iface=iface, count=1, required_size=('Increment', 2, 70, 78))
+        stream_id = tg.set_stream(self.pack_ip_icmp, iface=iface, count=1, required_size=("Increment", 2, 70, 78))
 
         tg.start_sniff([iface, ], sniffing_time=3, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
         tg.send_stream(stream_id)
@@ -827,9 +802,9 @@ class TestTG(object):
         """ Check packet size incrementing. Count=5, increment count=5 """
         iface = tg.ports[0]
 
-        stream_id = tg.set_stream(self.pack_ip_icmp, iface=iface, count=5, required_size=('Increment', 2, 70, 78))
+        stream_id = tg.set_stream(self.pack_ip_icmp, iface=iface, count=5, required_size=("Increment", 2, 70, 78))
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -852,9 +827,9 @@ class TestTG(object):
         """ Check packet size decrementing. Count=9, decrement count=9 """
         iface = tg.ports[0]
 
-        stream_id = tg.set_stream(self.pack_ip_icmp, iface=iface, count=9, required_size=('Increment', -1, 70, 78))
+        stream_id = tg.set_stream(self.pack_ip_icmp, iface=iface, count=9, required_size=("Increment", -1, 70, 78))
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -879,7 +854,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_icmp, count=5, sip_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -900,7 +875,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_icmp, count=10, sip_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -921,7 +896,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_icmp, count=5, sip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.ICMP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.ICMP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -942,7 +917,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_icmp, count=10, sip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.ICMP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.ICMP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -963,7 +938,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_icmp, count=5, dip_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -984,7 +959,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_icmp, count=10, dip_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1005,7 +980,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_icmp, count=5, dip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.ICMP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.ICMP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1026,7 +1001,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_icmp, count=10, dip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.ICMP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.ICMP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1049,7 +1024,7 @@ class TestTG(object):
 
         stream_id_1 = tg.set_stream(self.packet_definition, count=100, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:00:00:00:02")
+        tg.start_sniff([iface, ], sniffing_time=7, filter_layer="IP", src_filter="00:00:00:00:00:02")
         tg.start_streams([stream_id_1, ])
         tg.stop_sniff([iface, ])
         tg.stop_streams([stream_id_1, ])
@@ -1074,7 +1049,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_arp, count=5, arp_sa_increment=(3, 5), arp_sip_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ARP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ARP")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1101,7 +1076,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_arp, count=5, arp_sa_increment=(3, 5), arp_sip_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.ARP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.ARP")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1128,7 +1103,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_arp, count=10, arp_sa_increment=(3, 5), arp_sip_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="ARP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ARP")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1155,7 +1130,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_tcp, count=5, vlan_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1167,7 +1142,7 @@ class TestTG(object):
         # Verify that all packets with different vlan.
         vlan_set = set()
         for packet in data[iface]:
-            vlan_set.add(tg.get_packet_field(packet, "Ethernet", "vlan"))
+            vlan_set.add(tg.get_packet_field(packet, "S-Dot1Q", "vid"))
         assert len(vlan_set) == 5
 
     def test_vlan_incrementation_increment_count_2(self, tg):
@@ -1176,7 +1151,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_tcp, count=10, vlan_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1188,7 +1163,7 @@ class TestTG(object):
         # Verify that all packets with different vlan.
         vlan_set = set()
         for packet in data[iface]:
-            vlan_set.add(tg.get_packet_field(packet, "Ethernet", "vlan"))
+            vlan_set.add(tg.get_packet_field(packet, "S-Dot1Q", "vid"))
         assert len(vlan_set) == 5
 
     def test_da_incrementation_continuous_traffic(self, tg):
@@ -1199,7 +1174,7 @@ class TestTG(object):
 
         tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter="00:00:20:00:10:01")
         tg.start_streams([stream_id, ])
-        time.sleep(5)
+
         tg.stop_streams([stream_id, ])
         data = tg.stop_sniff([iface, ])
 
@@ -1217,10 +1192,8 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=10, inter=0.5, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, packets_count=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=7, packets_count=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
         tg.start_streams([stream_id, ])
-        time.sleep(5)
-        tg.stop_streams([stream_id, ])
         data = tg.stop_sniff([iface, ])
 
         # Verify that all packets with 10 different timestamps
@@ -1235,9 +1208,9 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=10, sa_increment=(1, 2), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:20:00:10:02")
         tg.start_streams([stream_id, ])
-        time.sleep(5)
+
         tg.stop_streams([stream_id, ])
         data = tg.stop_sniff([iface, ])
 
@@ -1254,9 +1227,9 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=10, da_increment=(1, 2), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", dst_filter="00:00:00:33:33:33")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", dst_filter="00:00:00:33:33:33")
         tg.start_streams([stream_id, ])
-        time.sleep(5)
+
         tg.stop_streams([stream_id, ])
         data = tg.stop_sniff([iface, ])
 
@@ -1273,9 +1246,9 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=10, sa_increment=(1, 2), da_increment=(1, 2), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:20:00:10:02", dst_filter="00:00:00:33:33:33")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:20:00:10:02", dst_filter="00:00:00:33:33:33")
         tg.start_streams([stream_id, ])
-        time.sleep(5)
+
         tg.stop_streams([stream_id, ])
         data = tg.stop_sniff([iface, ])
 
@@ -1295,9 +1268,9 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=10, sa_increment=(1, 2), da_increment=(1, 2), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, packets_count=10, filter_layer="ARP", src_filter="00:00:20:00:10:02", dst_filter="00:00:00:33:33:33")
+        tg.start_sniff([iface, ], sniffing_time=7, packets_count=10, filter_layer="ARP", src_filter="00:00:20:00:10:02", dst_filter="00:00:00:33:33:33")
         tg.start_streams([stream_id, ])
-        time.sleep(5)
+
         tg.stop_streams([stream_id, ])
         data = tg.stop_sniff([iface, ])
 
@@ -1314,7 +1287,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_lldp, count=5, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, dst_filter="01:80:c2:00:00:0e")
+        tg.start_sniff([iface, ], sniffing_time=5, dst_filter="01:80:c2:00:00:0e")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1340,7 +1313,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_lldp, count=10, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, dst_filter="01:80:c2:00:00:0e")
+        tg.start_sniff([iface, ], sniffing_time=5, dst_filter="01:80:c2:00:00:0e")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1421,7 +1394,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=5, sudp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="UDP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="UDP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1442,7 +1415,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_tcp, count=5, stcp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="TCP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="TCP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1463,7 +1436,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=10, sudp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="UDP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="UDP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1484,7 +1457,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_tcp, count=10, stcp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="TCP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="TCP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1505,7 +1478,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_udp, count=5, sudp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1526,7 +1499,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_tcp, count=5, stcp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1547,7 +1520,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=5, dudp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="UDP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="UDP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1568,7 +1541,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=10, dudp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="UDP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="UDP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1589,7 +1562,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_udp, count=5, dudp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1610,7 +1583,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=5, sudp_increment=(3, 5), dudp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="UDP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="UDP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1634,7 +1607,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_tcp, count=5, stcp_increment=(3, 5), dtcp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="TCP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="TCP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1658,7 +1631,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=10, sudp_increment=(3, 5), dudp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="UDP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="UDP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1682,7 +1655,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_tcp, count=10, stcp_increment=(3, 5), dtcp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="TCP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="TCP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1706,7 +1679,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_udp, count=5, sudp_increment=(3, 5), dudp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1730,7 +1703,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_tcp, count=5, stcp_increment=(3, 5), dtcp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1748,14 +1721,13 @@ class TestTG(object):
         assert len(src_tcp_set) == 5
         assert len(dst_tcp_set) == 5
 
-    @pytest.mark.skip("IP protocol increment is not integrated yet")
     def test_ip_protocol_incrementation_dot1q_disabled(self, tg):
         """ Check ip protocol incrementation. Count == Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=5, protocol_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1767,17 +1739,16 @@ class TestTG(object):
         # Verify that all packets with different ip proto
         proto_ip_set = set()
         for packet in data[iface]:
-            proto_ip_set.add(tg.get_packet_field(packet, "IP", "proto"))
+            proto_ip_set.add(tg.get_packet_field(packet, "IP", "p"))
         assert len(proto_ip_set) == 5
 
-    @pytest.mark.skip("IP protocol increment is not integrated yet")
     def test_ip_protocol_incrementation_dot1q_disabled_2(self, tg):
         """ Check ip protocol incrementation. Count = 2*Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=10, protocol_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1789,17 +1760,16 @@ class TestTG(object):
         # Verify that all packets with different ip proto.
         proto_ip_set = set()
         for packet in data[iface]:
-            proto_ip_set.add(tg.get_packet_field(packet, "IP", "proto"))
+            proto_ip_set.add(tg.get_packet_field(packet, "IP", "p"))
         assert len(proto_ip_set) == 5
 
-    @pytest.mark.skip("IP protocol increment is not integrated yet")
     def test_ip_protocol_incrementation_dot1q_enabled(self, tg):
         """ Check destination_udp incrementation. Count == Increment count. Dot1Q enabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_udp, count=5, protocol_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1811,17 +1781,16 @@ class TestTG(object):
         # Verify that all packets with different ip proto.
         proto_ip_set = set()
         for packet in data[iface]:
-            proto_ip_set.add(tg.get_packet_field(packet, "IP", "proto"))
+            proto_ip_set.add(tg.get_packet_field(packet, "IP", "p"))
         assert len(proto_ip_set) == 5
 
-    @pytest.mark.skip("IP protocol increment is not integrated yet")
     def test_ip_protocol_and_sip_increment_dot1q_disabled(self, tg):
         """ Check ip protocol and sip_increment incrementation. Count = 2*Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=10, sip_increment=(3, 5), protocol_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1834,19 +1803,18 @@ class TestTG(object):
         proto_ip_set = set()
         src_ip_set = set()
         for packet in data[iface]:
-            proto_ip_set.add(tg.get_packet_field(packet, "IP", "proto"))
+            proto_ip_set.add(tg.get_packet_field(packet, "IP", "p"))
             src_ip_set.add(tg.get_packet_field(packet, "IP", "src"))
         assert len(proto_ip_set) == 5
         assert len(src_ip_set) == 5
 
-    @pytest.mark.skip("IP protocol increment is not integrated yet")
     def test_ip_protocol_and_sip_increment_dot1q_enabled(self, tg):
         """ Check ip protocol and sip_increment incrementation. Count == Increment count. Dot1Q enabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_udp, count=5, sip_increment=(3, 5), protocol_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1859,7 +1827,7 @@ class TestTG(object):
         proto_ip_set = set()
         src_ip_set = set()
         for packet in data[iface]:
-            proto_ip_set.add(tg.get_packet_field(packet, "IP", "proto"))
+            proto_ip_set.add(tg.get_packet_field(packet, "IP", "p"))
             src_ip_set.add(tg.get_packet_field(packet, "IP", "src"))
         assert len(proto_ip_set) == 5
         assert len(src_ip_set) == 5
@@ -1870,7 +1838,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=5, eth_type_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1891,7 +1859,7 @@ class TestTG(object):
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=10, eth_type_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1906,14 +1874,13 @@ class TestTG(object):
             eth_type_set.add(tg.get_packet_field(packet, "Ethernet", "type"))
         assert len(eth_type_set) == 5
 
-    @pytest.mark.skip("IP DSCP increment is not integrated yet")
     def test_dscp_incrementation_dot1q_disabled_1(self, tg):
         """ Check dscp incrementation. Count == Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=5, dscp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1928,14 +1895,13 @@ class TestTG(object):
             dscp_set.add(tg.get_packet_field(packet, "IP", "tos"))
         assert len(dscp_set) == 5
 
-    @pytest.mark.skip("IP DSCP increment is not integrated yet")
     def test_dscp_incrementation_dot1q_disabled_2(self, tg):
         """ Check dscp incrementation. Count = 2*Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=10, dscp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1950,14 +1916,13 @@ class TestTG(object):
             dscp_set.add(tg.get_packet_field(packet, "IP", "tos"))
         assert len(dscp_set) == 5
 
-    @pytest.mark.skip("IP DSCP increment is not integrated yet")
     def test_ip_dscp_incrementation_dot1q_enabled(self, tg):
         """ Check ip dscp incrementation. Count == Increment count. Dot1Q enabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_dot1q_ip_udp, count=5, dscp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1972,14 +1937,13 @@ class TestTG(object):
             dscp_set.add(tg.get_packet_field(packet, "IP", "tos"))
         assert len(dscp_set) == 5
 
-    @pytest.mark.skip("IP DSCP increment is not integrated yet")
     def test_ip_dscp_and_sip_increment_dot1q_disabled_1(self, tg):
         """ Check ip dscp and sip_increment incrementation. Count == Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ip_udp, count=5, sip_increment=(3, 5), dscp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -1997,7 +1961,6 @@ class TestTG(object):
         assert len(dscp_ip_set) == 5
         assert len(src_ip_set) == 5
 
-    @pytest.mark.skip("IP DSCP increment is not integrated yet")
     def test_ip_dscp_and_sip_increment_dot1q_disabled_2(self, tg):
         """ Check ip dscp and sip_increment incrementation. Count == Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
@@ -2005,7 +1968,7 @@ class TestTG(object):
         stream_id = tg.set_stream(self.pack_ip_udp, count=5, sip_increment=(3, 15), dip_increment=(3, 10), dscp_increment=(3, 5),
                                   protocol_increment=(3, 30), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2023,13 +1986,12 @@ class TestTG(object):
             dscp_ip_set.add(tg.get_packet_field(packet, "IP", "tos"))
             src_ip_set.add(tg.get_packet_field(packet, "IP", "src"))
             dst_ip_set.add(tg.get_packet_field(packet, "IP", "dst"))
-            proto_ip_set.add(tg.get_packet_field(packet, "IP", "proto"))
+            proto_ip_set.add(tg.get_packet_field(packet, "IP", "p"))
         assert len(dscp_ip_set) == 5
         assert len(src_ip_set) == 5
         assert len(dst_ip_set) == 5
         assert len(proto_ip_set) == 5
 
-    @pytest.mark.skip("IP DSCP increment is not integrated yet")
     def test_ip_dip_and_sip_increment_udf_dependant(self, tg):
         """ Check ip dip and sip_increment incrementation. Dip increment dependant from sip increment. """
 
@@ -2038,7 +2000,7 @@ class TestTG(object):
         stream_id = tg.set_stream(self.pack_ip_udp, count=18, sip_increment=(3, 3), dip_increment=(3, 3), dscp_increment=(3, 3), iface=iface,
                                   udf_dependancies={'sip_increment': 'dip_increment'})
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2063,7 +2025,6 @@ class TestTG(object):
         assert len(dst_ip_set) == 3
         assert len(_packets) == 9
 
-    @pytest.mark.skip("IP DSCP increment is not integrated yet")
     def test_ip_dscp_dip_sip_increment_udf_dependant(self, tg):
         """ Check ip dscp, dip and sip_increment incrementation. Dependant increments. """
         iface = tg.ports[0]
@@ -2071,7 +2032,7 @@ class TestTG(object):
         stream_id = tg.set_stream(self.pack_ip_udp, count=54, sip_increment=(3, 3), dip_increment=(3, 3), dscp_increment=(3, 3), iface=iface,
                                   udf_dependancies={'dip_increment': 'sip_increment', 'dscp_increment': 'dip_increment'})
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2096,7 +2057,6 @@ class TestTG(object):
         assert len(dst_ip_set) == 3
         assert len(_packets) == 27
 
-    @pytest.mark.skip("IP DSCP increment is not integrated yet")
     def test_ip_dscp_dip_sip_increment_udf_one_dependant(self, tg):
         """ Check ip dscp, dip and sip_increment incrementation. Dependant increments form sip. """
         iface = tg.ports[0]
@@ -2104,7 +2064,7 @@ class TestTG(object):
         stream_id = tg.set_stream(self.pack_ip_udp, count=54, sip_increment=(3, 3), dip_increment=(3, 3), dscp_increment=(3, 3), iface=iface,
                                   udf_dependancies={'dip_increment': 'sip_increment', 'dscp_increment': 'sip_increment'})
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2129,14 +2089,13 @@ class TestTG(object):
         assert len(dst_ip_set) == 3
         assert len(_packets) == 9
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_src_ipv6_incrementation_dot1q_disabled_1(self, tg):
         """ Check SRC IPv6 incrementation. Count == Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ipv6, count=5, sipv6_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2148,17 +2107,16 @@ class TestTG(object):
         # Verify that all packets with different IPv6 SRC address
         sipv6_set = set()
         for packet in data[iface]:
-            sipv6_set.add(tg.get_packet_field(packet, "IPv6", "src"))
+            sipv6_set.add(tg.get_packet_field(packet, "IP6", "src"))
         assert len(sipv6_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_src_ipv6_incrementation_dot1q_disabled_2(self, tg):
         """ Check SRC IPv6 incrementation. Count = 2*Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ipv6, count=10, sipv6_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2170,17 +2128,16 @@ class TestTG(object):
         # Verify that all packets with different IPv6 SRC address
         sipv6_set = set()
         for packet in data[iface]:
-            sipv6_set.add(tg.get_packet_field(packet, "IPv6", "src"))
+            sipv6_set.add(tg.get_packet_field(packet, "IP6", "src"))
         assert len(sipv6_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_src_ipv6_incrementation_dot1q_enabled_1(self, tg):
         """ Check SRC IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_dot1q_ipv6, count=5, sipv6_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2192,17 +2149,16 @@ class TestTG(object):
         # Verify that all packets with different IPv6 SRC address
         sipv6_set = set()
         for packet in data[iface]:
-            sipv6_set.add(tg.get_packet_field(packet, "IPv6", "src"))
+            sipv6_set.add(tg.get_packet_field(packet, "IP6", "src"))
         assert len(sipv6_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_src_ipv6_incrementation_dot1q_enabled_2(self, tg):
         """ Check SRC IPv6 incrementation. Count > Increment count. Dot1Q enabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_dot1q_ipv6, count=10, sipv6_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2214,17 +2170,16 @@ class TestTG(object):
         # Verify that all packets with different IPv6 SRC address
         sipv6_set = set()
         for packet in data[iface]:
-            sipv6_set.add(tg.get_packet_field(packet, "IPv6", "src"))
+            sipv6_set.add(tg.get_packet_field(packet, "IP6", "src"))
         assert len(sipv6_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_src_and_dst_ipv6_incrementation_dot1q_disabled(self, tg):
         """ Check SRC and DST IPv6 incrementation. Count == Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ipv6, count=5, sipv6_increment=(3, 5), dipv6_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2237,19 +2192,18 @@ class TestTG(object):
         sipv6_set = set()
         dipv6_set = set()
         for packet in data[iface]:
-            sipv6_set.add(tg.get_packet_field(packet, "IPv6", "src"))
-            dipv6_set.add(tg.get_packet_field(packet, "IPv6", "dst"))
+            sipv6_set.add(tg.get_packet_field(packet, "IP6", "src"))
+            dipv6_set.add(tg.get_packet_field(packet, "IP6", "dst"))
         assert len(sipv6_set) == 5
         assert len(dipv6_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_src_and_dst_ipv6_incrementation_dot1q_enabled(self, tg):
         """ Check SRC and DST IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_dot1q_ipv6, count=5, sipv6_increment=(3, 5), dipv6_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2262,19 +2216,18 @@ class TestTG(object):
         sipv6_set = set()
         dipv6_set = set()
         for packet in data[iface]:
-            sipv6_set.add(tg.get_packet_field(packet, "IPv6", "src"))
-            dipv6_set.add(tg.get_packet_field(packet, "IPv6", "dst"))
+            sipv6_set.add(tg.get_packet_field(packet, "IP6", "src"))
+            dipv6_set.add(tg.get_packet_field(packet, "IP6", "dst"))
         assert len(sipv6_set) == 5
         assert len(dipv6_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_dst_ipv6_incrementation_dot1q_disabled_1(self, tg):
         """ Check DST IPv6 incrementation. Count == Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ipv6, count=5, dipv6_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2286,17 +2239,16 @@ class TestTG(object):
         # Verify that all packets with different IPv6 DST address
         dipv6_set = set()
         for packet in data[iface]:
-            dipv6_set.add(tg.get_packet_field(packet, "IPv6", "dst"))
+            dipv6_set.add(tg.get_packet_field(packet, "IP6", "dst"))
         assert len(dipv6_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_dst_ipv6_incrementation_dot1q_disabled_2(self, tg):
         """ Check DST IPv6 incrementation. Count = 2*Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ipv6, count=10, dipv6_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2308,17 +2260,16 @@ class TestTG(object):
         # Verify that all packets with different IPv6 DST address
         dipv6_set = set()
         for packet in data[iface]:
-            dipv6_set.add(tg.get_packet_field(packet, "IPv6", "dst"))
+            dipv6_set.add(tg.get_packet_field(packet, "IP6", "dst"))
         assert len(dipv6_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_dst_ipv6_incrementation_dot1q_enabled_1(self, tg):
         """ Check DST IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_dot1q_ipv6, count=5, dipv6_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2330,17 +2281,16 @@ class TestTG(object):
         # Verify that all packets with different IPv6 DST address
         dipv6_set = set()
         for packet in data[iface]:
-            dipv6_set.add(tg.get_packet_field(packet, "IPv6", "dst"))
+            dipv6_set.add(tg.get_packet_field(packet, "IP6", "dst"))
         assert len(dipv6_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_dst_ipv6_incrementation_dot1q_enabled_2(self, tg):
         """ Check DST IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_dot1q_ipv6, count=10, dipv6_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2352,17 +2302,16 @@ class TestTG(object):
         # Verify that all packets with different IPv6 DST address
         dipv6_set = set()
         for packet in data[iface]:
-            dipv6_set.add(tg.get_packet_field(packet, "IPv6", "dst"))
+            dipv6_set.add(tg.get_packet_field(packet, "IP6", "dst"))
         assert len(dipv6_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_flow_label_ipv6_incrementation_dot1q_disabled_1(self, tg):
         """ Check Flow Label IPv6 incrementation. Count == Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ipv6, count=5, fl_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2374,17 +2323,16 @@ class TestTG(object):
         # Verify that all packets with different IPv6 Flow Label
         fl_set = set()
         for packet in data[iface]:
-            fl_set.add(tg.get_packet_field(packet, "IPv6", "fl"))
+            fl_set.add(tg.get_packet_field(packet, "IP6", "flow"))
         assert len(fl_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_flow_label_ipv6_incrementation_dot1q_disabled_2(self, tg):
         """ Check Flow Label incrementation. Count = 2*Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ipv6, count=10, fl_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2396,17 +2344,16 @@ class TestTG(object):
         # Verify that all packets with different IPv6 Flow Label
         fl_set = set()
         for packet in data[iface]:
-            fl_set.add(tg.get_packet_field(packet, "IPv6", "fl"))
+            fl_set.add(tg.get_packet_field(packet, "IP6", "flow"))
         assert len(fl_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_flow_label_ipv6_incrementation_dot1q_enabled(self, tg):
         """ Check Flow Label IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_dot1q_ipv6, count=5, fl_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2418,17 +2365,16 @@ class TestTG(object):
         # Verify that all packets with different IPv6 Flow Label
         fl_set = set()
         for packet in data[iface]:
-            fl_set.add(tg.get_packet_field(packet, "IPv6", "fl"))
+            fl_set.add(tg.get_packet_field(packet, "IP6", "flow"))
         assert len(fl_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_flow_label_src_ipv6_incrementation(self, tg):
         """ Check Flow Label with SRC IPv6 incrementation. Count = 2*Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ipv6, count=10, fl_increment=(3, 5), sipv6_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2441,19 +2387,18 @@ class TestTG(object):
         fl_set = set()
         sipv6_set = set()
         for packet in data[iface]:
-            fl_set.add(tg.get_packet_field(packet, "IPv6", "fl"))
-            sipv6_set.add(tg.get_packet_field(packet, "IPv6", "src"))
+            fl_set.add(tg.get_packet_field(packet, "IP6", "flow"))
+            sipv6_set.add(tg.get_packet_field(packet, "IP6", "src"))
         assert len(fl_set) == 5
         assert len(sipv6_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_flow_label_dst_ipv6_incrementation(self, tg):
         """ Check Flow Label and DST IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_dot1q_ipv6, count=5, fl_increment=(3, 5), dipv6_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2466,19 +2411,18 @@ class TestTG(object):
         fl_set = set()
         dipv6_set = set()
         for packet in data[iface]:
-            fl_set.add(tg.get_packet_field(packet, "IPv6", "fl"))
-            dipv6_set.add(tg.get_packet_field(packet, "IPv6", "dst"))
+            fl_set.add(tg.get_packet_field(packet, "IP6", "flow"))
+            dipv6_set.add(tg.get_packet_field(packet, "IP6", "dst"))
         assert len(fl_set) == 5
         assert len(dipv6_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_next_header_ipv6_incrementation_dot1q_disabled(self, tg):
         """ Check next header incrementation. Count == Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ipv6, count=5, nh_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2490,17 +2434,16 @@ class TestTG(object):
         # Verify that all packets with different next header
         nh_set = set()
         for packet in data[iface]:
-            nh_set.add(tg.get_packet_field(packet, "IPv6", "nh"))
+            nh_set.add(tg.get_packet_field(packet, "IP6", "nxt"))
         assert len(nh_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_next_header_ipv6_incrementation_dot1q_disabled_2(self, tg):
         """ Check next header incrementation. Count = 2*Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ipv6, count=10, nh_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2512,17 +2455,16 @@ class TestTG(object):
         # Verify that all packets with different next header
         nh_set = set()
         for packet in data[iface]:
-            nh_set.add(tg.get_packet_field(packet, "IPv6", "nh"))
+            nh_set.add(tg.get_packet_field(packet, "IP6", "nxt"))
         assert len(nh_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_next_header_ipv6_incrementation_dot1q_enabled(self, tg):
         """ Check next header IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_dot1q_ipv6, count=5, nh_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2534,17 +2476,16 @@ class TestTG(object):
         # Verify that all packets with different IPv6 next header
         nh_set = set()
         for packet in data[iface]:
-            nh_set.add(tg.get_packet_field(packet, "IPv6", "nh"))
+            nh_set.add(tg.get_packet_field(packet, "IP6", "nxt"))
         assert len(nh_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_traffic_class_ipv6_incrementation_dot1q_disabled(self, tg):
         """ Check traffic class incrementation. Count == Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ipv6, count=5, tc_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2556,17 +2497,16 @@ class TestTG(object):
         # Verify that all packets with different traffic class
         tc_set = set()
         for packet in data[iface]:
-            tc_set.add(tg.get_packet_field(packet, "IPv6", "tc"))
+            tc_set.add(tg.get_packet_field(packet, "IP6", "fc"))
         assert len(tc_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_traffic_class_ipv6_incrementation_dot1q_disabled_2(self, tg):
         """ Check traffic class incrementation. Count = 2*Increment count. Dot1Q disabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_ipv6, count=10, tc_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2578,17 +2518,16 @@ class TestTG(object):
         # Verify that all packets with different traffic class
         tc_set = set()
         for packet in data[iface]:
-            tc_set.add(tg.get_packet_field(packet, "IPv6", "tc"))
+            tc_set.add(tg.get_packet_field(packet, "IP6", "fc"))
         assert len(tc_set) == 5
 
-    @pytest.mark.skip("IPv6 increment is not integrated yet")
     def test_traffic_class_ipv6_incrementation_dot1q_enabled(self, tg):
         """ Check traffic class IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(self.pack_dot1q_ipv6, count=5, tc_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
@@ -2600,41 +2539,42 @@ class TestTG(object):
         # Verify that all packets with different IPv6 traffic class
         tc_set = set()
         for packet in data[iface]:
-            tc_set.add(tg.get_packet_field(packet, "IPv6", "tc"))
+            tc_set.add(tg.get_packet_field(packet, "IP6", "fc"))
         assert len(tc_set) == 5
 
-    @pytest.mark.skip("Pypacker does not support QOS")
     def test_qos_vlan_stat(self, tg):
         """ Check Ixia QoS vlan stat reading. """
+        if tg.type != "ixiahl":
+            pytest.skip("Get Qos Frames count increment isn't supported by Pypacker TG")
         iface = tg.ports[0]
 
         dst_mac = "00:00:00:00:00:aa"
         src_mac = "00:00:00:00:00:bb"
 
         pack_p0 = ({"Ether": {"dst": dst_mac, "src": src_mac}},
-                   {"Dot1Q": {"vlan": 10, "prio": 0, "type": 0x8100}},
-                   {"IP": {}}, {"UDP": {}}, )
+                   {"Dot1Q": {"vid": 10, "prio": 0, "type": 0x8100}},
+                   {"IP": {"p": 17}}, {"UDP": {}}, )
         pack_p1 = ({"Ether": {"dst": dst_mac, "src": src_mac}},
-                   {"Dot1Q": {"vlan": 10, "prio": 1, "type": 0x8100}},
-                   {"IP": {}}, {"UDP": {}}, )
+                   {"Dot1Q": {"vid": 10, "prio": 1, "type": 0x8100}},
+                   {"IP": {"p": 17}}, {"UDP": {}}, )
         pack_p2 = ({"Ether": {"dst": dst_mac, "src": src_mac}},
-                   {"Dot1Q": {"vlan": 10, "prio": 2, "type": 0x8100}},
-                   {"IP": {}}, {"UDP": {}}, )
+                   {"Dot1Q": {"vid": 10, "prio": 2, "type": 0x8100}},
+                   {"IP": {"p": 17}}, {"UDP": {}}, )
         pack_p3 = ({"Ether": {"dst": dst_mac, "src": src_mac}},
-                   {"Dot1Q": {"vlan": 10, "prio": 3, "type": 0x8100}},
-                   {"IP": {}}, {"UDP": {}}, )
+                   {"Dot1Q": {"vid": 10, "prio": 3, "type": 0x8100}},
+                   {"IP": {"p": 17}}, {"UDP": {}}, )
         pack_p4 = ({"Ether": {"dst": dst_mac, "src": src_mac}},
-                   {"Dot1Q": {"vlan": 10, "prio": 4, "type": 0x8100}},
-                   {"IP": {}}, {"UDP": {}}, )
+                   {"Dot1Q": {"vid": 10, "prio": 4, "type": 0x8100}},
+                   {"IP": {"p": 17}}, {"UDP": {}}, )
         pack_p5 = ({"Ether": {"dst": dst_mac, "src": src_mac}},
-                   {"Dot1Q": {"vlan": 10, "prio": 5, "type": 0x8100}},
-                   {"IP": {}}, {"UDP": {}}, )
+                   {"Dot1Q": {"vid": 10, "prio": 5, "type": 0x8100}},
+                   {"IP": {"p": 17}}, {"UDP": {}}, )
         pack_p6 = ({"Ether": {"dst": dst_mac, "src": src_mac}},
-                   {"Dot1Q": {"vlan": 10, "prio": 6, "type": 0x8100}},
-                   {"IP": {}}, {"UDP": {}}, )
+                   {"Dot1Q": {"vid": 10, "prio": 6, "type": 0x8100}},
+                   {"IP": {"p": 17}}, {"UDP": {}}, )
         pack_p7 = ({"Ether": {"dst": dst_mac, "src": src_mac}},
-                   {"Dot1Q": {"vlan": 10, "prio": 7, "type": 0x8100}},
-                   {"IP": {}}, {"UDP": {}}, )
+                   {"Dot1Q": {"vid": 10, "prio": 7, "type": 0x8100}},
+                   {"IP": {"p": 17}}, {"UDP": {}}, )
 
         stream_ids = []
         stream_ids.append(tg.set_stream(pack_p0, count=8, iface=iface))
@@ -2668,46 +2608,47 @@ class TestTG(object):
         assert tg.get_qos_frames_count(iface, 6) == 7
         assert tg.get_qos_frames_count(iface, 7) == 8
 
-    @pytest.mark.skip("Pypacker does not support QOS")
     def test_qos_iptos_stat(self, tg):
         """Check Ixia QoS IP TOS stat reading."""
+        if tg.type != "ixiahl":
+            pytest.skip("Get Qos Frames count increment isn't supported by Pypacker TG")
         iface = tg.ports[0]
 
         dst_mac = "00:00:00:00:00:55"
         src_mac = "00:00:00:00:00:77"
 
         pack_list = []
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x00}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x0f}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x1f}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x00}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x0f}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x1f}}, {"TCP": {}}))
 
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x20}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x30}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x3f}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x20}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x30}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x3f}}, {"TCP": {}}))
 
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x40}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x5a}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x5f}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x40}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x5a}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x5f}}, {"TCP": {}}))
 
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x60}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x71}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x7f}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x60}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x71}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x7f}}, {"TCP": {}}))
 
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x80}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x8f}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x9f}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x80}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x8f}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0x9f}}, {"TCP": {}}))
 
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xa0}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xb3}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xbf}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xa0}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xb3}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xbf}}, {"TCP": {}}))
 
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xc0}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xc5}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xdf}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xc0}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xc5}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xdf}}, {"TCP": {}}))
 
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xe0}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xe1}}, {"TCP": {}}))
-        pack_list.append(({"Ether": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xff}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xe0}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xe1}}, {"TCP": {}}))
+        pack_list.append(({"Ethernet": {"dst": dst_mac, "src": src_mac}}, {"IP": {"tos": 0xff}}, {"TCP": {}}))
 
         stream_ids = []
         for pack in pack_list:
@@ -2731,6 +2672,8 @@ class TestTG(object):
 
     def test_get_rate_stat(self, tg):
         """ Check transmit rate reading """
+        if tg.type != "ixiahl":
+            pytest.skip("Get port txrate increment isn't supported by Pypacker TG.")
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(self.pack_ip_tcp, continuous=True, inter=0.1, iface=iface)
@@ -2754,362 +2697,326 @@ class TestTG(object):
         assert 30 * 0.96 <= tg.get_port_rxrate(iface) <= 30 * 1.04
         tg.stop_streams([stream_id_1, stream_id_2])
 
-    @pytest.mark.skip("IP OPTS is not integrated yet")
     def test_check_increment_ip_src(self, tg):
         """  Check all fields in incremented packet. IP.src increment """
         iface = tg.ports[0]
 
-        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "p": 17}},
                   {"UDP": {"dport": 23, "sport": 23}},
                   )
         stream_id = tg.set_stream(packet, count=5, sip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
+
         assert iface in data
-
+        assert len(data[iface]) == 5
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-    @pytest.mark.skip("IP OPTS is not integrated yet")
     def test_check_increment_ip_dst(self, tg):
         """  Check all fields in incremented packet. IP.dst increment """
         iface = tg.ports[0]
 
-        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "p": 17}},
                   {"UDP": {"dport": 23, "sport": 23}},
                   )
         stream_id = tg.set_stream(packet, count=1, dip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-    @pytest.mark.skip("IP DSCP is not integrated yet")
     def test_check_increment_ip_dscp(self, tg):
         """  Check all fields in incremented packet. IP.tos increment"""
         iface = tg.ports[0]
 
-        packet = ({"Ether": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "p": 17}},
                   {"UDP": {"dport": 23, "sport": 23}},
                   )
         stream_id = tg.set_stream(packet, count=1, dscp_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-    @pytest.mark.skip("IP proto increment  is not integrated yet")
     def test_check_increment_ip_proto(self, tg):
         """  Check all fields in incremented packet. IP.proto increment """
         iface = tg.ports[0]
 
-        packet = ({"Ether": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "p": 17}},
                   {"UDP": {"dport": 23, "sport": 23}},
                   )
         stream_id = tg.set_stream(packet, count=1, protocol_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-    @pytest.mark.skip("packet_dictionary is not integrated yet")
     def test_check_increment_arp_hwsrc(self, tg):
         """  Check all fields in incremented packet. APR.hwsrc increment """
         iface = tg.ports[0]
 
-        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x0806}},
+                  {"Dot1Q": {"vid": 5}},
                   {"ARP": {"op": 1, "sha": "00:00:20:00:10:02", "spa": "1.1.1.1", "tha": "00:00:00:00:00:00", "tpa": "1.1.1.2"}},
                   )
-        stream_id = tg.set_stream(packet, count=1, arp_sa_increment=(2, 5), iface=iface)
+        stream_id = tg.set_stream(packet, count=3, arp_sa_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-    @pytest.mark.skip("packet_dictionary is not integrated yet")
     def test_check_increment_arp_psrc(self, tg):
         """  Check all fields in incremented packet. APR.psrc increment """
         iface = tg.ports[0]
 
-        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x0806}},
+                  {"Dot1Q": {"vid": 5}},
                   {"ARP": {"op": 2, "sha": "00:00:20:00:10:02", "spa": "1.1.1.1", "tha": "00:00:00:00:00:00", "tpa": "1.1.1.2"}},
                   )
         stream_id = tg.set_stream(packet, count=1, arp_sip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-    @pytest.mark.skip("IGMP increment  is not integrated yet")
     def test_check_increment_igmp_ip(self, tg):
         """  Check all fields in incremented packet. IGMP.ip increment """
         iface = tg.ports[0]
 
-        packet = ({"Ether": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
-                  {"IGMP": {"type": 17, "mrtime": 23, "gaddr": '10.0.2.5'}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "offset": 0,
+                   "opts": [{"type": 20, "len": 4, "body_bytes": b"\xff\xff"}], "p": 2}},
+                  {"IGMP": {"type": 17, "maxresp": 23, "group": '10.0.2.5'}},
                   )
         stream_id = tg.set_stream(packet, count=1, igmp_ip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-        packet = ({"Ether": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
-                  {"IGMP": {"type": 18, "mrtime": 23, "gaddr": '10.0.2.5'}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "offset": 0,
+                   "opts": [{"type": 20, "len": 4, "body_bytes": b"\xff\xff"}], "p": 2}},
+                  {"IGMP": {"type": 18, "maxresp": 23, "group": '10.0.2.5'}},
                   )
         stream_id = tg.set_stream(packet, count=1, igmp_ip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-        packet = ({"Ether": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
-                  {"IGMP": {"type": 23, "mrtime": 23, "gaddr": '10.0.2.5'}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "offset": 0,
+                   "opts": [{"type": 20, "len": 4, "body_bytes": b"\xff\xff"}], "p": 2}},
+                  {"IGMP": {"type": 23, "maxresp": 23, "group": '10.0.2.5'}},
                   )
         stream_id = tg.set_stream(packet, count=1, igmp_ip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-        packet = ({"Ether": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
-                  {"IGMP": {"type": 34, "mrtime": 23, "gaddr": '10.0.2.5'}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "offset": 0,
+                   "opts": [{"type": 20, "len": 4, "body_bytes": b"\xff\xff"}], "p": 2}},
+                  {"IGMP": {"type": 34, "maxresp": 23, "group": '10.0.2.5'}},
                   )
         stream_id = tg.set_stream(packet, count=1, igmp_ip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-        packet = ({"Ether": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
-                  {"IGMP": {"type": 22, "mrtime": 23, "gaddr": '10.0.2.5'}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "offset": 0,
+                   "opts": [{"type": 20, "len": 4, "body_bytes": b"\xff\xff"}], "p": 2}},
+                  {"IGMP": {"type": 22, "maxresp": 23, "group": '10.0.2.5'}},
                   )
-        stream_id = tg.set_stream(packet, count=1, igmp_ip_increment=(2, 5), iface=iface)
+        stream_id = tg.set_stream(packet, count=4, igmp_ip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 4
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-    @pytest.mark.skip("IP OPTS is not integrated yet")
     def test_check_increment_ip_icmp(self, tg):
         """  Check all fields in incremented packet. IP.src increment """
         iface = tg.ports[0]
 
-        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
-                  {"ICMP": {"type": 11, "code": 23, "id": 3, "seq": 20}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "p": 1}},
+                  {"ICMP": {}}, {"ICMP.Echo": {"id": 3, "seq": 20}},
                   )
         stream_id = tg.set_stream(packet, count=1, sip_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-    @pytest.mark.skip("IP OPTS is not integrated yet")
     def test_check_increment_udp_sport(self, tg):
         """  Check all fields in incremented packet. UDP.sport increment """
         iface = tg.ports[0]
 
-        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "p": 17}},
                   {"UDP": {"sport": 20, "dport": 80}},
                   )
         stream_id = tg.set_stream(packet, count=1, sudp_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-    @pytest.mark.skip("IP OPTS is not integrated yet")
     def test_check_increment_udp_dport(self, tg):
         """  Check all fields in incremented packet. UDP.dport increment """
         iface = tg.ports[0]
 
-        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "p": 17}},
                   {"UDP": {"sport": 20, "dport": 80}},
                   )
         stream_id = tg.set_stream(packet, count=1, dudp_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-    @pytest.mark.skip("IP opts is not integrated yet")
     def test_check_increment_dot1q_vlan_single(self, tg):
         """  Check all fields in incremented packet. Dot1Q.vlan increment """
         iface = tg.ports[0]
 
-        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5, "prio": 2}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5, "prio": 2}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "p": 17}},
                   {"UDP": {"sport": 20, "dport": 80}},
                   )
         stream_id = tg.set_stream(packet, count=1, vlan_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
-    @pytest.mark.skip("IP opts is not integrated yet")
     def test_check_increment_dot1q_vlan_double(self, tg):
         """  Check all fields in incremented packet. Dot1Q.vlan increment"""
         iface = tg.ports[0]
 
-        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x8100}},
-                  {"Dot1Q": {"vlan": 5, "prio": 2}}, {"Dot1Q": {"vlan": 6, "prio": 3}},
-                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "tos": 255, "id": 2, "flags": 1, "frag": 0,
-                   "options": [{"IPOption_Router_Alert": {"length": 4}}, ]}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33"}},
+                  {"Dot1Q": {"vid": 5, "prio": 2, "type": 0x9100}}, {"Dot1Q": {"vid": 6, "prio": 3}},
+                  {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "p": 17}},
                   {"UDP": {"sport": 20, "dport": 80}},
                   )
         stream_id = tg.set_stream(packet, count=1, vlan_increment=(2, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:20:00:10:02")
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-
+        assert len(data[iface]) == 1
         received = tg.packet_dictionary(data[iface][0])
-
         # Verify received packet is equal to sent packet
         assert self._check_packets_data(packet, received)
 
@@ -3120,16 +3027,13 @@ class TestTG(object):
 
         tg.start_sniff([iface, ])
         tg.start_streams([stream_id_1, ])
-        time.sleep(3)
         tg.stop_streams([stream_id_1, ])
         tg.stop_sniff([iface, ])
         start_receive_statistics = tg.get_received_frames_count(iface)
-        time.sleep(5)
         end_receive_statistics = tg.get_received_frames_count(iface)
 
         assert start_receive_statistics == end_receive_statistics
 
-    @pytest.mark.skip("IP opts is not integrated yet")
     def test_packet_with_ipoption(self, tg):
         """
         @brief  Test building packet with IPOption.
@@ -3137,24 +3041,22 @@ class TestTG(object):
         iface = tg.ports[0]
         dst_mac = "01:00:5E:00:01:05"
         src_mac = "00:00:05:04:03:02"
-        igmp_query = ({"Ethernet": {"dst": dst_mac, "src": src_mac, "type": 0x0800}},
+        igmp_query = ({"Ethernet": {"dst": dst_mac, "src": src_mac}},
                       {"IP": {"src": "10.0.1.101", "dst": "224.0.1.5", "p": 2, "ttl": 1,
-                              "opts": [{"IP_OPT_RTRALT": {"len": 4}}, ], "tos": 0xc0, "len": 36}},
+                              "opts": [{"type": 20}], "tos": 0xc0, "len": 36}},
                       {"IGMP": {"type": 17, "maxresp": 100}},)
 
         stream_id = tg.set_stream(igmp_query, count=1, iface=iface, adjust_size=False)
 
-        tg.start_sniff([iface, ], sniffing_time=3)
+        tg.start_sniff([iface, ], sniffing_time=2)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
-        assert iface in data, "No packets were sniffed."
-        # filter our packets from data
-        # TODO: update with [x for x in data[iface] if tg.get_packet_field(x,"Ethernet", "dst") == dst_mac]
-        # data[iface] = [x for x in data[iface] if x.get_packet_field("Ether", "dst") == dst_mac and x.get_packet_field("Ether", "src") == src_mac]
-        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
-
-        assert data[iface][0].haslayer("IPOption_Router_Alert") and data[iface][0].get_lfield("IPOption_Router_Alert", "length") == 4
+        assert iface in data
+        assert len(data[iface]) == 1
+        received = tg.packet_dictionary(data[iface][0])
+        # Verify received packet is equal to sent packet
+        assert self._check_packets_data(igmp_query, received)
 
     def test_dot1q_arp_filter(self, tg):
         """ Check Dot1Q.ARP filter """
@@ -3163,16 +3065,16 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_arp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_arp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=7, filter_layer="Dot1Q.ARP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.ARP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
         # Verify that only packets with specified Dot1Q.ARP filter layer are sniffed
         assert len(data[iface]) == 1
-
-        assert tg.get_packet_layer(data[iface][0], "ARP") is not None and tg.get_packet_field(data[iface][0], "Ethernet", "vlan")
+        received = tg.packet_dictionary(data[iface][0])
+        # Verify received packet is equal to sent packet
+        assert self._check_packets_data(self.pack_dot1q_arp, received)
 
     def test_dot1q_arp_custom_filter(self, tg):
         """ Check Dot1Q.ARP filter """
@@ -3181,9 +3083,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_arp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_arp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=7, filter_layer="Dot1Q.ARP")
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.ARP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3192,9 +3093,8 @@ class TestTG(object):
 
         p1 = data[iface][0]
 
-        tg.start_sniff([iface, ], sniffing_time=7, filter_layer=(12, "81 00 00 00 08 06", "00 00 FF FF 00 00"))
+        tg.start_sniff([iface, ], sniffing_time=5, filter_layer=(12, "81 00 00 00 08 06", "00 00 FF FF 00 00"))
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3217,7 +3117,6 @@ class TestTG(object):
         tg.start_sniff([iface, ], sniffing_time=4, filter_layer="notARP",
                        src_filter="00:00:20:00:10:02")
         tg.start_streams([stream_id_1, stream_id_2, stream_id_3, stream_id_4, ])
-        time.sleep(2)
         tg.stop_streams([stream_id_1, stream_id_2, stream_id_3, stream_id_4, ])
         data = tg.stop_sniff([iface, ])
 
@@ -3234,7 +3133,6 @@ class TestTG(object):
 
         tg.start_sniff([iface, ], sniffing_time=4, filter_layer="Dot1Q.ARP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3250,9 +3148,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_arp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_arp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="Dot1Q.ARP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.ARP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3261,9 +3158,8 @@ class TestTG(object):
 
         p1 = data[iface][0]
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer=(12, "81 00 00 00 08 06", "00 00 FF FF 00 00"))
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=(12, "81 00 00 00 08 06", "00 00 FF FF 00 00"))
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3281,9 +3177,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_udp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=3, filter_layer="IP", dst_filter="00:00:00:33:33:33")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="IP", dst_filter="00:00:00:33:33:33")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3299,9 +3194,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_udp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=3, filter_layer="IP", dst_filter="00:00:00:33:33:33")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="IP", dst_filter="00:00:00:33:33:33")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3310,9 +3204,8 @@ class TestTG(object):
 
         p1 = data[iface][0]
 
-        tg.start_sniff([iface, ], sniffing_time=3, filter_layer=(12, "08 00", "00 00"), dst_filter="00:00:00:33:33:33")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=(12, "08 00", "00 00"), dst_filter="00:00:00:33:33:33")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3330,9 +3223,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_udp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.IP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3348,9 +3240,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_udp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.IP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3359,9 +3250,8 @@ class TestTG(object):
 
         p1 = data[iface][0]
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer=(12, "81 00 00 00 08 00", "00 00 FF FF 00 00"))
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=(12, "81 00 00 00 08 00", "00 00 FF FF 00 00"))
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3379,9 +3269,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_stp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="STP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="STP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3398,9 +3287,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_stp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="STP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="STP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3409,9 +3297,8 @@ class TestTG(object):
 
         p1 = data[iface][0]
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer=(14, "42 42 03 00 00", "00 00 00 00 00"))
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=(14, "42 42 03 00 00", "00 00 00 00 00"))
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3430,10 +3317,9 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_stp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=3, filter_layer="notSTP",
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="notSTP",
                        src_filter="00:00:20:00:10:02")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(1)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3449,7 +3335,7 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_tcp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="TCP", dst_filter="00:00:00:33:33:33")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="TCP", dst_filter="00:00:00:33:33:33")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
@@ -3466,7 +3352,7 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_tcp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="TCP", dst_filter="00:00:00:33:33:33")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="TCP", dst_filter="00:00:00:33:33:33")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
@@ -3476,7 +3362,7 @@ class TestTG(object):
 
         p1 = data[iface][0]
 
-        tg.start_sniff([iface, ], sniffing_time=10,
+        tg.start_sniff([iface, ], sniffing_time=2,
                        filter_layer=(12, "08 00 00 00 00 00 00 00 00 00 00 06", "00 00 FF FF FF FF FF FF FF FF FF 00"), dst_filter="00:00:00:33:33:33")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
@@ -3496,7 +3382,7 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_tcp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_tcp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="Dot1Q.TCP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.TCP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
@@ -3513,7 +3399,7 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_tcp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_tcp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="Dot1Q.TCP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.TCP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
@@ -3523,7 +3409,7 @@ class TestTG(object):
 
         p1 = data[iface][0]
 
-        tg.start_sniff([iface, ], sniffing_time=4,
+        tg.start_sniff([iface, ], sniffing_time=2,
                        filter_layer=(12, "81 00 00 00 08 00 00 00 00 00 00 00 00 00 00 06", "00 00 FF FF 00 00 FF FF FF FF FF FF FF FF FF 00"))
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
@@ -3543,7 +3429,7 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_udp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="UDP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="UDP", src_filter="00:00:20:00:10:02")
         tg.start_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3559,7 +3445,7 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_udp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="UDP", src_filter="00:00:20:00:10:02")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="UDP", src_filter="00:00:20:00:10:02")
         tg.start_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3568,7 +3454,7 @@ class TestTG(object):
 
         p1 = data[iface][0]
 
-        tg.start_sniff([iface, ], sniffing_time=4,
+        tg.start_sniff([iface, ], sniffing_time=2,
                        filter_layer=(12, "08 00 00 00 00 00 00 00 00 00 00 11", "00 00 FF FF FF FF FF FF FF FF FF 00"), src_filter="00:00:20:00:10:02")
         tg.start_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
@@ -3587,9 +3473,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_udp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=7, filter_layer="Dot1Q.UDP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.UDP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(5)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3604,9 +3489,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_udp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_udp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=7, filter_layer="Dot1Q.UDP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.UDP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(5)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3615,10 +3499,9 @@ class TestTG(object):
 
         p1 = data[iface][0]
 
-        tg.start_sniff([iface, ], sniffing_time=7,
+        tg.start_sniff([iface, ], sniffing_time=2,
                        filter_layer=(12, "81 00 00 00 08 00 00 00 00 00 00 00 00 00 00 11", "00 00 FF FF 00 00 FF FF FF FF FF FF FF FF FF 00"))
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(5)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3636,9 +3519,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_icmp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_icmp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=7, filter_layer="ICMP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="ICMP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(5)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3654,9 +3536,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_icmp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_icmp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=7, filter_layer="ICMP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="ICMP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(5)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3665,9 +3546,8 @@ class TestTG(object):
 
         p1 = data[iface][0]
 
-        tg.start_sniff([iface, ], sniffing_time=7, filter_layer=(12, "08 00 00 00 00 00 00 00 00 00 00 01", "00 00 FF FF FF FF FF FF FF FF FF 00"))
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=(12, "08 00 00 00 00 00 00 00 00 00 00 01", "00 00 FF FF FF FF FF FF FF FF FF 00"))
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(5)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3685,9 +3565,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_icmp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_icmp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=7, filter_layer="Dot1Q.ICMP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.ICMP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(5)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3703,9 +3582,8 @@ class TestTG(object):
         stream_id_1 = tg.set_stream(self.pack_dot1q_ip_icmp, count=1, iface=iface)
         stream_id_2 = tg.set_stream(self.pack_ip_icmp, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=7, filter_layer="Dot1Q.ICMP")
+        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.ICMP")
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(5)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3714,10 +3592,9 @@ class TestTG(object):
 
         p1 = data[iface][0]
 
-        tg.start_sniff([iface, ], sniffing_time=7,
+        tg.start_sniff([iface, ], sniffing_time=2,
                        filter_layer=(12, "81 00 00 00 08 00 00 00 00 00 00 00 00 00 00 01", "00 00 FF FF 00 00 FF FF FF FF FF FF FF FF FF 00"))
         tg.start_streams([stream_id_1, stream_id_2])
-        time.sleep(5)
         tg.stop_streams([stream_id_1, stream_id_2])
         data = tg.stop_sniff([iface, ])
 
@@ -3736,7 +3613,7 @@ class TestTG(object):
         src_mac = '00:00:00:00:00:cc'
         dst_mac = '00:00:00:00:00:99'
         bgp_open = ({"Ether": {"src": src_mac, "dst": dst_mac, "type": 0x8100}},
-                    {"Dot1Q": {"vlan": 7}},
+                    {"Dot1Q": {"vid": 7}},
                     {"IP": {"dst": "10.0.0.1", "src": "10.0.0.2", "tos": 6}},
                     {"TCP": {"sport": 179, "dport": 47330, "seq": 305, "ack": 887850408, "flags": 0x18}},
                     {"BGPHeader": {"type": 2}},
@@ -3832,7 +3709,7 @@ class TestTG(object):
         src_mac = '00:00:00:00:00:cc'
         dst_mac = '00:00:00:00:00:99'
         bgp_open = ({"Ether": {"src": src_mac, "dst": dst_mac, "type": 0x8100}},
-                    {"Dot1Q": {"vlan": 7}},
+                    {"Dot1Q": {"vid": 7}},
                     {"IP": {"dst": "10.0.0.1", "src": "10.0.0.2", "tos": 6}},
                     {"TCP": {"sport": 179, "dport": 47330, "seq": 305, "ack": 887850408, "flags": 0x18}},
                     {"BGPHeader": {"type": 3}},
@@ -3852,7 +3729,7 @@ class TestTG(object):
         assert tg.packet_dictionary(data[iface][0])
         assert data[iface][0].get_lcount("BGPNotification") == 1
 
-    @pytest.mark.skip("Dot3 is not integrated yet")
+    @pytest.mark.skip("STP is not integrated yet")
     def test_xstp_build_capture(self, tg):
         """ Check stp/rstp/mstp build and detection."""
         iface = tg.ports[0]
@@ -3870,7 +3747,7 @@ class TestTG(object):
 
         tg.start_sniff([iface, ], sniffing_time=20, filter_layer="STP", src_filter="00:00:00:11:11:11")
         tg.start_streams([stream_id_1, stream_id_2, stream_id_3, stream_id_4, stream_id_5])
-        time.sleep(2)
+
         data = tg.stop_sniff([iface, ])
         tg.stop_streams([stream_id_1, stream_id_2, stream_id_3, stream_id_4, stream_id_5])
 
@@ -3886,47 +3763,46 @@ class TestTG(object):
         # Verify that 2 MST BPDUs have MSTI Configuration messages
         assert len([x for x in data[iface] if x.get_lfield("STP", "version") == 3 and x.get_lfield("STP", "v3len") > 64 and x.get_lfield("MstiConfigMsg", "rootmac")]) == 2
 
-    @pytest.mark.skip("Pypacker does not support QinQ")
-    def test_ether_packet(self, tg):
+    def test_double_tagged_packet_1(self, tg):
         """
-        Verify that pypacker can recognize QinQ packets.
+        Verify that pypacker can recognize QinQ packets type 0x9100
         """
         iface = tg.ports[0]
 
         dst_mac = "00:00:00:00:00:aa"
         src_mac = "00:00:00:00:00:bb"
-        packet_def = ({"Ether": {"dst": dst_mac, "src": src_mac, "type": 0x9100}},
-                      {"Dot1Q": {"prio": 1}},
+        packet_def = ({"Ethernet": {"dst": dst_mac, "src": src_mac}},
+                      {"Dot1Q": {"prio": 1, "type": 0x9100}},
                       {"Dot1Q": {"prio": 2}},
                       {"IP": {}}, {"TCP": {}})
 
         stream_id = tg.set_stream(packet_def, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter="00:00:00:00:00:bb")
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter=src_mac)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-        data[iface] = [x for x in data[iface] if x.get_lfield("Ether", "dst") == dst_mac and x.get_lfield("Ether", "src") == src_mac]
-        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
-
+        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]),)
+        packet = data[iface][0]
         # Verify ether type
-        assert data[iface][0].get_lfield("Ether", "type") == 0x9100
+        assert tg.get_packet_field(packet, "Ethernet", "type") == 0x0800
+        assert tg.get_packet_field(packet, "S-Dot1Q", "type") == 0x9100
+        assert tg.get_packet_field(packet, "C-Dot1Q", "type") == 0x8100
         # Verify that we have 2 Dot1Q layers with different prio.
-        assert tg.check_packet_field(data[iface][0], "Ethernet", "prio", 1)
-        assert tg.check_packet_field(data[iface][0], "Ethernet", "prio", 2)
+        assert tg.get_packet_field(packet, "S-Dot1Q", "prio") == 1
+        assert tg.get_packet_field(packet, "C-Dot1Q", "prio") == 2
 
-    @pytest.mark.skip("Pypacker does not support layer count")
-    def test_layer_counter(self, tg):
+    def test_double_tagged_packet_2(self, tg):
         """
-        Verify that layer counter works correctly
+        Verify that pypacker can recognize QinQ packets type 0x88A8
         """
         iface = tg.ports[0]
 
         dst_mac = "00:00:00:00:00:aa"
         src_mac = "00:00:00:00:00:bb"
-        packet_def = ({"Ether": {"dst": dst_mac, "src": src_mac, "type": 0x9100}},
-                      {"Dot1Q": {"prio": 1}},
+        packet_def = ({"Ethernet": {"dst": dst_mac, "src": src_mac}},
+                      {"Dot1Q": {"prio": 1, "type": 0x88A8}},
                       {"Dot1Q": {"prio": 2}},
                       {"IP": {}}, {"TCP": {}})
 
@@ -3937,14 +3813,12 @@ class TestTG(object):
         data = tg.stop_sniff([iface, ])
 
         assert iface in data
-        data[iface] = [x for x in data[iface] if x.get_lfield("Ether", "dst") == dst_mac and x.get_lfield("Ether", "src") == src_mac]
         assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
+        packet = data[iface][0]
+        received = tg.packet_dictionary(packet)
+        # Verify received packet is equal to sent packet
+        assert self._check_packets_data(packet_def, received)
 
-        assert data[iface][0].get_lcount("Dot1Q") == 2
-        assert data[iface][0].get_lfield("Dot1Q", "prio") == 1
-        assert data[iface][0].get_lfield("Dot1Q", "prio", 2) == 2
-
-    @pytest.mark.skip("Pypacker does not support Dot1Q fields")
     def test_default_ether_type(self, tg):
         """
         Verify that default Ether type for tagged packets is equal to 0x8100.
@@ -3954,24 +3828,29 @@ class TestTG(object):
         # Define packet without setting type for Ether layer.
         dst_mac = "00:00:00:00:00:11"
         src_mac = "00:00:00:00:00:22"
-        pack = ({'Ether': {'dst': dst_mac, 'src': src_mac}},
-                {'Dot1Q': {'type': 0x800, 'prio': 1}},
-                {'IP': {}}, {'TCP': {}})
+        pack = ({"Ethernet": {"dst": dst_mac, "src": src_mac}},
+                {"Dot1Q": {"vid": 999, "prio": 6}},
+                {"IP": {}}, {"TCP": {}})
 
         stream_id = tg.set_stream(pack, count=1, iface=iface, adjust_size=False)
 
-        tg.start_sniff([iface, ], sniffing_time=2)
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter=src_mac)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data, "No packets were sniffed."
-        # filter our packets from data
-        data[iface] = [x for x in data[iface] if x.get_lfield("Ether", "dst") == dst_mac and x.get_lfield("Ether", "src") == src_mac]
-        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
+        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]),)
+        packet = data[iface][0]
+        assert tg.get_packet_field(packet, "Ethernet", "dst") == dst_mac
+        assert tg.get_packet_field(packet, "Ethernet", "src") == src_mac
+        assert tg.get_packet_field(packet, "Ethernet", "type") == 0x0800
+        assert tg.get_packet_field(packet, "Ethernet", "vlan")
+        vlan_tag = tg.get_packet_field(packet, "Ethernet", "vlan")[0]
+        assert vlan_tag.vid == 999
+        assert vlan_tag.type == 0x8100
+        assert vlan_tag.cfi == 0
+        assert vlan_tag.prio == 6
 
-        assert data[iface][0].get_lfield("Ether", "type") == 0x8100
-
-    @pytest.mark.skip("Pypacker does not support Pause")
     def test_pause_frames_0001(self, tg):
         """
         Verify that MAC Control Pause frames with opcode 0x0001 are builded and sniffed correctly.
@@ -3981,56 +3860,54 @@ class TestTG(object):
         # Define packet without setting type for Ether layer.
         dst_mac = "01:80:c2:00:00:01"
         src_mac = "00:00:00:00:00:aa"
-        pack = ({'Ether': {'dst': dst_mac, 'src': src_mac}},
-                {'Pause': {'opcode': 0x0001, 'ptime': 3}})
+        pack = ({"Ethernet": {"dst": dst_mac, "src": src_mac, "type": 0x8808}},
+                {"FlowControl": {"opcode": 0x0001}}, {"Pause": {"ptime": 3}})
 
         stream_id = tg.set_stream(pack, count=1, iface=iface, adjust_size=False)
 
-        tg.start_sniff([iface, ], sniffing_time=2)
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter=src_mac)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data, "No packets were sniffed."
-        # filter our packets from data
-        data[iface] = [x for x in data[iface] if x.get_lfield("Ether", "dst") == dst_mac and x.get_lfield("Ether", "src") == src_mac]
-        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
+        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]),)
+        packet = data[iface][0]
 
-        assert data[iface][0].get_lfield("Ether", "type") == 0x8808
-        assert data[iface][0].get_lfield("Pause", "opcode") == 0x0001
-        assert data[iface][0].get_lfield("Pause", "ptime") == 3
+        assert tg.get_packet_field(packet, "Ethernet", "type") == 0x8808
+        assert tg.get_packet_field(packet, "FlowControl", "opcode") == 0x0001
+        assert tg.get_packet_field(packet, "Pause", "ptime") == 3
 
-    @pytest.mark.skip("Pypacker does not support Pause")
     def test_pause_frames_0101(self, tg):
         """
         Verify that MAC Control Pause frames with opcode 0x0101 are builded and sniffed correctly.
         """
         iface = tg.ports[0]
-
         # Define packet without setting type for Ether layer.
+        ls_list = [0, 1, 0, 1, 1, 1, 0, 1]
+        time_list = [0, 1, 0, 20, 3, 40, 3, 500]
         dst_mac = "01:80:c2:00:00:01"
         src_mac = "00:00:00:00:00:33"
-        pack = ({'Ether': {'dst': dst_mac, 'src': src_mac}},
-                {'Pause': {'opcode': 0x0101,
-                           'ls': [0, 1, 0, 1, 1, 1, 0, 1],
-                           'timelist': [0, 1, 0, 20, 3, 40, 3, 500]}})
+        pack = ({"Ethernet": {"dst": dst_mac, "src": src_mac, "type": 0x8808}},
+                {"FlowControl": {"opcode": 0x0101}},
+                {"PFC": {"ls_list": ls_list,
+                         "time_list": time_list}})
 
         stream_id = tg.set_stream(pack, count=1, iface=iface, adjust_size=False)
 
-        tg.start_sniff([iface, ], sniffing_time=2)
+        tg.start_sniff([iface, ], sniffing_time=2, src_filter=src_mac)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface, ])
 
         assert iface in data, "No packets were sniffed."
-        # filter our packets from data
-        data[iface] = [x for x in data[iface] if x.get_lfield("Ether", "dst") == dst_mac and x.get_lfield("Ether", "src") == src_mac]
-        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
+        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]),)
+        packet = data[iface][0]
 
-        assert data[iface][0].get_lfield("Ether", "type") == 0x8808
-        assert data[iface][0].get_lfield("Pause", "opcode") == 0x0101
-        assert data[iface][0].get_lfield("Pause", "ls") == [0, 1, 0, 1, 1, 1, 0, 1]
-        assert data[iface][0].get_lfield("Pause", "timelist") == [0, 1, 0, 20, 3, 40, 3, 500]
+        assert tg.get_packet_field(packet, "Ethernet", "type") == 0x8808
+        assert tg.get_packet_field(packet, "FlowControl", "opcode") == 0x0101
+        assert tg.get_packet_field(packet, "PFC", "ms") == 0
+        assert tg.get_packet_field(packet, "PFC", "ls_list") == ls_list
+        assert tg.get_packet_field(packet, "PFC", "time_list") == time_list
 
-    @pytest.mark.skip("Pypacker does not support Pause")
     def test_pause_frames_ffff(self, tg):
         """
         Verify that MAC Control Pause frames with unknown are builded and sniffed correctly.
@@ -4040,8 +3917,8 @@ class TestTG(object):
         # Define packet without setting type for Ether layer.
         dst_mac = "01:80:c2:00:00:01"
         src_mac = "00:00:00:00:00:99"
-        pack = ({'Ether': {'dst': dst_mac, 'src': src_mac}},
-                {'Pause': {'opcode': 0xffff, 'ptime': 7}})
+        pack = ({"Ethernet": {"dst": dst_mac, "src": src_mac, "type": 0x8808}},
+                {"FlowControl": {"opcode": 0xffff}}, {"Pause": {"ptime": 7}})
 
         stream_id = tg.set_stream(pack, count=1, iface=iface, adjust_size=False)
 
@@ -4050,13 +3927,12 @@ class TestTG(object):
         data = tg.stop_sniff([iface, ])
 
         assert iface in data, "No packets were sniffed."
-        # filter our packets from data
-        data[iface] = [x for x in data[iface] if x.get_lfield("Ether", "dst") == dst_mac and x.get_lfield("Ether", "src") == src_mac]
-        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
+        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]),)
+        packet = data[iface][0]
 
-        assert data[iface][0].get_lfield("Ether", "type") == 0x8808
-        assert data[iface][0].get_lfield("Pause", "opcode") == 0xffff
-        assert data[iface][0].get_lfield("Pause", "ptime") == 7
+        assert tg.get_packet_field(packet, "Ethernet", "type") == 0x8808
+        assert tg.get_packet_field(packet, "FlowControl", "opcode") == 0xffff
+        assert tg.get_packet_field(packet, "Pause", "ptime") == 7
 
     @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_build_capture(self, tg):
@@ -4323,7 +4199,7 @@ class TestTG(object):
         dst_mac = "01:80:c2:00:00:02"
         src_mac = "00:00:00:00:11:22"
 
-        pack = ({"Ether": {"dst": dst_mac, "src": src_mac, "type": 0x8809}},
+        pack = ({"Ethernet": {"dst": dst_mac, "src": src_mac, "type": 0x8809}},
                 {"LACP": {'subtype': 1, 'version': 1}},
                 {"LACPActorInfoTlv": {'type': 1, 'length': 20, 'sysprio': 32768, 'sys': "00:11:00:ff:00:aa",
                                       'key': 0, 'portprio': 32768, "port": 2,
@@ -4355,19 +4231,16 @@ class TestTG(object):
         assert data[iface][0].haslayer("LACPTerminatorTlv")
         assert data[iface][0].haslayer("LACPReserved")
 
-    @pytest.mark.skip("Fragmentation is not integrated yet")
     def test_pproc_packet_fragmentation_1(self, tg):
         """ Check packet fragmentation """
         fragments = tg.packet_fragment(self.pack_ip_icmp, required_size=200, fragsize=110)
         assert len(fragments) == 2
 
-    @pytest.mark.skip("Fragmentation is not integrated yet")
     def test_pproc_packet_fragmentation_2(self, tg):
         """ Check packet fragmentation. fragsize is None"""
         fragments = tg.packet_fragment(self.pack_ip_icmp, required_size=200)
         assert len(fragments) == 1
 
-    @pytest.mark.skip("Fragmentation is not integrated yet")
     def test_pproc_packet_dictionary(self, tg):
         """ Check packet dictionary. fragsize is None"""
         fragments = tg.packet_fragment(self.pack_dot1q_ip_udp, adjust_size=False, required_size=200)
@@ -4453,7 +4326,6 @@ class TestTG(object):
             src_ip_set.add(tg.get_packet_field(packet, "BOOTP", "siaddr"))
         assert len(src_ip_set) == 5
 
-    @pytest.mark.skip("RAW is not integrated yet")
     @pytest.mark.parametrize("payload_size", [26, 1480])
     def test_send_sniff_max_min_packets(self, tg, payload_size):
         """ Verify sending and sniffing of packets with minimal and maximal size """
@@ -4468,30 +4340,28 @@ class TestTG(object):
 
         # send packet, sniff pkt stream
         pkt = ({"Ethernet": {"src": ether_src, "dst": ether_dst, "type": 0x800}},
-               {"IP": {"src": '4.3.2.1', "dst": '1.2.3.4', "len": len(payload) + 20}},
-               {"Raw": {"load": payload}})
-        tg.start_sniff([iface, ], sniffing_time=5,
+               {"IP": {"src": '4.3.2.1', "dst": '1.2.3.4', "p": 0, "len": len(payload) + 20,
+                       "body_bytes": payload}})
+        tg.start_sniff([iface, ], sniffing_time=3,
                        filter_layer="IP", src_filter=ether_src, dst_filter=ether_dst)
-        tg.send_stream(tg.set_stream(pkt, count=1, iface=iface))
+        tg.send_stream(tg.set_stream(pkt, count=1, iface=iface, adjust_size=False))
         data = tg.stop_sniff([iface, ])
 
         assert len(data[iface]) == 1
-        # Expected IP len == Actual IP len
-        assert (payload_size + 20) == data[iface][0].get_lfield("IP", "len")
+        packet = data[iface][0]
         # Expected size ==  Actual size
-        if (payload_size + 34) != len(data[iface][0]):
-            print("WARNING: Test packet was appended by padding.")
-            print("Expected size: {0}\nActual size: {1}".format(payload_size + 34, len(data[iface][0])))
+        assert (payload_size + 34) == len(packet), "Expected size: {0}\nActual size: {1}".format(payload_size + 34, len(packet))
+        # Expected IP len == Actual IP len
+        assert (payload_size + 20) == tg.get_packet_field(packet, "IP", "len")
         # Get payload and compare to original
-        buf = data[iface][0].get_lfield("Raw", "load")
+        buf = tg.get_packet_field(packet, "IP", "body_bytes")
         assert buf == payload
 
-    @pytest.mark.skip("Does not supported yet")
     def test_incrementation_negative_1(self, tg):
         """ Verify that method set_stream returns Error message when layer is not defined in packet(1). """
         iface = tg.ports[0]
 
-        packet = ({"Ether": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x0800}},
+        packet = ({"Ethernet": {"src": "00:00:20:00:10:02", "dst": "00:00:00:33:33:33", "type": 0x0800}},
                   {"TCP": {}})
 
         exception_message = []
@@ -4500,7 +4370,6 @@ class TestTG(object):
                      {"sudp_increment": (3, 5)},
                      {"dudp_increment": (3, 5)},
                      {"fl_increment": (3, 5)},
-                     {"dhcp_si_increment": (3, 5)},
                      {"vlan_increment": (3, 5)},
                      {"igmp_ip_increment": (1, 5)},
                      {"arp_sip_increment": (2, 5)},
@@ -4513,13 +4382,12 @@ class TestTG(object):
             exception_message.append(excepinfo.value.parameter)
 
         # verify expected result
-        result = ["Layer UDP is not defined.", "Layer IPv6 is not defined.", "Layer BOOTP is not defined.",
-                  "Layer Dot1Q is not defined.", "Layer IGMP is not defined.", "Layer ARP is not defined.",
-                  "Layer IP is not defined."]
-        assert len(exception_message) == 11
+        result = ["Layer UDP is not defined", "Layer IP6 is not defined",
+                  "VLAN tag is not defined", "Layer IGMP is not defined",
+                  "Layer ARP is not defined", "Layer IP is not defined"]
+        assert len(exception_message) == 10
         assert set(exception_message) == set(result)
 
-    @pytest.mark.skip("Does not supported yet")
     def test_incrementation_negative_2(self, tg):
         """ Verify that method set_stream returns Error message when when layer is not defined in packet(2). """
         iface = tg.ports[0]
@@ -4538,10 +4406,8 @@ class TestTG(object):
             exception_message.append(excepinfo.value.parameter)
 
         # verify expected result
-        result = ["Incorrect packet or unsupported layers structure for sa/da incrementation.",
-                  "Incorrect packet or unsupported layers structure for sa/da incrementation.",
-                  "Incorrect packet or unsupported layers structure for sa/da incrementation.",
-                  "Layer Ether is not defined."]
+        result = ["Layer Ethernet is not defined", "Layer Ethernet is not defined",
+                  "Layer Ethernet is not defined", "Layer Ethernet is not defined"]
         assert len(exception_message) == 4
         assert set(exception_message) == set(result)
 
@@ -4569,11 +4435,17 @@ class TestTG(object):
     def test_send_several_streams(self, tg):
         """ Send several streams"""
         iface = tg.ports[0]
+        packets_count = 20
 
         tg.clear_statistics([iface, ])
-
-        stream_1 = tg.set_stream(self.packet_definition, count=20, inter=0.1, iface=iface)
-        stream_2 = tg.set_stream(self.packet_definition, count=20, inter=0.1, iface=iface)
-
+        stream_1 = tg.set_stream(self.packet_definition, count=packets_count//2, inter=0.1, iface=iface)
+        stream_2 = tg.set_stream(self.packet_definition, count=packets_count//2, inter=0.1, iface=iface)
+        tg.start_sniff([iface, ], sniffing_time=4, src_filter="00:00:00:00:00:02")
         tg.send_stream(stream_1)
         tg.send_stream(stream_2)
+        data = tg.stop_sniff([iface, ])
+
+        assert iface in data
+        assert len(data[iface]) == packets_count
+        sent_statistics = tg.get_sent_frames_count(iface)
+        assert sent_statistics == packets_count
