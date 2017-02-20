@@ -1,6 +1,5 @@
-#! /usr/bin/env python
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+@copyright Copyright (c) 2011 - 2017, Intel Corporation.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,8 +19,7 @@ limitations under the License.
 """
 
 import random
-
-import pypacker
+import ipaddress as ipaddr
 
 
 class BaseGenerator(object):
@@ -59,7 +57,7 @@ class BaseGenerator(object):
 
     def __next__(self):
         """
-        @brief  Return next item fron container
+        @brief  Return next item from container
         """
         return self
 
@@ -93,42 +91,6 @@ class PypackerMacGenerator(BaseGenerator):
                 diff = int_mac - int("000000000000", 16)
                 int_mac = int("FFFFFFFFFFFF", 16) + diff
             hex_mac = hex(int_mac).replace('L', '')[2:].zfill(12)
-            self.value = "%s:%s:%s:%s:%s:%s" % (hex_mac[:2], hex_mac[2:4], hex_mac[4:6], hex_mac[6:8], hex_mac[8:10], hex_mac[10:12])
-            self.iterator += 1
-        return current
-
-
-class PypackerARPMacGenerator(BaseGenerator):
-    """
-    @description  Iteration class for list of ARP MAC addresses generation
-    @param start_value:  initial MAC value
-    @type start_value:  str
-    @param increment:  incrementation step
-    @type increment:  int
-    @param count:  number of iteration steps
-    @type count:  int
-    """
-
-    def __next__(self):
-        """
-        @brief  Get next generated ARP MAC address.
-        """
-        current = self.value
-        if self.iterator >= self.count and self.count != 0:
-            self.value = self.start_value
-            self.iterator = 1
-        else:
-            mac_string = self.value.replace(":", "")
-            int_mac_start = mac_string[:4]
-            int_mac_end = int(mac_string[4:], 16)
-            int_mac_end = int_mac_end + self.increment
-            if int_mac_end > int("FFFFFFFF", 16):
-                diff = int_mac_end - int("FFFFFFFF", 16)
-                int_mac_end = int("00000000", 16) + diff
-            if int_mac_end < int("00000000", 16):
-                diff = int_mac_end - int("00000000", 16)
-                int_mac_end = int("FFFFFFFF", 16) + diff
-            hex_mac = hex(int(int_mac_start + hex(int_mac_end).replace('L', '')[2:].zfill(8)[:8], 16)).replace('L', '')[2:].zfill(12)
             self.value = "%s:%s:%s:%s:%s:%s" % (hex_mac[:2], hex_mac[2:4], hex_mac[4:6], hex_mac[6:8], hex_mac[8:10], hex_mac[10:12])
             self.iterator += 1
         return current
@@ -246,9 +208,7 @@ class PypackerRandomPayloadGenerator(BaseGenerator):
         """
         @brief  Get next generated payload value.
         """
-        current = self.end_value
-        rand_length = random.randint(self.start_value, len(current))
-        return current[:rand_length]
+        return random.randint(self.start_value, self.end_value)
 
 
 class PypackerIncrementPayloadGenerator(BaseGenerator):
@@ -266,11 +226,11 @@ class PypackerIncrementPayloadGenerator(BaseGenerator):
         """
         @brief  Get next generated payload value.
         """
-        current = ""
-        if self.value > len(self.end_value):
+        current = self.value
+        if self.value == self.end_value:
             self.value = self.start_value
-        current = self.end_value[:self.value]
-        self.value += self.increment
+            return current
+        self.value += abs(self.increment)
         return current
 
 
@@ -382,7 +342,6 @@ class PypackerIPv6Generator(BaseGenerator):
         """
         @brief  Get next generated IPv6 address.
         """
-        import ipaddress as ipaddr
         current = self.value
         if self.iterator >= self.count and self.count != 0:
             self.value = self.start_value
