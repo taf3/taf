@@ -41,18 +41,18 @@ from pypacker import psocket
 from pypacker.layer12 import ethernet
 
 from . import loggers
-from . import tg_generators
 from .tg_template import GenericTG
 from .custom_exceptions import PypackerException
 from .packet_processor import PacketProcessor
+from .tg_generators import (PypackerRandomPayloadGenerator, PypackerIncrementPayloadGenerator,
+                            PypackerMacGenerator, PypackerIPGenerator, PypackerVlanGenerator,
+                            PypackerProtocolGenerator, PypackerTCPOrUDPGenerator, PypackerIPv6Generator,
+                            PypackerFlowLabelGenerator, PypackerTypeGenerator)
 
 
 def verify_increment_conf(func):
     def wrapper(*args):
-        try:
-            args[0][0]
-            args[0][1]
-        except IndexError:
+        if not args or len(args[0]) <= 1:
             err_msg = "Stream increment should be a tuple in format ('int', 'int') e.g. (1, 99)"
             raise TypeError(err_msg)
         return func(*args)
@@ -102,6 +102,30 @@ class PypackerTG(PacketProcessor, GenericTG):
     SIOCGIFMTU = 0x8921
     SIOCSIFMTU = 0x8922
     ETHER_HEADER = 14
+    INCREMENT_ORDER = (
+        ('sa_increment', 'Ethernet', 'src', 'PypackerMacGenerator', 'src_s'),
+        ('da_increment', 'Ethernet', 'dst', 'PypackerMacGenerator', 'dst_s'),
+        ('arp_sa_increment', 'Ethernet', 'src', 'PypackerMacGenerator', 'src_s'),
+        ('arp_sa_increment', 'Ethernet', 'src', 'PypackerMacGenerator', 'arp.sha_s'),
+        ('eth_type_increment', 'Ethernet', 'type', 'PypackerTypeGenerator', 'type'),
+        ('vlan_increment', 'S-Dot1Q', 'vid', 'PypackerVlanGenerator', 'S-Dot1Q'),
+        ('in_vlan_increment', 'C-Dot1Q', 'vid', 'PypackerVlanGenerator', 'C-Dot1Q'),
+        ('arp_sip_increment', 'ARP', 'spa', 'PypackerIPGenerator', 'arp.spa_s'),
+        ('sip_increment', 'IP', 'src', 'PypackerIPGenerator', 'ip.src_s'),
+        ('dip_increment', 'IP', 'dst', 'PypackerIPGenerator', 'ip.dst_s'),
+        ('sudp_increment', 'UDP', 'sport', 'PypackerTCPOrUDPGenerator', 'udp.sport'),
+        ('dudp_increment', 'UDP', 'dport', 'PypackerTCPOrUDPGenerator', 'udp.dport'),
+        ('stcp_increment', 'TCP', 'sport', 'PypackerTCPOrUDPGenerator', 'tcp.sport'),
+        ('dtcp_increment', 'TCP', 'dport', 'PypackerTCPOrUDPGenerator', 'tcp.dport'),
+        ('protocol_increment', 'IP', 'p', 'PypackerProtocolGenerator', 'ip.p'),
+        ('dscp_increment', 'IP', 'tos', 'PypackerProtocolGenerator', 'ip.tos'),
+        ('igmp_ip_increment', 'IGMP', 'group', 'PypackerIPGenerator', 'igmp.group_s'),
+        ('sipv6_increment', 'IP6', 'src', 'PypackerIPv6Generator', 'ip6.src_s'),
+        ('dipv6_increment', 'IP6', 'dst', 'PypackerIPv6Generator', 'ip6.dst_s'),
+        ('fl_increment', 'IP6', 'flow', 'PypackerFlowLabelGenerator', 'ip6.flow'),
+        ('tc_increment', 'IP6', 'fc', 'PypackerProtocolGenerator', 'ip6.fc'),
+        ('nh_increment', 'IP6', 'nxt', 'PypackerProtocolGenerator', 'ip6.nxt'),
+    )
 
     def __init__(self, config, opts):
         """
@@ -202,149 +226,29 @@ class PypackerTG(PacketProcessor, GenericTG):
         """
         @brief  Return random payload generator
         """
-        return field_name, tg_generators.PypackerRandomPayloadGenerator(start_packet_size,
-                                                                        end_packet_size,
-                                                                        None,
-                                                                        None)
+        return field_name, PypackerRandomPayloadGenerator(start_packet_size,
+                                                          end_packet_size,
+                                                          None,
+                                                          None)
 
     @staticmethod
     def _gen_incremented_size(start_packet_size, end_packet_size, size_increment_step, field_name):
         """
         @brief  Return incremented payload generator
         """
-        return field_name, tg_generators.PypackerIncrementPayloadGenerator(start_packet_size,
-                                                                           end_packet_size,
-                                                                           size_increment_step,
-                                                                           None)
+        return field_name, PypackerIncrementPayloadGenerator(start_packet_size,
+                                                             end_packet_size,
+                                                             size_increment_step,
+                                                             None)
 
     @staticmethod
     @verify_increment_conf
-    def _gen_mac_list(increment_conf, start_mac, field_name):
+    def _gen_list(increment_conf, start, gen_name, field_name):
         """
-        @brief  Generate list of MACs
+        @brief  Generate list
         @raise  TypeError:  invalid arguments
         """
-        mac_generator = tg_generators.PypackerMacGenerator(start_mac,
-                                                           None,
-                                                           increment_conf[0],
-                                                           increment_conf[1])
-        return field_name, mac_generator
-
-    @staticmethod
-    @verify_increment_conf
-    def _gen_ip_list(increment_conf, start_ip, field_name):
-        """
-        @brief  Generate list of IPs
-        @raise  TypeError:  invalid arguments
-        """
-        ip_generator = tg_generators.PypackerIPGenerator(start_ip,
-                                                         None,
-                                                         increment_conf[0],
-                                                         increment_conf[1])
-        return field_name, ip_generator
-
-    @staticmethod
-    @verify_increment_conf
-    def _gen_vlan_list(increment_conf, start_vlan, field_name):
-        """
-        @brief  Generate list of Vlans
-        @raise  TypeError:  invalid arguments
-        """
-        vlan_generator = tg_generators.PypackerVlanGenerator(start_vlan,
-                                                             None,
-                                                             increment_conf[0],
-                                                             increment_conf[1])
-        return field_name, vlan_generator
-
-    @staticmethod
-    @verify_increment_conf
-    def _gen_tos_list(increment_conf, start_tos, field_name):
-        """
-        @brief  Generate list of Tos
-        @raise  TypeError:  invalid arguments
-        """
-        tos_generator = tg_generators.PypackerProtocolGenerator(start_tos,
-                                                                None,
-                                                                increment_conf[0],
-                                                                increment_conf[1])
-        return field_name, tos_generator
-
-    @staticmethod
-    @verify_increment_conf
-    def _gen_udp_list(increment_conf, start_udp, field_name):
-        """
-        @brief  Generate list of UDPs ports
-        @raise  TypeError:  invalid arguments
-        """
-        udp_generator = tg_generators.PypackerUDPGenerator(start_udp,
-                                                           None,
-                                                           increment_conf[0],
-                                                           increment_conf[1])
-        return field_name, udp_generator
-
-    @staticmethod
-    @verify_increment_conf
-    def _gen_tcp_list(increment_conf, start_tcp, field_name):
-        """
-        @brief  Generate list of TCPs ports
-        @raise  TypeError:  invalid arguments
-        """
-        tcp_generator = tg_generators.PypackerTCPGenerator(start_tcp,
-                                                           None,
-                                                           increment_conf[0],
-                                                           increment_conf[1])
-        return field_name, tcp_generator
-
-    @staticmethod
-    @verify_increment_conf
-    def _gen_protocol_list(increment_conf, start_protocol, field_name):
-        """
-        @brief  Generate list of Vlans
-        @raise  TypeError:  invalid arguments
-        """
-        protocol_generator = tg_generators.PypackerProtocolGenerator(start_protocol,
-                                                                     None,
-                                                                     increment_conf[0],
-                                                                     increment_conf[1])
-        return field_name, protocol_generator
-
-    @staticmethod
-    @verify_increment_conf
-    def _gen_ipv6_list(increment_conf, start_ip, field_name):
-        """
-        @brief  Generate list of IPv6
-        @raise  TypeError:  invalid arguments
-        """
-        ipv6_generator = tg_generators.PypackerIPv6Generator(start_ip,
-                                                             None,
-                                                             increment_conf[0],
-                                                             increment_conf[1])
-        return field_name, ipv6_generator
-
-    @staticmethod
-    @verify_increment_conf
-    def _gen_flow_list(increment_conf, start_flow, field_name):
-        """
-        @brief  Generate list of Flows
-        @raise  TypeError:  invalid arguments
-        """
-        flow_generator = tg_generators.PypackerFlowLabelGenerator(start_flow,
-                                                                  None,
-                                                                  increment_conf[0],
-                                                                  increment_conf[1])
-        return field_name, flow_generator
-
-    @staticmethod
-    @verify_increment_conf
-    def _gen_type_list(increment_conf, start_type, field_name):
-        """
-        @brief  Generate list of types
-        @raise  TypeError:  invalid arguments
-        """
-        type_generator = tg_generators.PypackerTypeGenerator(start_type,
-                                                             None,
-                                                             increment_conf[0],
-                                                             increment_conf[1])
+        type_generator = globals().get(gen_name)(start, None, increment_conf[0], increment_conf[1])
         return field_name, type_generator
 
     def set_stream(self, packet_def, count=1, inter=0, rate=None, sa_increment=None, da_increment=None, sip_increment=None, dip_increment=None, is_valid=False,
@@ -371,14 +275,16 @@ class PypackerTG(PacketProcessor, GenericTG):
             self.class_logger.warning("UFD dependencies makes no effect for Pypacker TG")
             pytest.skip("UFD dependencies makes no effect for Pypacker TG")
 
-        kwargs['packet_definition'] = packet_def
-        kwargs['adjust_size'] = adjust_size
-        if isinstance(required_size, int):
-            kwargs['required_size'] = required_size
-        if build_packet:
-            packet = self._build_pypacker_packet(**kwargs)
-        else:
+        if not build_packet:
             packet = packet_def
+        else:
+            kwargs.update({
+                'packet_definition': packet_def,
+                'adjust_size': adjust_size,
+            })
+            if isinstance(required_size, int):
+                kwargs['required_size'] = required_size
+            packet = self._build_pypacker_packet(**kwargs)
 
         if fragsize is not None:
             pytest.skip("Packet fragmentation is not integrated yet")
@@ -389,10 +295,12 @@ class PypackerTG(PacketProcessor, GenericTG):
                     size_increment_step = required_size[1]
                     size_increment_min_val = required_size[2]
                     size_increment_max_val = required_size[3]
-                    padding = self._gen_incremented_size(size_increment_min_val,
-                                                         size_increment_max_val,
-                                                         size_increment_step,
-                                                         "padding")
+                    size_args = (size_increment_min_val, size_increment_max_val,
+                                 size_increment_step, "padding")
+                    if size_increment_step < 0:
+                        size_args = (size_increment_max_val, size_increment_min_val,
+                                     size_increment_step, "padding")
+                    padding = self._gen_incremented_size(*size_args)
                     increments.append(padding)
                 elif required_size[0] == "Random":
                     size_increment_min_val = required_size[1]
@@ -409,138 +317,19 @@ class PypackerTG(PacketProcessor, GenericTG):
             if size_increment_max_val < size_increment_min_val:
                 raise TypeError("Max value in required_size increment is less than min value")
 
-        # Set source address increment
-        if sa_increment is not None:
-            start_mac = self.get_packet_field(packet, "Ethernet", "src")
-            sa_list = self._gen_mac_list(sa_increment, start_mac, "src_s")
-            increments.append(sa_list)
-
-        # Set destination address increment
-        if da_increment is not None:
-            start_mac = self.get_packet_field(packet, "Ethernet", "dst")
-            da_list = self._gen_mac_list(da_increment, start_mac, "dst_s")
-            increments.append(da_list)
-
-        # Set source mac address increment for ARP
-        if arp_sa_increment is not None:
-            start_mac = self.get_packet_field(packet, "Ethernet", "src")
-            sa_list = self._gen_mac_list(arp_sa_increment, start_mac, "src_s")
-            hwsrc_list = self._gen_mac_list(arp_sa_increment, start_mac, "arp.sha_s")
-            increments.append(sa_list)
-            increments.append(hwsrc_list)
-
-        # Set source ip address increment
-        if sip_increment is not None:
-            src_ip = self.get_packet_field(packet, "IP", "src")
-            src_ip_list = self._gen_ip_list(sip_increment, src_ip, "ip.src_s")
-            increments.append(src_ip_list)
-
-        # Set destination ip address increment
-        if dip_increment is not None:
-            dst_ip = self.get_packet_field(packet, "IP", "dst")
-            dst_ip_list = self._gen_ip_list(dip_increment, dst_ip, "ip.dst_s")
-            increments.append(dst_ip_list)
-
-        # Set arp source ip address increment
-        if arp_sip_increment is not None:
-            src_ip = self.get_packet_field(packet, "ARP", "spa")
-            src_ip_list = self._gen_ip_list(arp_sip_increment, src_ip, "arp.spa_s")
-            increments.append(src_ip_list)
-
-        # Set source udp address increment
-        if sudp_increment is not None:
-            src_udp = self.get_packet_field(packet, "UDP", "sport")
-            src_udp_list = self._gen_udp_list(sudp_increment, src_udp, "udp.sport")
-            increments.append(src_udp_list)
-
-        # Set destination udp address increment
-        if dudp_increment is not None:
-            dst_udp = self.get_packet_field(packet, "UDP", "dport")
-            dst_udp_list = self._gen_udp_list(dudp_increment, dst_udp, "udp.dport")
-            increments.append(dst_udp_list)
-
-        # Set source tcp address increment
-        if stcp_increment is not None:
-            src_tcp = self.get_packet_field(packet, "TCP", "sport")
-            src_tcp_list = self._gen_tcp_list(stcp_increment, src_tcp, "tcp.sport")
-            increments.append(src_tcp_list)
-
-        # Set destination tcp address increment
-        if dtcp_increment is not None:
-            dst_tcp = self.get_packet_field(packet, "TCP", "dport")
-            dst_tcp_list = self._gen_tcp_list(dtcp_increment, dst_tcp, "tcp.dport")
-            increments.append(dst_tcp_list)
-
-        # Set protocol increment:
-        if protocol_increment is not None:
-            protocol = self.get_packet_field(packet, "IP", "p")
-            protocol_list = self._gen_protocol_list(protocol_increment, protocol, "ip.p")
-            increments.append(protocol_list)
-
-        # Set DSCP increment:
-        if dscp_increment is not None:
-            dscp = self.get_packet_field(packet, "IP", "tos")
-            dscp_list = self._gen_tos_list(dscp_increment, dscp, "ip.tos")
-            increments.append(dscp_list)
-
-        # Set IGMP ip address increment:
-        if igmp_ip_increment is not None:
-            dst_ip = self.get_packet_field(packet, "IGMP", "group")
-            igmp_ip_list = self._gen_ip_list(igmp_ip_increment, dst_ip, "igmp.group_s")
-            increments.append(igmp_ip_list)
-
-        # Set src IPv6 increment:
-        if sipv6_increment is not None:
-            src_ipv6 = self.get_packet_field(packet, "IP6", "src")
-            src_ipv6_list = self._gen_ipv6_list(sipv6_increment, src_ipv6, "ip6.src_s")
-            increments.append(src_ipv6_list)
-
-        # Set dst IPv6 increment:
-        if dipv6_increment is not None:
-            dst_ipv6 = self.get_packet_field(packet, "IP6", "dst")
-            dst_ipv6_list = self._gen_ipv6_list(dipv6_increment, dst_ipv6, "ip6.dst_s")
-            increments.append(dst_ipv6_list)
-
-        # Set vlan increment
-        if vlan_increment is not None:
-            vlan = self.get_packet_field(packet, "S-Dot1Q", "vid")
-            vlan_list = self._gen_vlan_list(vlan_increment, vlan, "S-Dot1Q")
-            increments.append(vlan_list)
-
-        # Set inner vlan increment
-        if in_vlan_increment is not None:
-            vlan = self.get_packet_field(packet, "C-Dot1Q", "vid")
-            vlan_list = self._gen_vlan_list(vlan_increment, vlan, "C-Dot1Q")
-            increments.append(vlan_list)
-
-        # Set flow label increment:
-        if fl_increment is not None:
-            flow_label = self.get_packet_field(packet, "IP6", "flow")
-            flow_label_list = self._gen_flow_list(fl_increment, flow_label, "ip6.flow")
-            increments.append(flow_label_list)
-
-        # Set ether type increment
-        if eth_type_increment is not None:
-            eth_type = self.get_packet_field(packet, "Ethernet", "type")
-            eth_type_list = self._gen_type_list(eth_type_increment, eth_type, "type")
-            increments.append(eth_type_list)
-
-        if tc_increment is not None:
-            tc = self.get_packet_field(packet, "IP6", "fc")
-            tc_list = self._gen_protocol_list(tc_increment, tc, "ip6.fc")
-            increments.append(tc_list)
-
-        if nh_increment is not None:
-            nh = self.get_packet_field(packet, "IP6", "nxt")
-            nh_list = self._gen_protocol_list(nh_increment, nh, "ip6.nxt")
-            increments.append(nh_list)
+        # Set increments
+        locals_map = locals()
+        for local_name, field_type, field_name, gen_name, long_field_name in self.INCREMENT_ORDER:
+            local_value = locals_map[local_name]
+            if local_value is None:
+                continue
+            field_value = self.get_packet_field(packet, field_type, field_name)
+            field_list = self._gen_list(local_value, field_value, gen_name, long_field_name)
+            increments.append(field_list)
 
         args = {"iface": iface, "inter": inter, "is_valid": is_valid}
         if continuous:
             args["count"] = None
-        # elif cont_burst :
-        #     args["loop"] = 1
-        #     args["count"] = count
         else:
             args["count"] = count
         if increments:
@@ -711,7 +500,7 @@ class PypackerTG(PacketProcessor, GenericTG):
         def hex_str_to_int(hex_str):
             return int('0x{}'.format(hex_str), 16)
 
-        mask = reduce(lambda m, val: m.replace(*val), [(' ', ''), ('0','1'), ('F','0'),('1','F')],
+        mask = reduce(lambda m, val: m.replace(*val), [(' ', ''), ('0', '1'), ('F', '0'), ('1', 'F')],
                       self.filter_mask)
         data = self.filter_data.replace(" ", "")
         pkt_hex = codecs.encode(pkt.bin(), "hex_codec").decode()[2 * self.filter_offset:2 * self.filter_offset + len(mask)]
@@ -732,9 +521,9 @@ class PypackerTG(PacketProcessor, GenericTG):
             @brief  Collect sniffed data
             """
             pkt = packet_filter(ethernet.Ethernet(pkt_data))
-            timestamp = float(".".join(map(str, pkt_hdr.getts())))
             if pkt is not None:
-                pkt.time = timestamp
+                # Get packet timestamp
+                pkt.time = float(".".join(map(str, pkt_hdr.getts())))
                 self._collector.collect(sniff_port, pkt)
                 self.receive_statistics.increase(sniff_port, 1)
 
@@ -801,11 +590,11 @@ class PypackerTG(PacketProcessor, GenericTG):
         timeout_iter = iter(time.time, -1)
         if timeout is not None:
             start_time = time.time()
-            timeout_iter = itertools.takewhile(lambda x: not(x >= start_time + timeout),timeout_iter )
+            timeout_iter = itertools.takewhile(lambda x: x < start_time + timeout, timeout_iter)
 
         port_data_iter = iter(get_port_statistic, object())
         if count != 0:
-            port_data_iter = itertools.takewhile(lambda x: not(x >= count), port_data_iter)
+            port_data_iter = itertools.takewhile(lambda x: x < count, port_data_iter)
 
         with suppress(KeyboardInterrupt):
             for _ in zip(timeout_iter, port_data_iter):
@@ -904,14 +693,14 @@ class PypackerTG(PacketProcessor, GenericTG):
         @type  state:  str
         @raise  PypackerException:  error on port configuration
         """
-        self.class_logger.debug("Set {0} port to {1} state.".format(iface, state))
+        self.class_logger.debug("Set %s port to %s state.", iface, state)
         process = Popen(['ip', 'link', 'dev', iface, state], stdout=PIPE, stderr=PIPE)
         process.wait()
         if process.returncode != 0:
             message = "Fail to set {0} port to {1} state.".format(iface, state)
             self.class_logger.error(message)
-            self.class_logger.error("StdOut: {0}".format(process.stdout.read()))
-            self.class_logger.error("StdErr: {0}".format(process.stderr.read()))
+            self.class_logger.error("StdOut: %s", process.stdout.read())
+            self.class_logger.error("StdErr: %s", process.stderr.read())
             raise PypackerException(message)
 
     def connect_port(self, iface):
@@ -1061,27 +850,32 @@ class PacketGenerator(object):
     @description  Packet generator used for creating field values based on generators
     """
 
-    def __init__(self, packet, generator=None):
+    def __init__(self, packet, stream_increments=None):
         """
         @brief  Initialize PacketGenerator class
         @param  packet:  Packet to analyze
         @type  packet:  pypacker.Packet
-        @param  generator:  Generator's count value
-        @type  generator:  int|str
+        @param  stream_increments:  list of packet field name and appropriate Iteration class
+                                    to generate field values
+        @type  stream_increments:  list(tuples(str, tg_generators.BaseGenerator))
         """
         self.packet = packet
-        self.generator = generator
+        self.stream_increments = stream_increments
 
     def __next__(self):
         """
         @brief  Return next item from container
         """
-        if self.generator:
-            fields = [x[0] for x in self.generator]
-            values = [x[1] for x in self.generator]
+        if not self.stream_increments:
+            return self.packet
+        else:
+            fields = [x[0] for x in self.stream_increments]
+            values = [x[1] for x in self.stream_increments]
             for mapped_values in itertools.zip_longest(*values):
                 for field, value in itertools.zip_longest(fields, mapped_values):
-                    if value:
+                    if not value:
+                        continue
+                    else:
                         # Find layer and set value
                         if '.' in field:
                             layer, layer_field = field.split('.')
@@ -1105,11 +899,8 @@ class PacketGenerator(object):
                         else:
                             setattr(self.packet, field, value)
                 return self.packet
-        else:
-            return self.packet
 
 
 ENTRY_TYPE = "tg"
 INSTANCES = {"pypacker": PypackerTG}
 NAME = "tg"
-
