@@ -32,7 +32,7 @@ from testlib.packet_processor import PacketProcessor
 from testlib.custom_exceptions import IxiaException
 
 IXNET_CONF = {"name": "IxNetwork-103", "entry_type": "tg", "instance_type": "ixiahl", "id": "1",
-              "ip_host": "10.166.44.250", "tcl_server": "10.166.44.8:8206", "user": "IxNetwork/yow-onsWin2008/cg06or",
+              "ip_host": "X.X.X.X", "tcl_server": "X.X.X.X:8200", "user": "IxNetwork/user",
               "kprio": 200, "sprio": 200, "cprio": 200, "tprio": 200,
               "ports": [[1, 2, 9], ]}
 
