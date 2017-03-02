@@ -32,7 +32,7 @@ In general, you should define only ids of necessary devices, but you can also ov
 
    {
    "env": [
-           {"id": 0, "ifaces": [[1, 1, 6], [1, 1, 7], [1, 1, 8], [1, 1, 9], [1, 1, 10], [1, 1, 11], [1, 1, 12], [1, 1, 13], [1, 1, 14]]},
+           {"id": 0, "ports": [[1, 1, 6], [1, 1, 7], [1, 1, 8], [1, 1, 9], [1, 1, 10], [1, 1, 11], [1, 1, 12], [1, 1, 13], [1, 1, 14]]},
            {"id": 1, "ports": [24, 25, 26, 33, 48, 39, 34, 35]},
            {"id": 4, "ports": [28, 29, 24, 25, 26, 27]},
            {"id": 3, "ports": [24, 25, 28, 29, 34, 35]},
@@ -81,7 +81,7 @@ This list of connections is a list of lists. Each connection is a list of four e
 
    {
    "env": [
-           {"id": 0, "ifaces": [[1, 1, 6], [1, 1, 7], [1, 1, 8], [1, 1, 9], [1, 1, 10]]},
+           {"id": 0, "ports": [[1, 1, 6], [1, 1, 7], [1, 1, 8], [1, 1, 9], [1, 1, 10]]},
            {"id": 1},
            {"id": "30"}
           ],
@@ -235,7 +235,7 @@ Cross:
    [
      {"entry_type": "cross", "instance_type": "vlab", "id": "2",
       "ip_host": "localhost", "ip_port": "8050",
-      "ifaces": ["vlab0", "vlab1", "vlab2", "vlab3", "vlab4"],
+      "ports": ["vlab0", "vlab1", "vlab2", "vlab3", "vlab4"],
       "tgmap": [0],
       "related_id": [1]},
    ]

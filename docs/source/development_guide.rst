@@ -2,9 +2,8 @@ Development guide
 =================
 TAF code naming convention
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-**General**
 
-The heart of the design of python project is its high level of readability. One reason for code to be easily readable and understood is following set of code style guidelines. It is always advisable to maintain consistency in naming standards. This document describes the nomenclature suggested for use in TAF. TAF developers requires reading at `PEP 8 -- Style Guide for Python Code <https://www.python.org/dev/peps/pep-0008/>`_  , and TAF library is conservative and requires limiting lines to 79 characters (and docstrings/comments to 72) although it exceeds `PEP 8 <https://www.python.org/dev/peps/pep-0008/>`_  standard. 79 characters will give enough to review side-by-side with multiple files, and visualize the difference between changes well in code review tools. Only exception is in writing function name in testcases which can exceed this limit as long as it's helpful to understand the testcase.
+The heart of the design of python project is its high level of readability. One reason for code to be easily readable and understood is following set of code style guidelines. It is always advisable to maintain consistency in naming standards. This document describes the nomenclature suggested for use in TAF. TAF developers requires reading at `PEP 8 -- Style Guide for Python Code <https://www.python.org/dev/peps/pep-0008/>`_  , and TAF library is conservative and requires limiting lines to 99 characters (and docstrings/comments to 92) although it exceeds `PEP 8 <https://www.python.org/dev/peps/pep-0008/>`_  standard. 99 characters will give enough to review side-by-side with multiple files, and visualize the difference between changes well in code review tools. Only exception is in writing function name in testcases which can exceed this limit as long as it's helpful to understand the testcase.
 
 Directory
 +++++++++
@@ -162,192 +161,171 @@ Arguments
 Docstring
 +++++++++
 
-All files, classes, class methods and first level functions must have properly created docstrings. Note that 'type' syntax in Python docstrings is not defined by any standard. Thus, suggest following notations at `PyCharm <https://www.jetbrains.com/pycharm/webhelp/type-hinting-in-pycharm.html>`_ , `Epydoc <http://epydoc.sourceforge.net/fields.html>`_. This type hinting is only for TAF core library, not for testcases.
+All files, classes, class methods and first level functions must have properly created docstrings. Note that 'type' syntax in Python docstrings is `Google style <https://google.github.io/styleguide/pyguide.html>`_ .
+
+**Google style** tends to be easier to read for short and simple docstrings.
 
 **File**
 
-Each python file in TAF should contain a header where the main information about the file is stored. Following keywords can be used:
+Each python file in TAF should contain a header where the main information about the file is stored:
 
-+-----------------+------------------------------------------------------------------------------------+
-|**@copyright**   |put Intel copyright statement                                                       |
-+-----------------+------------------------------------------------------------------------------------+
-|**@file**        |the name of the test suite (python file name, e.g.: `@file <test_suite_name>.py`)   |
-+-----------------+------------------------------------------------------------------------------------+
-|**@summary**     |the summary of the test suite                                                       |
-+-----------------+------------------------------------------------------------------------------------+
-|**@details**     |list available test cases in the test suite                                         |
-+-----------------+------------------------------------------------------------------------------------+
+* copyright
+* licence information
+* file name
+* summary
+* note with example of module usage in tests (optionally)
+
+In accordance to `Google style <https://google.github.io/styleguide/pyguide.html>`_ of docstrings should look as following example:
 
 *Example:*
 
 .. code-block:: python
    :linenos:
 
-    """
-    @copyright Copyright (c) 2011 - 2017, Intel Corporation.
+   # Copyright (c) 2011 - 2016, Intel Corporation.
+   #
+   # Licensed under the Apache License, Version 2.0 (the "License");
+   # you may not use this file except in compliance with the License.
+   # You may obtain a copy of the License at
+   #
+   #     http://www.apache.org/licenses/LICENSE-2.0
+   #
+   # Unless required by applicable law or agreed to in writing, software
+   # distributed under the License is distributed on an "AS IS" BASIS,
+   # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   # See the License for the specific language governing permissions and
+   # limitations under the License.
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+   """``dpdk.py``
 
-        http://www.apache.org/licenses/LICENSE-2.0
+   Class for dpdk operations
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+   Note:
+       Examples of dpdk usage in tests::
 
-    @file test_vlan.py
+           inst.ui.dpdk.modify_iface_status(bind_action='bind', ifaces=["0000:01:00.0", "01:00.0"],
+                                            drv='igb_uio', force=False, show_status=True)
 
-    @summary   Test Vlan implementation.
-
-    @details
-    Following test cases are tested:
-      1. Verify that static VLAN can be created.
-      2. Verify that static VLAN can be deleted and default VLAN cannot be deleted
-
-    """
+   """
 
 **Class**
 
 Create a class with appropriate docstring. Following keywords can be used:
 
-+----------------------+----------------------------------------------------------------+
-|**@description**      |describing the functionality of testing suite                   |
-+----------------------+----------------------------------------------------------------+
-|**@par**              |paragraph for further detailed explanation or to give examples  |
-+----------------------+----------------------------------------------------------------+
-|**@code, @endcode**   |to mention any coding samples for the usage                     |
-+----------------------+----------------------------------------------------------------+
++----------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|**Note**              |An optional section that provides additional information about the code, possibly including a discussion of the algorithm                           |
++----------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+|**Example**           |Sections support any reStructuredText formatting, including literal blocks:: or `doctest <https://docs.python.org/3/library/doctest.html>`_ format  |
+|                      |to mention any coding samples                                                                                                                       |
++----------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 
 *Example:*
 
 .. code-block:: python
    :linenos:
 
-    """
-    @description  General Switch object functionality.
+   class NoErrArgumentParser(argparse.ArgumentParser):
+       """ArgumentParser class that handle only predefined for an instance options.
 
-    @par Configuration examples:
+       Note:
+           The original ArgumentParser class raises an error if handle unknown option.
+           But py.test have it's own options and it's own custom parser and if ArgumentParser find them it raises an error.
+           Using this class allows not to define all possible options in each module that uses ArgumentParser.
 
-    @code{.json}
-    {
-    "name": "simswitch2_lxc",
-    "entry_type": "switch",
-    "instance_type": "lxc",
-    }
-    @ endcode
-    """
+       Examples::
 
+               def parse_args(self, *args, **kwargs):
+                   if len(args) > 0:
+                       args_to_parse = args[0]
+                   else:
+                       args_to_parse = sys.argv[1:]
+                   new_args_to_parse = []
+
+       """
 
 **Function**
 
-*Test Case*
+Create a test case function with appropriate docstring.
+Sub-functions inside first level functions don`t need to contain docstrings as far as they aren't designed for any external calls. Ignore `pylint <https://www.pylint.org/>`_ messages.
 
-Create a test case function with appropriate docstring. Following keywords can be used:
+In case you wish to create a docstring, following keywords can be used:
 
-+--------------+------------------------------------------------------------------------------+
-|**@brief**    |summary of the particular test case should explain actual device's behavior   |
-+--------------+------------------------------------------------------------------------------+
-|**@steps**    |describe the steps for particular test case                                   |
-+--------------+------------------------------------------------------------------------------+
++-------------+---------------------------------------------------------------------------------+
+|**Args**     |description of the function arguments, keywords and their respective types       |
++-------------+---------------------------------------------------------------------------------+
+|**Returns**  |explanation of the returned values and their types                               |
++-------------+---------------------------------------------------------------------------------+
+|**Raises**   |an optional section detailing which errors get raised and under what conditions  |
++-------------+---------------------------------------------------------------------------------+
+|**Yields**   |explanation of the yielded values and their types                                |
++-------------+---------------------------------------------------------------------------------+
 
-*Example #1* *(TAF Core library)*
-
-.. code-block:: python
-   :linenos:
-
-    def cli_set(self, commands, split_lines=True, expected_rc=0)
-        """
-        @brief: Sends a list of commands, will raise an exception on any error
-        @param commands: command string to execute
-        @type commands: list[list[str]]
-        @param split_lines: determine to split or not
-        @type split_lines: bool
-        @param expected_rc: expected return code
-        @type expected_rc: int
-        @raise UIException
-        @rtype: list[list[str]]
-        @return: Output in sequence per list of commands
-        """
-
-
-*Example #2*  *(Test Case)*
+*Example function docstrings with Returns key:*
 
 .. code-block:: python
    :linenos:
 
-    """
-    @brief Verify that the Static entry can be removed
-    @steps
-        -# Disable STP.
-        -# Add new static entry to FDB.
-    @endsteps
-    """
+   def __get__(self, instance, owner):
+       """This method is called from class.
 
+       Args:
+           owner (owner):  class instance.
 
-*Sub module Functions*
+       Returns:
+           logging.LoggerAdapter:  logger adaptor.
 
-Sub-functions inside first level functions need not contain doc strings as far as they aren't designed for any external calls. Ignore `pylint <https://www.pylint.org/>`_ messages. In case you wish to create a docstring, following keywords can be used:
+       Raises:
+           KeyError: Cannot connect to logger adaptor.
 
-+---------------------+----------------------------------------------------+
-|**@brief**           |summary of the particular function                  |
-+---------------------+----------------------------------------------------+
-|**@param**           |explanation of arguments given to a function        |
-+---------------------+----------------------------------------------------+
-|**@type**            |explanation of argument type given to a function    |
-+---------------------+----------------------------------------------------+
-|**@note**            |any notes for better understanding                  |
-+---------------------+----------------------------------------------------+
-|**@code, @endcode**  |to mention any coding samples for the usage         |
-+---------------------+----------------------------------------------------+
-|**@rtype**           |to specify return type of the function              |
-+---------------------+----------------------------------------------------+
-|**@return**          |to specify return value of the function             |
-+---------------------+----------------------------------------------------+
+       """
+       if self.for_exception:
+           caller_frame = inspect.stack()[2]
+           module_name = inspect.getmodulename(caller_frame[1])
+           func_name = caller_frame[3]
+           try:
+               class_name = caller_frame[0].f_locals["self"].__class__.__name__
+           except KeyError:
+               class_name = ""
+           _logger_adaptor = self._get_logger(module_name, class_name, func_name)
+       else:
+           _logger_adaptor = self._get_logger(owner.__module__, owner.__name__)
+       return _logger_adaptor
 
-*Example:*
+*Example function docstrings with Yields key:*
 
 .. code-block:: python
    :linenos:
 
-    """
-    @brief  Check that FDB table is filled correctly
-    @param  switch_instance  Switch instance to work with
-    @param  macaddress  MAC address for check
-    @note  This function check if master port should be devided into slave ports.
-    @return  Count of entries
-    @code
-    assert self._is_entry_added_to_fdb_table(portid=ports[('sw1', 'tg1')][1], macaddress=source_mac, vlanid=vlan_id, fdb_type="Dynamic", switch_instance=env.switch[1]) == 1
-    @ endcode
-    """
+   def parse_table_vlan(self, vlan_table):
+       """Parses the vlan table.
 
+       This needs to be a loop because previous the table
+       is built based on previous entries.
 
-* Use `@copydoc <link-object>` command to avoid cases where a documentation block would otherwise have to be duplicated or to extend the documentation of an inherited member.
-* In order to copy the documentation for a member of a class:
+       Args:
+           vlan_table (list[str] | iter()):  List of vlan raw output
 
-.. code-block:: python
-   :linenos:
+       Yields:
+           iter(): A dictionary containing the portId, vlanId, and tagged state for each vlan
 
-    def myfunction():
-        """
-        @copydoc MyClass::myfunction()
-        More documentation if required
-        """
-
-In case if source docstring is in other file, you can use the following syntax:
-
-.. code-block:: python
-   :linenos:
-
-    def customized_get_file():
-        """
-        @copydoc testlib::cli_template::CLIGeneric::get_file()
-        More documentation if required
-        """
-
-Where testlib is file's folder, cli_template is file name, CLIGeneric is class, get_file() is function.
+       """
+       for row in vlan_table:
+           match = re.search(
+               r"(?P<portId>\S*\d+)?\s*(?P<vlanId>\d+)\s*(?P<pvid>PVID)?\s*(?:Egress)?\s*(?P<tagged>\D+)?", row)
+           if match:
+               row = match.groupdict()
+               row['vlanId'] = int(row['vlanId'])
+               if row['tagged'] is None:
+                   row['tagged'] = 'Tagged'
+               row['pvid'] = (row['pvid'] == 'PVID')
+               if row['portId'] is not None:
+                   # Set portId on the first line and use that value for following lines
+                   row['portId'] = self.name_to_portid_map[row['portId']]
+                   port_id = row['portId']
+               else:
+                   # This row doesn't have a portId because it implicitly uses the previous
+                   row['portId'] = port_id
+               yield row
 
 Test Case Structure
 ^^^^^^^^^^^^^^^^^^^
@@ -368,34 +346,42 @@ Test suite is divided into the following separate parts:
 
 Header
 ++++++
-Each test case python file in TAF3 ("testcases" directory) should contain a header where the main information about the file is stored.
+Each test case python file in TAF3 ("testcases" directory) should contain a header with contains following information:
 
-+--------------------+----------------------------------------------+
-|**@copyright**      |copyright section                             |
-+--------------------+----------------------------------------------+
-|**@file**           |the name of the test suite (python file name) |
-+--------------------+----------------------------------------------+
+* copyright
+* licence information
+* file name
+* summary
+* note (contain information what following test case are tested)
 
-.. code-block:: python
-   :linenos:
-
-    @file  <test_suite_name>.py
-
-+-----------------+-----------------------------------------------+
-|**@summary**     |the summary of the test suite                  |
-+-----------------+-----------------------------------------------+
-|**@details**     |list available test cases in the test suite    |
-+-----------------+-----------------------------------------------+
 
 .. code-block:: python
    :linenos:
 
-    @details
-    Following test cases are tested:
-    1.      <test 1 summary>
-    2.      <test 2 summary>
-    ..      ..
-    n.      <test N summary>
+   # Copyright (c) 2011 - 2016, Intel Corporation.
+   #
+   # Licensed under the Apache License, Version 2.0 (the "License");
+   # you may not use this file except in compliance with the License.
+   # You may obtain a copy of the License at
+   #
+   #     http://www.apache.org/licenses/LICENSE-2.0
+   #
+   # Unless required by applicable law or agreed to in writing, software
+   # distributed under the License is distributed on an "AS IS" BASIS,
+   # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   # See the License for the specific language governing permissions and
+   # limitations under the License.
+
+   """``test_vlan.py``
+
+   `Test Vlan implementation`
+
+   Note:
+       Following test cases are tested:
+        1. Verify that static VLAN can be created.
+        2. Verify that static VLAN can be deleted and default VLAN cannot be deleted.
+
+   """
 
 .. note::
 
@@ -443,7 +429,7 @@ Class name should start with "Test". Class decorators should contain the followi
 * list of platform in case test suite/case is platform dependent (optional);
 * mark to skip pidchecker plugin (optional).
 
-*Example:*
+*Example of test suite docstrings:*
 
 .. code-block:: python
    :linenos:
@@ -454,9 +440,27 @@ Class name should start with "Test". Class decorators should contain the followi
     @pytest.mark.acl
     @pytest.mark.lag
     class TestRSTPSimplified(object):
+    """Suite for testing custom feature.
+
     """
-    @description Suite for testing custom feature.
-    """
+
+*Example of test case functions docstrings:*
+
+Write a summary of the particular test case which should explain actual device\'s behavior.
+
+Describe test steps of the particular test case.
+
+.. code-block:: python
+   :linenos:
+
+   def test_bpdu_packet_format(self, env):
+       """Verify that BPDU packets sent by switch are correctly formatted.
+
+       Steps:
+           - # Capture BPDU frames from the DUT
+           - # Verify BPDU frames are correctly formatted
+
+       """
 
 It's recommended to register all your markers in pytest.ini file.
 
@@ -481,7 +485,7 @@ Section should start with following comment separated with a blank line:
 .. code-block:: python
    :linenos:
 
-    # Attributes and Properties
+   # Attributes and Properties
 
 
 Then, class attributes should contain short inline description:
@@ -489,14 +493,14 @@ Then, class attributes should contain short inline description:
 .. code-block:: python
    :linenos:
 
-    tp_id = 0x9100
-    tagged = "Tagged"
-    untagged = "Untagged"
+   tp_id = 0x9100
+   tagged = "Tagged"
+   untagged = "Untagged"
 
 
 Class method should have a docstring with following parts:
 
-* brief summary with method description;
+* summary with method description;
 * parameters with name and description (optional);
 * return value description (optional);
 * usage examples (optional).
