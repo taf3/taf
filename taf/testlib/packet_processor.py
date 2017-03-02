@@ -37,7 +37,7 @@ class PacketProcessor(object):
     """
 
     class_logger = loggers.ClassLogger()
-
+    inner_classes = ["Echo", "Unreach", "Redirect", "Error", "TooBig", "TimeExceed", "ParamProb"]
     flt_patterns = {
         "ARP": {'ptrn1': ["08 06", "00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1",
                 'lfilter': lambda x: getattr(x, 'arp', None) and not x.vlan},
@@ -106,7 +106,7 @@ class PacketProcessor(object):
         @par Example:
         @code{.py}
         packet_definition = ({"Ether": {"dst": "00:80:C2:00:00:00", "src": "00:00:00:00:00:02"}},
-                             {"Dot1Q": {"vlan": 4}},
+                             {"Dot1Q": {"vid": 4}},
                              {"IP": {}})
         packet=env.tg[1]._build_trex_packet(packet_definition)
         @endcode
@@ -151,28 +151,33 @@ class PacketProcessor(object):
 
         return packet
 
-    @staticmethod
-    def __get_pypacker_layer(layer):
+    def _get_pypacker_layer(self, layer):
         """
         @brief  Get Pypacker protocol object
-        @param  layer:  Protocol name
+        @param  layer:  Protocol name e.g IP, ICMP.Echo
         @type  layer:  str
         @rtype:  pypacker.Packet
         @return:  return Pypacker object
         """
-        if layer in ["Ethernet", "ARP", "LLC", "STP"]:
-            return getattr(getattr(pypacker.layer12, layer.lower()), layer)
-        elif layer in ["IP", "IP6", "ICMP", "IGMP"]:
-            return getattr(getattr(pypacker.layer3, layer.lower()), layer)
-        elif layer in ["TCP", "UDP"]:
-            return getattr(getattr(pypacker.layer4, layer.lower()), layer)
-        elif layer == "FlowControl":
-            return getattr(getattr(pypacker.layer12, "flow_control"), layer)
-        elif layer in ["Pause", "PFC"]:
-            return getattr(getattr(getattr(pypacker.layer12, "flow_control"), "FlowControl"), layer)
+        if '.' not in layer:
+            if layer in ["Ethernet", "ARP", "LLC", "STP"]:
+                return getattr(getattr(pypacker.layer12, layer.lower()), layer)
+            elif layer in ["IP", "IP6", "ICMP", "IGMP"]:
+                return getattr(getattr(pypacker.layer3, layer.lower()), layer)
+            elif layer in ["TCP", "UDP"]:
+                return getattr(getattr(pypacker.layer4, layer.lower()), layer)
+            elif layer == "FlowControl":
+                return getattr(getattr(pypacker.layer12, "flow_control"), layer)
+            elif layer in ["Pause", "PFC"]:
+                return getattr(getattr(getattr(pypacker.layer12, "flow_control"), "FlowControl"), layer)
+        # Handle inner pypacker class e.g. icmp.ICMP.Echo
+        else:
+            layer, inner_layer = layer.split('.')
+            pypacker_layer = self._get_pypacker_layer(layer)
+            return getattr(pypacker_layer, inner_layer)
 
     @staticmethod
-    def __get_pypacker_layer_fields(packet):
+    def _get_pypacker_layer_fields(packet):
         """
         @brief  Get packet fields
         @param  packet:  pypacker packet
@@ -191,7 +196,9 @@ class PacketProcessor(object):
         @brief  Builds pypacker packet based on provided packet definition.
         @param  packet_definition:  Packet representation (tuple of dictionaries of dictionaries)
         @type  packet_definition:  tuple(dict)
-        @param  adjust_size:  If set to True packet size will be increased to 60 bytes (CRC not included)
+        @param  adjust_size:  If set to True packet size will be increased to 64 bytes for Pypacker TG (CRC is included)
+                              and to 60 bytes for Ixia TG without CRC.
+                              Otherwise Ixia TG will add 4 bytes(CRC), Pypacker TG will not add CRC.
         @type  adjust_size:  bool
         @param  required_size:  Size (in bytes) of the result packet
         @type  required_size:  int
@@ -200,7 +207,7 @@ class PacketProcessor(object):
         @par Example:
         @code{.py}
         packet_definition = ({"Ethernet": {"dst": "00:80:C2:00:00:00", "src": "00:00:00:00:00:02"}},
-                             {"Dot1Q": {"vlan": 4}},
+                             {"Dot1Q": {"vid": 4}},
                              {"IP": {}})
         packet=env.tg[1]._build_pypacker_packet(packet_definition)
         @endcode
@@ -210,19 +217,13 @@ class PacketProcessor(object):
             """
             @brief  Return pypacker Packet object built according to definition.
             """
-            layer_name = list(layer_dict.keys())[0]
-            # Handle inner pypacker class e.g. icmp.ICMP.Echo
-            if '.' in layer_name:
-                layer, inner_layer = layer_name.split('.')
-                pypacker_layer = self.__get_pypacker_layer(layer)
-                sl = getattr(pypacker_layer, inner_layer)()
+            layer_name = next(iter(layer_dict))
+            pypacker_layer = self._get_pypacker_layer(layer_name)
+            if pypacker_layer:
+                sl = pypacker_layer()
+            # Skip undefined layers e.g. Dot1Q
             else:
-                pypacker_layer = self.__get_pypacker_layer(layer_name)
-                if pypacker_layer:
-                    sl = pypacker_layer()
-                # Skip undefined layers e.g. Dot1Q
-                else:
-                    return None
+                return None
 
             for field, value in layer_dict[layer_name].items():
                 if getattr(sl, '{0}_s'.format(field), None):
@@ -248,7 +249,11 @@ class PacketProcessor(object):
         if adjust_size:
             packet_length = len(packet)
             if packet_length < required_size:
-                packet.padding = b"\x00" * (required_size - packet_length)
+                loss_bytes = required_size - packet_length
+                try:
+                    packet.padding = b"\x00" * (loss_bytes + len(packet.padding))
+                except AttributeError:
+                    packet.upper_layer.body_bytes = b"\x00" * loss_bytes
             # packet length cannot be less 14 bytes for Ethernet layer due to pypacker behavior
             elif packet_length > required_size and required_size < 60:
                 self.class_logger.warning("required_size is less than actual size. Packet will be cut off")
@@ -273,13 +278,18 @@ class PacketProcessor(object):
         @return:  True or False
         @par Example:
         @code{.py}
-        assert check_packet_field(packet=pypacker_packet, layer="Dot1Q", field="prio", value=4)
-        assert check_packet_field(packet=pypacker_packet, layer="Dot1Q", field="type")
+        assert check_packet_field(packet=pypacker_packet, layer="S-Dot1Q", field="prio", value=4)
+        assert check_packet_field(packet=pypacker_packet, layer="S-Dot1Q", field="type")
         @endcode
         """
         try:
             packet_value = self.get_packet_field(packet, layer, field)
-            return True if packet_value == value else False
+            if value is None:
+                return True
+            elif packet_value == value:
+                return True
+            else:
+                return False
         except PypackerException:
             return False
 
@@ -297,26 +307,26 @@ class PacketProcessor(object):
         @return:  value (may be different types, depending on field)
         @par Example:
         @code{.py}
-        value = get_packet_field(packet=pypacker_packet, layer="Dot1Q", field="vlan")
+        value = get_packet_field(packet=pypacker_packet, layer="S-Dot1Q", field="vid")
         @endcode
         """
         tag_id = {"S-Dot1Q": 0, "C-Dot1Q": 1}
         try:
-            if layer in tag_id:
+            with suppress(KeyError):
+                layer_tag = tag_id[layer]
                 vlan_tags = self.get_packet_field(packet, "Ethernet", "vlan")
                 try:
-                    return getattr(vlan_tags[tag_id[layer]], field)
+                    return getattr(vlan_tags[layer_tag], field)
                 except IndexError:
                     raise PypackerException("VLAN tag is not defined")
-            else:
-                packet_layer = self.get_packet_layer(packet, layer)
 
-                if packet_layer is None:
-                    message = "Layer {0} is not defined".format(layer)
-                    raise PypackerException(message)
-                with suppress(AttributeError):
-                    return getattr(packet_layer, '{0}_s'.format(field))
-                return getattr(packet_layer, field)
+            packet_layer = self.get_packet_layer(packet, layer)
+            if packet_layer is None:
+                message = "Layer {0} is not defined".format(layer)
+                raise PypackerException(message)
+            with suppress(AttributeError):
+                return getattr(packet_layer, '{0}_s'.format(field))
+            return getattr(packet_layer, field)
         except AttributeError:
             message = "Field {0} is not defined in {1}".format(field, layer)
             raise PypackerException(message)
@@ -334,14 +344,15 @@ class PacketProcessor(object):
         @return:  pypacker.Packet or str
         @par  Example:
         @code{.py}
-        packet_definition = ({"Ethernet": {"dst": "00:80:C2:00:00:00", "src": "00:00:00:00:00:02"}}, {"Dot1Q": {"vlan": 4}}, {"IP": {}})
+        packet_definition = ({"Ethernet": {"dst": "00:80:C2:00:00:00", "src": "00:00:00:00:00:02"}},
+                            {"Dot1Q": {"vid": 4}}, {"IP": {}})
         pypacker_packet = _build_pypacker_packet(packet_definition)
         ip_layer_hex = get_packet_layer(packet=pypacker_packet, layer="IP", output_format="hex")
         assert ip_layer_hex[-8:] == '7f000001'
         @endcode
         """
         try:
-            pypacker_layer = self.__get_pypacker_layer(layer)
+            pypacker_layer = self._get_pypacker_layer(layer)
             layer = packet[pypacker_layer]
             if output_format == "pypacker":
                 return layer
@@ -365,29 +376,35 @@ class PacketProcessor(object):
         @return  dictionary created from pypacker.Packet
         @par  Example:
         @code{.py}
-        p = pypacker.Ethernet(dst="ff:ff:ff:ff:ff:ff", src="90:e6:ba:c3:17:13", type=0x806)/
-            pypacker.ARP(hwtype=0x1, ptype=0x800, hwlen=6, plen=4,
-                      op=1, hwsrc="90:e6:ba:c3:17:13", psrc="172.20.20.175", hwdst="00:00:00:00:00:00", pdst="172.20.20.211")/
-            pypacker.Padding(load='\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        p = ethernet.Ethernet(dst_s="ff:ff:ff:ff:ff:ff", src_s="90:e6:ba:c3:17:13", type=0x806)/
+            arp.ARP(hrd=0x1, pro=0x800, hln=6, pln=4,
+                      op=1, sha="90:e6:ba:c3:17:13", spa="172.20.20.175", tha="00:00:00:00:00:00", tpa="172.20.20.211")
         pd = PacketProcessor().packet_dictionary(p)
-        assert pd == ({'Ether': {'src': '90:e6:ba:c3:17:13', 'dst': 'ff:ff:ff:ff:ff:ff', 'type': 2054}},
-                      {'ARP': {'hwdst': '00:00:00:00:00:00', 'ptype': 2048, 'hwtype': 1, 'psrc': '172.20.20.175',
-                               'plen': 4, 'hwlen': 6, 'pdst': '172.20.20.211', 'hwsrc': '90:e6:ba:c3:17:13', 'op': 1}},
-                      {'Padding': {'load': '\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00'}})
+        assert pd == ({'Ethernet': {'src': '90:e6:ba:c3:17:13', 'dst': 'ff:ff:ff:ff:ff:ff', 'type': 2054}},
+                      {'ARP': {'tha': '00:00:00:00:00:00', 'pro': 2048, 'hrd': 1, 'spa': '172.20.20.175',
+                               'pln': 4, 'hln': 6, 'tpa': '172.20.20.211', 'sha': '90:e6:ba:c3:17:13', 'op': 1}})
         @endcode
         """
         packet_def = []
         vlans = []
+        opts = []
         for layer in packet:
-            layer_dict = {}
             class_name = layer.__class__.__name__
-            fields = self.__get_pypacker_layer_fields(layer)
-            layer_dict[class_name] = {}
+            # Handle inner pypacker class e.g. icmp.ICMP.Echo, icmp6.ICMP6.Echo
+            if class_name in self.inner_classes:
+                # get main class ICMP + echo
+                class_name = "{0}.{1}".format(next(iter(layer_dict)), class_name)
+            fields = self._get_pypacker_layer_fields(layer)
+            layer_dict = {class_name: {}}
             for field in fields:
-                field = field.strip("_")
                 if field == "vlan" and self.get_packet_field(packet, "Ethernet", "vlan"):
                     for vlan in self.get_packet_field(packet, "Ethernet", "vlan"):
-                        vlans.append({"Dot1Q": {f: getattr(vlan, f) for f in self.__get_pypacker_layer_fields(vlan)}})
+                        vlans.append({"Dot1Q": {f: getattr(vlan, f) for f in self._get_pypacker_layer_fields(vlan)}})
+                elif field == "opts" and class_name in ["IP", "IP6"]:
+                    pypacker_opts = self.get_packet_field(packet, class_name, "opts")[:]
+                    opts_fields = {"len", "type", "body_bytes"}
+                    opts.append({f: getattr(opt, f) for opt in pypacker_opts for f in opts_fields})
+                    layer_dict[class_name][field] = opts
                 elif field != "padding":
                     layer_dict[class_name][field] = self.get_packet_field(layer, class_name, field)
             packet_def.append(layer_dict)
