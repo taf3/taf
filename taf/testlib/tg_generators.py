@@ -133,41 +133,10 @@ class PypackerIPGenerator(BaseGenerator):
         return current
 
 
-class PypackerUDPGenerator(BaseGenerator):
+class PypackerTCPOrUDPGenerator(BaseGenerator):
     """
-    @brief  Iteration class for list of UDP addresses generation
-    @param start_value:  initial UDP value
-    @type start_value:  str
-    @param increment:  incrementation step
-    @type increment:  int
-    @param count:  number of iteration steps
-    @type count:  int
-    """
-
-    def __next__(self):
-        """
-        @brief  Get next generated UDP address.
-        """
-        current = self.value
-        if self.iterator >= self.count and self.count != 0:
-            self.value = self.start_value
-            self.iterator = 1
-        else:
-            self.value = self.value + self.increment
-            if self.value > 65535:
-                diff = self.value - 65535
-                self.value = 1 + diff
-            if self.value < 1:
-                diff = self.value - 1
-                self.value = 65535 + diff
-            self.iterator += 1
-        return current
-
-
-class PypackerTCPGenerator(BaseGenerator):
-    """
-    @description  Iteration class for list of TCP addresses generation
-    @param start_value:  initial TCP value
+    @brief  Iteration class for list of UDP/TCP addresses generation
+    @param start_value:  initial UDP/TCP value
     @type start_value:  str
     @param increment:  incrementation step
     @type increment:  int
@@ -229,8 +198,8 @@ class PypackerIncrementPayloadGenerator(BaseGenerator):
         current = self.value
         if self.value == self.end_value:
             self.value = self.start_value
-            return current
-        self.value += abs(self.increment)
+        else:
+            self.value += self.increment
         return current
 
 
