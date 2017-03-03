@@ -1,39 +1,38 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``pytest_start_from_case.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Starting tests execution from the specified test case not from the beginning`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Examples::
 
-@file  pytest_start_from_case.py
+    # complete test-name
+    $ py.test PATH_TO_TESTS --start_from_case test_my_func
 
-@summary  Starting tests execution from the specified test case not from the beginning.
+    # not complete test-name
+    $ py.test PATH_TO_TESTS --start_from_case test*func
 
-@par Example:
-@verbatim
-# complete test-name
-$ py.test PATH_TO_TESTS --start_from_case test_my_func
+    # or
+    $ py.test PATH_TO_TESTS --start_from_case *func
 
-# not complete test-name
-$ py.test PATH_TO_TESTS --start_from_case test*func
+    # parameterized tests
+    $ py.test PATH_TO_TESTS --start_from_case test*[1]
 
-# or
-$ py.test PATH_TO_TESTS --start_from_case *func
+    # or
+    $ py.test PATH_TO_TESTS --start_from_case test*1
 
-# parameterized tests
-$ py.test PATH_TO_TESTS --start_from_case test*[1]
-
-# or
-$ py.test PATH_TO_TESTS --start_from_case test*1
-@endverbatim
 """
 
 import re
@@ -42,8 +41,8 @@ import pytest
 
 
 def pytest_addoption(parser):
-    """
-    @brief  Plugin specific options.
+    """Plugin specific options.
+
     """
     group = parser.getgroup("start_from_case", "plugin start from case")
     group.addoption("--start_from_case", action="store", default=None, dest="start_from_case",
@@ -51,16 +50,16 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin.
+    """Registering plugin.
+
     """
     if config.option.start_from_case:
         config.pluginmanager.register(StartFromCase(config), "_start_from_case")
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin.
+    """Unregistering plugin.
+
     """
     start_from_case = getattr(config, "_start_from_case", None)
     if start_from_case:
@@ -69,16 +68,16 @@ def pytest_unconfigure(config):
 
 
 class StartFromCase(object):
-    """
-    @description  Execute test run starting from specified test item
+    """Execute test run starting from specified test item.
+
     """
 
     def __init__(self, config):
         self.config = config
 
     def pytest_collection_modifyitems(self, session, config, items):
-        """
-        @brief  Leave only necessary items in collected list.
+        """Leave only necessary items in collected list.
+
         """
         start_case = session.config.option.start_from_case
         if start_case is not None:

@@ -1,22 +1,23 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``pytest_smartrerun.py``
+
+`Plugin is collecting failed test cases from specific Test Plan in Jira and run them again`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_smartrerun.py
-
-@summary  Plugin is collecting failed test cases from specific Test Plan in Jira and run them again.
-"""
 import pytest
 
 from .pytest_helpers import get_tcname
@@ -24,8 +25,8 @@ from .pytest_onsenv import setup_scope
 
 
 def pytest_addoption(parser):
-    """
-    @brief  Describe plugin specified options.
+    """Describe plugin specified options.
+
     """
     group = parser.getgroup("SM reporting", "plugin: smart rerun")
     group.addoption("--sm_rerun", action="store", default=None,
@@ -36,16 +37,16 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin.
+    """Registering plugin.
+
     """
     if config.option.sm_rerun:
         config.pluginmanager.register(SmartRerun(config), "_smart_rerun")
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin.
+    """Unregistering plugin.
+
     """
     smart_rerun = getattr(config, "_smart_rerun", None)
     if smart_rerun:
@@ -54,8 +55,8 @@ def pytest_unconfigure(config):
 
 
 class SmartRerun(object):
-    """
-    @description  Re-run failed test cases.
+    """Re-run failed test cases.
+
     """
     def __init__(self, config):
         self.config = config
@@ -71,10 +72,11 @@ class SmartRerun(object):
         request.addfinalizer(teardown)
 
     def _set_switch_log_level(self, env, loglevel):
-        """
-        @brief  Change loglevel on switches
-        @param  loglevel:  logging level
-        @type loglevel:  str
+        """Change loglevel on switches.
+
+        Args:
+            loglevel(str):  logging level
+
         """
         if hasattr(env, 'switch'):
             for switch in env.switch.values():

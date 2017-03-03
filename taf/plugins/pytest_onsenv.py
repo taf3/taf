@@ -1,22 +1,23 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``pytest_onsenv.py``
+
+`Creates env fixture for ons test cases`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_onsenv.py
-
-@summary  Creates env fixture for ons test cases.
-"""
 import time
 import sys
 
@@ -40,14 +41,15 @@ def finish(self):
 
 
 def _check_pytest_version(version, max_version):
-    """
-    @brief  Check if version is less or equal to the max_version
-    @param  version:  product version
-    @type  version:  str
-    @param  max_version:  max product version
-    @type  max_version:  str
-    @rtype:  bool
-    @return:  True/False
+    """ Check if version is less or equal to the max_version.
+
+    Args:
+        version(str): product version
+        max_version(str):  max product version
+
+    Returns:
+        bool: True/False
+
     """
     version_list = version.split('.')
     max_version_list = max_version.split('.')
@@ -77,8 +79,8 @@ TESTENV_OPTIONS = ["none", "simplified2", "simplified3", "simplified4", "simplif
 
 
 def pytest_addoption(parser):
-    """
-    @brief  TAF specific options
+    """TAF specific options.
+
     """
     parser.addoption("--env", action="store", default=None,
                      help="Testing environment, '%default' by default.")
@@ -123,8 +125,8 @@ def pytest_addoption(parser):
 
 
 def setup_scope():
-    """
-    @brief  Return setup_scope option value in global namespace.
+    """Return setup_scope option value in global namespace.
+
     """
     try:
         _setup_scope = [x for x in sys.argv if x.startswith("--setup_scope")][0].split("=")[1]
@@ -134,8 +136,8 @@ def setup_scope():
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin.
+    """Registering plugin.
+
     """
     if config.option.setup:
         config.pluginmanager.register(OnsEnvPlugin(), "_onsenv")
@@ -145,8 +147,8 @@ def pytest_configure(config):
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin.
+    """Unregistering plugin.
+
     """
     onsenv = getattr(config, "_onsenv", None)
     if onsenv:
@@ -182,15 +184,15 @@ class Env(object):
             self.env.testenv_checkstatus = True
 
     def destroy(self):
-        """
-        @brief  destroy testing environment
+        """Destroy testing environment.
+
         """
         self.env.shutdown()
 
 
 class EnvTest(object):
-    """
-    @description  Cleanup/Check testing environment
+    """Cleanup/Check testing environment.
+
     """
 
     def __init__(self, request, env):
@@ -199,8 +201,8 @@ class EnvTest(object):
         self.request.node.call_status = False
 
     def setup(self):
-        """
-        @brief  Cleanup/Check testing environment on test case setup
+        """Cleanup/Check testing environment on test case setup.
+
         """
         _start_time = time.time()
         # Clean up environment before new case
@@ -219,8 +221,8 @@ class EnvTest(object):
         self.request.config.ctlogger.debug("Exit env fixture setup. Item: %s" % self.request.node.name)
 
     def teardown(self):
-        """
-        @brief  Cleanup/Check testing environment on test case teardown
+        """Cleanup/Check testing environment on test case teardown.
+
         """
         self.request.config.ctlogger.debug("Entering env fixture teardown. Item: %s" % self.request.node.name)
         _start_time = time.time()
@@ -241,12 +243,14 @@ class OnsEnvPlugin(object):
 
     @pytest.fixture(scope='session')
     def env_init(self, request):
-        """
-        @brief  Validate command line options
-        @param  request:  pytest request
-        @param  request:  pytest.request
-        @rtype:  testlib.common3.Environment
-        @return:  Environment instance
+        """Validate command line options.
+
+        Args:
+            request(pytest.request): pytest request
+
+        Returns:
+            testlib.common3.Environment: Environment instance
+
         """
         if request.config.option.setup_scope not in {"session", "module", "class", "function"}:
             request.config.ctlogger.error("Incorrect --setup_scope option.")
@@ -266,12 +270,14 @@ class OnsEnvPlugin(object):
 
     @pytest.fixture(scope=setup_scope())
     def env_main(self, request, env_init):
-        """
-        @brief  Start/stop devices from environment
-        @param  request:  pytest request
-        @param  request:  pytest.request
-        @rtype:  testlib.common3.Environment
-        @return:  Environment instance
+        """Start/stop devices from environment.
+
+        Args:
+            request(pytest.request): pytest request
+
+        Returns:
+            testlib.common3.Environment: Environment instance
+
         """
         env_wrapper = Env(request, env_init)
 
@@ -282,12 +288,14 @@ class OnsEnvPlugin(object):
 
     @pytest.fixture
     def env(self, request, env_main):
-        """
-        @brief  Clear devices from environment
-        @param  request:  pytest.request
-        @param  env_main:  pytest fixture
-        @rtype:  testlib.common3.Environment
-        @return:  Environment instance
+        """Clear devices from environment.
+
+        Args:
+            request(pytest fixture):  pytest.request
+
+        Returns:
+            testlib.common3.Environment: Environment instance
+
         """
         env = EnvTest(request, env_main)
         request.addfinalizer(env.teardown)

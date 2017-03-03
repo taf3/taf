@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``SYNAPSERT.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`SYNAPSERT class`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  SYNAPSERT.py
-
-@summary  SYNAPSERT class
 """
 
 import os
@@ -37,18 +36,19 @@ import loggers
 
 
 class SYNAPSERT(object):
-    """
-    @description  Class for TCMS interaction
+    """Class for TCMS interaction.
+
     """
     jira = None
     class_logger = loggers.ClassLogger()
     name = "SynapseRT"
 
     def __init__(self, config_file="synapsert_client.json"):
-        """
-        @brief  Class initialization
-        @param  config_file:  SYNAPSERT configuration file
-        @type  config_file:  str
+        """Class initialization.
+
+        Args:
+            config_file(str): SYNAPSERT configuration file
+
         """
         self.host = None
         self.username = None
@@ -75,9 +75,11 @@ class SYNAPSERT(object):
 
     # Run it when you got first test case
     def _set_default_custom_fields(self):
-        """
-        @brief Find and set custom fields
-        @note  Serve for operating with custom fields.
+        """Find and set custom fields.
+
+        Note:
+            Serve for operating with custom fields.
+
         """
         # Init urllib for TS
         # Set cookie
@@ -88,11 +90,14 @@ class SYNAPSERT(object):
             self.tc_custom_fields = self.get_custom_fields("Test Case")
 
     def _set_allowed_suites(self, test_case):
-        """
-        @brief  Set allowed suites
-        @param  test_case:  Instance of Test Case
-        @type  test_case:  JIRA.Issue
-        @note  Get allowed values from 'Test Suite' custom field and store them
+        """Set allowed suites.
+
+        Args:
+            test_case(JIRA.Issue): Instance of Test Case
+
+        Note:
+            Get allowed values from 'Test Suite' custom field and store them.
+
         """
 #        self._generate_servlet(issue_type="ts")
         try:
@@ -106,10 +111,11 @@ class SYNAPSERT(object):
             self.allowed_suites.append(custom_field['value'])
 
     def _init_jira_client(self):
-        """
-        @brief Return Jira client.
-        @rtype:  JIRA
-        @return:  jira-instance
+        """Return Jira client.
+
+        Returns:
+            JIRA: jira-instance
+
         """
         try:
             self.jira = JIRA(options={'server': self.host}, basic_auth=(self.username, self.password))
@@ -121,10 +127,11 @@ class SYNAPSERT(object):
             return None
 
     def get_tracker(self):
-        """
-        @brief Check if tracker exists and sleep on 30 seconds
-        @rtype:  bool
-        @return: True if connect to Jira host
+        """Check if tracker exists and sleep on 30 seconds.
+
+        Returns:
+            bool: True if connect to Jira host
+
         """
         try:
             connection = urllib.request.urlopen(self.host)
@@ -138,10 +145,11 @@ class SYNAPSERT(object):
             return False
 
     def get_config(self):
-        """
-        @brief Return config fields
-        @rtype:  tuple(str)
-        @return:  host, project name, build number, test case  state, fail reason, automated test case name, platform
+        """Return config fields.
+
+        Returns:
+            tuple(str): host, project name, build number, test case  state, fail reason, automated test case name, platform
+
         """
         if not self.tc_custom_fields:
             self.tc_custom_fields = self.get_custom_fields("Test Case")
@@ -154,12 +162,13 @@ class SYNAPSERT(object):
             return None
 
     def get_tc_by_auto_tc_name(self, auto_tc_name):
-        """
-        @brief  Get Test Case by auto_tc_name
-        @param  auto_tc_name:  Automated TC Name of Test Case
-        @type  auto_tc_name:  str
-        @rtype:  JIRA.Issue
-        @return:  Instance of Test Case in JIRA
+        """Get Test Case by auto_tc_name.
+
+        Args:
+            auto_tc_name(str):  Automated TC Name of Test Case
+
+        Returns:
+            JIRA.Issue: Instance of Test Case in JIRA
 
         """
         # Search only test cases
@@ -182,14 +191,15 @@ class SYNAPSERT(object):
         return None
 
     def get_issue_by_name(self, name, issue_type="Test Case"):
-        """
-        @brief Get Jira issue by name
-        @param  name:  Summary of Test Plan
-        @type  name:  str
-        @param  issue_type:  Jira issue type
-        @type  issue_type:  str
-        @rtype:  JIRA.Issue
-        @return:  JIRA issue
+        """Get Jira issue by name.
+
+        Args:
+            name(str):  Summary of Test Plan
+            issue_type(str):  Jira issue type
+
+        Returns:
+            JIRA.Issue: JIRA issue
+
         """
         self._set_default_custom_fields()
         jql_str = "project='%s' AND issuetype='%s' AND summary ~ '%s'" % (self.project, issue_type, name, )
@@ -204,15 +214,18 @@ class SYNAPSERT(object):
             return None
 
     def _do_transition(self, item, value):
-        """
-        @brief Do transition of JIRA issue
-        @param  item:  Instance of issue
-        @type  item:  JIRA.Issue
-        @param  value:  Name of button
-        @type  value:  str
-        @rtype:  bool
-        @return:  True in case has been pushed successfully
-        @note Push buttons on issue: Pass, Fail, Cant Test, etc...`
+        """Do transition of JIRA issue.
+
+        Args:
+            item(JIRA.Issue):  Instance of issue
+            value(str):  Name of button
+
+        Returns:
+            bool: True in case has been pushed successfully
+
+        Note:
+            Push buttons on issue: Pass, Fail, Cant Test, etc...
+
         """
         try:
             transitions = self.jira.transitions(item)
@@ -227,12 +240,14 @@ class SYNAPSERT(object):
             return False
 
     def get_last_tp_by_platform(self, platform):
-        """
-        @brief  Get latest Test Plan by platform
-        @param  platform:  Platform name
-        @type  platform:  str
-        @rtype:  JIRA.Issue
-        @return:  Latest Test Plan by platform
+        """Get latest Test Plan by platform.
+
+        Args:
+            platform(str): Platform name
+
+        Returns:
+            JIRA.Issue: Latest Test Plan by platform
+
         """
         jql_str = "project='%s' AND type='Test Plan' ORDER BY updated DESC" % (self.project, )
         try:
@@ -247,12 +262,14 @@ class SYNAPSERT(object):
             self.class_logger.warning("Cannot find TP by platform %s: %s" % (platform, err))
 
     def get_last_open_tp(self, tp_name):
-        """
-        @brief Return last open Test Plan
-        @param  tp_name:  Jira Test Plan name
-        @type  tp_name:  str
-        @rtype:  JIRA.Issue
-        @return:  Last open Test Plan in JIRA
+        """Return last open Test Plan.
+
+        Args:
+            tp_name(str):  Jira Test Plan name
+
+        Returns:
+            JIRA.Issue: Last open Test Plan in JIRA
+
         """
         jql_str = "project='%s' AND issuetype='Test Plan'" % (self.project, )
         issues = self.jira.search_issues(jql_str)
@@ -277,10 +294,11 @@ class SYNAPSERT(object):
         return self.create_tp(tp_name + "-" + str(cur_ver + 1))
 
     def _create_test_suite(self, ts_name):
-        """
-        @brief Create test suite
-        @param  ts_name:  Jira Test Suite name
-        @type  ts_name:  str
+        """Create test suite.
+
+        Args:
+            ts_name(str): Jira Test Suite name
+
         """
         # Api to update Test Suite in the SynapseRT plugin storage. Use manageTestSuitesServlet servlet url: http://hostname/browse/<Project KEY>
         suite_data = {
@@ -299,12 +317,14 @@ class SYNAPSERT(object):
 
     @staticmethod
     def _get_suite_value(suite):
-        """
-        @brief  Get suite value without _test_
-        @param  suite:  Full test suite name
-        @type  suite:  str
-        @rtype:  str
-        @return:  Suite name without _test_
+        """Get suite value without _test_.
+
+        Args:
+            suite(str):  Full test suite name
+
+        Returns:
+            str: Suite name without _test_
+
         """
         _arr = suite.split(".")
         _value = ""
@@ -320,12 +340,12 @@ class SYNAPSERT(object):
         return _value
 
     def _set_suite(self, test_case, suite):
-        """
-        @brief Set Test Suite
-        @param  test_case:  Jira test case
-        @type  test_case:  JIRA.Issue
-        @param  suite:  Test suite name
-        @type  suite:  str
+        """Set Test Suite.
+
+        Args:
+            test_case(JIRA.Issue):  Jira test case
+            suite(str):  Test suite name
+
         """
         # If suite doesn't exists create it
 
@@ -341,18 +361,17 @@ class SYNAPSERT(object):
         self._update_cf(test_case, "Test Suite", [{'value': _suite}])
 
     def create_tc(self, name, description, auto_tc_name, suite=None):
-        """
-        @brief Create test case
-        @param  name:  Summary of Test Case
-        @type  name:  str
-        @param  description:  Description of Test Case
-        @type  description:  str
-        @param  auto_tc_name:  Automated TC Name customfield.
-        @type  auto_tc_name:  str
-        @param  suite:  Test Suite name.
-        @type  suite:  str
-        @rtype:  JIRA.Issue
-        @return:  instance of Test Case
+        """Create test case.
+
+        Args:
+            name(str):  Summary of Test Case
+            description(str):  Description of Test Case
+            auto_tc_name(str):  Automated TC Name customfield.
+            suite(str):  Test Suite name.
+
+        Returns:
+            JIRA.Issue: instance of Test Case
+
         """
         # Find test case by name
         if not name:
@@ -380,12 +399,14 @@ class SYNAPSERT(object):
         return test_case
 
     def create_tp(self, tp_name):
-        """
-        @brief Create test plan
-        @param  tp_name:  Summary of Test Plan
-        @type  tp_name:  str
-        @rtype:  JIRA.Issue
-        @return:  Instance of Jira Test Plan
+        """Create test plan.
+
+        Args:
+            tp_name(str):  Summary of Test Plan
+
+        Returns:
+            JIRA.Issue: Instance of Jira Test Plan
+
         """
         # Check if test plan exists
         issue_dict = {
@@ -398,15 +419,16 @@ class SYNAPSERT(object):
         return test_plan
 
     def _update_cf(self, test_case, custom_field=None, data=None):
-        """
-        @brief Update Custom Field
-        @param  test_case:  Jira test case
-        @type  test_case:  JIRA.Issue
-        @param  custom_field:  Name of custon field
-        @type  custom_field:  str
-        @param  data:  Custom field value
-        @type  data:  str
-        @note  Get customfield_id from allowed values
+        """Update Custom Field.
+
+        Args:
+            test_case(JIRA.Issue):  Jira test case
+            custom_field(str):  Name of custon field
+            data(str):  Custom field value
+
+        Note:
+            Get customfield_id from allowed values.
+
         """
         try:
             test_case.update(fields={'customfield_%s' % (self.tc_custom_fields[custom_field],): data})
@@ -415,12 +437,12 @@ class SYNAPSERT(object):
             self.class_logger.warning("Can\'t set custom field '%s': %s" % (custom_field, err))
 
     def _generate_servlet(self, key, issue_type=None):
-        """
-        @brief Generate OptionServlet issue or suite to OptionField
-        @param  key:  Jira Issue key
-        @type  key:  str
-        @param  issue_type:  Type of Jira issues
-        @type  issue_type:  str
+        """Generate OptionServlet issue or suite to OptionField.
+
+        Args:
+            key(str):  Jira Issue key
+            issue_type(str):  Type of Jira issues
+
         """
         try:
             connection = None
@@ -434,16 +456,14 @@ class SYNAPSERT(object):
             self.class_logger.warning(err)
 
     def set_failure_reason(self, test_case, value, platform=None, prefix=None):
-        """
-        @brief Set Failure Reason
-        @param  test_case:  Instance of Test Case
-        @type  test_case:  JIRA.Issue
-        @param  value:  Value of failure reason
-        @type  value:  str
-        @param  platform:  Platform of failed issue
-        @type  platform:  str
-        @param  prefix:  Prefix of Test Plan
-        @type  prefix:  str
+        """Set Failure Reason.
+
+        Args:
+            test_case(JIRA.Issue):  Instance of Test Case
+            value(str):  Value of failure reason
+            platform(str):  Platform of failed issue
+            prefix(str):  Prefix of Test Plan
+
         """
         try:
             self._update_cf(test_case, "Failure Reason", value)
@@ -463,19 +483,20 @@ class SYNAPSERT(object):
                                     self.get_issue_key(test_case), err)
 
     def _get_linked_defects(self, value, auto_tc_name, platform, prefix):
-        """
-        @brief Get linked defects
-        @param  value:  Value of failure reason
-        @type  value:  str
-        @param  auto_tc_name:  Automated TC Name customfield.
-        @type  auto_tc_name:  str
-        @param  platform:  Platform of failed issue
-        @type  platform:  str
-        @param  prefix:  Prefix of Test Plan
-        @type  prefix:  str
-        @rtype:  list[JIRA.Issue]
-        @return:  list of linked defetcs
-        @note Get list of linked defects of SubTests by auto_tc_name, platform and/or prefix
+        """Get linked defects.
+
+        Args:
+            value(str):  Value of failure reason
+            auto_tc_name(str):  Automated TC Name customfield.
+            platform(str):  Platform of failed issue
+            prefix(str):  Prefix of Test Plan
+
+        Returns:
+            list[JIRA.Issue]: list of linked defetcs
+
+        Note:
+            Get list of linked defects of SubTests by auto_tc_name, platform and/or prefix.
+
         """
         try:
             # issue_links = []
@@ -499,16 +520,16 @@ class SYNAPSERT(object):
             return None
 
     def _check_prefix(self, issue, prefix, platform):
-        """
-        @brief Check if summary of Test Case containts prefix. Return True or prefix is None or prefix exists
-        @param  issue:  Jira issue
-        @type  issue:  JIRA.Issue
-        @param  prefix:  Prefix of Test Plan
-        @type  prefix:  str
-        @param  platform:  Platform of failed issue
-        @type  platform:  str
-        @rtype:  bool
-        @return:  True if platform or prefix in issue
+        """Check if summary of Test Case containts prefix. Return True or prefix is None or prefix exists.
+
+        Args:
+            issue(JIRA.Issue):  Jira issue
+            prefix(str):  Prefix of Test Plan
+            platform(str):  Platform of failed issue
+
+        Returns:
+            bool: True if platform or prefix in issue
+
         """
         if prefix is None:
             return platform in self.get_summary(issue).split(':')[0].split("-")
@@ -516,14 +537,15 @@ class SYNAPSERT(object):
             return any(item.endswith(prefix) for item in self.get_summary(issue).split(':')[0].split("-"))
 
     def _link_issues(self, test_case, defect_keys):
-        """
-        @brief Relink defects to subtest
-        @param  test_case:  Instance of Test Case
-        @type  test_case:  JIRA.Issue
-        @param  defect_keys:  List of defect keys
-        @type  defect_keys:  list[str]
-        @rtype:  bool
-        @return:  True if defect list updated successfully
+        """Relink defects to subtest.
+
+        Args:
+            test_case(JIRA.Issue): Instance of Test Case
+            defect_keys(list[str]): List of defect keys
+
+        Returns:
+            bool: True if defect list updated successfully
+
         """
         try:
             if test_case is not None and defect_keys is not None:
@@ -554,13 +576,15 @@ class SYNAPSERT(object):
             return False
 
     def update_tc_status(self, test_case, status):
-        """
-        @brief  Update status of test case
-        @param  test_case:  Instance of Test Case
-        @type  test_case:  JIRA.Issue
-        @param  status:  Test case status
-        @type  status:  str
-        @raise  ValueError:  unknown status
+        """Update status of test case.
+
+        Args:
+            test_case(JIRA.Issue): Instance of Test Case
+            status(str): Test case status
+
+        Raises:
+            ValueError: unknown status
+
         """
         status_list = ('Pass', 'Fail', 'Can\'t Test', 'Re-open')
         if status not in status_list:
@@ -574,12 +598,14 @@ class SYNAPSERT(object):
 
     @staticmethod
     def get_summary(issue):
-        """
-        @brief  Get summary of Jira issue
-        @param  issue:  Instance of Test Case
-        @type  issue:  JIRA.Issue
-        @rtype:  str
-        @return:  Summary of Jira issue
+        """Get summary of Jira issue.
+
+        Args:
+            issue(JIRA.Issue):  Instance of Test Case
+
+        Returns:
+            str:  Summary of Jira issue
+
         """
         try:
             return issue.fields.summary
@@ -587,12 +613,14 @@ class SYNAPSERT(object):
             return None
 
     def get_tc_by_key(self, tc_key):
-        """
-        @brief  Get test case by key
-        @param  tc_key:  Jira issue key
-        @type  tc_key:  str
-        @rtype:  JIRA.Issue
-        @return:  Jira Test Case issue
+        """Get test case by key.
+
+        Args:
+            tc_key(str):  Jira issue key
+
+        Returns:
+            JIRA.Issue: Jira Test Case issue
+
         """
         try:
             test_case = self.jira.issue(tc_key)
@@ -608,12 +636,14 @@ class SYNAPSERT(object):
             return None
 
     def get_issue_status(self, issue):
-        """
-        @brief  Get issue status
-        @param  issue:  Instance of Test Case
-        @type  issue:  JIRA.Issue
-        @rtype:  str
-        @return:  Test case status
+        """Get issue status
+
+        Args:
+            issue(JIRA.Issue):  Instance of Test Case
+
+        Returns:
+            str: Test case status
+
         """
         try:
             status = issue.fields.status.name
@@ -623,12 +653,14 @@ class SYNAPSERT(object):
             self.class_logger.error("Can't get status for TC: '%s'" % (self.get_issue_key(issue)))
 
     def get_custom_fields(self, issue_type):
-        """
-        @brief  Get custom fields
-        @param  issue_type:  Jira issue type
-        @type  issue_type:  str
-        @rtype:  dict{}
-        @return:  Dictionary with custom field name, value pairs
+        """Get custom fields.
+
+        Args:
+            issue_type(str):  Jira issue type
+
+        Returns:
+            dict{}: Dictionary with custom field name, value pairs
+
         """
         try:
             url = '%s/rest/api/latest/issue/createmeta?projectKeys=%s&issuetypeName=Bug&expand=projects.issuetypes.fields' % (self.host, self.project)
@@ -652,10 +684,11 @@ class SYNAPSERT(object):
             self.class_logger.error("Cannot get customfield of %s" % issue_type)
 
     def get_available_platforms(self):
-        """
-        @brief  Get platform field values
-        @rtype:  list
-        @return:  List with available platforms
+        """Get platform field values.
+
+        Returns:
+            list: List with available platforms
+
         """
         try:
             url = '%s/rest/api/latest/issue/createmeta?projectKeys=%s&issuetypeName=Bug&expand=projects.issuetypes.fields' % (self.host, self.project)
@@ -677,10 +710,11 @@ class SYNAPSERT(object):
             self.class_logger.error("Cannot get all available platforms for SubTest")
 
     def _get_all_statuses(self):
-        """
-        @brief  Get all available statuses
-        @rtype:  list[str]
-        @return:  Get all available Jira statuses
+        """Get all available statuses.
+
+        Returns:
+            list[str]: Get all available Jira statuses
+
         """
         statuses = []
         try:
@@ -699,12 +733,14 @@ class SYNAPSERT(object):
         return statuses
 
     def get_issue_type_id(self, issue_type):
-        """
-        @brief Get Jira issue type ID
-        @param  issue_type: Jira issue type
-        @type  issue_type:  str
-        @rtype:  int
-        @return:  Jira issue type ID
+        """Get Jira issue type ID.
+
+        Args:
+            issue_type(str): Jira issue type
+
+        Returns:
+            int: Jira issue type ID
+
         """
         issue_id = "20"
         try:
@@ -727,14 +763,15 @@ class SYNAPSERT(object):
         return issue_id
 
     def get_cf_value(self, issue, name):
-        """
-        @brief  Get custom field value
-        @param  issue:  Jira Issue
-        @type  issue:  JIRA.Issue
-        @param  name:  Name of custom field
-        @type  name:  str
-        @rtype:  str
-        @return:  Custom field value
+        """Get custom field value.
+
+        Args:
+            issue(JIRA.Issue):  Jira Issue
+            name(str):  Name of custom field
+
+        Returns:
+            str: Custom field value
+
         """
         try:
             if not self.tc_custom_fields:
@@ -749,16 +786,16 @@ class SYNAPSERT(object):
             return None
 
     def get_previous_subtask(self, auto_tc_name, current_key, platform):
-        """
-        @brief Get previous subtask
-        @param  auto_tc_name:  Automated Test Case name
-        @type  auto_tc_name:  str
-        @param  current_key:  Jira issue key
-        @type  current_key:  str
-        @param  platform:  Platform of Jira issue
-        @type  platform:  str
-        @rtype:  JIRA.Issue
-        @return:  Previous Jira issue
+        """Get previous subtask.
+
+        Args:
+            auto_tc_name(str):  Automated Test Case name
+            current_key(str):  Jira issue key
+            platform(str):  Platform of Jira issue
+
+        Returns:
+            JIRA.Issue: Previous Jira issue
+
         """
         jql_str = "project='%s' AND 'Automated TC Name' ~ '%s' AND 'Platform' = '%s' AND 'Test Case State' != 'In Progress' ORDER BY updated DESC" % \
                   (self.project, auto_tc_name, platform)
@@ -773,12 +810,14 @@ class SYNAPSERT(object):
         return None
 
     def get_transitions(self, issue):
-        """
-        @brief Get available transitions of issue
-        @param  issue:  Jira issue
-        @type  issue:  JIRA.Issue
-        @rtype:  list[str]
-        @return:  List of available transitions
+        """Get available transitions of issue.
+
+        Args:
+            issue(JIRA.Issue): Jira issue
+
+        Returns:
+            list[str]: List of available transitions
+
         """
         try:
             transitions = self.jira.transitions(issue)
@@ -788,22 +827,26 @@ class SYNAPSERT(object):
             return None
 
     def get_issue_link(self, tc_key):
-        """
-        @brief Get issue links of Test Case
-        @param  tc_key:  Jira issue key
-        @type  tc_key:  str
-        @rtype:  str
-        @return:  Link to Jira issue
+        """Get issue links of Test Case.
+
+        Args:
+            tc_key(str): Jira issue key
+
+        Returns:
+            str: Link to Jira issue
+
         """
         return self.host + "/browse/" + tc_key
 
     def get_issue_key(self, test_case):
-        """
-        @brief  Get Issue key
-        @param  test_case:  Jira issue
-        @type  test_case:  JIRA.Issue
-        @rtype:  str
-        @return:  Jira issue key
+        """Get Issue key.
+
+        Args:
+            test_case(JIRA.Issue): Jira issue
+
+        Returns:
+            str: Jira issue key
+
         """
         try:
             return test_case.key
@@ -812,12 +855,14 @@ class SYNAPSERT(object):
             return None
 
     def get_defects_list(self, tc_key):
-        """
-        @brief  Get defects of Issue
-        @param  tc_key:  Jira issue key
-        @type  tc_key:  str
-        @rtype:  list[str]
-        @return:  List of linked defects
+        """Get defects of Issue.
+
+        Args:
+            tc_key(str): Jira issue key
+
+        Returns:
+            list[str]: List of linked defects
+
         """
         try:
             issue_links = []
@@ -837,14 +882,15 @@ class SYNAPSERT(object):
             return None
 
     def get_st_history(self, auto_tc_name, tp_names):
-        """
-        @brief Get history of SubTests
-        @param  auto_tc_name:  Jira issue key
-        @type  auto_tc_name:  str
-        @param  tp_names:  Jira Test Plans
-        @type  tp_names:  str
-        @rtype:  dict
-        @return:  SubTest history
+        """Get history of SubTests.
+
+        Args:
+            auto_tc_name(str):  Jira issue key
+            tp_names(str):  Jira Test Plans
+
+        Returns:
+            dict: SubTest history
+
         """
         for test_plan in tp_names.split(";"):
             jql_str = "project='%s' AND summary ~ '%s:' AND 'Automated TC Name'~'%s' \
@@ -857,15 +903,18 @@ class SYNAPSERT(object):
         return state
 
     def get_last_failed_issues_from_tps(self, tp_names, linked_defects):
-        """
-        @brief Get last failed issues by test plan name
-        @param  tp_names: Jira Test Plan name
-        @type  tp_names:  str
-        @param  linked_defects:  Look for linked defects
-        @type  linked_defects:  bool
-        @raise  Exception:  Test Plan does not exist
-        @rtype:  list[str]
-        @return:  List of failed test cases
+        """Get last failed issues by test plan name.
+
+        Args:
+            tp_names(str): Jira Test Plan name
+            linked_defects(bool): Look for linked defects
+
+        Raises:
+            Exception: Test Plan does not exist
+
+        Returns:
+            list[str]: List of failed test cases
+
         """
         try:
             items = {}
@@ -901,12 +950,14 @@ class SYNAPSERT(object):
             return None
 
     def _get_all_issues(self, jql):
-        """
-        @brief Get all issue because one request can get only 1,000-2,000 issues
-        @param  jql:  jql request
-        @type  jql:  str
-        @rtype:  list[JIRA.Issue]
-        @return:  List of Jira issues
+        """Get all issue because one request can get only 1,000-2,000 issues.
+
+        Args:
+            jql(str):  jql request
+
+        Returns:
+            list[JIRA.Issue]: List of Jira issues
+
         """
         block_size = 1000
         block_num = 0
@@ -932,14 +983,13 @@ class SYNAPSERT(object):
         return all_issues
 
     def update_test_case(self, test_case, info, suite):
-        """
-        @brief Update summary, description, suite of Test Case
-        @param  test_case: Jira issue
-        @type  test_case:  JIRA.Issue
-        @param  info:  Jira issue info
-        @type  info:  dict
-        @param  suite:  Test suite name
-        @type  suite:  str
+        """Update summary, description, suite of Test Case.
+
+        Args:
+            test_case(JIRA.Issue): Jira issue
+            info(dict):  Jira issue info
+            suite(str):  Test suite name
+
         """
         if test_case is not None:
             current_brief = self.get_summary(test_case)
@@ -959,18 +1009,17 @@ class SYNAPSERT(object):
                 self._set_suite(test_case, suite)
 
     def create_subtest(self, test_plan, test_case, client=None, build_info=None):
-        """
-        @brief Create subtest
-        @param  test_plan: Jira test plan
-        @type  test_plan:  JIRA.Issue
-        @param  test_case:  Jira test case
-        @type  test_case:  JIRA.Issue
-        @param  client:  Client info
-        @type  client:  dict
-        @param  build_info:  Build info
-        @type  build_info:  dict
-        @rtype:  JIRA.Issue
-        @return:  Jira SubTest instance
+        """Create subtest.
+
+        Args:
+            test_plan(JIRA.Issue): Jira test plan
+            test_case(JIRA.Issue): Jira test case
+            client(dict): Client info
+            build_info(dict): Build info
+
+        Returns:
+            JIRA.Issue: Jira SubTest instance
+
         """
         if test_case is None:
             self.class_logger.error("Test Case is None")

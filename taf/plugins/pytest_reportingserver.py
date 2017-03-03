@@ -1,22 +1,23 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``pytest_reportingserver.py``
+
+`XML-RPC reporting server plugin`
+
 """
-@copyright Copyright (c) 2011 - 2017, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_reportingserver.py
-
-@summary  XML-RPC reporting server plugin
-"""
 import os
 import sys
 import time
@@ -38,8 +39,8 @@ from testlib.xmlrpc_proxy import TimeoutServerProxy as XMLRPCProxy
 
 MODULES = {}
 def imp_plugins(dest):
-    """
-    @brief  Import all py modules from <dest> subfolder.
+    """Import all py modules from <dest> subfolder.
+
     """
     _list = [os.path.splitext(_m)[0] for _m in os.listdir(os.path.join(os.path.dirname(__file__), dest))
              if not _m.startswith("_") and _m.endswith(".py")]
@@ -53,21 +54,21 @@ imp_plugins("reports_conf")
 
 
 class ReportingServerConfigBase(object, metaclass=ABCMeta):
-    """
-    @description  Reporting Server configuration
+    """Reporting Server configuration.
+
     """
 
     @abstractmethod
     def _additional_option(self):
-        """
-        @brief  Defining options for Reporting Server.
+        """Defining options for Reporting Server.
+
         """
         pass
 
 
 def pytest_addoption(parser):
-    """
-    @brief  Plugin specific options.
+    """Plugin specific options.
+
     """
     [MODULES[_var].ReportingServerConfig._additional_option(parser) for _var in MODULES if "reports_conf." in _var]
 
@@ -80,9 +81,11 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin
-    @raise  Exception:  not able to connect to the reporting server
+    """Registering plugin.
+
+    Raises:
+        Exception: not able to connect to the reporting server.
+
     """
     if_start_server = any([MODULES[_var].ReportingServerConfig._configure(config) for _var in MODULES if "reports_conf." in _var])
     if if_start_server:
@@ -98,8 +101,8 @@ def pytest_configure(config):
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin
+    """Unregistering plugin.
+
     """
     reportingserver = getattr(config, "reportingserver", None)
     if reportingserver:
@@ -111,16 +114,16 @@ def pytest_unconfigure(config):
 
 
 class ReportingServer(object):
-    """
-    @description  Logging xmlrpc server class
+    """Logging xmlrpc server class.
+
     """
     REPORTINGSRV_PATH = "reporting_server.py"
     UNDEFINED_BUILD = "Undefined"
     class_logger = loggers.ClassLogger()
 
     def __init__(self, opts):
-        """
-        @brief  Initialize ReportingServer class
+        """Initialize ReportingServer class.
+
         """
 
         self._opts = opts
@@ -152,12 +155,14 @@ class ReportingServer(object):
         self.self_name = "py.test-{0}-{1}".format(self.os_username, os.getpid())
 
     def buildname(self, env_prop=None):
-        """
-        @brief  Return buildname for current session
-        @param  env_prop:  environment information e.g. build, name, etc.
-        @type  env_prop:  dict
-        @rtype:  str
-        @return:  buildname
+        """Return buildname for current session.
+
+        Args:
+            env_prop(dict): environment information e.g. build, name, etc.
+
+        Returns:
+            str: buildname
+
         """
         if self._buildname is not None:
             return self._buildname
@@ -183,8 +188,8 @@ class ReportingServer(object):
         return self._buildname
 
     def shutdown_server(self):
-        """
-        @brief  Send xmlrpc request to shutdown xmlrpc server
+        """Send xmlrpc request to shutdown xmlrpc server.
+
         """
         try:
             ans = self.xmlproxy.shutdown()
@@ -206,14 +211,15 @@ class ReportingServer(object):
     REPORTINGSRV_TIMEOUT = 30
 
     def launch_server(self, port=None):
-        """
-        @brief  Launch xmlrpc server
-        @param  port:  port to launch xmlrpc server
-        @type  port:  int
+        """Launch xmlrpc server.
+
+        Args:
+            port(int):  port to launch xmlrpc server
+
         """
         def wait_rc(popen, timeout=30):
-            """
-            @brief  Wait until popen finish execution
+            """Wait until popen finish execution.
+
             """
             stop = False
             end_time = time.time() + timeout
@@ -279,10 +285,11 @@ class ReportingServer(object):
             raise Exception(message)
 
     def check_server(self, timeout=1):
-        """
-        @brief  Check if xmlrpc server is alive
-        @param  timeout:  timeout for server verification
-        @type  timeout:  int
+        """Check if xmlrpc server is alive.
+
+        Args:
+            timeout(int): timeout for server verification
+
         """
         ans = None
         end_time = time.time() + timeout
@@ -304,14 +311,13 @@ class ReportingServer(object):
         return False
 
     def server_cmd(self, cmd, args, retry=3):
-        """
-        @brief Send XML query to server with retry and exception handling
-        @param  cmd:  command name
-        @type  cmd:  str
-        @param  args:  command arguments
-        @type  args:  list
-        @param  retry:  retry count
-        @type  retry:  int
+        """Send XML query to server with retry and exception handling.
+
+        Args:
+            cmd(str): command name
+            args(list): command arguments
+            retry(int): retry count
+
         """
         success = False
         _i = 1
@@ -335,10 +341,11 @@ class ReportingServer(object):
             self.class_logger.warning("XMLRPC query {0}({1}) failed.".format(cmd, str(args)))
 
     def _send_post_request(self, item):
-        """
-        @brief Send post request to reporting server or add it to queue
-        @param  item:  test case item
-        @type  item:  pytest.Item
+        """Send post request to reporting server or add it to queue.
+
+        Args:
+            item(pytest.Item): test case item
+
         """
         tc_name = get_tcname(item)
         try:
@@ -355,10 +362,11 @@ class ReportingServer(object):
         self.server_cmd("post", [self.self_name, buildname, suite_name, tc_name, "Run", "", info, self._get_build_info(item)])
 
     def pytest_runtest_setup(self, item):
-        """
-        @brief Add info about test case start time
-        @param  item:  test case item
-        @type  item:  pytest.Item
+        """Add info about test case start time.
+
+        Args:
+            item(pytest.Item): test case item
+
         """
         if not item.config.option.tc_duration:
             self.detailed_duration[item.nodeid] = dict()
@@ -369,10 +377,11 @@ class ReportingServer(object):
 
     @pytest.mark.tryfirst
     def pytest_runtest_call(self, item):
-        """
-        @brief  Create TC instance and send it to the Reporting Server
-        @param  item:  test case item
-        @type  item:  pytest.Item
+        """Create TC instance and send it to the Reporting Server.
+
+        Args:
+            item(pytest.Item): test case item
+
         """
         if not item.config.option.tc_duration:
             self.detailed_duration[item.nodeid]['call'] = time.time()
@@ -385,14 +394,13 @@ class ReportingServer(object):
             self._send_post_request(item)
 
     def _send_post_queue(self, item=None, buildname=None, sanity=False):
-        """
-        @brief  Send info about test execution to the Reporting Server
-        @param  item:  test case item
-        @type  item:  pytest.Item
-        @param  buildname:  buildname
-        @type  buildname:  str
-        @param  sanity:  True if sanity test
-        @type  sanity:  bool
+        """Send info about test execution to the Reporting Server.
+
+        Args:
+            item(pytest.Item): test case item
+            buildname(str): buildname
+            sanity(bool): True if sanity test
+
         """
 
         if buildname is None:
@@ -411,12 +419,14 @@ class ReportingServer(object):
         self.post_queue[:] = []
 
     def _get_build_info(self, item=None):
-        """
-        @brief  Get info about build
-        @param  item:  test case item
-        @type  item:  pytest.Item
-        @rtype:  dict{"platform": str, "build": str}
-        @return build info
+        """Get info about build.
+
+        Args:
+            item(pytest.Item): test case item
+
+        Returns:
+            dict{"platform": str, "build": str}: build info
+
         """
 
         if item is not None and item.config and hasattr(item.config, 'env')\
@@ -427,10 +437,11 @@ class ReportingServer(object):
         return {'platform': self.platform, 'build': self.build}
 
     def pytest_runtest_logreport(self, report):
-        """
-        @brief  Send update TC run status to the Reporting Server
-        @param  report:  pytets report
-        @type  report:  pytest.BaseReport
+        """Send update TC run status to the Reporting Server.
+
+        Args:
+            report(pytest.BaseReport):  pytets report
+
         """
         status = None
         if report.passed:
@@ -484,10 +495,11 @@ class ReportingServer(object):
                 self.post_queue.append([self.self_name, self.buildname(), suite_name, tc_name, status, _report])
 
     def _sessionstart(self, item):
-        """
-        @brief  Tell to XMLRPC Server that we are going to interact with it
-        @param  item:  test case item
-        @type  item:  pytest.Item
+        """Tell to XMLRPC Server that we are going to interact with it.
+
+        Args:
+            item(pytest.Item): test case item
+
         """
         self.class_logger.info("Configuring reporting server...")
         self.server_cmd("open", [self.self_name])
@@ -502,10 +514,11 @@ class ReportingServer(object):
         # Order and configure XML report to server.
 
     def pytest_sessionfinish(self, session):
-        """
-        @brief  Tell to XMLRPC Server that we have finished interaction
-        @param  session:  test session
-        @type  session:  pytest.Session
+        """Tell to XMLRPC Server that we have finished interaction.
+
+        Args:
+            session(pytest.Session): test session
+
         """
         _buildname = self.buildname()
         if _buildname is None:
@@ -521,10 +534,11 @@ class ReportingServer(object):
         self.server_cmd("close", [self.self_name])
 
     def pytest_keyboard_interrupt(self, excinfo):
-        """
-        @brief  Handle KeyboardInterrupt
-        @param  excinfo:  exception info
-        @type  excinfo:  py.code.ExceptionInfo
+        """Handle KeyboardInterrupt.
+
+        Args:
+            excinfo(py.code.ExceptionInfo):  exception info
+
         """
         self.class_logger.debug("Caught KeyboardInterrupt on pytest_hook.")
         self.pytest_sessionfinish(session=self)

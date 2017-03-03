@@ -1,22 +1,23 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``pytest_workload.py``
+
+`Add workload on SUTs using stress tool`
+
 """
-@copyright Copyright (c) 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_workload.py
-
-@summary  Add workload on SUTs using stress tool.
-"""
 from collections import namedtuple
 import time
 from multiprocessing import Pool as ThreadPool
@@ -36,8 +37,8 @@ WORKERS = ['cpu', 'vm', 'vm_bytes', 'io', 'disk', 'time']
 
 
 def device_workload(args):
-    """
-    @brief  Start workload on device
+    """Start workload on device.
+
     """
     # Create duplicate instance of device in order to use new ssh connection
     dev = args.class_name(args.config, args.opts)
@@ -68,8 +69,8 @@ def device_workload(args):
 
 
 def pytest_addoption(parser):
-    """
-    @brief  Describe plugin specified options.
+    """Describe plugin specified options.
+
     """
     group = parser.getgroup("Workload", "plugin: stress workload")
     group.addoption("--workload", action="store_true", default=False,
@@ -83,8 +84,8 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin.
+    """Registering plugin.
+
     """
     if config.option.workload:
         config.pluginmanager.register(WorkloadPlugin(config.option.workload_type,
@@ -92,8 +93,8 @@ def pytest_configure(config):
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin.
+    """Unregistering plugin.
+
     """
     workload = getattr(config, "_workload", None)
     if workload:
@@ -110,16 +111,17 @@ def get_workers(line):
 
 
 class WorkloadContinuous(object):
-    """
-    @brief  Main functionality for workload manipulation
+    """Main functionality for workload manipulation.
+
     """
     class_logger = loggers.ClassLogger()
 
     def __init__(self, env, workers):
-        """
-        @brief  Initialize WorkloadContinuous object instance.
-        @param env:  TAF environment instance
-        @type  env:  testlib.common3.Environment
+        """Initialize WorkloadContinuous object instance.
+
+        Args:
+            env(testlib.common3.Environment): TAF environment instance
+
         """
         self.env = env
 
@@ -132,8 +134,8 @@ class WorkloadContinuous(object):
             self.workers['time'] = None
 
     def start_on_nodes(self):
-        """
-        @brief  Start workload on devices
+        """Start workload on devices.
+
         """
         for dev in self.devices:
             try:
@@ -144,16 +146,16 @@ class WorkloadContinuous(object):
                 raise
 
     def item_setup(self):
-        """
-        @brief  Start the workload if no active
+        """Start the workload if no active.
+
         """
         for dev in self.devices:
             if not dev.ui.get_active_workloads():
                 dev.ui.start_workload()
 
     def item_teardown(self):
-        """
-        @brief  Stop the workload and get the results
+        """Stop the workload and get the results.
+
         """
         for dev in self.devices:
             try:
@@ -170,8 +172,8 @@ class WorkloadContinuous(object):
                 raise
 
     def teardown(self):
-        """
-        @brief  Stop the workload
+        """Stop the workload.
+
         """
         for dev in self.devices:
             try:
@@ -183,16 +185,17 @@ class WorkloadContinuous(object):
 
 
 class WorkloadInterrupted(object):
-    """
-    @brief  Main functionality for workload manipulation
+    """Main functionality for workload manipulation.
+
     """
     class_logger = loggers.ClassLogger()
 
     def __init__(self, env, workers):
-        """
-        @brief  Initialize WorkloadInterrupted object instance.
-        @param env:  TAF environment instance
-        @type  env:  testlib.common3.Environment
+        """Initialize WorkloadInterrupted object instance.
+
+        Args:
+            env(testlib.common3.Environment): TAF environment instance
+
         """
         self.env = env
 
@@ -213,8 +216,8 @@ class WorkloadInterrupted(object):
                 self.workers['time'] = WORKLOAD_TIME
 
     def start_on_nodes(self):
-        """
-        @brief  Start workload on devices
+        """Start workload on devices.
+
         """
         try:
             self.pool.map_async(device_workload,
@@ -229,14 +232,14 @@ class WorkloadInterrupted(object):
             raise
 
     def item_setup(self):
-        """
-        @brief  Start the workload if no active
+        """Start the workload if no active.
+
         """
         pass
 
     def item_teardown(self):
-        """
-        @brief  Stop the workload and get the results
+        """Stop the workload and get the results.
+
         """
         failed_results = []
         for dev in self.devices:
@@ -249,8 +252,8 @@ class WorkloadInterrupted(object):
                                    " on devices {}".format(" ".join(failed_results)))
 
     def teardown(self):
-        """
-        @brief  Stop the workload
+        """Stop the workload.
+
         """
         self.class_logger.debug("Workload teardown")
         STOP_REQUEST.set()
@@ -269,8 +272,8 @@ WORKLOADS = {
 
 
 class WorkloadPlugin(object):
-    """
-    @brief  WorkloadPlugin implementation.
+    """WorkloadPlugin implementation.
+
     """
     def __init__(self, workload_type, workers):
         self.workload_type = workload_type
@@ -278,18 +281,19 @@ class WorkloadPlugin(object):
 
     @pytest.fixture(autouse=True, scope='session')
     def workload_init(self, env_init):
-        """
-        @brief  Initialize WorkloadPlugin on session start
-        @param  env_init:  'env_init' pytest fixture from pytest_onsenv.py
-        @type  env_init:  testlib.common3.Environment
+        """Initialize WorkloadPlugin on session start.
+
+        Args:
+            env_init(testlib.common3.Environment): 'env_init' pytest fixture from pytest_onsenv.py
+
         """
         self._workload = WORKLOADS[self.workload_type](env_init, self.workers)
         return self._workload
 
     @pytest.fixture(scope=setup_scope(), autouse=True)
     def workload(self, request, env_main, workload_init):
-        """
-        @brief  Start stress tool on devices
+        """Start stress tool on devices.
+
         """
         request.addfinalizer(workload_init.teardown)
         workload_init.start_on_nodes()
@@ -297,14 +301,13 @@ class WorkloadPlugin(object):
 
     @pytest.fixture(autouse=True)
     def test_workload(self, request, env, workload):
-        """
-        @brief  Gather collectd info for certain test case
-        @param request:  pytest request object
-        @type  request: pytest.request
-        @param env:  env fixture
-        @type  env:  testlib.common3.Environment
-        @param monitor_start:  monitor_start fixture
-        @type  monitor_start:  SutMonitor
+        """Gather collectd info for certain test case.
+
+        Args:
+            request(pytest.request):  pytest request object
+            env(testlib.common3.Environment):  env fixture
+            monitor_start(SutMonitor):  monitor_start fixture
+
         """
         request.addfinalizer(workload.item_teardown)
         workload.item_setup()

@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``pytest_caselogger.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Plugin is getting logs for each test case`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_caselogger.py
-
-@summary  Plugin is getting logs for each test case.
 """
 
 import time
@@ -28,8 +28,8 @@ from testlib import caselogger
 
 
 def pytest_addoption(parser):
-    """
-    @brief  Describe plugin specified options.
+    """Describe plugin specified options.
+
     """
     group = parser.getgroup("log_enable", "plugin case logger")
     group.addoption("--log_enable", action="store", default="True",
@@ -47,16 +47,16 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin.
+    """Registering plugin.
+
     """
     if config.option.log_enable == "True":
         config.pluginmanager.register(CaseLoggerPlugin(), "_case_logger")
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin.
+    """Unregistering plugin.
+
     """
     case_logger = getattr(config, "_case_logger", None)
     if case_logger == "True":
@@ -65,15 +65,16 @@ def pytest_unconfigure(config):
 
 
 class CaseLoggerExecutor(object):
-    """
-    @description  Base class for TAF caselogger functionality
+    """Base class for TAF caselogger functionality.
+
     """
 
     def __init__(self, env):
-        """
-        @brief  Initialize CaseLoggerExecutor instance
-        @param  env:  Environment instance from config
-        @type  env:  testlib.common3.Environment
+        """Initialize CaseLoggerExecutor instance.
+
+        Args:
+            env(testlib.common3.Environment):  Environment instance from config
+
         """
         self.node = None
         self.env = env
@@ -81,8 +82,8 @@ class CaseLoggerExecutor(object):
         self.log_flag = env.opts.log_enable
 
     def case_setup(self):
-        """
-        @brief  Add message into device logs on test case setup
+        """Add message into device logs on test case setup.
+
         """
         self.log_timestamp = time.time()
         self.tc_name = get_tcname(self.node)
@@ -96,8 +97,8 @@ class CaseLoggerExecutor(object):
                 self.node.config.ctlogger.error("[Caselogger] Adding message to device logs failed: %s", err)
 
     def case_teardown(self):
-        """
-        @brief  Add message into device logs on test case teardown. Copy test case logs to the log host.
+        """Add message into device logs on test case teardown. Copy test case logs to the log host.
+
         """
         # Make notice of test teardown in log file.
         for switch in list(self.env.switch.values()):
@@ -119,8 +120,8 @@ class CaseLoggerExecutor(object):
                         case_logger.get_test_case_logs(self.tc_name, self.log_timestamp, self.env.opts.log_type)
 
     def suite_teardown(self):
-        """
-        @brief  Copy core logs to the log host on test suite teardown.
+        """Copy core logs to the log host on test suite teardown.
+
         """
         if self.log_flag == "True":
             if self.log_storage == "Host":
@@ -131,14 +132,14 @@ class CaseLoggerExecutor(object):
 
 
 class CaseLoggerPlugin(object):
-    """
-    @description  Base class for caselogger plugin functionality
+    """Base class for caselogger plugin functionality.
+
     """
 
     @pytest.hookimpl(tryfirst=True, hookwrapper=True)
     def pytest_runtest_makereport(self, item, call):
-        """
-        @brief  Add information about test case execution results.
+        """Add information about test case execution results.
+
         """
         # execute all other hooks to obtain the report object
         yield
@@ -149,14 +150,15 @@ class CaseLoggerPlugin(object):
 
     @pytest.fixture(autouse=True, scope=setup_scope())
     def suitelogger(self, request, env_main):
-        """
-        @brief  Call caselogger on test suite teardown
-        @param  request:  pytest request instance
-        @type  request:  pytest.request
-        @param  env_main:  'env_main' pytest fixture from pytest_onsenv.py
-        @type  env_main:  testlib.common3.Environment
-        @rtype:  CaseLoggerExecutor
-        @return:  instance of CaseLoggerExecutor class
+        """Call caselogger on test suite teardown.
+
+        Args:
+            request(pytest.request):  pytest request instance
+            env_main (testlib.common3.Environment):  'env_main' pytest fixture from pytest_onsenv.py
+
+        Returns:
+            CaseLoggerExecutor: instance of CaseLoggerExecutor class
+
         """
         case_logger = CaseLoggerExecutor(env_main)
         request.addfinalizer(case_logger.suite_teardown)
@@ -164,13 +166,13 @@ class CaseLoggerPlugin(object):
 
     @pytest.fixture(autouse=True)
     def caselogger(self, request, suitelogger, env):
-        """
-        @brief  Call caselogger on test case setup/teardown
-        @param  request:  pytest request instance
-        @type  request:  pytest.request
-        @param  suitelogger:  pytest fixture
-        @param  env:  'env' pytest fixture from pytest_onsenv.py
-        @type  env:  testlib.common3.Environment
+        """Call caselogger on test case setup/teardown
+
+        Args:
+            request(pytest.request): pytest request instance
+            suitelogger:  pytest fixture
+            env(testlib.common3.Environment):  'env' pytest fixture from pytest_onsenv.py
+
         """
         suitelogger.node = request.node
         suitelogger.suite_name = request.node.module.__name__

@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``pytest_helpers.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`pytest specific helpers functions`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_helpers.py
-
-@summary  pytest specific helpers functions
 """
 
 import inspect
@@ -27,13 +27,17 @@ class_logger = loggers.ClassLogger()
 
 
 def get_tcname(report):
-    """
-    @brief  Return TC name from pytest report object.
-    @param  report:  pytest report object
-    @type  report:  pytest.report
-    @rtype:  str
-    @return:  test case name
-    @note  This function allows to get proper name without parameters string from normal and parametrized TCs.
+    """Return TC name from pytest report object.
+
+    Args:
+        report(pytest.report): pytest report object
+
+    Returns:
+        str: test case name
+
+    Note:
+        This function allows to get proper name without parameters string from normal and parametrized TCs.
+
     """
     name = None
     full_name = report.nodeid.split("::")[-1]
@@ -69,12 +73,14 @@ def get_tcname(report):
 
 
 def get_suite_name(nodeid):
-    """
-    @brief  Return suitename from nodeid string
-    @param  nodeid:  pytest.Item nodeid string
-    @type  nodeid:  str
-    @rtype:  str
-    @return:  test suite name
+    """Return suitename from nodeid string.
+
+    Args:
+        nodeid(str):  pytest.Item nodeid string
+
+    Returns:
+        str: test suite name
+
     """
     names = nodeid.split("::")
     names[0] = names[0].replace("/", '.')
@@ -84,26 +90,29 @@ def get_suite_name(nodeid):
 
 
 def get_test_keys(data):
-    """
-    @brief  Return case keys from report string
-    @param  data:  test case results
-    @type  data:  str
-    @rtype:  list[str]
-    @return:  list of report keys
+    """Return case keys from report string.
+
+    Args:
+        data(str):  test case results
+
+    Returns:
+        list[str]: list of report keys
+
     """
     keys_rules = re.compile('<success>(.*?)</success>')
     return keys_rules.findall(data)
 
 
 def get_steps(item, tc_name):
-    """
-    @brief  Parse and return test steps
-    @param  item:  pytest test case item
-    @type  item:  pytest.Item
-    @param  tc_name:  test case name
-    @type  tc_name:  str
-    @rtype:  str
-    @return:  test case's steps
+    """Parse and return test steps.
+
+    Args:
+        item(pytest.Item):  pytest test case item
+        tc_name(str):  test case name
+
+    Returns:
+        str: test case's steps
+
     """
     # Get source of test function
     steps_list = []
@@ -134,14 +143,15 @@ def get_doc_from_item(item):
 
 
 def get_brief(item, tc_name):
-    """
-    @brief  Parse doc-string and return brief
-    @param  item:  pytest test case item
-    @type  item:  pytest.Item
-    @param  tc_name:  test case name
-    @type  tc_name:  str
-    @rtype:  str
-    @return:  test case docstring's brief
+    """Parse doc-string and return brief.
+
+    Args:
+        item(pytest.Item):  pytest test case item
+        tc_name(str):  test case name
+
+    Returns:
+        str: test case docstring's brief
+
     """
     brief = ''
     data = get_doc_from_item(item)
@@ -158,12 +168,14 @@ def get_brief(item, tc_name):
 
 
 def get_failure_reason(data):
-    """
-    @brief  Return test case failure reason from report string
-    @param  data:  test case report
-    @type  data:  str
-    @rtype:  str
-    @return:  failure reason or None
+    """Return test case failure reason from report string.
+
+    Args:
+        data(str): test case report
+
+    Returns:
+        str: failure reason or None
+
     """
     try:
         reason_rules = re.compile('\nE    (.*)')
@@ -173,12 +185,14 @@ def get_failure_reason(data):
 
 
 def get_skipped_reason(data):
-    """
-    @brief  Return test case skip reason from report string
-    @param  data:  test case report
-    @type  data:  str
-    @rtype:  str
-    @return:  skip reason or None
+    """Return test case skip reason from report string.
+
+    Args:
+        data(str): test case report
+
+    Returns:
+        str: skip reason or None
+
     """
     try:
         reason_rules = re.compile("Skipped:(.*?)..$")
@@ -188,14 +202,15 @@ def get_skipped_reason(data):
 
 
 def get_html_xml_path(path, build_name):
-    """
-    @brief Parse and replace $BUILD_NAME variable in the path
-    @param  path:  path to html report
-    @type  path:  str
-    @param  build_name:  software build number
-    @type  build_name:  str
-    @rtype:  str
-    @return:  modified path to html report
+    """Parse and replace $BUILD_NAME variable in the path.
+
+    Args:
+        path(str):  path to html report
+        build_name(str):  software build number
+
+    Returns:
+        str: modified path to html report
+
     """
     try:
         return path.replace("__BUILD_NAME__", build_name)

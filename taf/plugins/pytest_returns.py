@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``pytest_returns.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Collect return results from testcases instead of 'PASSED' message`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_returns.py
-
-@summary Collect return results from testcases instead of 'PASSED' message.
 """
 
 import operator
@@ -25,16 +25,16 @@ from contextlib import suppress
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin
+    """Registering plugin.
+
     """
     config.pluginmanager.register(ReturnsPlugin(), "returns")
     config.addinivalue_line("markers", "returns: collect this testcase's return results")
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin
+    """Unregistering plugin.
+
     """
     returns = getattr(config, "returns", None)
     if returns:

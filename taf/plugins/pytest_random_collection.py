@@ -1,23 +1,23 @@
-#! /usr/bin/env python
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``pytest_random_collection.py``
+
+`Choose one test case from test suite randomly if random marker is set`
+
 """
-@copyright Copyright (c) 2015 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_random_collection.py
-
-@summary  Choose one test case from test suite randomly if random marker is set.
-"""
 import random
 from collections import defaultdict
 
@@ -25,8 +25,8 @@ import pytest
 
 
 def pytest_addoption(parser):
-    """
-    @brief  Describe plugin specified options.
+    """Describe plugin specified options.
+
     """
     group = parser.getgroup("random", "plugin random test case choice")
     group.addoption("--random", action="store", default="Module",
@@ -37,8 +37,8 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin.
+    """Registering plugin.
+
     """
     if config.option.random in RANDOM_MAP:
         random_chooser = RandomChoice(config.option.random_seed)
@@ -46,8 +46,8 @@ def pytest_configure(config):
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin.
+    """Unregistering plugin.
+
     """
     random_class = getattr(config, "_random", None)
     if random_class in RANDOM_MAP:
@@ -61,8 +61,8 @@ RANDOM_MAP = {
 
 
 class RandomChoice(object):
-    """
-    @description  Choose one test case from test suite randomly if random marker is set.
+    """Choose one test case from test suite randomly if random marker is set.
+
     """
 
     def __init__(self, seed):

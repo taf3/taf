@@ -1,27 +1,29 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``pytest_sut_monitor.py``
+
+`Collect monitoring info based on Colletcd RRDs`
+
+Note:
+    For correct functioning collectd should be properly configured:
+      1) Collectd server should be configured in the lab
+      2) Collectd client should be configured on device
+      3) On device should be configured hostname equal to the 'name' value in JSON
+
 """
-@copyright Copyright (c) 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_sut_monitor.py
-
-@summary  Collect monitoring info based on Colletcd RRDs.
-
-@note  For correct functioning collectd should be properly configured:
-       1) Collectd server should be configured in the lab
-       2) Collectd client should be configured on device
-       3) On device should be configured hostname equal to the 'name' value in JSON
-"""
 import errno
 import json
 import os
@@ -58,8 +60,8 @@ RESULTS_DIR = '/tmp/sut_monitor'
 
 
 def pytest_addoption(parser):
-    """
-    @brief  Describe plugin specified options.
+    """ Describe plugin specified options.
+
     """
     group = parser.getgroup("SUT monitoring", "plugin: SUT monitor")
     group.addoption("--monitor", action="store_true", default=False,
@@ -67,16 +69,16 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin.
+    """Registering plugin.
+
     """
     if config.option.monitor:
         config.pluginmanager.register(SutMonitorPlugin(), "_sut_monitor")
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin.
+    """Unregistering plugin.
+
     """
     sut_monitor = getattr(config, "_sut_monitor", None)
     if sut_monitor:
@@ -85,16 +87,17 @@ def pytest_unconfigure(config):
 
 
 class SutMonitor(object):
-    """
-    @brief  Main functionality for collectd client/server manipulation
+    """Main functionality for collectd client/server manipulation.
+
     """
     class_logger = loggers.ClassLogger()
 
     def __init__(self, env):
-        """
-        @brief  Initialize SutMonitor object instance.
-        @param env:  TAF environment instance
-        @type  env:  testlib.common3.Environment
+        """Initialize SutMonitor object instance.
+
+        Args:
+            env(testlib.common3.Environment): TAF environment instance
+
         """
         super().__init__()
         self.env = env
@@ -119,12 +122,12 @@ class SutMonitor(object):
                         if dev.type in INCLUDES and self.server.id in dev.related_obj}
 
     def create_dir(self, dir_name, clear=True):
-        """
-        @brief  Create folder on TAF host
-        @param dir_name:  folder path
-        @type  dir_name:  str
-        @param clear:  flag to delete folder if exists
-        @type  clear: bool
+        """Create folder on TAF host.
+
+        Args:
+            dir_name(str): folder path
+            clear(bool): flag to delete folder if exists
+
         """
         if clear:
             try:
@@ -140,8 +143,8 @@ class SutMonitor(object):
             os.makedirs(dir_name)
 
     def configure_server(self):
-        """
-        @brief  Create SSH connection to Collectd server host
+        """Create SSH connection to Collectd server host.
+
         """
         self.class_logger.debug("Connect to the Collectd server")
         ssh = clissh.CLISSH(self.server.config['ip_host'],
@@ -154,8 +157,8 @@ class SutMonitor(object):
         self.server.ssh.open_shell()
 
     def start_on_nodes(self):
-        """
-        @brief  Start Collectd service on devices
+        """Start Collectd service on devices.
+
         """
         for dev in self.env.id_map.values():
             if dev.type in INCLUDES and dev.name in self.devices:
@@ -166,12 +169,14 @@ class SutMonitor(object):
                                             " on device {0}: {1}".format(dev.name, err))
 
     def exec_command(self, command):
-        """
-        @brief  Execute shell command on Collectd server host
-        @param command:  command to execute
-        @type  command:  str
-        @rtype:  str
-        @return:  command execution output
+        """Execute shell command on Collectd server host.
+
+        Args:
+            command(str):  command to execute
+
+        Returns:
+            str:  command execution output
+
         """
         cmd_status = self.server.ssh.exec_command(command)
         if cmd_status.stderr:
@@ -184,12 +189,14 @@ class SutMonitor(object):
         return cmd_status.stdout
 
     def multicall(self, commands):
-        """
-        @brief  Execute a list of commands on Collectd server host
-        @param commands:  list of commands to be executed
-        @type  commands:  list[str]
-        @rtype:  list[str]
-        @return:  list of commands results
+        """Execute a list of commands on Collectd server host.
+
+        Args:
+            commands(list[str]): list of commands to be executed
+
+        Returns:
+            list[str]:list of commands results
+
         """
         results = []
         # cmds are full strings, so we have to split in remote_multicall_template
@@ -203,28 +210,28 @@ class SutMonitor(object):
         return [x[1].stdout for x in results]
 
     def copy_file(self, remote_file, local_file):
-        """
-        @brief  Copy file from Collect server host to TAF host
-        @param remote_file:  path to file on remote Collectd server host
-        @type  remote_file:  str
-        @param local_file:  path to file on local TAF host
-        @type  local_file:  str
+        """Copy file from Collect server host to TAF host.
+
+        Args:
+            remote_file(str): path to file on remote Collectd server host
+            local_file(str):  path to file on local TAF host
+
         """
         self.class_logger.debug("Copy file {0} to the local file {1}".format(remote_file,
                                                                              local_file))
         self.server.ssh.get_file(remote_file, local_file)
 
     def configure(self):
-        """
-        @brief  Configure monitoring tool
+        """ Configure monitoring tool.
+
         """
         if self.server:
             # Connect to Collectd server host
             self.configure_server()
 
     def list_rrd_folders(self):
-        """
-        @brief  List device's RRD folders on Collectd server host
+        """List device's RRD folders on Collectd server host.
+
         """
         for dev_name in self.devices:
             collectd_folder = os.path.join(PATH_TO_RRD, dev_name)
@@ -241,8 +248,8 @@ class SutMonitor(object):
             self.devices[dev_name]['folders'] = folder_dict
 
     def item_teardown(self):
-        """
-        @brief  Create RRD graphs on test teardown
+        """Create RRD graphs on test teardown.
+
         """
         self.class_logger.info("Generating graphs...")
         self.class_logger.debug("PROFILING: SutMonitor start time %d", time.time())
@@ -301,18 +308,17 @@ class SutMonitor(object):
                                 "duration {1}".format(time.time(), time.time() - self.end_time))
 
     def is_not_empty(self, folder, start, end, gtype):
-        """
-        @brief  Check if RRD folder contains non-empty data
-        @param folder: RRD folder to check for
-        @type  folder:  str
-        @param start: time period start value
-        @type  start:  int
-        @param end: time period end value
-        @type  end:  int
-        @param gtype: RRD folder CF
-        @type  gtype:  str
-        @rtype:  bool
-        @return:  True if folder contains non-empty data
+        """Check if RRD folder contains non-empty data.
+
+        Args:
+            folder(str): RRD folder to check for
+            start(str): time period start value
+            end(int): time period end value
+            gtype(str): RRD folder CF
+
+        Returns:
+            bool: True if folder contains non-empty data
+
         """
         if gtype == 'LOAD':
             return True
@@ -343,16 +349,16 @@ class SutMonitor(object):
         return False
 
     def teardown(self):
-        """
-        @brief  Close SSH connection to the Collectd server host
+        """Close SSH connection to the Collectd server host.
+
         """
         if self.server and self.server.ssh:
             self.server.ssh.close()
 
 
 class SutMonitorPlugin(object):
-    """
-    @brief  SutMonitorPlugin implementation.
+    """SutMonitorPlugin implementation.
+
     """
 
     def __init__(self):
@@ -361,18 +367,19 @@ class SutMonitorPlugin(object):
 
     @pytest.fixture(autouse=True, scope='session')
     def monitor_init(self, env_init):
-        """
-        @brief  Initialize SutMonitor on session start
-        @param  env_init:  'env_init' pytest fixture from pytest_onsenv.py
-        @type  env_init:  testlib.common3.Environment
+        """Initialize SutMonitor on session start.
+
+        Args:
+            env_init(testlib.common3.Environment): 'env_init' pytest fixture from pytest_onsenv.py
+
         """
         self.sut_monitor = SutMonitor(env_init)
         return self.sut_monitor
 
     @pytest.fixture(scope=setup_scope(), autouse=True)
     def monitor(self, request, env_main, monitor_init):  # pylint: disable=W0613
-        """
-        @brief  Start Collectd service on devices
+        """Start Collectd service on devices.
+
         """
         request.addfinalizer(monitor_init.teardown)
         monitor_init.configure()
@@ -381,22 +388,21 @@ class SutMonitorPlugin(object):
 
     @pytest.fixture(autouse=True)
     def test_monitor(self, request, env, monitor):  # pylint: disable=W0613
-        """
-        @brief  Gather collectd info for certain test case
-        @param request:  pytest request object
-        @type  request: pytest.request
-        @param env:  env fixture
-        @type  env:  testlib.common3.Environment
-        @param monitor_start:  monitor_start fixture
-        @type  monitor_start:  SutMonitor
+        """Gather collectd info for certain test case.
+
+        Args:
+            request(pytest.request): pytest request object
+            env(testlib.common3.Environment): env fixture
+            monitor_start(SutMonitor): monitor_start fixture
+
         """
         monitor.test = request.node.name
         request.addfinalizer(monitor.item_teardown)
 
     @pytest.hookimpl(tryfirst=True, hookwrapper=True)
     def pytest_runtest_makereport(self, item, call):   # pylint: disable=W0613
-        """
-        @brief  Add generated graphs to the pytest report in order to access from reporting plugin
+        """Add generated graphs to the pytest report in order to access from reporting plugin.
+
         """
         outcome = yield
         report = outcome.get_result()

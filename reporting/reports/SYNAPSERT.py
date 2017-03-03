@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``SYNAPSERT.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`SYNAPSERT class`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  SYNAPSERT.py
-
-@summary  SYNAPSERT class
 """
 
 import os
@@ -27,15 +26,15 @@ import loggers
 
 
 class SYNAPSERT(object):
-    """
-    @description  SYNAPSERT report specific functionality.
+    """SYNAPSERT report specific functionality.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, connectors=None):
-        """
-        @brief  Initialize SYNAPSERT class
+        """Initialize SYNAPSERT class.
+
         """
         self.synapsert = connectors['SYNAPSERT']
         self.test_plan = None
@@ -49,10 +48,11 @@ class SYNAPSERT(object):
         self.wait_stop_button = True
 
     def _set_test_plan(self, cmd):
-        """
-        @brief  Get test plan or create if doesn't exist.
-        @param  cmd:  Command
-        @type  cmd:  dict
+        """Get test plan or create if doesn't exist.
+
+        Args:
+            cmd(dict):  Command
+
         """
         # try to get test plan by name
         tp_name = cmd['build']
@@ -76,10 +76,11 @@ class SYNAPSERT(object):
             self.test_plan = _current_test_plan
 
     def _set_test_case(self, cmd):
-        """
-        @brief  Create subtest in test plan.
-        @param  cmd:  Command
-        @type  cmd:  dict
+        """Create subtest in test plan.
+
+        Args:
+            cmd(dict):  Command
+
         """
         _test_case = self.synapsert.get_tc_by_auto_tc_name(cmd['tc'])
         if _test_case is not None and 'build_info' in list(cmd.keys()):
@@ -89,10 +90,11 @@ class SYNAPSERT(object):
             self.subtest = self.synapsert.create_subtest(self.test_plan, _test_case, self.current_client, cmd['build_info'])
 
     def process_cmd(self, cmd):
-        """
-        @brief  Get and process command from client.
-        @param  cmd:  Command
-        @type  cmd:  dict
+        """Get and process command from client.
+
+        Args:
+            cmd(dict):  Command
+
         """
         if 'status' in list(cmd.keys()) and self.synapsert.get_tracker():
             # Create test case and test plan on start test
@@ -159,10 +161,11 @@ class SYNAPSERT(object):
                 self.class_logger.warning('Unknown test case status')
 
     def set_cant_test(self, cmd):
-        """
-        @brief  Update subtest status to 'Can't test'.
-        @param  cmd:  Command
-        @type  cmd:  dict
+        """Update subtest status to 'Can't test'.
+
+        Args:
+            cmd(dict):  Command
+
         """
         self.synapsert.update_tc_status(self.subtest, 'Can\'t Test')
         if 'longrepr' in list(cmd['report'].keys()):
@@ -174,8 +177,8 @@ class SYNAPSERT(object):
                 self.synapsert.set_failure_reason(self.subtest, "%s%s" % (teardown_fr, "" if call_fr is None else ";" + call_fr), self.platform, self.prefix)
 
     def info(self):
-        """
-        @brief  Return report settings.
+        """Return report settings.
+
         """
         return str({'Test Plan': self.synapsert.get_issue_key(self.test_plan),
                     'Test Case': self.synapsert.get_issue_key(self.subtest),

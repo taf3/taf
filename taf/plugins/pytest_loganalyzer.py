@@ -1,23 +1,24 @@
 # coding: utf-8
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``pytest_loganalyzer.py``
+
+`Plugin is checking device's log after each test case is executed`
+
 """
-@copyright Copyright (c) 2015 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_loganalyzer.py
-
-@summary  Plugin is checking device's log after each test case is executed.
-"""
 import re
 import os
 import json
@@ -31,8 +32,8 @@ from .pytest_onsenv import setup_scope
 
 
 def pytest_addoption(parser):
-    """
-    @brief  Describe plugin specified options.
+    """Describe plugin specified options.
+
     """
     group = parser.getgroup("log_analyzer", "plugin log analyzer")
     group.addoption(
@@ -42,16 +43,16 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin.
+    """Registering plugin.
+
     """
     if config.option.log_analyzer == "True":
         config.pluginmanager.register(LogAnalyzerPlugin(), "_log_analyzer")
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin.
+    """Unregistering plugin.
+
     """
     log_analyzer = getattr(config, "_log_analyzer", None)
     if log_analyzer == "True":
@@ -60,7 +61,9 @@ def pytest_unconfigure(config):
 
 
 def pairwise(iterable):
-    """s -> (s0,s1), (s1,s2), (s2, s3), ..."""
+    """s -> (s0,s1), (s1,s2), (s2, s3), ...
+
+    """
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
@@ -82,22 +85,24 @@ class LogAnalyzer(object):
     ]
 
     def __init__(self, switch):
-        """
-        @brief  Initialize LogAnalyzer instance
-        @param  switch:  switch dictionary
-        @type  switch:  dict{SwitchGeneral}
+        """Initialize LogAnalyzer instance.
+
+        Args:
+            switch(dict{SwitchGeneral}): switch dictionary
+
         """
         self.switch = switch
         self.item_skip_log_marker = None
 
     def ignore(self, entry):
-        """
-        Check if duplicate can be ignored
+        """Check if duplicate can be ignored.
 
-        @param entry: journalctl json decoded dict
-        @type entry: dict
-        @return: if we should ignore this message when checking duplicates
-        @rtype: bool
+        Args:
+            entry(dict): journalctl json decoded dict
+
+        Returns:
+            bool: if we should ignore this message when checking duplicates
+
         """
         # Ignore these duplicates.  First in a long line of forthcoming false positives
         # Jun 03 00:50:59 rr12or systemd-journal[338]: Runtime journal is using 8.0M (max allowed 399.0M, trying to leave 598.5M free of 3.8G available → current limit 399.0M).
@@ -105,10 +110,11 @@ class LogAnalyzer(object):
         return any(regexp.search(entry['MESSAGE']) for regexp in self.IGNORE_RES)
 
     def _check_log_duplicates(self, log_output):
-        """
-        @brief  Check if duplicated records are present in device log
-        @param  log_output:  output of device log
-        @type  log_output:  str
+        """Check if duplicated records are present in device log.
+
+        Args:
+            log_output(str): output of device log
+
         """
         json_lines = (json.loads(x, encoding='utf-8') for x in log_output.splitlines())
         duplicates = defaultdict(list)
@@ -124,10 +130,11 @@ class LogAnalyzer(object):
                     assert abs(a - b) > 1, "Log duplication found in journalctl:\n %s" % duplicate
 
     def _check_log_errors(self, log_output):
-        """
-        @brief  Check if errors with specific priority are present in device log
-        @param  log_output:  output of device log
-        @type  log_output:  str
+        """Check if errors with specific priority are present in device log.
+
+        Args:
+            log_output(str):  output of device log
+
         """
         # just count the newlines
         lines = log_output.count(os.linesep)
@@ -136,8 +143,8 @@ class LogAnalyzer(object):
                            (lines - 1, self.error_priority, log_output)
 
     def setup(self):
-        """
-        @brief  Initialize start time of test run
+        """Initialize start time of test run.
+
         """
         for switch_id, switch in self.switch.items():
             switch.ssh.login()
@@ -155,8 +162,8 @@ class LogAnalyzer(object):
                 switch.ssh.close_shell()
 
     def teardown(self):
-        """
-        @brief  Check for errors and duplicated records in device log (journalctl)
+        """Check for errors and duplicated records in device log (journalctl).
+
         """
         journalctl_all_cmd = "journalctl -o json --since '{0}' --until '{1}'"
         journalctl_priority_cmd = "journalctl --priority={0} --since '{1}' --until '{2}'"
@@ -202,12 +209,14 @@ class LogAnalyzerPlugin(object):
 
     @pytest.fixture(scope=setup_scope(), autouse=True)
     def log_analyzer_setup(self, env_main):
-        """
-        @brief  Setup LogAnalyzer plugin after devices had been started
-        @param  env_main:  pytest fixture
-        @param  env_main:  common3.Env
-        @rtype:  LogAnalyzer
-        @return:  LogAnalyzer instance
+        """Setup LogAnalyzer plugin after devices had been started.
+
+        Args:
+            env_main(common3.Env): pytest fixture
+
+        Returns:
+            LogAnalyzer: LogAnalyzer instance
+
         """
         log_wrapper = LogAnalyzer(env_main.switch)
         log_wrapper.setup()
@@ -215,12 +224,12 @@ class LogAnalyzerPlugin(object):
 
     @pytest.fixture(autouse=True)
     def log_analyzer(self, request, env, log_analyzer_setup):
-        """
-        @brief  Validate device's logs on test teardown
-        @param  request:  pytest request
-        @type  request:  pytest.request
-        @param  log_analyzer_setup:  LogAnalyzer instance
-        @type  log_analyzer_setup:  LogAnalyzer
+        """Validate device's logs on test teardown.
+
+        Args:
+            request(pytest.request):  pytest request
+            log_analyzer_setup(LogAnalyzer):  LogAnalyzer instance
+
         """
         # Set item_skip_log_marker for LogAnalyzer instance before teardown
         log_analyzer_setup.item_skip_log_marker = request.node.get_marker("skip_loganalyzer")

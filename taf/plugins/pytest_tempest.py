@@ -1,22 +1,23 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``pytest_tempest.py``
+
+`Prepares sys path for tempest`
+
 """
-@copyright Copyright (c) 2015 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_tempest.py
-
-@summary  Prepares sys path for tempest.
-"""
 import sys
 import os
 from itertools import chain
@@ -36,8 +37,8 @@ def prepend_path(path):
 
 
 def pytest_addoption(parser):
-    """
-    @brief  tempest specific options
+    """Tempest specific options.
+
     """
     options = {
         '--tempest_path': {
@@ -58,8 +59,8 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin.
+    """Registering plugin.
+
     """
     if config.option.tempest_path:
         prepend_path(config.option.tempest_path)
@@ -67,8 +68,8 @@ def pytest_configure(config):
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin.
+    """Unregistering plugin.
+
     """
     rem = getattr(config, _PLUGIN_NAME, None)
     if rem:

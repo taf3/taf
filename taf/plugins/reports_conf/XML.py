@@ -1,23 +1,23 @@
-#!/usr/bin/env python
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``XML.py``
+
+`XML and HTML report classes`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  XML.py
-
-@summary  XML and HTML report classes.
-"""
 import json
 import os
 import sys
@@ -35,8 +35,8 @@ import loggers
 
 
 def str2dict(dictstr):
-    """
-    @brief  Convert string to dictionary
+    """Convert string to dictionary.
+
     """
     _dict = ast.literal_eval(dictstr)
     if not isinstance(_dict, dict):
@@ -48,15 +48,15 @@ def str2dict(dictstr):
     return _dict
 
 class ReportingServerConfig(object):
-    """
-    @description  Reporting Server configuration
+    """Reporting Server configuration.
+
     """
     class_logger = loggers.ClassLogger()
 
     @staticmethod
     def _additional_option(parser):
-        """
-        @brief  Plugin specific options.
+        """Plugin specific options.
+
         """
         group = parser.getgroup("XML report", "plugin: xml reporter")
         group.addoption("--xml_file", action="store", dest="xml_file",
@@ -81,29 +81,28 @@ class ReportingServerConfig(object):
 
     @staticmethod
     def _configure(config):
-        """
-        @brief  Checking XML/HTML options.
+        """Checking XML/HTML options.
+
         """
         if (config.option.xml_file is not None or config.option.xml_html is not None) and not config.option.collectonly:
             return True
 
     @staticmethod
     def _get_build_name(options):
-        """
-        @brief  Return specified buildname.
+        """Return specified buildname.
+
         """
         pass
 
     @staticmethod
     def _sessionstart(log_class, item, name, buildname):
-        """
-        @brief  Tell to XMLRPC Server that we are going to interact with it.
-        @param  item:  test case item
-        @type  item:  pytest.Item
-        @param  name:  name for current session
-        @type  name:  str
-        @param  buildname:  buildname for current session
-        @type  buildname:  str
+        """Tell to XMLRPC Server that we are going to interact with it.
+
+        Args:
+            item(pytest.Item):  test case item
+            name(str):  name for current session
+            buildname(str):  buildname for current session
+
         """
         commands = []
         try:

@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``XML.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`XML and HTML report classes`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  XML.py
-
-@summary  XML and HTML report classes.
 """
 
 import json
@@ -36,9 +35,10 @@ from . import _reporter as reporter
 from plugins.pytest_helpers import get_failure_reason, get_skipped_reason, get_html_xml_path
 import loggers
 
+
 def str2dict(dictstr):
-    """
-    @brief  Convert string to dictionary
+    """Convert string to dictionary
+
     """
     _dict = ast.literal_eval(dictstr)
     if not isinstance(_dict, dict):
@@ -51,12 +51,14 @@ def str2dict(dictstr):
 
 
 def get_full_path(fname):
-    """
-    @brief  Return full file path by given relative.
-    @param  fname:  File name
-    @type  fname:  str
-    @rtype:  str
-    @return:  Full path to file
+    """Return full file path by given relative.
+
+    Args:
+        fname(str):  File name
+
+    Returns:
+        str: Full path to file
+
     """
     fname = os.path.normpath(os.path.expanduser(os.path.expandvars(fname)))
     abs_path = os.path.normpath(os.path.join(os.path.realpath(os.curdir), fname))
@@ -67,12 +69,14 @@ def get_full_path(fname):
 
 
 def get_uniq_filename(filename):
-    """
-    @brief  If file with given name exists return file with -N suffix.
-    @param  filename:  File name
-    @type  filename:  str
-    @rtype:  str
-    @return:  File with modified name
+    """If file with given name exists return file with -N suffix.
+
+    Args:
+        filename(str):  File name
+
+    Returns:
+        str: File with modified name
+
     """
     _file = filename
     flag = False
@@ -90,20 +94,20 @@ def get_uniq_filename(filename):
 
 # TODO: add processing of xfail TCs
 class XML(object):
-    """
-    @description  XML report specific functionality.
+    """XML report specific functionality.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, connectors=None):
-        """
-        @brief  Initialize XML class
+        """Initialize XML class
+
         """
 
         class Junit(Namespace):
-            """
-            @description  Junit is a child of abstract Namespace class.
+            """Junit is a child of abstract Namespace class.
+
             """
             pass
 
@@ -156,11 +160,12 @@ class XML(object):
         self.__html_report = None
 
     def __setattr__(self, name, value):
-        """
-        @brief  Perform additional configuration procedures on setting some attributes.
-        @param  name:  Attribute name
-        @type  name:  str
-        @param  value:  Attribute value
+        """Perform additional configuration procedures on setting some attributes.
+
+        Args:
+            name(str):  Attribute name
+            value:  Attribute value
+
         """
         if name == "logfile" and value is not None:
             self.__dict__[name] = os.path.normpath(os.path.join(os.path.realpath(os.curdir),
@@ -191,21 +196,27 @@ class XML(object):
             self.__dict__[name] = value
 
     def __htmlconfig(self, configfile):
-        """
-        @brief  Create HTMLReport instance.
-        @param  configfile:  Path to HTML report configuration file.
-        @type  configfile:  str
-        @return:  None
+        """Create HTMLReport instance.
+
+        Args:
+            configfile(str):  Path to HTML report configuration file.
+
+        Returns:
+            None
+
         """
         self.class_logger.debug("Creating HTMLReport instance.")
         self.__html_report = HTMLReport(configfile)
 
     def __configinit(self, cfgfile):
-        """
-        @brief  Read XML report configuration from file.
-        @param  cfgfile:  Path to XML report config file.
-        @type  cfgfile:  str
-        @return:  None
+        """Read XML report configuration from file.
+
+        Args:
+            cfgfile(str):  Path to XML report config file.
+
+        Returns:
+            None
+
         """
         config_file = get_full_path(cfgfile)
         self.class_logger.info("Loading config from file {0}...".format(config_file))
@@ -234,20 +245,22 @@ class XML(object):
 #            self.class_logger.info("Use connector: {0}.".format(self._connector.name))
 
     def append_infodict(self, attr, value):
-        """
-        @brief  Append xml report infodict (it's shown in report header).
-        @param  attr:  Attribute name
-        @type  attr:  str
-        @param  value:  Attribute value
+        """Append xml report infodict (it's shown in report header).
+
+        Args:
+            attr(str):  Attribute name
+            value:  Attribute value
+
         """
         self.class_logger.info("Appending infodict: {0} = {1}".format(attr, value))
         self.infodict[attr] = value
 
     def info(self):
-        """
-        @brief  Return dict of report settings.
-        @rtype:  dict
-        @return:  Report settings
+        """Return dict of report settings.
+
+        Returns:
+            dict: Report settings
+
         """
         return {'xml file': self.logfile,
                 'html file': self.htmlfile,
@@ -255,10 +268,11 @@ class XML(object):
                 'dump count': self.dump_count}
 
     def process_cmd(self, cmd):
-        """
-        @brief  Get and process command from client.
-        @param  cmd:  Command
-        @type  cmd:  dict
+        """Get and process command from client.
+
+        Args:
+            cmd(dict):  Command
+
         """
         if (self.platform is None or self.platform == 'undetermined') and 'build_info' in list(cmd.keys()):
             self.platform = cmd['build_info']['platform']
@@ -275,26 +289,27 @@ class XML(object):
             self.dump_xmllog(cmd['duration'], cmd.get('detailed_duration'))
 
     def append_prev_reason(self, value):
-        """
-        @brief  Append failure reason
-        @param  value:  Failure reason
-        @type  value:  str
+        """Append failure reason.
+
+        Args:
+            value(str):  Failure reason
+
         """
         res = self.Junit.results(message="Failure Reason")
         res.append(value)
         self.append(res)
 
     def _get_failure_res(self, current_status, previous_freason, current_freason):
-        """
-        @brief  Get failure reason
-        @param  current_status:  Current test case's status
-        @type  current_status:  str
-        @param  previous_freason:  Previous failure reason
-        @type  previous_freason:  str
-        @param  current_freason:  Current failure reason
-        @type  current_freason:  str
-        @rtype:  str
-        @return:  Failure reason
+        """Get failure reason
+
+        Args:
+            current_status(str):  Current test case's status
+            previous_freason(str):  Previous failure reason
+            current_freason(str):  Current failure reason
+
+        Returns:
+            str: Failure reason
+
         """
         if current_status == 'Failed' and previous_freason == current_freason:
             return "Same Failure"
@@ -304,26 +319,22 @@ class XML(object):
             return "Failure"
 
     def opentc(self, classnames, tcname, status, report, prev_data=None):
-        """
-        @brief  Adding TC to xml report.
+        """Adding TC to xml report.
 
-        @param  classnames:  py.test dot separated module/class names
-        @type  classnames:  str
-        @param  tcname:  test case name
-        @type  tcname:  str
-        @param  status:  TC run status
-        @type  status:  str
-        @param  report:  TC status report. It's generated by py.test and depends on TC status
-        @type  report:  dict
+        Args:
+            classnames(str):  py.test dot separated module/class names
+            tcname(str):  test case name
+            status(str):  TC run status
+            report(dict):  TC status report. It's generated by py.test and depends on TC status
 
-        @par Example:
-        @code
-        classnames = "functional_tests.feature.test_module.TestClass"
-        tcname = "test_some_feature_behaviour"
-        status = "Passed"
-        report = {"duration": 123}
-        xml_report.opentc(classnames, tcname, status, report)
-        @endcode
+        Example::
+
+            classnames = "functional_tests.feature.test_module.TestClass"
+            tcname = "test_some_feature_behaviour"
+            status = "Passed"
+            report = {"duration": 123}
+            xml_report.opentc(classnames, tcname, status, report)
+
         """
         if not isinstance(report, dict):
             # Exit method if report are not ready
@@ -446,10 +457,11 @@ class XML(object):
             self.append_defectids(_prev_bug_ids, config)
 
     def append(self, obj):
-        """
-        @brief  General method for appending xml object. It's used in append_<status> methods().
-        @param  obj:  Junit object to be appended
-        @type  obj:  Junit
+        """General method for appending xml object. It's used in append_<status> methods().
+
+        Args:
+            obj(Junit):  Junit object to be appended
+
         """
         self.tests[-1].append(obj)
 
@@ -464,12 +476,12 @@ class XML(object):
         self.append(monitor)
 
     def append_error(self, report, when=""):
-        """
-        @brief  Append xml report with error (in case TC failed on setup or teardown).
-        @param  report:  Error report
-        @type  report:  dict
-        @param  when:  Error occurance stage (setup|call|teardown)
-        @type  when:  str
+        """Append xml report with error (in case TC failed on setup or teardown).
+
+        Args:
+            report(dict):  Error report
+            when(str):  Error occurance stage (setup|call|teardown)
+
         """
         self.class_logger.info("Appending XML report with error.")
         if 'longrepr' in list(report.keys()):
@@ -495,19 +507,21 @@ class XML(object):
         self.failed += 1
 
     def append_xfail(self, report):
-        """
-        @brief  Append xml report with xfailed TC.
-        @param  report:  XFail report
-        @type  report:  dict
+        """Append xml report with xfailed TC.
+
+        Args:
+            report(dict):  XFail report
+
         """
         self.class_logger.info("Appending XML report with xfail.")
         self.append(self.Junit.skipped(str(xml_unescape(report['keywords']['xfail'])), message="expected test failure"))
 
     def append_skipped(self, report):
-        """
-        @brief  Append xml reports with skipped TC.
-        @param  report:  Skipped report
-        @type  report:  dict
+        """Append xml reports with skipped TC.
+
+        Args:
+            report(dict):  Skipped report
+
         """
         self.class_logger.info("Appending XML report with skip.")
         # filename, lineno, skipreason = report['longrepr']
@@ -520,20 +534,22 @@ class XML(object):
         self.skipped += 1
 
     def append_pass(self, report):
-        """
-        @brief  Append xml report with passed TC.
-        @param  report:  Passed report
-        @type  report:  dict
+        """Append xml report with passed TC.
+
+        Args:
+            report(dict):  Passed report
+
         """
         self.class_logger.info("Appending XML report with pass.")
         self.append(self.Junit.passed(message="Test passed"))
         self.passed += 1
 
     def append_failure(self, report):
-        """
-        @brief  Append xml report with failed TC.
-        @param  report:  Failure report
-        @type  report:  dict
+        """Append xml report with failed TC.
+
+        Args:
+            report(dict):  Failure report
+
         """
         self.class_logger.info("Appending XML report with fail.")
         for i in range(len(report['sections'])):
@@ -561,12 +577,12 @@ class XML(object):
         self.failed += 1
 
     def append_defectids(self, defect_ids, config=None):
-        """
-        @brief  Add defect ids to report.
-        @param  defect_ids:  Defect IDs
-        @type  defect_ids:  list
-        @param  config:  Connectors configuration
-        @type  config:  dict
+        """Add defect ids to report.
+
+        Args:
+            defect_ids(list):  Defect IDs
+            config(dict):  Connectors configuration
+
         """
         self.class_logger.info("Appending TC with related defects IDs {0}".format(defect_ids))
         _host = None
@@ -578,12 +594,12 @@ class XML(object):
             self.append(self.Junit.defect(d_id=defect_id, d_host=_host))
 
     def dump_xmllog(self, totaltime=None, detailed_duration=None):
-        """
-        @brief  Generating xml file.
-        @param  totaltime:  Total execution time of TCs in report. (It should be returned by py.test.)
-        @type  totaltime:  int
-        @param  detailed_duration:  Detailed execution time of TCs in report.
-        @type  detailed_duration:  dict
+        """Generating xml file.
+
+        Args:
+            totaltime(int):  Total execution time of TCs in report. (It should be returned by py.test.)
+            detailed_duration(dict):  Detailed execution time of TCs in report.
+
         """
         self.logfile = get_html_xml_path(self.logfile, self.buildname)
         self.htmlfile = get_html_xml_path(self.htmlfile, self.buildname)
@@ -642,13 +658,15 @@ class XML(object):
                 self.__html_report.dump_html(dump_logfile, self.htmlfile)
 
     def _connector_cmd(self, cmd, args):
-        """
-        @brief  Call connector method.
-        @param  cmd:  connector method name
-        @type  cmd:  str
-        @param  args:  connector method arguments
-        @type  args:  list
-        @return:  Connector method return code or None in case exception.
+        """Call connector method.
+
+        Args:
+            cmd(str):  connector method name
+            args(list):  connector method arguments
+
+        Returns:
+            Connector method return code or None in case exception.
+
         """
         try:
             ret = getattr(self._connector, cmd)(*args)
@@ -660,15 +678,15 @@ class XML(object):
 
 
 class HTMLReport(object):
-    """
-    @brief  Class for generating HTML reports from xml files.
+    """Class for generating HTML reports from xml files.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config_file):
-        """
-        @brief  Initialize HTMLReport class.
+        """Initialize HTMLReport class.
+
         """
         self.xslt_style = None
         self.xslt_concat = None
@@ -691,13 +709,15 @@ class HTMLReport(object):
                                       self.html_resources))
 
     def dump_html(self, xmlpath, htmlpath):
-        """
-        @brief  Create the HTML report from an XML.
-        @param  xmlpath:  Path to input xml report
-        @type  xmlpath:  str
-        @param  htmlpath:  Path to output html report
-        @type  htmlpath:  str
-        @return:  None
+        """Create the HTML report from an XML.
+
+        Args:
+            xmlpath(str):  Path to input xml report
+            htmlpath(str):  Path to output html report
+
+        Returns:
+            None
+
         """
         temp_file = None
         try:
