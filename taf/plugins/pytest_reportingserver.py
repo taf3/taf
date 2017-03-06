@@ -1,5 +1,5 @@
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+@copyright Copyright (c) 2011 - 2017, Intel Corporation.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,14 +18,15 @@ limitations under the License.
 @summary  XML-RPC reporting server plugin
 """
 import os
-from re import sub as re_sub
-from socket import error as socket_error
-from subprocess import Popen
 import sys
 import time
+import errno
+from subprocess import Popen
+from re import sub as re_sub
+from contextlib import suppress
+from socket import error as socket_error
 from xml.sax.saxutils import escape as xml_escape
 from xmlrpc.client import ProtocolError as XmlrpcProtocolError
-import errno
 from abc import ABCMeta, abstractmethod
 
 import pytest
@@ -114,6 +115,7 @@ class ReportingServer(object):
     @description  Logging xmlrpc server class
     """
     REPORTINGSRV_PATH = "reporting_server.py"
+    UNDEFINED_BUILD = "Undefined"
     class_logger = loggers.ClassLogger()
 
     def __init__(self, opts):
@@ -159,21 +161,20 @@ class ReportingServer(object):
         """
         if self._buildname is not None:
             return self._buildname
-        # Check cli options first
-        get_build_name = [MODULES[_var].ReportingServerConfig._get_build_name(self._opts) for _var in MODULES if "reports_conf." in _var
-                          if MODULES[_var].ReportingServerConfig._get_build_name(self._opts) is not None]
-        if env_prop:
-            self._buildname = "{0}-{1}".format(env_prop['switchppVersion'], env_prop['chipName'])
-            self.platform = env_prop["chipName"]
-            self.build = env_prop["switchppVersion"]
-        else:
-            message = "Cannot determinate buildname."
+        try:
+            platform, build = env_prop['chipName'], env_prop['switchppVersion']
+        except (KeyError, TypeError):
+            message = 'Cannot determine build name'
             self.class_logger.warning(message)
-            # raise Exception(message)
-#            return None
-
-        if get_build_name and env_prop:
-            self._buildname = "{0}-{1}".format(get_build_name[0], env_prop['chipName'])
+            self._buildname = self.UNDEFINED_BUILD
+        else:
+            self.platform = platform
+            self.build = build
+            name_iter = (MODULES[_var].ReportingServerConfig._get_build_name(self._opts) for _var in MODULES if
+                         'reports_conf.' in _var)
+            with suppress(StopIteration):  # retain build name from env_prop
+                build = next(name for name in name_iter if name is not None)
+            self._buildname = '{0}-{1}'.format(build, platform)
 
         # WORKAROUND to add 'sanity' suffix to buildname
         if 'sanity' in self._opts.markexpr and self._buildname is not None:
@@ -343,7 +344,7 @@ class ReportingServer(object):
         try:
             env_prop = item.config.env.env_prop
         except AttributeError:
-            buildname = 'unspecified'
+            buildname = self.UNDEFINED_BUILD
         else:
             buildname = self.buildname(env_prop)
         suite_name = get_suite_name(item.nodeid)
