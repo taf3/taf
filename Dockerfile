@@ -4,11 +4,11 @@ MAINTAINER intel.com
 
 # define proxy environment variables to build image
 # if environment requires
-#ENV http_proxy 'http://<proxy server>:<port>'
-#ENV https_proxy 'http://<proxy server>:<port>'
-#ENV ftp_proxy 'http://<proxy server>:<port>'
-#ENV socks_proxy 'socks://<proxy server>:<port>'
-#ENV no_proxy 'localhost,127.0.0.1,.<example.com>'
+#ENV http_proxy='http://<proxy server>:<port>'
+#ENV https_proxy='http://<proxy server>:<port>'
+#ENV ftp_proxy='http://<proxy server>:<port>'
+#ENV socks_proxy='socks://<proxy server>:<port>'
+#ENV no_proxy='localhost,127.0.0.1,.<example.com>'
 
 # create apt proxy
 #RUN echo 'Acquire::http::Proxy "<proxy server>";' >>/etc/apt/apt.conf.d/20proxy
@@ -56,6 +56,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get autoremove \
     && apt-get clean
 
+# Set the locale to C.UTF-8 for Python 3
+ENV LANG=C.UTF-8
 
 # need to specify path to Ixia client library and
 # copy ixia files where X.XX is Ixia version
@@ -90,9 +92,6 @@ mock \n\
 ' > /root/requirements.txt && pip install --upgrade -r /root/requirements.txt && rm /root/requirements.txt && rm -rf /root/.cache/pip
 
 
-# always need /etc/environment for IXIA and TCL vars
-COPY docker_environment_variables /etc/environment
-
 ARG TAF_ROOT=/root/taf
 # copy TAF repo to docker image
 COPY /  $TAF_ROOT/
@@ -107,7 +106,7 @@ RUN pip install -r $TAF_ROOT/requirements.txt
 
 
 # copy TRex client API library
-ARG TREX_VERSION=v2.00
+ARG TREX_VERSION=v2.20
 ARG TREX_TMP_PATH=/tmp/trex
 ARG TREX_WEB_URL=http://trex-tgn.cisco.com/trex/release
 ENV TREX_CLIENT_LIB=/opt/trex_client/stl
