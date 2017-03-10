@@ -1,22 +1,22 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+"""``powerboard.py``
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+`Functionality related to APC power boards`
 
-@file  powerboard.py
-
-@summary  Functionality related to APC power boards.
 """
 
 from pysnmp.entity.rfc3413.oneliner import cmdgen
@@ -47,23 +47,18 @@ SNMP_DEFAULT_SERVICE_PORT = 161
 
 def snmpget(snmp_host, snmp_community_string, snmp_get_oid,
             snmp_service_port=SNMP_DEFAULT_SERVICE_PORT):
-    """
-    @brief:  Returns snmpget result connected to specified port on
-    specified host via SNMP ()
+    """Returns snmpget result connected to specified port on specified host via SNMP ()
 
-    @param  snmp_host:  PowerBoard hostname or IP (string).
-    @type   snmp_host:  str
-    @param  snmp_community_string:  PowerBoard SNMP community string to
-    communicated with.
-    @type   snmp_community_string:  str
-    @param  snmp_get_oid:  SNMP OID
-    @type   snmp_get_oid:  tuple
-    @param  snmp_service_port:  SNMP service port.
-    @type   snmp_service_port:  int
+    Args:
+        snmp_host(str):  PowerBoard hostname or IP (string).
+        snmp_community_string(str):  PowerBoard SNMP community string to communicated with.
+        snmp_get_oid(tuple):  SNMP OID
+        snmp_service_port(int):  SNMP service port.
 
-    @return:  device description name from SNMP system.sysDescr
-    varBinds in a tuple of name, value
-    @rtype:  (int, int, int, tuple(T, U))
+    Returns:
+        (int, int, int, tuple(T, U)):  device description name from SNMP system.sysDescr
+                                       varBinds in a tuple of name, value
+
     """
 
     errorIndication, errorStatus, errorIndex, varBinds = \
@@ -79,26 +74,19 @@ def snmpget(snmp_host, snmp_community_string, snmp_get_oid,
 def snmpset(snmp_host, snmp_community_string, snmp_set_oid,
             snmp_set_type, snmp_set_value,
             snmp_service_port=SNMP_DEFAULT_SERVICE_PORT):
-    """
-    @brief:  Returns snmpget result connected to specified port on
-    specified host via SNMP ()
+    """Returns snmpget result connected to specified port on specified host via SNMP ()
 
-    @param  snmp_host:  PowerBoard hostname or IP (string).
-    @type   snmp_host:  str
-    @param  snmp_community_string:  PowerBoard SNMP community string to
-    communicated with.
-    @type   snmp_community_string:  str
-    @param  snmp_set_oid:  SNMP OID
-    @type   snmp_set_oid:  tuple
-    @param  snmp_set_type:  SNMP SET Data Type
-    @type   snmp_set_type:  str
-    @param  snmp_set_value:  SNMP OID
-    @type   snmp_set_value:  str
-    @param  snmp_service_port:  SNMP service port.
-    @type   snmp_service_port:  int
+    Args:
+        snmp_host(str):  PowerBoard hostname or IP (string).
+        snmp_community_string(str):  PowerBoard SNMP community string to communicated with.
+        snmp_set_oid(tuple):  SNMP OID
+        snmp_set_type(str):  SNMP SET Data Type
+        snmp_set_value(str):  SNMP OID
+        snmp_service_port(int):  SNMP service port.
 
-    @return:  device description name from SNMP system.sysDescr.
-    @rtype:  (int, int, int, int)
+    Returns:
+        (int, int, int, int):  device description name from SNMP system.sysDescr.
+
     """
 
     if snmp_set_type.upper() == "INTEGER":
@@ -118,18 +106,15 @@ def snmpset(snmp_host, snmp_community_string, snmp_set_oid,
 
 
 def get_system_description(snmp_host, snmp_community_string):
-    """
-    @brief:  Returns device(PDU) name connected to specified port on
-    specified host via SNMP (system.sysDescr = 1.3.6.1.2.1.1.1.0)
+    """Returns device(PDU) name connected to specified port on specified host via SNMP (system.sysDescr = 1.3.6.1.2.1.1.1.0)
 
-    @param  snmp_host:  PowerBoard hostname or IP.
-    @type   snmp_host:  str
-    @param  snmp_community_string:  PowerBoard SNMP community string to
-    communicated with.
-    @type   snmp_community_string:  str
+    Args:
+        snmp_host(str):  PowerBoard hostname or IP.
+        snmp_community_string(str):  PowerBoard SNMP community string to communicated with.
 
-    @return:  device description name from SNMP system.sysDescr.
-    @rtype:  str
+    Returns:
+        str:  device description name from SNMP system.sysDescr.
+
     """
 
     errorIndication, errorStatus, errorIndex, varBinds = \
@@ -142,24 +127,20 @@ def get_system_description(snmp_host, snmp_community_string):
 
 
 def _get_action_name(system_id, action_id):
-    """
-    @brief:  Returns action name based on provided ID.
+    """Returns action name based on provided ID.
 
-    @param  system_id:  System ID which gets the first 3 characters
-    from 'snmpget' command.
-    @type   system_id:  str
-    @param  action_id:  Action ID which has corresponding record in
-    'commands' dictionary.
-    @type   system_id: int
+    Args:
+        system_id(str):  System ID which gets the first 3 characters from 'snmpget' command.
+        action_id(int):  Action ID which has corresponding record in 'commands' dictionary.
 
-    @return:  action name
-    @rtype:  str
+    Returns:
+        str:  action name
 
-    @par  Example:
-    @code
-    action_name = _get_action_name("APC", 1))
-    action_name = _get_action_name("PX2", 2))
-    @endcode
+    Examples::
+
+        action_name = _get_action_name("APC", 1))
+        action_name = _get_action_name("PX2", 2))
+
     """
 
     current_pdu = next(pdu for pdu in actions if pdu['PDU'] == system_id)
@@ -167,24 +148,20 @@ def _get_action_name(system_id, action_id):
 
 
 def _get_action_id(system_id, action_name):
-    """
-    @brief:  Returns action ID based on provided names("On","Off","Reset").
+    """Returns action ID based on provided names("On","Off","Reset").
 
-    @param  system_id:  System ID which gets the first 3 characters
-    from 'snmpget' command.
-    @type   system_id:  str
-    @param  action_name:  Action name which has corresponding record in
-    'commands' dictionary
-    @type   action_name: str
+    Args:
+        system_id(str):  System ID which gets the first 3 characters from 'snmpget' command.
+        action_name(str):  Action name which has corresponding record in 'commands' dictionary.
 
-    @return:  action ID
-    @rtype:  int
+    Returns:
+        int:  action ID
 
-    @par  Example:
-    @code
-    action_name = _get_action_id("APC", "On")
-    action_name = _get_action_id("PX2", "Off")
-    @endcode
+    Examples::
+
+        action_name = _get_action_id("APC", "On")
+        action_name = _get_action_id("PX2", "Off")
+
     """
 
     current_pdu = next(pdu for pdu in actions if pdu['PDU'] == system_id)
@@ -192,27 +169,25 @@ def _get_action_id(system_id, action_name):
 
 
 def set_commands(snmp_host, snmp_community_string):
-    """
-    @brief:  Sets the 'commands' variable to call do_action() with human readable
-    actions like "On", "Off", and "Reset". Based on PDUs, it might have different values
-    for snmpset command.
+    """Sets the 'commands' variable to call do_action() with human readable actions like "On", "Off", and "Reset".
+
+    Based on PDUs, it might have different values for snmpset command.
 
     Raritan PDU status values: 0(OFF), 1(ON), 2(Recycle)
     APC PDU status values: 1 (ON), 2(OFF), 3(Recycle)
 
-    @param  snmp_host:  PowerBoard hostname or IP.
-    @type   snmp_host:  str
-    @param  snmp_community_string:  PowerBoard SNMP community string to
-    communicated with.
-    @type   snmp_community_string:  str
+    Args:
+        snmp_host(str):  PowerBoard hostname or IP.
+        snmp_community_string(str):  PowerBoard SNMP community string to communicated with.
 
-    @return:  none
+    Returns:
+        None
 
-    @par  Example:
-    @code
-    initialize('192.168.1.1', 'private')
-    initialize('192.168.1.1', 'private')
-    @endcode
+    Examples::
+
+        initialize('192.168.1.1', 'private')
+        initialize('192.168.1.1', 'private')
+
     """
 
     global commands
@@ -224,25 +199,20 @@ def set_commands(snmp_host, snmp_community_string):
 
 
 def get_name(host, port, snmp_community_string):
-    """
-    @brief:  Returns configured device name connected to specified port on
-    specified host.
+    """Returns configured device name connected to specified port on specified host.
 
-    @param  host:  PowerBoard hostname or IP.
-    @type   host:  str
-    @param  port:  PowerBoard port to which device is connected (integer).
-    @type   port:  int or [int]
-    @param  snmp_community_string:  PowerBoard SNMP community string to
-    communicated with.
-    @type   snmp_community_string:  str
+    Args:
+        host(str):  PowerBoard hostname or IP.
+        port(int or [int]):  PowerBoard port to which device is connected (integer).
+        snmp_community_string(str):  PowerBoard SNMP community string to communicated with.
 
-    @return:  device name
-    @rtype:  str
+    Returns:
+        str:  device name
 
-    @par  Example:
-    @code
-    device_name = get_name('192.168.1.1', 2)
-    @endcode
+    Examples::
+
+        device_name = get_name('192.168.1.1', 2)
+
     """
 
     # WORKAROUND BEGIN: Ability to send commands on two ports simultaneously
@@ -268,28 +238,23 @@ def get_name(host, port, snmp_community_string):
 
 
 def get_status(host, port, snmp_community_string):
-    """
-    @brief:  Returns status of device connected to specified port on
-    specified host.
+    """Returns status of device connected to specified port on specified host.
 
-    @param  host:  PowerBoard hostname or IP.
-    @type   host:  str
-    @param  port:  PowerBoard port to which device is connected.
-    @type   port:  int
-    @param  snmp_community_string:  PowerBoard SNMP community string to
-    communicated with.
-    @type   snmp_community_string:  str
+    Args:
+        host(str):  PowerBoard hostname or IP.
+        port(int):  PowerBoard port to which device is connected.
+        snmp_community_string(str):  PowerBoard SNMP community string to communicated with.
 
-    @return:  device status
-    @rtype:  str
+    Returns:
+        str:  device status
 
-    @par  Example:
-    @code
-    device_status = get_status('192.168.1.1', 2, "private")
-    device_status = get_status('192.168.1.1', '2', "private")
-    device_status = get_status('192.168.1.1', [1,2], "private")
-        will return the result of the first element's execution.
-    @endcode
+    Examples::
+
+        device_status = get_status('192.168.1.1', 2, "private")
+        device_status = get_status('192.168.1.1', '2', "private")
+        device_status = get_status('192.168.1.1', [1,2], "private")
+            will return the result of the first element's execution.
+
     """
     set_commands(host, snmp_community_string)
 
@@ -320,31 +285,26 @@ def get_status(host, port, snmp_community_string):
 
 
 def do_action(host, port, snmp_community_string, action):
-    """
-    @brief:  Performs specified action for device connected to specified port
-    on specified host. Before do_action(), get_status() should be ran in order to
-    use 'action' parameter.
+    """Performs specified action for device connected to specified port on specified host.
 
-    @param  host:  PowerBoard  hostname or IP (string).
-    @type   host:  string
-    @param  port:  PowerBoard  port to which device is connected.
-    @type   port:  integer, list of integer
-    @param  snmp_community_string:  PowerBoard SNMP community string to
-    communicated with.
-    @type   snmp_community_string: string
-    @param  action:  Action  to perform for device connected to specified port
-    on specified host.
-    @type   action:  int.
+    Before do_action(), get_status() should be ran in order to use 'action' parameter.
 
-    @return:  none
+    Args:
+        host(str):  PowerBoard  hostname or IP (string).
+        port(int, list[int]):  PowerBoard  port to which device is connected.
+        snmp_community_string(str):  PowerBoard SNMP community string to communicated with.
+        action(int):  Action  to perform for device connected to specified port on specified host.
 
-    @par Example:
-    @code
-    do_action('192.168.1.1', 2, 'private', 1)
-    do_action('192.168.1.1', '2', 'private', 2)
-    do_action('192.168.1.1', [2, 3], 'private', 1)
-    do_action('192.168.1.1', ['2', '3'], 'private', 1)
-    @endcode
+    Returns:
+        None
+
+    Examples::
+
+        do_action('192.168.1.1', 2, 'private', 1)
+        do_action('192.168.1.1', '2', 'private', 2)
+        do_action('192.168.1.1', [2, 3], 'private', 1)
+        do_action('192.168.1.1', ['2', '3'], 'private', 1)
+
     """
 
     system_id = get_system_description(host, snmp_community_string)[:3]

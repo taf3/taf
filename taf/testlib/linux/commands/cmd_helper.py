@@ -1,22 +1,23 @@
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``cmd_helper.py``
+
+`Flexible command representation with parsing and building support`
+
 """
-@copyright Copyright (c) 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  cmd_helper.py
-
-@summary  flexible command representation with parsing and building support
-"""
 import copy
 import operator
 import argparse
@@ -218,9 +219,11 @@ class CommandHelper(object):
 
     @classmethod
     def check_args(cls, **kwargs):
-        """
-        @TODO: abstract
-        @brief: Input command arguments checking API
+        """Input command arguments checking API.
+
+        Todo:
+            abstract
+
         """
         pass
 
@@ -272,13 +275,13 @@ class CommandHelper(object):
         return self.arg_parser.parse_args(args_list)
 
     def get_set_args(self, args_in, args_out=None, args_order=None):
-        """
-        @brief A command builder helper function.
-            Strips the dict off the unset (default) arguments.
-            Learns which fields in 'args_in' (dict or argparse.Namespace instance), possibly
-            parsed earlier, had been set before the parsing took place.
-            If an intermediate dict is provided in 'args_out', mutate in place and overwrite
-            it on collision.
+        """A command builder helper function.
+
+        Strips the dict off the unset (default) arguments.
+        Learns which fields in 'args_in' (dict or argparse.Namespace instance), possibly
+        parsed earlier, had been set before the parsing took place.
+        If an intermediate dict is provided in 'args_out', mutate in place and overwrite it on collision.
+
         """
         if args_out is None:
             args_out = OrderedDict()
@@ -311,11 +314,11 @@ class CommandHelper(object):
         return args_out
 
     def build_cmd_list(self, **kwargs):
-        """
-        @brief A command builder helper function.
-            Reverse parse_args() functionality.
-            Converts the input sequence of command arguments(key[:value] pairs) to a command
-            options list.
+        """A command builder helper function.
+
+        Reverse parse_args() functionality.
+        Converts the input sequence of command arguments(key[:value] pairs) to a command options list.
+
         """
         return self.arg_builder.build_args(self.optarg_map, self.posarg_map, kwargs)
 
@@ -324,8 +327,8 @@ _DEFAULT_CMD_HELPER = CommandHelper()
 
 
 class Command(Mapping):
-    """
-    @brief Command holder object flexible representation
+    """Command holder object flexible representation.
+
     """
     CMD_HELPER = _DEFAULT_CMD_HELPER
 
@@ -519,9 +522,10 @@ class Command(Mapping):
         return cmd
 
     def update(self, *args, **kwargs):
-        """
-        Add new stuff and update existing
+        """Add new stuff and update existing
+
         cmd{a: 1, b: 2, c:3} + (cmd{b: 'b', c: 'c', d: 'd'}) => cmd{a: 1, b: 'b', c: 'c', d: 'd'}
+
         """
         for cmd in args:
             self._update_cmd(cmd)
@@ -537,9 +541,10 @@ class Command(Mapping):
         self._update_kwargs(**self.CMD_HELPER.get_set_args(_cmd_dict))
 
     def extend(self, *args, **kwargs):
-        """
-        Add new stuff only
+        """Add new stuff only
+
         cmd{a: 1, b: 2, c:3} + (cmd{b: 'b', c: 'c', d: 'd'}) => cmd{a: 1, b: 2, c: 3, d: 'd'}
+
         """
         for cmd in args:
             self._extend_cmd(cmd)
@@ -555,9 +560,10 @@ class Command(Mapping):
         self._extend_kwargs(**self.CMD_HELPER.get_set_args(_cmd_dict))
 
     def unset(self, *args, **kwargs):
-        """
-        Remove stuff
+        """Remove stuff
+
         cmd{a: 1, b: 2, c: 3} - {cmd{b: 'b', c: 'c', d: 'd'} => cmd{a: 1}
+
         """
         for cmd in args:
             self._unset_cmd(cmd)

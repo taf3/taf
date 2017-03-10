@@ -1,21 +1,19 @@
-#!/usr/bin/env python
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+"""``lldp.py``
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  lldp.py
 """
 
 from enum import IntEnum
@@ -59,10 +57,12 @@ class Lldp(object):
     def _get_lldp_tlvs_list(self, show_command):
         """
 
-        @param show_command: lldptool show-tlv command
-        @type show_command: str
-        @return: list of tlvs
-        @rtype: list
+        Args:
+            show_command(str): lldptool show-tlv command
+
+        Returns:
+            list: list of tlvs
+
         """
         # quiet=True to avoid exception on ret_code != exit_status
         stdout, stderr, exit_status = self.run_command(show_command, expected_rcs={0, 1})

@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2015 - 2016, Intel Corporation.
+# Copyright (c) 2015 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``dcrpd.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Class to abstract dcrpd operations`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file dcrpd.py
-
-@summary Class to abstract dcrpd operations
 """
 
 from testlib.custom_exceptions import UICmdException
@@ -31,9 +30,11 @@ class Dcrpd(object):
     MANIFEST_FILE = CONFIG_PATH + "dcrpd.service"
 
     def __init__(self, run_command, switch):
-        """
-        @param run_command: function that runs the actual commands
-        @type run_command: function
+        """Initialize Dcrpd class.
+
+        Args:
+            run_command(function): function that runs the actual commands
+
         """
         super(Dcrpd, self).__init__()
         self.run_command = run_command
@@ -42,56 +43,72 @@ class Dcrpd(object):
         self.service_manager = service_lib.SpecificServiceManager(self.SERVICE, self.run_command)
 
     def start(self):
-        """
-        @brief  Start dcrpd process
-        @raise  UICmdException: On non-zero return code
+        """Start dcrpd process.
+
+        Raises:
+            UICmdException: On non-zero return code
+
         """
         self.switch.ui.modify_ports(ports=[self.switch.ui.cpu_port], adminMode='Up')
         self.service_manager.start()
 
     def stop(self):
-        """
-        @brief  Stop dcrpd process
-        @raise  UICmdException: On non-zero return code
+        """Stop dcrpd process.
+
+        Raises:
+            UICmdException: On non-zero return code
+
         """
         self.service_manager.stop()
         self.switch.ui.modify_ports(ports=[self.switch.ui.cpu_port], adminMode='Down')
 
     def restart(self):
-        """
-        @brief  Restarting dcrpd process
-        @raise  UICmdException: On non-zero return code
+        """Restarting dcrpd process.
+
+        Raises:
+            UICmdException: On non-zero return code
+
         """
         self.service_manager.restart()
 
     def force_reload(self):
-        """
-        @brief  Restarting the switch driver and then the dcrpd process
-        @raise  UICmdException: On non-zero return code
+        """Restarting the switch driver and then the dcrpd process.
+
+        Raises:
+            UICmdException: On non-zero return code
+
         """
         self.switch_driver.force_reload()
         self.switch.ui.modify_ports(ports=[self.switch.ui.cpu_port], adminMode='Up')
         self.restart()
 
     def enable(self):
-        """
-        @brief  Enabling dcrpd service on start
-        @raise  UICmdException: On non-zero return code
+        """Enabling dcrpd service on start.
+
+        Raises:
+            UICmdException: On non-zero return code
+
         """
         self.service_manager.enable()
 
     def disable(self):
-        """
-        @brief  Disabling dcrpd service on start
-        @raise  UICmdException: On non-zero return code
+        """Disabling dcrpd service on start.
+
+        Raises:
+            UICmdException: On non-zero return code
+
         """
         self.service_manager.disable()
 
     def get_status(self):
-        """
-        @brief  Get dcrpd process status
-        @raise  UICmdException: On non-zero or non-three return code
-        @rtype:  str
+        """Get dcrpd process status.
+
+        Raises:
+            UICmdException: On non-zero or non-three return code
+
+        Returns:
+            str
+
         """
         try:
             result = self.service_manager.status()

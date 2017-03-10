@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``switch_general.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`General switches-specific functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  switch_general.py
-
-@summary  general switches-specific functionality.
 """
 
 import sys
@@ -51,74 +50,75 @@ PortsOrder = namedtuple('PortsOrder', 'masters, slaves')
 
 
 class SwitchGeneral(entry_template.GenericEntry):
-    """
-    @description  General Switch object functionality.
+    """General Switch object functionality.
 
-    @par  Configuration examples:
-    @code{.json}
-    {
-     "name": "simswitch2_lxc",
-     "entry_type": "switch",
-     "instance_type": "lxc",
-     "id": 31,
-     "ip_host": "10.0.5.103",
-     "ip_port": "8083",
-     "use_sshtun": 1,
-     "sshtun_user": "admin",
-     "sshtun_pass": "admin",
-     "sshtun_port": 22,
-     "default_gw": "127.0.0.1",
-     "net_mask": "255.255.255.0",
-     "ports_count": 32,
-     "pwboard_host": "1.1.1.100",
-     "pwboard_port": "15",
-     "pwboard_snmp_rw_community_string": "private",
-     "use_serial": false,
-     "cli_user": "lxc_admin",
-     "cli_user_passw": "lxc_admin",
-     "cli_user_prompt": "Switch",
-     "telnet_user": "admin",
-     "telnet_pass": "password",
-     "telnet_prompt": "localhost:~$",
-     "ports": [20, 21, 1, 16],
-     "port_list": [[35, 10000], [36, 2500]],
-     "ports_map": [[51, [51, 52, 53, 54]], [55, [55, 56, 57, 58]]],
-     "mgmt_ports": [47, 50],
-     "related_id": ["33"]
-    }
-    @endcode
-    @par  Where:
-    \b entry_type and \b instance_type are mandatory values and cannot be changed for current device type.
-    \n\b id - int or str uniq device ID (mandatory)
-    \n\b name - User defined device name (optional)
-    \n\b ip_host - uniq device IP (mandatory).
-    \n\b ip_port - uniq device IP port for XML-RPC commands (mandatory)
-    \n\b use_sshtun - set if TAF will use ssh connection for XML-RPC commands (0 or 1) (mandatory)
-    \n\b sshtun_user, \b sshtun_pass and \b sshtun_port - uniq ssh user credentials and port to establish ssh connection (optional).
-    \n\b default_gw and \b net_mask -
-    \n\b ports_count - length of Ports table in default configuration (mandatory)
-    \n\b pwboard_host and \b pwboard_port - PDU IP address and port to perform powercycle device reboot (mandatory).
-    \n\b pwboard_snmp_rw_community_string - PDU SNMP Read/Write community string (optional).
-    \n\b use_serial - set up if telnet connection used for clear config (optional)
-    \n\b cli_user and \b cli_user_passw - uniq CLI user credentials (optional).
-    \n\b cli_user_prompt - default CLI prompt on device (optional).
-    \n\b telnet_user and \b telnet_pass - uniq telnet user credentials (optional).
-    \n\b telnet_prompt - default telnet prompt on device (optional).
-    \n\b ports - list of port ids used in tests (mandatory).
-    \n\b port_list - list of port id and port speed used in tests for speed preconfiguration (optional).
-    \n\b ports_map - mapping of master/slave ports for speed preconfiguration (optional).
-    \n\b mgmt_ports - port ids of management ports in Ports table. Used to avoid setting of adminMode into Down state for these ports (optional).
-    \n\b related_id - list of ids of related devices or services (optional).
+    Configuration examples::
+
+        {
+         "name": "simswitch2_lxc",
+         "entry_type": "switch",
+         "instance_type": "lxc",
+         "id": 31,
+         "ip_host": "10.0.5.103",
+         "ip_port": "8083",
+         "use_sshtun": 1,
+         "sshtun_user": "admin",
+         "sshtun_pass": "admin",
+         "sshtun_port": 22,
+         "default_gw": "127.0.0.1",
+         "net_mask": "255.255.255.0",
+         "ports_count": 32,
+         "pwboard_host": "1.1.1.100",
+         "pwboard_port": "15",
+         "pwboard_snmp_rw_community_string": "private",
+         "use_serial": false,
+         "cli_user": "lxc_admin",
+         "cli_user_passw": "lxc_admin",
+         "cli_user_prompt": "Switch",
+         "telnet_user": "admin",
+         "telnet_pass": "password",
+         "telnet_prompt": "localhost:~$",
+         "ports": [20, 21, 1, 16],
+         "port_list": [[35, 10000], [36, 2500]],
+         "ports_map": [[51, [51, 52, 53, 54]], [55, [55, 56, 57, 58]]],
+         "mgmt_ports": [47, 50],
+         "related_id": ["33"]
+        }
+
+    Where::
+
+        \b entry_type and \b instance_type are mandatory values and cannot be changed for current device type.
+        \n\b id - int or str uniq device ID (mandatory)
+        \n\b name - User defined device name (optional)
+        \n\b ip_host - uniq device IP (mandatory).
+        \n\b ip_port - uniq device IP port for XML-RPC commands (mandatory)
+        \n\b use_sshtun - set if TAF will use ssh connection for XML-RPC commands (0 or 1) (mandatory)
+        \n\b sshtun_user, \b sshtun_pass and \b sshtun_port - uniq ssh user credentials and port to establish ssh connection (optional).
+        \n\b default_gw and \b net_mask -
+        \n\b ports_count - length of Ports table in default configuration (mandatory)
+        \n\b pwboard_host and \b pwboard_port - PDU IP address and port to perform powercycle device reboot (mandatory).
+        \n\b pwboard_snmp_rw_community_string - PDU SNMP Read/Write community string (optional).
+        \n\b use_serial - set up if telnet connection used for clear config (optional)
+        \n\b cli_user and \b cli_user_passw - uniq CLI user credentials (optional).
+        \n\b cli_user_prompt - default CLI prompt on device (optional).
+        \n\b telnet_user and \b telnet_pass - uniq telnet user credentials (optional).
+        \n\b telnet_prompt - default telnet prompt on device (optional).
+        \n\b ports - list of port ids used in tests (mandatory).
+        \n\b port_list - list of port id and port speed used in tests for speed preconfiguration (optional).
+        \n\b ports_map - mapping of master/slave ports for speed preconfiguration (optional).
+        \n\b mgmt_ports - port ids of management ports in Ports table. Used to avoid setting of adminMode into Down state for these ports (optional).
+        \n\b related_id - list of ids of related devices or services (optional).
+
     """
     class_logger = None  # defined in subclasses
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize SwitchGeneral class
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
+        """Initialize SwitchGeneral class.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
         """
         super(SwitchGeneral, self).__init__(config, opts)
         self.name = config.get('name', 'noname')
@@ -154,11 +154,14 @@ class SwitchGeneral(entry_template.GenericEntry):
         self.instance_prop = None
 
     def _get_speed_ports(self):
-        """
-        @brief  Get slave and master ports from config.
-        @rtype:  list
-        @return:  List of ports (slave and master) used in real config
-        @note  This function check if master port should be split into slave ports.
+        """Get slave and master ports from config.
+
+        Returns:
+            list: List of ports (slave and master) used in real config
+
+        Notes:
+            This function check if master port should be split into slave ports.
+
         """
         speed_ports = self.config.get("port_list", [])
         ports_map = self.config.get("ports_map", [])
@@ -172,24 +175,26 @@ class SwitchGeneral(entry_template.GenericEntry):
         return ports, speed_ports, ports_map
 
     def _get_port_for_probe(self):
-        """
-        @brief  Get port ID.
-        @rtype:  int
-        @return:  ssh tunnel ports ID
+        """Get port ID.
+
+        Returns:
+            int:  ssh tunnel ports ID
+
         """
         return int(self._sshtun_port)
 
     def enable_ports(self):
-        """
-        @brief  Enable ports if Ports table is empty.
+        """Enable ports if Ports table is empty.
+
         """
         pass
 
     def probe(self):
-        """
-        @brief  Probe switch with UI call.
-        @rtype:  dict
-        @return:  Dictionary (_object) with switchpp status parameters or raise an exception.
+        """Probe switch with UI call.
+
+        Returns:
+            dict:  Dictionary (_object) with switchpp status parameters or raise an exception.
+
         """
         _object = {
             'isup': False,
@@ -221,13 +226,17 @@ class SwitchGeneral(entry_template.GenericEntry):
         return _object
 
     def waiton(self, timeout=90):
-        """
-        @brief  Wait until switch if fully operational.
-        @param  timeout:  Wait timeout
-        @type  timeout:  int
-        @raise  SwitchException:  device doesn't response
-        @rtype:  dict
-        @return  Status dictionary from probe method or raise an exception.
+        """Wait until switch if fully operational.
+
+        Args:
+            timeout(int):  Wait timeout
+
+        Raises:
+            SwitchException:  device doesn't response
+
+        Returns:
+            dict:  Status dictionary from probe method or raise an exception.
+
         """
         status = None
         message = "Waiting until switch %s(%s) is up." % (self.name, self.ipaddr)
@@ -270,13 +279,17 @@ class SwitchGeneral(entry_template.GenericEntry):
         return status
 
     def waitoff(self, timeout=30):
-        """
-        @brief  Wait for switch stop listening on ssh port.
-        @param  timeout:  Wait timeout
-        @type  timeout:  int
-        @raise  SwitchException:  device is still alive
-        @rtype:  bool
-        @return:  True or raise an exception.
+        """Wait for switch stop listening on ssh port.
+
+        Args:
+            timeout(int):  Wait timeout
+
+        Raises:
+            SwitchException:  device is still alive
+
+        Returns:
+            bool:  True or raise an exception.
+
         """
         status = True
         message = "Waiting until switch %s(%s) is down." % (self.name, self.ipaddr)
@@ -300,10 +313,11 @@ class SwitchGeneral(entry_template.GenericEntry):
         return not status
 
     def clearconfig(self):
-        """
-        @brief  Perform switchpp clearConfig query and raise an exception if it fails.
+        """Perform switchpp clearConfig query and raise an exception if it fails.
 
-        @return  None
+        Returns:
+            None
+
         """
         try:
             self.ui.clear_config()
@@ -313,10 +327,11 @@ class SwitchGeneral(entry_template.GenericEntry):
             pytest.fail(message)
 
     def cleanup(self):
-        """
-        @brief  Check if switch is operational and perform clearConfig procedure.
+        """Check if switch is operational and perform clearConfig procedure.
 
-        @return  None
+        Returns:
+            None
+
         """
         if not self.status:
             self.class_logger.info("Skip cleanup of switch id:%s due to Off status." % (self.id, ))
@@ -326,41 +341,46 @@ class SwitchGeneral(entry_template.GenericEntry):
 
     @abstractmethod
     def start(self, wait_on=True):
-        """
-        @brief  Mandatory method for environment specific switch classes.
-        @param  wait_on:  Indicates if wait for device status
-        @type  wait_on:  bool
+        """Mandatory method for environment specific switch classes.
+
+        Args:
+            wait_on(bool):  Indicates if wait for device status
+
         """
         pass
 
     @abstractmethod
     def stop(self):
-        """
-        @brief  Mandatory method for environment specific switch classes.
+        """Mandatory method for environment specific switch classes.
+
         """
         pass
 
     @abstractmethod
     def restart(self, wait_on=True, mode=""):
-        """
-        @brief  Mandatory method for environment specific switch classes.
-        @param  wait_on:  Indicates if wait for device status
-        @type  wait_on:  bool
-        @param  mode:  Restart mode. powercycle|ui
-        @type  mode:  str
+        """Mandatory method for environment specific switch classes.
+
+        Args:
+            wait_on(bool):  Indicates if wait for device status
+            mode(str):  Restart mode. powercycle|ui
+
         """
         pass
 
     def get(self, init_start=False, retry_count=7):
-        """
-        @brief  Get or start switch instance.
-        @param init_start:  Perform switch start operation or not
-        @type  init_start:  bool
-        @param retry_count:  Number of retries to start(restart) switch
-        @type  retry_count:  int
-        @return None or raise an exception.
-        @note  Also self.opts.fail_ctrl attribute affects logic of this method.
-               fail_ctrl is set in py.test command line options (read py.test --help for more information).
+        """Get or start switch instance.
+
+        Args:
+            init_start(bool):  Perform switch start operation or not
+            retry_count(int):  Number of retries to start(restart) switch
+
+        Returns:
+            None or raise an exception.
+
+        Notes:
+            Also self.opts.fail_ctrl attribute affects logic of this method.
+            fail_ctrl is set in py.test command line options (read py.test --help for more information).
+
         """
         # If fail_ctrl != "restart", restart retries won't be performed
         if self.opts.fail_ctrl != "restart":
@@ -407,10 +427,11 @@ class SwitchGeneral(entry_template.GenericEntry):
                         pytest.fail(message)
 
     def check(self):
-        """
-        @brief  Check if switch is operational using waiton method.
+        """Check if switch is operational using waiton method.
 
-        @note  This mandatory method for all environment classes.
+        Notes:
+            This mandatory method for all environment classes.
+
         """
         if not self.status:
             self.class_logger.info("Skip switch id:%s(%s) check because it's has Off status." % (self.id, self.name))
@@ -427,23 +448,25 @@ class SwitchGeneral(entry_template.GenericEntry):
         return status
 
     def create(self):
-        """
-        @brief  Start switch or get running one.
+        """Start switch or get running one.
 
-        @note  This is mandatory method for all environment classes.
-               Also self.opts.get_only attribute affects logic of this method.
-               get_only is set in py.test command line options (read py.test --help for more information).
+        Notes:
+            This is mandatory method for all environment classes.
+            Also self.opts.get_only attribute affects logic of this method.
+            get_only is set in py.test command line options (read py.test --help for more information).
+
         """
         init_start = not self.opts.get_only
         return self.get(init_start=init_start)
 
     def destroy(self):
-        """
-        @brief  Stop or release switch.
+        """Stop or release switch.
 
-        @note  This is mandatory method for all environment classes.
-               Also self.opts.leave_on and get_only  attributes affect logic of this method.
-               leave_on and get_only are set in py.test command line options (read py.test --help for more information).
+        Notes:
+            This is mandatory method for all environment classes.
+            Also self.opts.leave_on and get_only  attributes affect logic of this method.
+            leave_on and get_only are set in py.test command line options (read py.test --help for more information).
+
         """
         if not self.status:
             self.class_logger.info("Skip switch id:%s(%s) destroying because it's has already Off status." % (self.id, self.name))
@@ -454,17 +477,18 @@ class SwitchGeneral(entry_template.GenericEntry):
         self.sanitize()
 
     def sanitize(self):
-        """
-        @brief  Perform any necessary operations to leave environment in normal state.
+        """Perform any necessary operations to leave environment in normal state.
+
         """
         # Close sshtun to prevent hanging threads.
         self.ui.disconnect()
 
     def connect_port(self, port_id):
-        """
-        @brief  Emulate port connection via setting adminMode into Up state
-        @param  port_id:  Port number
-        @type  port_id:  int
+        """Emulate port connection via setting adminMode into Up state.
+
+        Args:
+            port_id(int):  Port number
+
         """
         self.class_logger.debug("Emulating connecting for port ID = {0}".format(port_id))
         _port = self.ui.get_table_ports([int(port_id)])[0]
@@ -477,10 +501,11 @@ class SwitchGeneral(entry_template.GenericEntry):
             self.ui.modify_ports([int(port_id)], adminMode="Up")
 
     def disconnect_port(self, port_id):
-        """
-        @brief  Emulate port disconnection via setting adminMode into Down state
-        @param  port_id:  Port number
-        @type  port_id:  int
+        """Emulate port disconnection via setting adminMode into Down state.
+
+        Args:
+            port_id(int):  Port number
+
         """
         self.class_logger.debug("Emulating disconnecting for port ID = {0}".format(port_id))
         _port = self.ui.get_table_ports([int(port_id)])[0]
@@ -493,49 +518,47 @@ class SwitchGeneral(entry_template.GenericEntry):
             self.ui.modify_ports([int(port_id)], adminMode="Down")
 
     def ssh_connect(self, host, port, login, passw):
-        """
-        @brief  Make ssh connection to the device.
-        @param  host:  Device ssh IP address
-        @type  host:  str
-        @param  port:  Device ssh port
-        @type  port:  int
-        @param  login:  ssh username
-        @type  login:  str
-        @param  passw:  ssh password
-        @type  passw:  str
+        """Make ssh connection to the device.
+
+        Args:
+            host(str):  Device ssh IP address
+            port(int):  Device ssh port
+            login(str):  ssh username
+            passw(str):  ssh password
+
         """
         self.ssh_conn = clissh.CLISSH(host, port=port, username=login, password=passw)
         self.ssh_conn.login()
         self.ssh_conn.open_shell()
 
     def disabled_stp_on_management_ports(self):
-        """
-        @brief  Disable STP on management ports.
+        """Disable STP on management ports.
+
         """
         pass
 
     def get_env_prop(self, param):
-        """
-        @brief  Read properties from all devices.
+        """Read properties from all devices.
+
         """
         return self.instance_prop[param]
 
 
 class SwitchReal(SwitchGeneral):
-    """
-    @description  Real devices class.
+    """Real devices class.
+
     """
 
     class_logger = loggers.ClassLogger()
     UI_RESTART_TIMEOUT = 5
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize SwitchReal class
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
+        """Initialize SwitchReal class.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
         """
         from . import powerboard
         self.powerboard = powerboard
@@ -574,11 +597,14 @@ class SwitchReal(SwitchGeneral):
             self.netconf = netconfcmd.NETCONF(config)
 
     def start(self, wait_on=True):
-        """
-        @brief  Power on switch or perform power cycle if it is already On.
-        @param wait_on:  Check if switch boot successfully
-        @type  wait_on:  bool
-        @raise  SwitchException:  unknown device status
+        """Power on switch or perform power cycle if it is already On.
+
+        Args:
+            wait_on(bool):  Check if switch boot successfully
+
+        Raises:
+            SwitchException:  unknown device status
+
         """
         self.class_logger.info("Starting Real switch device %s(%s) ..." % (self.name, self.ipaddr))
         self.class_logger.debug("Checking device status on powerboard...")
@@ -615,9 +641,11 @@ class SwitchReal(SwitchGeneral):
         self.speed_preconfig()
 
     def stop(self):
-        """
-        @brief  Power Off real switch.
-        @raise  SwitchException:  unknown device status
+        """Power Off real switch.
+
+        Raises:
+            SwitchException:  unknown device status
+
         """
         self.ui.disconnect()
 
@@ -643,15 +671,19 @@ class SwitchReal(SwitchGeneral):
         return True
 
     def restart(self, wait_on=True, mode="powercycle"):
-        """
-        @brief  Perform switch power cycle.
-        @param wait_on:  Check if switch boot properly.
-        @type  wait_on:  bool
-        @param mode:  set type of reboot, by default it's powercycle.
-        @type  mode:  str
-        @raise  SwitchException:  incorrect restart mode
-        @note  By default start method performs power cycle in case switch is already On.
-               Therefore this method is just link to start().
+        """Perform switch power cycle.
+
+        Args:
+            wait_on(bool):  Check if switch boot properly.
+            mode(str):  set type of reboot, by default it's powercycle.
+
+        Raises:
+            SwitchException:  incorrect restart mode
+
+        Notes:
+            By default start method performs power cycle in case switch is already On.
+            Therefore this method is just link to start().
+
         """
         if mode == 'powercycle':
             self.class_logger.info("Perform powercycle device reboot")
@@ -678,33 +710,36 @@ class SwitchReal(SwitchGeneral):
             raise SwitchException(message)
 
     def get_serial(self, timeout=90, with_login=None, wait_login=0):
-        """
-        @brief  Connect to switch via serial.
-        @param  timeout:  time out to wait connection
-        @type  timeout:  int
-        @param  with_login:  Perform login procedure or not.
-                             If param isn't set try automatically determine login necessity. (True|False|None)
-        @type  with_login:  bool
-        @param  wait_login:  time to wait login before sending <Enter>.
-                             <Enter> is necessary if login is already appiered.
-        @type  wait_login:  int
-        @note  Create(or check) class attribute telnet with active telnet connection to switch and do login.
+        """Connect to switch via serial.
+
+        Args:
+            timeout(int):  time out to wait connection
+            with_login(bool):  Perform login procedure or not.
+                               If param isn't set try automatically determine login necessity. (True|False|None)
+            wait_login(int):  time to wait login before sending <Enter>.
+                              <Enter> is necessary if login is already appiered.
+
+        Notes:
+            Create(or check) class attribute telnet with active telnet connection to switch and do login.
+
         """
         self.telnet = lab.ConsoleServer(self.config)
         self.telnet.get_serial(timeout=timeout, with_login=with_login, wait_login=wait_login)
 
     def close_serial(self):
-        """
-        @brief  Close telnet connection to switch.
+        """Close telnet connection to switch.
+
         """
         self.telnet.close_serial()
         del self.telnet
         self.telnet = None
 
     def halt(self):
-        """
-        @brief  Do halt before shutdown.
-        @raise  SwitchException:  error on device halt
+        """Do halt before shutdown.
+
+        Raises:
+            SwitchException:  error on device halt
+
         """
         if not self._use_serial:
             self.class_logger.warning("Skipping halt procedure because serial access is disabled.")
@@ -730,20 +765,21 @@ class SwitchReal(SwitchGeneral):
 
     @staticmethod
     def _netmsk_to_cidr(ip_addr, netmask):
-        """
-        @brief  CIDR conversion.
-        @param  ip_addr:  IP address
-        @type  ip_addr:  str
-        @param  netmask:  netmask value
-        @type  netmask:  int
+        """CIDR conversion.
+
+        Args:
+            ip_addr(str):  IP address
+            netmask(int):  netmask value
+
         """
         cidr = ipaddr.IPv4Network('{0}/{1}'.format(ip_addr, netmask), strict=False)
         return cidr.with_prefixlen
 
     def clearconfig(self):
-        """
-        @brief  Perform clearConfig query on switch using telnet.
-                And try to configure management interface.
+        """Perform clearConfig query on switch using telnet.
+
+        And try to configure management interface.
+
         """
         self.class_logger.debug("Performing clearConfig on real switch.")
         super(SwitchReal, self).clearconfig()
@@ -754,8 +790,8 @@ class SwitchReal(SwitchGeneral):
         self.speed_preconfig()
 
     def setup_syslog(self):
-        """
-        @brief  Setup remote syslog server settings.
+        """Setup remote syslog server settings.
+
         """
         if 'related_id' in self.config:
             for val in self.config['related_id']:
@@ -778,15 +814,16 @@ class SwitchReal(SwitchGeneral):
         self.class_logger.debug("Syslog configuration skipped. Syslog settings not found.")
 
     def speed_preconfig(self, wait_for_ports=False):
-        """
-        @brief  Function for ports speed preconfiguration
-        @param wait_for_ports:  wait for Ports table changes size
-        @type  wait_for_ports:  int
+        """Function for ports speed preconfiguration.
+
+        Args:
+            wait_for_ports(int):  wait for Ports table changes size
+
         """
 
         def _normalize_port_list(ports_list):
-            """
-            @brief  Get lists of Master and Slave ports.
+            """Get lists of Master and Slave ports.
+
             """
             master_ports = set()
             ports = set()
@@ -801,8 +838,8 @@ class SwitchReal(SwitchGeneral):
             return PortsOrder(m_list, p_list)
 
         def _get_master_port(port):
-            """
-            @brief  Get Master port.
+            """Get Master port.
+
             """
             try:
                 return next(r for r, s in self.ports_map if port in s)
@@ -837,12 +874,12 @@ class SwitchReal(SwitchGeneral):
                 time.sleep(3)
 
     def setup_ports_speed_configuration(self, ports=None, speed=10000):
-        """
-        @brief  Configure ports speed.
-        @param  ports:  list of ports to set speed value
-        @type  ports:  list[int]
-        @param  speed:  speed value
-        @type  speed:  int
+        """Configure ports speed.
+
+        Args:
+            ports(list[int]):  list of ports to set speed value
+            speed(int):  speed value
+
         """
         if ports:
             self.class_logger.debug("Performing ports speed configuration on real switch.")

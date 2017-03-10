@@ -1,22 +1,23 @@
+# Copyright (c) 2015 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``ui_helpers.py``
+
+`UiHelper class for mixin for switch.ui object`
+
 """
-@copyright Copyright (c) 2015 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  ui_helpers.py
-
-@summary  UiHelper class for mixin for switch.ui object.
-"""
 import time
 import configparser
 from itertools import chain
@@ -36,23 +37,28 @@ mod_logger = loggers.module_logger(name=__name__)
 
 
 class UiHelperMixin(object):
-    """
-    @description  Mixing class for switch.ui
+    """Mixing class for switch.ui.
+
     """
 
 # Port Helpers
 
     def wait_for_port_value_to_change(
             self, ports, port_parameter, value, interval=1, timeout=30):
-        """
-        @brief  Wait until value is changed in port table
-        @type  ports: list[int | str]
-        @type  port_parameter: str
-        @type  value: int | str
-        @type  step: int
-        @type  timeout: int
-        @raise: StandardError
-        @rtype: none
+        """Wait until value is changed in port table.
+
+        Args:
+            ports(list[int | str]): list of ports
+            port_parameter(str): port parameter
+            value(int | str): checking value
+            timeout(int): timeout
+
+        Raises:
+            StandardError
+
+        Returns:
+            None
+
         """
         end_time = time.time() + timeout
         while time.time() < end_time:
@@ -69,8 +75,8 @@ class UiHelperMixin(object):
                 ports, value, port_parameter))
 
     def wait_until_ops_state(self, port=1, state="Up", timeout=30):
-        """
-        @brief  Obsoleted function. Use wait_until_value_is_changed with proper option instead.
+        """Obsoleted function. Use wait_until_value_is_changed with proper option instead.
+
         """
         end_time = time.time() + timeout
         while time.time() < end_time:
@@ -82,10 +88,11 @@ class UiHelperMixin(object):
             "Timeout exceeded: Port state wasn't changed during timeout %s into %s value" % (timeout, state))
 
     def ui_raises(self, method, *args, **values):
-        """
-        @brief  UI raises.
-        @param method: method to call
-        @type method: str
+        """UI raises.
+
+        Args:
+            method(str): method to call
+
         """
         try:
             getattr(self, method)(*args, **values)
@@ -97,14 +104,17 @@ class UiHelperMixin(object):
             pytest.fail("Incorrect command has been executed.")
 
     def compose_unique_mac_addr(self, pckt_type='unicast', prefix=None, ports=None):
-        """
-        @brief  Creates unique mac addresses for given ports. Each addres is concatenation
-                of packet type speecific prefix, switch own IP address and port number.
-        @param  pck_type:  type of packet: 'unicast', 'multicast' or 'broadcast'
-        @param  prefix:  custom packet prefix consisting of two octets,eg '01:80',
-                         ignored if pck_type == 'broadcast'
-        @param  ports:  list of port names or numbers
-        @return  map of port names and mac adresses
+        """Creates unique mac addresses for given ports. Each addres is concatenation
+        of packet type speecific prefix, switch own IP address and port number.
+
+        Args:
+            pckt_type(str):  type of packet: 'unicast', 'multicast' or 'broadcast'
+            prefix(str):  custom packet prefix consisting of two octets,eg '01:80', ignored if pck_type == 'broadcast'
+            ports(list):  list of port names or numbers
+
+        Returns:
+            map of port names and mac adresses
+
         """
         type_prefix = {'unicast': 0x0, 'multicast': 0x1, 'broadcast': 0xff}
         port_mac = {}
@@ -123,9 +133,11 @@ class UiHelperMixin(object):
 # FDB Helpers
 
     def delete_static_macs_from_port(self, port):
-        """
-        @brief  Deletes all static MAC addresses from port
-        @type  port:  str | int
+        """Deletes all static MAC addresses from port.
+
+        Args:
+            port(str | int): port
+
         """
         table_fdb = self.get_table_fdb(table="static")
         table_fdb_port = (r for r in table_fdb if r['portId'] == port)
@@ -136,18 +148,20 @@ class UiHelperMixin(object):
 # LAG Helpers
 
     def wait_for_port_status(self, lag_id, state, value, interval):
-        """
-        @brief  Wait for LAG/port state to become value
-        @param  lag_id: LAG/port id
-        @param  state: state
-        @param  value: expected value
-        @param  interval: timeout
-        @type  lag_id: int | str
-        @type  state: str
-        @type  value: int | str
-        @type interval:  int
-        @raise:  SwitchException
-        @rtype:  None
+        """Wait for LAG/port state to become value.
+
+        Args:
+            lag_id(int | str): LAG/port id
+            state(str): state
+            value(int | str): expected value
+            interval(int): timeout
+
+        Raises:
+            SwitchException
+
+        Returns:
+            None
+
         """
         end_time = time.time() + interval
         while time.time() < end_time:
@@ -160,8 +174,8 @@ class UiHelperMixin(object):
             "Port {} is not changed to {} during timeout.".format(state, value))
 
     def clear_lag_table(self):
-        """
-        @brief  Removes all ports from LAG and clears LAG table
+        """Removes all ports from LAG and clears LAG table.
+
         """
         table = self.get_table_lags()
         table_ports2lag = self.get_table_ports2lag()
@@ -172,35 +186,46 @@ class UiHelperMixin(object):
         self.delete_lags(lag_ids)
 
     def is_lag_added(self, lag_id):
-        """
-        @brief  Check if lag has been added to LAG table.
-        @type  lag_id:  str|int
-        @rtype:  bool
+        """Check if lag has been added to LAG table.
+
+        Args:
+            lag_id(str|int): id of lag
+
+        Returns:
+            bool
+
         """
         table = self.get_table_lags()
         return any(r['lagId'] == lag_id for r in table)
 
     def is_port_added_to_lag(self, port, lag_id):
-        """
-        @brief  Check if port added to LAG.
-        @type  port:  int
-        @type  lag_id:  str|int
-        @rtype:  bool
+        """Check if port added to LAG.
+
+        Args:
+            port(int): port
+            lag_id(str|int): id of lag
+
+        Returns:
+            bool
+
         """
         # Enforcing str for ONP/ONS compatibility
         table = self.get_table_ports2lag()
         return any(r['portId'] == port and r['lagId'] == lag_id for r in table)
 
     def set_admin_mode_for_slave_ports(self, admin_mode="Down"):
-        """
-        @brief  Set adminMode for logical ports.
+        """Set adminMode for logical ports.
 
-        @param  admin_mode:  Ports adminMode(string)
-        @return  True or raise exception
-        @par  Example:
-        @code
-        assert ui_helpers.set_admin_mode_for_slave_ports(admin_mode="Up")
-        @endco
+        Args:
+            admin_mode(str):  Ports adminMode
+
+        Returns:
+            True or raise exception
+
+        Examples::
+
+            assert ui_helpers.set_admin_mode_for_slave_ports(admin_mode="Up")
+
         """
         timeout = 10
         end_time = time.time() + timeout
@@ -225,8 +250,8 @@ class UiHelperMixin(object):
         return True
 
     def wait_for_state_lag_state(self, lag=None, port=1, state="Selected", timeout=30):
-        """
-        @brief  Wait until port state in RSTP table
+        """Wait until port state in RSTP table.
+
         """
         end_time = time.time() + timeout
         while time.time() < end_time:
@@ -242,15 +267,16 @@ class UiHelperMixin(object):
 # UFD Helpers
 
     def build_and_create_ufd_network_file(self, port_type, ports, bind_carrier=''):
-        """
-        @brief  Creating network file for uplink and downlink ports
-        @param  port_type:  type of interface (uplink/downlink)
-        @type  port_type:  str
-        @param  ports:  ports to assign to UFD group
-        @type  ports:  list[int | str]
-        @param  bind_carrier:  which uplink ports are bound to specified downlink ports
-        @type  bind_carrier:  str | list[int]
-        @rtype:  None
+        """Creating network file for uplink and downlink ports.
+
+        Args:
+            port_type(str):  type of interface (uplink/downlink)
+            ports(list[int | str]):  ports to assign to UFD group
+            bind_carrier(str | list[int]):  which uplink ports are bound to specified downlink ports
+
+        Returns:
+            None
+
         """
         # Get the Config Parser Instance
         config = configparser.RawConfigParser()
@@ -280,14 +306,15 @@ class UiHelperMixin(object):
                 port_name=port_name, config_parser_instance=config)
 
     def start_traffic_ufd(self, tg_instance, port_list):
-        """
-        @brief  Start sending traffic to the ports
-        @param  tg_instance:  TG instance object
-        @type  tg_instance:  instance object
-        @param  port_list:  List of interfaces to which traffic needs to be send
-        @type  port_list:  list[dict]
-        @return:  list of stream ids generated
-        @rtype:  list[int]
+        """Start sending traffic to the ports.
+
+        Args:
+            tg_instance(instance object):  TG instance object
+            port_list(list[dict]):  List of interfaces to which traffic needs to be send
+
+        Returns:
+            list[int]: list of stream ids generated
+
         """
         stream_ids = []
         for port in port_list:
@@ -310,19 +337,18 @@ class UiHelperMixin(object):
 
     def get_and_validate_statistics_ufd(self, ingress_ports, egress_ports,
                                         tg_instance, sniff_params, time_out=30):
-        """
-        @brief  Get the port statistics and validate the counters
-        @param  ingress_ports:  List of ingress ports that need to be validated
-        @type  ingress_ports:  list[tuple(int, built-in function)]
-        @param  egress_ports:  List of egress ports that need to be validated
-        @type  egress_ports:  list[tuple(int, built-in function)]
-        @param  tg_instance:  traffic generator instance object
-        @type  tg_instance:  instance object
-        @param  sniff_params:  parms used for validating packets in the TG
-        @type  sniff_params:  dict{(int, int, int): list[tuple(str, str, bool)]}
-        @param  time_out:  Time out requred for the counters to get updated
-        @type  time_out:  int
-        @rtype:  None
+        """Get the port statistics and validate the counters.
+
+        Args:
+            ingress_ports(list[tuple(int, built-in function)]):  List of ingress ports that need to be validated
+            egress_ports(list[tuple(int, built-in function)]):  List of egress ports that need to be validated
+            tg_instance(instance object):  traffic generator instance object
+            sniff_params(dict{(int, int, int): list[tuple(str, str, bool)]}):  parms used for validating packets in the TG
+            time_out(int):  Time out required for the counters to get updated
+
+        Returns:
+            None
+
         """
         # Start packet sniffing
         sniff_ports = list(sniff_params.keys())
@@ -366,13 +392,15 @@ class UiHelperMixin(object):
                                            tg_instance=tg_instance, result=param[2])
 
     def add_entry_to_fdb_ufd(self, vlan_id, fdb_entries):
-        """
-        @brief  Add static MAC to FDB
-        @param  vlan_id:  vlan id to be used
-        @type  vlan_id:  int
-        @param  fdb_entries:  port and mac details that neeed to be added to FDB
-        @type  fdb_entries:  list[tuple(int, str)]
-        @rtype:  None
+        """Add static MAC to FDB.
+
+        Args:
+            vlan_id(int):  vlan id to be used
+            fdb_entries(list[tuple(int, str)]):  port and mac details that neeed to be added to FDB
+
+        Returns:
+            None
+
         """
         for entry in fdb_entries:
             self.create_static_macs(port=entry[0], vlans=[vlan_id], macs=[entry[1]])
@@ -381,42 +409,40 @@ class UiHelperMixin(object):
 # VLAN helpers
 
     def is_entry_added_to_vlan_table(self, vlan_id=1):
-        """
-        @brief  Check if entry is added to VLAN table
+        """Check if entry is added to VLAN table.
 
-        @param  vlan_id:  vlan number from where packet was sent (integer)
-        @type  vlan_id:  int
-        @return:  True or False
-        @rtype:  bool
+        Args:
+            vlan_id(int):  vlan number from where packet was sent (integer)
 
-        @par  Example:
-        @code
-        is_entry_added_to_vlan_table(vlan_id=vlan_id)
+        Returns:
+            bool:  True or False
+
+        Examples::
+
+            is_entry_added_to_vlan_table(vlan_id=vlan_id)
+
         """
         table = self.get_table_vlans()
         return any(row['vlanId'] == vlan_id for row in table)
 
     def is_entry_added_to_ports2vlan_table(self, port_id, vlan_id, tagged='Tagged',
                                            pvid=None, table_ports2vlan=None):
-        """
-        @brief  Check if entry is added to Ports2Vlan table
+        """Check if entry is added to Ports2Vlan table.
 
-        @param  port_id:  port number
-        @type  port_id:  int
-        @param  vlan_id:  vlan number
-        @type  vlan_id:  int
-        @param  tagged:  tagged or untagged
-        @type  tagged:  str
-        @param  pvid:  true or false, if inputted vlan is pvid
-        @type  pvid:  bool
-        @param  table_ports2vlan:  table of ports2vlan
-        @return:  True or False
-        @rtype:  bool
+        Args:
+            port_id(int):  port number
+            vlan_id(int):  vlan number
+            tagged(str):  tagged or untagged
+            pvid(bool):  true or false, if inputted vlan is pvid
+            table_ports2vlan(list[dict]):  table of ports2vlan
 
-        @par  Example:
-        @code
-        is_entry_added_to_ports2vlan_table(port_id=port_id, vlan_id=vlan_id, pvid=True,
-        tagged=tagged
+        Returns:
+            bool:  True or False
+
+        Examples::
+
+            is_entry_added_to_ports2vlan_table(port_id=port_id, vlan_id=vlan_id, pvid=True, tagged=tagged)
+
         """
         if table_ports2vlan is None:
             table_ports2vlan = self.get_table_ports2vlans()
@@ -431,8 +457,8 @@ class UiHelperMixin(object):
 
     def wait_until_stp_param(self, mode="STP", port=1, param='rootGuard',
                              value="Disabled", timeout=30, instance=0):
-        """
-        @brief  Wait until port role in xSTP table
+        """Wait until port role in xSTP table.
+
         """
         end_time = time.time() + timeout
         while time.time() < end_time:

@@ -1,22 +1,22 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+"""``clicmd_ons.py``
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+`Module for CLI specific functionality`
 
-@file  clicmd_ons.py
-
-@summary  Module for CLI specific functionality.
 """
 
 import re
@@ -32,10 +32,11 @@ from .custom_exceptions import CLICMDException
 
 
 def get_table_title(line):
-    """
-    @brief  Get table name
-    @param  line:  output
-    @type  line:  str
+    """Get table name.
+
+    Args:
+        line(str):  output
+
     """
     if ":" in line:
         table_title = line.split(":")[0]
@@ -45,12 +46,14 @@ def get_table_title(line):
 
 
 def get_column_ranges(line):
-    """
-    @brief  Get column ranges
-    @param  line:  string with "--" column delimiters
-    @type  line:  str
-    @rtype:  list[list[str]]
-    @return:  column_indexes - list of lists with string indexes of columns
+    """Get column ranges.
+
+    Args:
+        line(str):  string with "--" column delimiters
+
+    Returns:
+        list[list[str]]:  column_indexes - list of lists with string indexes of columns
+
     """
     if "--" in line:
         column_indexes = []
@@ -65,14 +68,15 @@ def get_column_ranges(line):
 
 
 def get_column_names(table_data, column_ranges):
-    """
-    @brief  Get column name
-    @param  table_data:  String fetched from SSH CLI with column names
-    @type  table_data:  str
-    @param  column_ranges:  List with columns width string indexes used to extract column names
-    @type  column_ranges:  list
-    @rtype:  list[str]
-    @return:  column_names_list - List of strings with columns names
+    """Get column name.
+
+    Args:
+        table_data(str):  String fetched from SSH CLI with column names
+        column_ranges(list):  List with columns width string indexes used to extract column names
+
+    Returns:
+        list[str]:  column_names_list - List of strings with columns names
+
     """
     column_names_dict = {}
     column_names_list = []
@@ -95,12 +99,14 @@ def get_column_names(table_data, column_ranges):
 
 
 def get_dotted_table(table_lines):
-    """
-    @brief  Get table data
-    @param  table_lines:  list of table rows
-    @type  table_lines:  list
-    @rtype:  list[list]
-    @return:  table_list - list of lists with row names and values
+    """Get table data.
+
+    Args:
+        table_lines(list):  list of table rows
+
+    Returns:
+        list[list]:  table_list - list of lists with row names and values
+
     """
     table_list = []
     for line in table_lines:
@@ -110,18 +116,19 @@ def get_dotted_table(table_lines):
 
 
 def get_table_value(table_data, identifier=None, checker=None):
-    """
-    @brief  Gets necessary field value from the table.
+    """Gets necessary field value from the table.
 
-    @param  table_data:  console output data (string),
-    @type  table_data:  str
-    @param  identifier:  Column name and row number['column', 'value'],
-    @type  identifier:  list[]
-    @param  checker:  column name to check value (string).
-    @type  checker:  str
-    @raise  CLICMDException:  invalid row length
-    @rtype:  str
-    @return:  Field value.
+    Args:
+        table_data(str):  console output data
+        identifier(list[]):  Column name and row number['column', 'value']
+        checker(str):  column name to check value
+
+    Raises:
+        CLICMDException:  invalid row length
+
+    Returns:
+        str:  Field value
+
     """
     table_value = ''
     # === parse received data for table header and type of table ==================
@@ -247,19 +254,20 @@ def get_table_value(table_data, identifier=None, checker=None):
 
 
 class CLICmd(object):
-    """
-    @description  Class for CLI specific functionality.
+    """Class for CLI specific functionality.
 
-    @param  config:  environment config.
-    @param  switches:  switches list.
+    Args:
+        config:  environment config.
+        switches:  switches list.
+
     """
     suite_logger = loggers.ClassLogger()
     # TODO: add wait_until_value_is_changed method for CLI
 
     def __init__(self, ipaddr, port, login, passw, prompt, devtype, delay=None, build_path=None, img_path=None,
                  page_break="<?> - help.", xmlrpcport=None):
-        """
-        @brief Initialize CLICmd class
+        """Initialize CLICmd class.
+
         """
         self.timeout = 9
         # find out login, password and command prompt for switches from config for defined user
@@ -283,17 +291,19 @@ class CLICmd(object):
             self.conn.delay = delay
 
     def _connect_to_switch(self, prompt, timeout=20):
-        """
-        @brief  SSH connect to switch and wait untill prompt string appeared.
-        @param  prompt:  expected CLI prompt.
-        @type  prompt:  str
-        @param  timeout:  connection timeout.
-        @type  timeout:  int
-        @return:  None
-        @par Example:
-        @code
-        self._connect_to_switches(sw_keys=1, prompt="Switch ")
-        @endcode
+        """SSH connect to switch and wait until prompt string appeared.
+
+        Args:
+            prompt(str):  expected CLI prompt.
+            timeout(int):  connection timeout.
+
+        Returns:
+            None
+
+        Examples::
+
+            self._connect_to_switches(sw_keys=1, prompt="Switch ")
+
         """
         cli_start_path = ''
         self.suite_logger.debug("Login on switch with login: {0} and expected prompt is: {1}".format(self.login, prompt))
@@ -332,23 +342,24 @@ class CLICmd(object):
                     login = self.conn.action_on_expect(self.conn.shell, alternatives=alter, timeout=timeout, is_shell=self.is_shell)
 
     def cli_get(self, arguments_list, prompt=None, show=True, timeout=25):
-        """
-        @brief  Getting values by CLI.
-        @param  arguments_list:  list of arguments to get values.
-        @type  arguments_list:  list
-        @param  prompt:  expected promt or message, takes from cli_set_result.
-        @type  prompt:  str
-        @param  show:  execute command with show prefix
-        @type  show:  bool
-        @param  timeout:  command execution timeout
-        @type  timeout:  int
-        @raise  Exception:  error on command execution
-        @rtype:  list
-        @return:  List of CLI-GET command results.
-        @par  Example:
-        @code
-        env.switch[1].cli.cli_get(['enable, none 0 none', 'statistics, Port 1, RX Discards']])
-        @endcode
+        """Getting values by CLI.
+
+        Args:
+            arguments_list(list):  list of arguments to get values.
+            prompt(str):  expected promt or message, takes from cli_set_result.
+            show(bool):  execute command with show prefix
+            timeout(int):  command execution timeout
+
+        Raises:
+            Exception:  error on command execution
+
+        Returns:
+            list: List of CLI-GET command results.
+
+        Examples::
+
+            env.switch[1].cli.cli_get(['enable, none 0 none', 'statistics, Port 1, RX Discards']])
+
         """
         if not prompt:
             prompt = self.prompt
@@ -410,19 +421,20 @@ class CLICmd(object):
         return result
 
     def cli_get_all(self, arguments_list, prompt=None, timeout=25, interval=0.1):
-        """
-        @brief  Getting values by CLI.
-        @param  arguments_list:  list of arguments to get values.
-        @type  arguments_list:  list
-        @param  prompt:  expected promt or message, takes from cli_set_result.
-        @type  prompt:  str
-        @param  timeout:  command execution timeout
-        @type  timeout:  int
-        @param  interval:  time interval between read attempts
-        @type  interval:  int
-        @raise  Exception:  error on command execution
-        @rtype:  list
-        @return:  List of CLI-GET command results.
+        """Getting values by CLI.
+
+        Args:
+            arguments_list(list):  list of arguments to get values
+            prompt(str):  expected promt or message, takes from cli_set_result
+            timeout(int):  command execution timeout
+            interval(int):  time interval between read attempts
+
+        Raises:
+            Exception:  error on command execution
+
+        Returns:
+            list:  List of CLI-GET command results
+
         """
         result = []
         alternatives = []
@@ -446,23 +458,24 @@ class CLICmd(object):
         return result
 
     def cli_set(self, commands_list, timeout=5, prompt=None, connect=True):
-        """
-        @brief  Setting values by CLI.
-        @param  commands_list:  list of commands.
-        @type  commands_list:  list
-        @param  prompt:  expected promt or message, takes from cli_set_result.
-        @type  prompt:  str
-        @param  timeout:  commnad execution timeout
-        @type  timeout:  int
-        @param connect: Flag if connection should be established before login procedure.
-        @type  connect:  bool
-        @raise  Exception:  error on command execution
-        @rtype:  list
-        @return:  List of CLI-SET command results.
-        @par  Example:
-        @code
-        env.switch[1].cli.cli_set([["enable"], ["vlan-database"], ["vlan 10"]])
-        @endcode
+        """Setting values by CLI.
+
+        Args:
+            commands_list(list):  list of commands.
+            prompt(str):  expected promt or message, takes from cli_set_result.
+            timeout(int):  command execution timeout
+            connect(bool): Flag if connection should be established before login procedure.
+
+        Raises:
+            Exception:  error on command execution
+
+        Returns:
+            list:  List of CLI-SET command results.
+
+        Examples::
+
+            env.switch[1].cli.cli_set([["enable"], ["vlan-database"], ["vlan 10"]])
+
         """
         alternatives = []
         tabulation = False
@@ -549,29 +562,36 @@ class CLICmd(object):
         return result
 
     def cli_connect(self, prompt=None):
-        """
-        @brief  SSH connect to switch and wait untill prompt string appeared.
-        @param  prompt:  expected CLI prompt.
-        @type  prompt:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].cli.cli_connect(prompt="Switch ")
-        @endcode
+        """SSH connect to switch and wait untill prompt string appeared.
+
+        Args:
+            prompt(str):  expected CLI prompt.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].cli.cli_connect(prompt="Switch ")
+
         """
         if not prompt:
             prompt = self.prompt
         self._connect_to_switch(prompt)
 
     def cli_disconnect(self):
-        """
-        @brief  Close ssh connection to switch
-        @raise  CLICMDException:  error on disconnect
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].cli.cli_disconnect()
-        @endcode
+        """Close ssh connection to switch.
+
+        Raises:
+            CLICMDException:  error on disconnect
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].cli.cli_disconnect()
+
         """
         try:
             if self.conn:
@@ -580,10 +600,11 @@ class CLICmd(object):
             raise CLICMDException(err)
 
     def update_prompt(self, prompt):
-        """
-        @brief  Updating prompt in both clissh and clicmd_ons objects.
-        @param  prompt:  Prompt to be updated
-        @type  prompt:  str
+        """Updating prompt in both clissh and clicmd_ons objects.
+
+        Args:
+            prompt(str):  Prompt to be updated
+
         """
         self.prompt = prompt
         self.conn.prompt = prompt

@@ -1,22 +1,22 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+"""``dev_vlabcross.py```
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+`ONS Vlab virtual cross specific functionality`
 
-@file  dev_vlabcross.py
-
-@summary  ONS Vlab virtual cross specific functionality.
 """
 
 from os.path import join as os_path_join
@@ -34,21 +34,23 @@ from .xmlrpc_proxy import TimeoutServerProxy as xmlrpcProxy
 
 
 class VlabEnv(dev_basecross.GenericXConnectMixin):
-    """
-    @description  Vlab from device viewpoint.
+    """Vlab from device viewpoint.
+
     """
 
     class_logger = loggers.ClassLogger()
     DEFAULT_TIMEOUT = 1
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize VlabEnv class
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
-        @raise  CrossException:  error in vlab path
+        """Initialize VlabEnv class.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
+        Raises:
+            CrossException:  error in vlab path
+
         """
         self.id = config['id']
         self.type = config['instance_type']
@@ -89,10 +91,11 @@ class VlabEnv(dev_basecross.GenericXConnectMixin):
         self.status = self.opts.get_only
 
     def probe_port(self):
-        """
-        @brief  Establishing a connection to a remote host.
-        @rtype:  bool
-        @return:  True if connection is established
+        """Establishing a connection to a remote host.
+
+        Returns:
+            bool: True if connection is established
+
         """
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(3)
@@ -104,10 +107,11 @@ class VlabEnv(dev_basecross.GenericXConnectMixin):
             return False
 
     def probe(self):
-        """
-        @brief  Check if Vlab instance is run
-        @rtype:  dict
-        @return:  Vlab status
+        """Check if Vlab instance is run.
+
+        Returns:
+            dict:  Vlab status
+
         """
         result = {'isup': False, 'type': "unknown", 'prop': {}}
         if self.probe_port():
@@ -123,13 +127,17 @@ class VlabEnv(dev_basecross.GenericXConnectMixin):
         return result
 
     def waiton(self, timeout=30):
-        """
-        @brief  Waiting until Vlab port is up.
-        @param  timeout:  Waiting timeout
-        @type  timeout:  int
-        @raise  CrossException:  error on vlab start
-        @rtype:  dict
-        @return:  Vlab status
+        """Waiting until Vlab port is up.
+
+        Args:
+            timeout(int):  Waiting timeout
+
+        Raises:
+            CrossException:  error on vlab start
+
+        Returns:
+            dict:  Vlab status
+
         """
         status = None
         message = "Waiting until vlab on %s port #%s is up." % (self.ipaddr, self.port, )
@@ -165,13 +173,17 @@ class VlabEnv(dev_basecross.GenericXConnectMixin):
         return status
 
     def waitoff(self, timeout=30):
-        """
-        @brief  Waiting until Vlab port is down.
-        @param  timeout:  Waiting timeout
-        @type  timeout:  int
-        @raise  CrossException: error on vlab stop
-        @rtype:  dict
-        @return:  Vlab status
+        """Waiting until Vlab port is down.
+
+        Args:
+            timeout(int):  Waiting timeout
+
+        Raises:
+            CrossException: error on vlab stop
+
+        Returns:
+            dict:  Vlab status
+
         """
         status = None
         message = "Waiting until vlab on %s port #%s is down." % (self.ipaddr, self.port, )
@@ -211,14 +223,16 @@ class VlabEnv(dev_basecross.GenericXConnectMixin):
             time.sleep(self.DEFAULT_TIMEOUT)
 
     def start(self):
-        """
-        @brief  Starts vlab based on provided host and port info with specified number of interfaces.
-        @raise  CrossException:  not local environment, vlab is stopped
-        @raise  Exception:  error on vlab start
+        """Starts vlab based on provided host and port info with specified number of interfaces.
+
+        Raises:
+            CrossException:  not local environment, vlab is stopped
+            Exception:  error on vlab start
+
         """
         def check_rc():
-            """
-            @brief  Checking Vlab process.
+            """Checking Vlab process.
+
             """
             rc = process.poll()
             if rc is not None:
@@ -256,9 +270,11 @@ class VlabEnv(dev_basecross.GenericXConnectMixin):
         self.status = True
 
     def stop(self):
-        """
-        @brief  Stops vlab based on provided host and port info.
-        @raise  CrossException:  error on vlab stop
+        """Stops vlab based on provided host and port info.
+
+        Raises:
+            CrossException:  error on vlab stop
+
         """
         if not self.popen:
             message = "No Popen object exists for Vlab. Exiting stop() method without processing."
@@ -277,8 +293,8 @@ class VlabEnv(dev_basecross.GenericXConnectMixin):
         self.status = False
 
     def restart(self):
-        """
-        @brief  Restarting Vlab instance.
+        """Restarting Vlab instance.
+
         """
         try:
             self.stop()
@@ -288,8 +304,8 @@ class VlabEnv(dev_basecross.GenericXConnectMixin):
             self.start()
 
     def check(self):
-        """
-        @brief  Checking Vlab instance status.
+        """Checking Vlab instance status.
+
         """
         if self.status:
             self.waiton()
@@ -298,26 +314,30 @@ class VlabEnv(dev_basecross.GenericXConnectMixin):
 
 
 class VlabCross(VlabEnv):
-    """
-    @description  Vlab from xconnect viewpoint.
+    """Vlab from xconnect viewpoint.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def _get_ports_from_config(self, connection=None):
-        """
-        @brief  Get ports from configuration.
-        @param  connection:  Connection info in format [sw1, port1, sw2, port2]
-        @type  connection:  list
-        @raise  CrossException:  unsupported connection type
-        @raise  ValueError:  error in configuration file
-        @rtype:  list
-        @return:  Ports from configuration
+        """Get ports from configuration.
+
+        Args:
+            connection(list):  Connection info in format [sw1, port1, sw2, port2]
+
+        Raises:
+            CrossException:  unsupported connection type
+            ValueError:  error in configuration file
+
+        Returns:
+            list:  Ports from configuration
+
         """
 
         def get_port(conn):
-            """
-            @brief  Get port ID.
+            """Get port ID.
+
             """
             # If device linked to another via bridged interface
             if hasattr(self, 'portmap'):
@@ -362,38 +382,44 @@ class VlabCross(VlabEnv):
             raise ValueError("Cannot make requested connection. Check config. Got following args: %s, %s" % (vconn1, vconn2))
 
     def xconnect(self, connection):
-        """
-        @brief  Create single connection
-        @param  connection:  Connection info in format [sw1, port1, sw2, port2]
-        @type  connection:  list
+        """Create single connection.
+
+        Args:
+            connection(list):  Connection info in format [sw1, port1, sw2, port2]
+
         """
         vconn = self._get_ports_from_config(connection)
         self.class_logger.debug("Connect VLAB ports: %s" % vconn)
         return self.xmlproxy.vlab.cross.connect(vconn[0], vconn[1], vconn[2], vconn[3])
 
     def xdisconnect(self, connection):
-        """
-        @brief  Destroy single connection
-        @param  connection:  Connection info in format [sw1, port1, sw2, port2]
-        @type  connection:  list
+        """Destroy single connection.
+
+        Args:
+            connection(list):  Connection info in format [sw1, port1, sw2, port2]
+
         """
         vconn = self._get_ports_from_config(connection)
         self.class_logger.debug("Disconnect VLAB ports: %s" % vconn)
         return self.xmlproxy.vlab.cross.disconnect(vconn[0], vconn[1], vconn[2], vconn[3])
 
     def cross_connect(self, conn_list):
-        """
-        @brief  Make connections between switches
-        @param  conn_list:  Set of connections in format: [[sw1, port1, sw2, port2], ... ]
-        @type  conn_list:  list[list]
-        @raise  CrossException:  devices from conn_list are not in related configurations,
-                                 error on connection creation
-        @rtype:  bool
-        @return:  True  if success or raise an error if connections were not created.
-        @par  Example:
-        @code
-        cross_connect([[0, 1, 1, 1], [0, 2, 1, 2]])
-        @endcode
+        """Make connections between switches.
+
+        Args:
+            conn_list(list[list]):  Set of connections in format: [[sw1, port1, sw2, port2], ... ]
+
+        Raises:
+            CrossException:  devices from conn_list are not in related configurations,
+                             error on connection creation
+
+        Returns:
+            bool:  True  if success or raise an error if connections were not created.
+
+        Examples::
+
+            cross_connect([[0, 1, 1, 1], [0, 2, 1, 2]])
+
         """
         if self.related_conf and conn_list:
             list_id = []
@@ -416,17 +442,21 @@ class VlabCross(VlabEnv):
         return True
 
     def cross_disconnect(self, disconn_list):
-        """
-        @brief  Destroy connections between switches
-        @param  disconn_list:  Set of connections in format: [[sw1, port1, sw2, port2], ... ]
-        @type  disconn_list:  list[list]
-        @raise  CrossException:  error on connection destroying
-        @rtype:  bool
-        @return  True if success or False if connections were not destroyed.
-        @par  Example:
-        @code
-        cross_disconnect([[0, 1, 1, 1], [0, 2, 1, 2]])
-        @endcode
+        """Destroy connections between switches.
+
+        Args:
+            disconn_list(list[list]):  Set of connections in format: [[sw1, port1, sw2, port2], ... ]
+
+        Raises:
+            CrossException:  error on connection destroying
+
+        Returns:
+            bool: True if success or False if connections were not destroyed.
+
+        Examples::
+
+            cross_disconnect([[0, 1, 1, 1], [0, 2, 1, 2]])
+
         """
         # Destroy connections using Virtual Lab
         for conn in disconn_list:
@@ -439,15 +469,18 @@ class VlabCross(VlabEnv):
         return True
 
     def cross_clear(self):
-        """
-        @brief  Clear all connections between switches
-        @raise  CrossException:  error on connections clearing
-        @rtype:  bool
-        @return  True if success or False if all connections were not cleared.
-        @par  Example:
-        @code
-        cross_clear(env)
-        @endcode
+        """Clear all connections between switches
+
+        Raises:
+            CrossException:  error on connections clearing
+
+        Returns:
+            bool:  True if success or False if all connections were not cleared.
+
+        Examples::
+
+            cross_clear(env)
+
         """
         self.class_logger.info("Clear all connections.")
         if self.xmlproxy.vlab.cross.clear() == 0:

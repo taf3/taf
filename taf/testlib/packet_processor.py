@@ -1,21 +1,22 @@
-"""
-@copyright Copyright (c) 2011 - 2017, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+"""``packet_processor.py``
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+`Packet processor specific functionality`
 
-@file  packet_processor.py
-
-@summary  Packet processor specific functionality.
 """
 
 import codecs
@@ -32,8 +33,8 @@ from .custom_exceptions import PypackerException
 
 
 class PacketProcessor(object):
-    """
-    @description  This class contents only one method to build packet from tuple of dictionaries.
+    """This class contents only one method to build packet from tuple of dictionaries.
+
     """
 
     class_logger = loggers.ClassLogger()
@@ -93,29 +94,29 @@ class PacketProcessor(object):
     }
 
     def _build_trex_packet(self, packet_definition, adjust_size=True, required_size=64):
-        """
-        @brief  Builds trex packet based on provided packet definition.
-        @param  packet_definition:  Packet representation (tuple of dictionaries of dictionaries)
-        @type  packet_definition:  tuple(dict)
-        @param  adjust_size:  If set to True packet size will be increased to 60 bytes (CRC not included)
-        @type  adjust_size:  bool
-        @param  required_size:  Size (in bytes) of the result packet
-        @type  required_size:  int
-        @rtype:  trex.Packet
-        @return:  trex.packet or list of pypacker packets (if fragsize defined)
-        @par Example:
-        @code{.py}
-        packet_definition = ({"Ether": {"dst": "00:80:C2:00:00:00", "src": "00:00:00:00:00:02"}},
-                             {"Dot1Q": {"vid": 4}},
-                             {"IP": {}})
-        packet=env.tg[1]._build_trex_packet(packet_definition)
-        @endcode
+        """Builds trex packet based on provided packet definition.
+
+        Args:
+            packet_definition(tuple(dict)):  Packet representation (tuple of dictionaries of dictionaries)
+            adjust_size(bool):  If set to True packet size will be increased to 60 bytes (CRC not included)
+            required_size(int):  Size (in bytes) of the result packet
+
+        Returns:
+            trex.Packet:  trex.packet or list of pypacker packets (if fragsize defined)
+
+        Examples::
+
+            packet_definition = ({"Ether": {"dst": "00:80:C2:00:00:00", "src": "00:00:00:00:00:02"}},
+                                 {"Dot1Q": {"vlan": 4}},
+                                 {"IP": {}})
+            packet=env.tg[1]._build_trex_packet(packet_definition)
+
         """
         import trex_stl_lib.api as TApi
 
         def _value_repr(value):
-            """
-            @brief  Check if value contains layers.
+            """Check if value contains layers.
+
             """
             if isinstance(value, (list, tuple)):
                 return type(value)(list(map(_value_repr, value)))
@@ -125,8 +126,8 @@ class PacketProcessor(object):
                 return value
 
         def _trex_layer(layer_dict):
-            """
-            @brief  Return trex Packet object built according to definition.
+            """Return trex Packet object built according to definition.
+
             """
             layer_name = list(layer_dict.keys())[0]
             sl = getattr(TApi, layer_name)()
@@ -152,13 +153,17 @@ class PacketProcessor(object):
         return packet
 
     def _get_pypacker_layer(self, layer):
-        """
-        @brief  Get Pypacker protocol object
-        @param  layer:  Protocol name e.g IP, ICMP.Echo
-        @type  layer:  str
-        @rtype:  pypacker.Packet
-        @return:  return Pypacker object
-        @raise  PypackerException: Pypacker library does not support protocol
+        """Get Pypacker protocol object.
+
+        Args:
+            layer(str):  Protocol name e.g IP, ICMP.Echo
+
+        Returns:
+            pypacker.Packet:  return Pypacker object
+
+        Raises:
+            PypackerException: Pypacker library does not support protocol
+
         """
         if '.' in layer:
             # Handle inner pypacker class e.g. icmp.ICMP.Echo
@@ -180,12 +185,14 @@ class PacketProcessor(object):
 
     @staticmethod
     def _get_pypacker_layer_fields(packet):
-        """
-        @brief  Get packet fields
-        @param  packet:  pypacker packet
-        @type  packet:  pypacker.Packet
-        @rtype  set
-        @return  set of packet fields
+        """Get packet fields.
+
+        Args:
+            packet(pypacker.Packet):  pypacker packet
+
+        Returns:
+            set:  set of packet fields
+
         """
         # Get header fields
         fields = {field.strip('_') for field in packet._header_field_names if not field.endswith("_s")}
@@ -194,30 +201,30 @@ class PacketProcessor(object):
         return fields.union(sub_fields)
 
     def _build_pypacker_packet(self, packet_definition, adjust_size=True, required_size=64):
-        """
-        @brief  Builds pypacker packet based on provided packet definition.
-        @param  packet_definition:  Packet representation (tuple of dictionaries of dictionaries)
-        @type  packet_definition:  tuple(dict)
-        @param  adjust_size:  If set to True packet size will be increased to 64 bytes for Pypacker TG (CRC is included)
-                              and to 60 bytes for Ixia TG without CRC.
-                              Otherwise Ixia TG will add 4 bytes(CRC), Pypacker TG will not add CRC.
-        @type  adjust_size:  bool
-        @param  required_size:  Size (in bytes) of the result packet
-        @type  required_size:  int
-        @rtype:  pypacker.Packet
-        @return:  pypacker.packet or list of pypacker packets (if fragsize defined)
-        @par Example:
-        @code{.py}
-        packet_definition = ({"Ethernet": {"dst": "00:80:C2:00:00:00", "src": "00:00:00:00:00:02"}},
-                             {"Dot1Q": {"vid": 4}},
-                             {"IP": {}})
-        packet=env.tg[1]._build_pypacker_packet(packet_definition)
-        @endcode
+        """Builds pypacker packet based on provided packet definition.
+
+        Args:
+            packet_definition(tuple(dict)):  Packet representation (tuple of dictionaries of dictionaries)
+            adjust_size(bool):  If set to True packet size will be increased to 64 bytes for Pypacker TG (CRC is included)
+                                and to 60 bytes for Ixia TG without CRC.
+                                Otherwise Ixia TG will add 4 bytes(CRC), Pypacker TG will not add CRC.
+            required_size(int):  Size (in bytes) of the result packet
+
+        Returns:
+            pypacker.Packet:  pypacker.packet or list of pypacker packets (if fragsize defined)
+
+        Examples::
+
+            packet_definition = ({"Ethernet": {"dst": "00:80:C2:00:00:00", "src": "00:00:00:00:00:02"}},
+                                 {"Dot1Q": {"vid": 4}},
+                                 {"IP": {}})
+            packet=env.tg[1]._build_pypacker_packet(packet_definition)
+
         """
 
         def _pypacker_layer(layer_dict):
-            """
-            @brief  Return pypacker Packet object built according to definition.
+            """Return pypacker Packet object built according to definition.
+
             """
             layer_name = next(iter(layer_dict))
             try:
@@ -267,23 +274,22 @@ class PacketProcessor(object):
         return packet
 
     def check_packet_field(self, packet=None, layer=None, field=None, value=None):
-        """
-        @brief  Check if specified field is present (for specified layer) and checks if field value matches specified value.
-        @param  packet:  Packet to analyze
-        @type  packet:  pypacker.Packet
-        @param  layer:  Layer to analyze
-        @type  layer:  str
-        @param  field:  Field to look for
-        @type  field:  str
-        @param  value:  Filed value to compare (may be different types, depending on field)
-        @type  value:  str, int
-        @rtype:  bool
-        @return:  True or False
-        @par Example:
-        @code{.py}
-        assert check_packet_field(packet=pypacker_packet, layer="S-Dot1Q", field="prio", value=4)
-        assert check_packet_field(packet=pypacker_packet, layer="S-Dot1Q", field="type")
-        @endcode
+        """Check if specified field is present (for specified layer) and checks if field value matches specified value.
+
+        Args:
+            packet(pypacker.Packet):  Packet to analyze
+            layer(str):  Layer to analyze
+            field(str):  Field to look for
+            value(str, int):  Filed value to compare (may be different types, depending on field)
+
+        Returns:
+            bool:  True or False
+
+        Examples::
+
+            assert check_packet_field(packet=pypacker_packet, layer="Dot1Q", field="prio", value=4)
+            assert check_packet_field(packet=pypacker_packet, layer="Dot1Q", field="type")
+
         """
         try:
             packet_value = self.get_packet_field(packet, layer, field)
@@ -291,22 +297,24 @@ class PacketProcessor(object):
         except PypackerException:
             return False
 
-    def get_packet_field(self, packet=None, layer=None, field=None):
-        """
-        @brief  Returns field value (for specified layer) from specified packet.
-        @param  packet:  Packet to analyze
-        @type  packet:  pypacker.Packet
-        @param  layer:  Layer to analyze
-        @type  layer:  str
-        @param  field:  Field to look for
-        @type  field:  str
-        @raise  PypackerException:  unknown layer or field
-        @rtype:  int, str
-        @return:  value (may be different types, depending on field)
-        @par Example:
-        @code{.py}
-        value = get_packet_field(packet=pypacker_packet, layer="S-Dot1Q", field="vid")
-        @endcode
+     def get_packet_field(self, packet=None, layer=None, field=None):
+        """Returns field value (for specified layer) from specified packet.
+
+        Args:
+            packet(pypacker.Packet):  Packet to analyze
+            layer(str):  Layer to analyze
+            field(str):  Field to look for
+
+        Raises:
+            PypackerException:  unknown layer or field
+
+        Returns:
+            int, str:  value (may be different types, depending on field)
+
+        Examples::
+
+            value = get_packet_field(packet=pypacker_packet, layer="Dot1Q", field="vlan")
+
         """
         tag_id = {"S-Dot1Q": 0, "C-Dot1Q": 1}
         try:
@@ -330,24 +338,23 @@ class PacketProcessor(object):
             raise PypackerException(message)
 
     def get_packet_layer(self, packet=None, layer=None, output_format="pypacker"):
-        """
-        @brief  Returns packet layer in pypacker or hex format.
-        @param  packet:  Packet to analyze
-        @type  packet:  pypacker.Packet
-        @param  layer:  Layer to analyze
-        @type  layer:  str
-        @param  output_format:  Output format - "pypacker" or "hex" or "bytes_array"
-        @type  output_format:  str
-        @rtype:  pypacker.Packet, str
-        @return:  pypacker.Packet or str
-        @par  Example:
-        @code{.py}
-        packet_definition = ({"Ethernet": {"dst": "00:80:C2:00:00:00", "src": "00:00:00:00:00:02"}},
-                            {"Dot1Q": {"vid": 4}}, {"IP": {}})
-        pypacker_packet = _build_pypacker_packet(packet_definition)
-        ip_layer_hex = get_packet_layer(packet=pypacker_packet, layer="IP", output_format="hex")
-        assert ip_layer_hex[-8:] == '7f000001'
-        @endcode
+        """Returns packet layer in pypacker or hex format.
+
+        Args:
+            packet(pypacker.Packet):  Packet to analyze
+            layer(str):  Layer to analyze
+            output_format(str):  Output format - "pypacker" or "hex" or "bytes_array"
+
+        Returns:
+            pypacker.Packet, str:  pypacker.Packet or str
+
+        Examples::
+
+            packet_definition = ({"Ethernet": {"dst": "00:80:C2:00:00:00", "src": "00:00:00:00:00:02"}}, {"Dot1Q": {"vlan": 4}}, {"IP": {}})
+            pypacker_packet = _build_pypacker_packet(packet_definition)
+            ip_layer_hex = get_packet_layer(packet=pypacker_packet, layer="IP", output_format="hex")
+            assert ip_layer_hex[-8:] == '7f000001'
+
         """
         try:
             pypacker_layer = self._get_pypacker_layer(layer)
@@ -366,22 +373,26 @@ class PacketProcessor(object):
             return None
 
     def packet_dictionary(self, packet):
-        """
-        @brief  Get packet dictionary from pypacker.Packet
-        @param  packet:  pypacker packet
-        @type  packet:  pypacker.Packet
-        @rtype;  dict
-        @return  dictionary created from pypacker.Packet
-        @par  Example:
-        @code{.py}
-        p = ethernet.Ethernet(dst_s="ff:ff:ff:ff:ff:ff", src_s="90:e6:ba:c3:17:13", type=0x806)/
-            arp.ARP(hrd=0x1, pro=0x800, hln=6, pln=4,
-                      op=1, sha="90:e6:ba:c3:17:13", spa="172.20.20.175", tha="00:00:00:00:00:00", tpa="172.20.20.211")
-        pd = PacketProcessor().packet_dictionary(p)
-        assert pd == ({'Ethernet': {'src': '90:e6:ba:c3:17:13', 'dst': 'ff:ff:ff:ff:ff:ff', 'type': 2054}},
-                      {'ARP': {'tha': '00:00:00:00:00:00', 'pro': 2048, 'hrd': 1, 'spa': '172.20.20.175',
-                               'pln': 4, 'hln': 6, 'tpa': '172.20.20.211', 'sha': '90:e6:ba:c3:17:13', 'op': 1}})
-        @endcode
+        """Get packet dictionary from pypacker.Packet.
+
+        Args:
+            packet(pypacker.Packet):  pypacker packet
+
+        Returns:
+            dict: dictionary created from pypacker.Packet
+
+        Examples::
+
+            p = pypacker.Ethernet(dst="ff:ff:ff:ff:ff:ff", src="90:e6:ba:c3:17:13", type=0x806)/
+                pypacker.ARP(hwtype=0x1, ptype=0x800, hwlen=6, plen=4,
+                             op=1, hwsrc="90:e6:ba:c3:17:13", psrc="172.20.20.175", hwdst="00:00:00:00:00:00", pdst="172.20.20.211")/
+                pypacker.Padding(load='\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+            pd = PacketProcessor().packet_dictionary(p)
+            assert pd == ({'Ether': {'src': '90:e6:ba:c3:17:13', 'dst': 'ff:ff:ff:ff:ff:ff', 'type': 2054}},
+                          {'ARP': {'hwdst': '00:00:00:00:00:00', 'ptype': 2048, 'hwtype': 1, 'psrc': '172.20.20.175',
+                                   'plen': 4, 'hwlen': 6, 'pdst': '172.20.20.211', 'hwsrc': '90:e6:ba:c3:17:13', 'op': 1}},
+                          {'Padding': {'load': '\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00'}})
+
         """
         packet_def = []
         vlans = []
@@ -411,27 +422,28 @@ class PacketProcessor(object):
         return tuple(packet_def)
 
     def packet_fragment(self, packet, adjust_size=True, required_size=64, fragsize=None):
-        """
-        @brief  Method for packet fragmentation
-        @param  packet:  Packet to be fragmented
-        @type  packet:  pypacker.Packet
-        @param  adjust_size:  If set to True packet size will be increased to 60 bytes
-        @type  adjust_size:  bool
-        @param  required_size:  Size (in bytes) of the result packet
-        @type  required_size:  int
-        @param  fragsize:  length of each fragment
-        @type  fragsize:  int
-        @rtype:  list[pypacker.Packet]
-        @return:  list of pypacker.Packets - fragments of received packet
+        """Method for packet fragmentation.
+
+        Args:
+            packet(pypacker.Packet):  Packet to be fragmented
+            adjust_size(bool):  If set to True packet size will be increased to 60 bytes
+            required_size(int):  Size (in bytes) of the result packet
+            fragsize(int):  length of each fragment
+
+        Returns:
+            list[pypacker.Packet]:  list of pypacker.Packets - fragments of received packet
+
         """
         pytest.skip("Packet fragmentation is not integrated yet")
 
     def assemble_fragmented_packets(self, packets):
-        """
-        @brief  Method for assembling packets from fragments in packet list
-        @param  packets:  List of fragmened packets
-        @type  packets:  list[pypacker.Packet]
-        @rtype:  list[pypacker.Packet]
-        @return:  List of assembled packets
+        """Method for assembling packets from fragments in packet list.
+
+        Args:
+            packets(list[pypacker.Packet]):  List of fragmened packets
+
+        Returns:
+            list[pypacker.Packet]:  List of assembled packets
+
         """
         pytest.skip("Packet fragmentation is not integrated yet")

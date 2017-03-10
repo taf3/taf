@@ -1,23 +1,23 @@
-#! /usr/bin/env python
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``helpers.py``
+
+`Helpers functions`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  helpers.py
-
-@summary  Helpers functions.
-"""
 import json
 import os
 import time
@@ -100,14 +100,19 @@ def run_on_ixnetwork(y="Run on IxNetwork setup only"):
 
 
 def get_attribute_from_argvalue(argvalue, item):
-    """
-    @brief:  Gets an attribute from argvalues
-    @param  item: This can be an int (it will attempt to retrieve an index or a
-    str (it will attempt to retrieve a NamedTuple's field name)
-    @type  item: int | str
-    @raise  AttributeError: when attribute not found
-    @raise  IndexError: when index not found
-    @rtype:  str
+    """Gets an attribute from argvalues.
+
+    Args:
+        item(int | str): This can be an int (it will attempt to retrieve an index or a
+                         str (it will attempt to retrieve a NamedTuple's field name)
+
+    Raises:
+        AttributeError: when attribute not found
+        IndexError: when index not found
+
+    Returns:
+        str
+
     """
     # This is a MarkDectorator where the argvalue is the last element in args.
     while isinstance(argvalue, MarkDecorator):
@@ -124,8 +129,8 @@ def get_attribute_from_argvalue(argvalue, item):
 
 
 def get_json(path, filename):
-    """
-    @brief  Get json file
+    """Get json file.
+
     """
     file_path = os.path.join(path, 'resources', filename)
     with open(file_path) as _f:
@@ -135,16 +140,19 @@ def get_json(path, filename):
 
 
 def get_stepped_value(value, step, step_type='Down'):
-    """
-    @brief:  Returns the rounded value, given an initial input value.
-    @param  value: The input value
-    @param  step:  The step value
-    @param  step_up:  Whether the value is incremented to the next step
-    @type  value:  int
-    @type  step:  int | OrderedDict
-    @type  step_up: bool
-    @raise:  ValueError
-    @rtype: int
+    """Returns the rounded value, given an initial input value.
+
+    Args:
+        value(int): The input value
+        step(int | OrderedDict):  The step value
+        step_type(str):  Whether the value is incremented to the next step
+
+    Raises:
+        ValueError
+
+    Returns:
+        int
+
     """
     if isinstance(step, OrderedDict):
         attribute_step = step.copy()
@@ -169,24 +177,26 @@ def get_stepped_value(value, step, step_type='Down'):
 
 
 def ri_find_wrapper(switch_instance, vlan=None, ip_address=None, bandwith=100, mtu=1500, vrf=0):
-    """
-    @brief  Wrapper of "find" function for RouteInterface table.
+    """Wrapper of "find" function for RouteInterface table.
 
-    @note this is temporary function.
+    Notes:
+        This is temporary function.
 
-    @param  switch_instance:  Switch instance
-    @param vlan:  Vlan on which route interface is implemented.
-    @param ip_address:  IP address of route interface.
-    @param mtu:  MTU of route interface.
-    @param bandwith:  Bandwith of route interface
-    @param vrf:  Virtual route Id
+    Args:
+        switch_instance(object):  Switch instance
+        vlan(str):  Vlan on which route interface is implemented.
+        ip_address(str):  IP address of route interface.
+        mtu(int):  MTU of route interface.
+        bandwith(int):  Bandwith of route interface
+        vrf(int):  Virtual route Id
 
-    @return  row
+    Returns:
+        row
 
-    @par  Example:
-    @code
-    _ri_find_wrapper(env.switch[1], vlan=10, ip_address="10.0.10.1/24", mtu=100, bandwith=1500, vrf=0)
-    @endcode
+    Examples::
+
+        _ri_find_wrapper(env.switch[1], vlan=10, ip_address="10.0.10.1/24", mtu=100, bandwith=1500, vrf=0)
+
     """
     try:
         result = switch_instance.nb.RouteInterface.find(vlan, ip_address, bandwith, mtu, vrf)
@@ -196,20 +206,21 @@ def ri_find_wrapper(switch_instance, vlan=None, ip_address=None, bandwith=100, m
 
 
 def wait_for_route_iface_status(switch, iface_id, timeout, status):
-    """
-    @brief  Wait for RouteInterface changed its oper status to expected value or raise exception if it is not after 'interval' seconds elapsed
+    """Wait for RouteInterface changed its oper status to expected value or raise exception if it is not after 'interval' seconds elapsed
 
-    @param switch:  switch for checking RouteInterface oper state value
-    @param iface_id:  interface id for checking oper state value
-    @param timeout:   seconds for checking RouteInterface oper state value
-    @param status:  RouteInterface oper state value (lower)
+    Args:
+        switch(SwitchX object):  switch for checking RouteInterface oper state value
+        iface_id(str):  interface id for checking oper state value
+        timeout(int):   seconds for checking RouteInterface oper state value
+        status(str):  RouteInterface oper state value (lower)
 
-    @return  None
+    Returns:
+        None
 
-    @par  Example:
-    @code
-    _wait_for_route_iface_status(env.switch[1], 2, 120, 'down')
-    @endcode
+    Examples::
+
+        _wait_for_route_iface_status(env.switch[1], 2, 120, 'down')
+
     """
     end_time = time.time() + timeout
     while True:
@@ -222,23 +233,24 @@ def wait_for_route_iface_status(switch, iface_id, timeout, status):
 
 
 def wait_for_route_iface_deleted(switch, iface_id, ip_address, bandwidth, mtu, vrf, timeout):
-    """
-    @brief  Wait for RouteInterface deleted if it is not after 'timeout' seconds elapsed
+    """Wait for RouteInterface deleted if it is not after 'timeout' seconds elapsed
 
-    @param switch:  switch for checking RouteInterface being deleted
-    @param iface_id:  interface id for checking RouteInterface being deleted
-    @param ip_address:  ip address for checking RouteInterface being deleted
-    @param bandwidth:  bandwidth for checking RouteInterface being deleted
-    @param mtu:   mtu for checking RouteInterface being deleted
-    @param vrf:  vrf for checking RouteInterface being deleted
-    @param timeout:  seconds for checking RouteInterface being deleted
+    Args:
+        switch(SwitchX object):  switch for checking RouteInterface being deleted
+        iface_id(str):  interface id for checking RouteInterface being deleted
+        ip_address(str):  ip address for checking RouteInterface being deleted
+        bandwidth(int):  bandwidth for checking RouteInterface being deleted
+        mtu(int):   mtu for checking RouteInterface being deleted
+        vrf(int):  vrf for checking RouteInterface being deleted
+        timeout(int):  seconds for checking RouteInterface being deleted
 
-    @return  None
+    Returns:
+        None
 
-    @par  Example:
-    @code
-    _wait_for_route_iface_deleted(env.switch[1], 3210, '2001:db8:85a3::8a3e:370:7377/96', 1000, 1280, 0, 120)
-    @endcode
+    Examples::
+
+        _wait_for_route_iface_deleted(env.switch[1], 3210, '2001:db8:85a3::8a3e:370:7377/96', 1000, 1280, 0, 120)
+
     """
     end_time = time.time() + timeout
     while True:
@@ -251,18 +263,19 @@ def wait_for_route_iface_deleted(switch, iface_id, ip_address, bandwidth, mtu, v
 
 
 def set_all_ports_admin_disabled(switches, wait_status=True):
-    """
-    @brief  Sets all ports of all switches provided as an argument to admin state Down.
+    """Sets all ports of all switches provided as an argument to admin state Down.
 
-    @param  switches:  Switches configuration (dictionary)
-    @param  wait_status:  Wait for ports desire necessary state (bool)
+    Args:
+        switches(dict):  Switches configuration
+        wait_status(bool):  Wait for ports desire necessary state
 
-    @return  none
+    Returns:
+        none
 
-    @par  Example:
-    @code
-    set_all_ports_admin_disabled(env.switch)
-    @endcode
+    Examples::
+
+        set_all_ports_admin_disabled(env.switch)
+
     """
 
     mod_logger.debug("Set adminMode = Disabled for all ports...")
@@ -278,27 +291,28 @@ def set_all_ports_admin_disabled(switches, wait_status=True):
 
 
 def set_ports_admin_enabled(switches, ports, wait_status=True, fail_func=None):
-    """
-    @brief  Sets provided in arguments ports to admin state Up.
+    """Sets provided in arguments ports to admin state Up.
 
-    @param  switches:  Switches configuration (dictionary)
-    @param  ports:  List of ports to enable. Each element is a dictionary like {('sw1', 'sw2'): {link_id: port_id})} (dictionary of dictionaries)
-    @param  wait_status:  Wait for ports desire necessary state (bool)
-    @param  fail_func:  function with params that will be executed in case of failure (tuple)
+    Args:
+        switches(dict):  Switches configuration
+        ports(dict(dict)):  List of ports to enable. Each element is a dictionary like {('sw1', 'sw2'): {link_id: port_id})}
+        wait_status(bool):  Wait for ports desire necessary state
+        fail_func(tuple):  function with params that will be executed in case of failure
 
-    @return  none
+    Returns:
+        none
 
-    @par  Example:
-    @code
-    ports = {('sw1', 'sw2'): {1: 2, 2: 4}}
-    set_ports_admin_enabled(env.switch, ports)
-    set_ports_admin_enabled(env.switch, ports, fail_func=(pytest.softexit, [mesasge, env]))
-    @endcode
+    Examples::
+
+        ports = {('sw1', 'sw2'): {1: 2, 2: 4}}
+        set_ports_admin_enabled(env.switch, ports)
+        set_ports_admin_enabled(env.switch, ports, fail_func=(pytest.softexit, [mesasge, env]))
+
     """
 
     def wait_for_port_status(switch, port, status, timeout=30):
-        """
-        @brief  Wait for port status during specified time.
+        """Wait for port status during specified time.
+
         """
         mod_logger.debug("Function wait_for_port_status started.")
         end_time = time.time() + timeout
@@ -319,8 +333,8 @@ def set_ports_admin_enabled(switches, ports, wait_status=True, fail_func=None):
 
     # WORKAROUND: Verify that port is up and retry if not
     def check_n_retry(xmlproxy, port, op_xmlproxy, op_port, timeout=30):
-        """
-        @brief  Check that port change status to Up and retry Down/Up cycle if not.
+        """Check that port change status to Up and retry Down/Up cycle if not.
+
         """
         # Convert port number to port Id in switch table.
         try:
@@ -398,21 +412,22 @@ def set_ports_admin_enabled(switches, ports, wait_status=True, fail_func=None):
 
 
 def wait_until_fdb_entry_is_added(mac_address=None, port_id=1, timeout=5, vlan_id=1, switch_instance=None):
-    """
-    @brief  Wait some time for adding dynamic entry to FDB
+    """Wait some time for adding dynamic entry to FDB.
 
-    @param switch_instance:  Switch instance to work with (xmlrpclib.ServerProxy object)
-    @param mac_address:  MAC address for check
-    @param port_id:  Port ID corresponding to MAC address
-    @param vlan_id:  VLAN ID corresponding to MAC address
-    @param  timeout:  seconds for checking Fdb entry being added
+    Args:
+        switch_instance(xmlrpclib.ServerProxy object):  Switch instance to work with
+        mac_address(str):  MAC address for check
+        port_id(int):  Port ID corresponding to MAC address
+        vlan_id(int):  VLAN ID corresponding to MAC address
+        timeout(int):  seconds for checking Fdb entry being added
 
-    @return  none
+    Returns:
+        None
 
-    @par  Example:
-    @code
-    wait_time_for_adding_entry_to_fdb(mac_address=source_mac, port_id=port_id_2, timeout=10, vlan_id=vlan_id, switch_instance=env.switch[1])
-    @endcode
+    Examples::
+
+        wait_time_for_adding_entry_to_fdb(mac_address=source_mac, port_id=port_id_2, timeout=10, vlan_id=vlan_id, switch_instance=env.switch[1])
+
     """
     if type(switch_instance).__name__.find("Switch") >= 0:
         switch_instance = switch_instance.xmlproxy
@@ -439,19 +454,21 @@ def wait_until_fdb_entry_is_added(mac_address=None, port_id=1, timeout=5, vlan_i
 
 
 def is_entry_added_to_fdb(mac_address=None, port_id=1, vlan_id=1, switch_instance=None):
-    """
-    @brief  Check dynamic entry in FDB
+    """Check dynamic entry in FDB.
 
-    @param switch_instance:  Switch instance to work with (xmlrpclib.ServerProxy object)
-    @param mac_address:  Source mac-address to check entry in FDB
-    @param port_id:  Port number from where packet was sent (integer)
-    @param vlan_id:  Vlan number from where packet was sent (integer)
-    @return  True or False
+    Args:
+        switch_instance(xmlrpclib.ServerProxy object):  Switch instance to work with
+        mac_address(str):  Source mac-address to check entry in FDB
+        port_id(int):  Port number from where packet was sent
+        vlan_id(int):  Vlan number from where packet was sent
 
-    @par  Example:
-    @code
-    is_entry_added_to_fdb(mac_address=source_mac, port_id=1, vlan_id=vlab_id, switch_instance=env.switch[1].xmlproxy)
-    @endcode
+    Returns:
+        bool: True or False
+
+    Examples::
+
+        is_entry_added_to_fdb(mac_address=source_mac, port_id=1, vlan_id=vlab_id, switch_instance=env.switch[1].xmlproxy)
+
     """
     if type(switch_instance).__name__.find("Switch") >= 0:
         switch_instance = switch_instance.xmlproxy
@@ -466,19 +483,21 @@ def is_entry_added_to_fdb(mac_address=None, port_id=1, vlan_id=1, switch_instanc
 
 
 def is_static_entry_added(mac_address=None, vlan_id=1, port_id=1, switch_instance=None):
-    """
-    @brief  Check static entry in StaticMAC table
+    """Check static entry in StaticMAC table
 
-    @param switch_instance:  Switch instance to work with (xmlrpclib.ServerProxy object)
-    @param mac_address:  Source mac-address to check entry in FDB
-    @param port_id:  port number from where packet was sent (integer)
-    @param vlan_id:  vlan number from where packet was sent (integer)
-    @return  True or False
+    Args:
+        switch_instance(xmlrpclib.ServerProxy object):  Switch instance to work with
+        mac_address(str):  Source mac-address to check entry in FDB
+        port_id(int):  Port number from where packet was sent
+        vlan_id(int):  Vlan number from where packet was sent
 
-    @par  Example:
-    @code
-    is_static_entry_added(mac_address=source_mac, port_id=1, vlan_id=vlab_id, switch_instance=env.switch[1].xmlproxy)
-    @endcode
+    Returns:
+        bool: True or False
+
+    Examples::
+
+        is_static_entry_added(mac_address=source_mac, port_id=1, vlan_id=vlab_id, switch_instance=env.switch[1].xmlproxy)
+
     """
     table = switch_instance.nb.StaticMAC.getTable()
     row_count = 0
@@ -491,19 +510,21 @@ def is_static_entry_added(mac_address=None, vlan_id=1, port_id=1, switch_instanc
 
 
 def is_entry_added_to_acl_expressions_table(field=None, mask=None, data=None, switch_instance=None):
-    """
-    @brief  Check entry in ACL Expressions Table
+    """Check entry in ACL Expressions Table.
 
-    @param switch_instance:  Switch instance to work with (xmlrpclib.ServerProxy object)
-    @param field:  The field to operate on
-    @param mask:  The bitwise mask to AND with the field
-    @param data:  The expected result
-    @return  True or False
+    Args:
+        switch_instance(xmlrpclib.ServerProxy object):  Switch instance to work with (xmlrpclib.ServerProxy object)
+        field(str):  The field to operate on
+        mask(str):  The bitwise mask to AND with the field
+        data(str):  The expected result
 
-    @par  Example:
-    @code
-    is_entry_added_to_acl_expressions_table(field=field, mask=mask_acl, data=data_acl, switch_instance=env.switch[1].xmlproxy)
-    @endcode
+    Returns:
+        bool: True or False
+
+    Examples::
+
+        is_entry_added_to_acl_expressions_table(field=field, mask=mask_acl, data=data_acl, switch_instance=env.switch[1].xmlproxy)
+
     """
     table = switch_instance.nb.ACLExpressions.getTable()
     row_count = 0
@@ -516,18 +537,20 @@ def is_entry_added_to_acl_expressions_table(field=None, mask=None, data=None, sw
 
 
 def is_entry_added_to_acl_actions_table(action=None, param=None, switch_instance=None):
-    """
-    @brief  Check entry in ACL Actions Table
+    """Check entry in ACL Actions Table.
 
-    @param switch_instance:  Switch instance to work with (xmlrpclib.ServerProxy object)
-    @param action:  The actual action
-    @param param:  Parameters required for the action
-    @return  True or False
+    Args:
+        switch_instance(xmlrpclib.ServerProxy object):  Switch instance to work with
+        action(str):  The actual action
+        param(str):  Parameters required for the action
 
-    @par  Example:
-    @code
-    is_entry_added_to_acl_actions_table(action=action_acl, param=param_acl, switch_instance=env.switch[1].xmlproxy)
-    @endcode
+    Returns:
+        bool: True or False
+
+    Examples::
+
+        is_entry_added_to_acl_actions_table(action=action_acl, param=param_acl, switch_instance=env.switch[1].xmlproxy)
+
     """
     table = switch_instance.nb.ACLActions.getTable()
     row_count = 0
@@ -540,24 +563,26 @@ def is_entry_added_to_acl_actions_table(action=None, param=None, switch_instance
 
 
 def is_entry_added_to_rules_table(rule_id=1, expression_id=1, action_id=1, stage=None, enabled="Disabled", priority=1, switch_instance=None):
-    """
-    @brief  Check entry in ACL Rules Table
+    """Check entry in ACL Rules Table.
 
-    @param switch_instance:  Switch instance to work with (xmlrpclib.ServerProxy object)
-    @param  rule_id:  Given ruleId from the ACLRules table
-    @param expression_id:  Given expressionId from the ACLExpressions table
-    @param action_id:  Given actionId from the ACLActions table
-    @param stage:  "Ingress", "Egress", "Lookup"
-    @param enabled:  Enable or disable rule
-    @param priority:  Rules priority
-    @return  True or False
+    Args:
+        switch_instance(xmlrpclib.ServerProxy object):  Switch instance to work with
+        rule_id(int):  Given ruleId from the ACLRules table
+        expression_id(int):  Given expressionId from the ACLExpressions table
+        action_id(int):  Given actionId from the ACLActions table
+        stage(str):  "Ingress", "Egress", "Lookup"
+        enabled(str):  Enable or disable rule
+        priority(int):  Rules priority
 
-    @par  Example:
-    @code
-    is_entry_added_to_rules_table(rule_id=rule_id, expression_id=expression_id, action_id=action_id,
-                                  stage=rules_stage_ingress, enabled=rules_disabled,
-                                  priority=priority_zero, switch_instance=env.switch[1].xmlproxy)
-    @endcode
+    Returns:
+        bool: True or False
+
+    Examples::
+
+        is_entry_added_to_rules_table(rule_id=rule_id, expression_id=expression_id, action_id=action_id,
+                                      stage=rules_stage_ingress, enabled=rules_disabled,
+                                      priority=priority_zero, switch_instance=env.switch[1].xmlproxy)
+
     """
     table = switch_instance.nb.ACLRules.getTable()
     row_count = 0
@@ -572,19 +597,20 @@ def is_entry_added_to_rules_table(rule_id=1, expression_id=1, action_id=1, stage
 
 
 def set_invalid_value(switch_instance=None, method=None, params=None):
-    """
-    @brief  Exception handler for negative testcases
+    """Exception handler for negative testcases.
 
-    @param switch_instance:  Switch instance to work with (xmlrpclib.ServerProxy object)
-    @param method:  XML RPC method to invoke (string)
-    @param params:  Arguments to pass to XML RPC method (list of mixed types values)
+    Args:
+        switch_instance(xmlrpclib.ServerProxy object):  Switch instance to work with
+        method(str):  XML RPC method to invoke
+        params(list of mixed types values):  Arguments to pass to XML RPC method
 
-    @return  none
+    Returns:
+        None
 
-    @par  Example:
-    @code
-    set_invalid_value(switch_instance=env.switch[1].xmlproxy, method="nb.Table.set.field", params=[param1, param2,param3])
-    @endcode
+    Examples::
+
+        set_invalid_value(switch_instance=env.switch[1].xmlproxy, method="nb.Table.set.field", params=[param1, param2,param3])
+
     """
     try:
         return_code = getattr(switch_instance, method)(*params)
@@ -601,18 +627,19 @@ def set_invalid_value(switch_instance=None, method=None, params=None):
 
 
 def clear_table(switch_instance=None, table_name=None):
-    """
-    @brief  Clear table for correct test cases work
+    """Clear table for correct test cases work.
 
-    @param switch_instance:  Switch instance to work with (xmlrpclib.ServerProxy object)
-    @param table_name:  Specific table name (string)
+    Args:
+        switch_instance(xmlrpclib.ServerProxy object):  Switch instance to work with
+        table_name(str):  Specific table name
 
-    @return  none
+    Returns:
+        None
 
-    @par  Example:
-    @code
-    clear_table(switch_instance=env.switch[1], table_name="ACLRules")
-    @endcode
+    Examples::
+
+        clear_table(switch_instance=env.switch[1], table_name="ACLRules")
+
     """
     if switch_instance.opts.ui == "onpss_shell":
         # Note: This needs to be fixed. It assumes clear_table is clearing static FDB table where it should be taking in a table_name
@@ -632,18 +659,19 @@ def clear_table(switch_instance=None, table_name=None):
 
 
 def set_stp_mode(switch_instance=None, mode="STP"):
-    """
-    @brief  Set SpanningTree mode to STP|RSTP|MSTP
+    """Set SpanningTree mode to STP|RSTP|MSTP.
 
-    @param  switch_instance:  Switch class instance to work with
-    @param  mode:  SpanningTree mode
+    Args:
+        switch_instance(xmlrpclib.ServerProxy object):  Switch class instance to work with
+        mode(str):  SpanningTree mode
 
-    @return  none
+    Returns:
+        None
 
-    @par  Example:
-    @code
-    set_stp_mode(env.switch[1], "MSTP")
-    @endcode
+    Examples::
+
+        set_stp_mode(env.switch[1], "MSTP")
+
     """
     # if not switch_instance.getprop("SpanningTree", "mode", 1) == mode:
     #         switch_instance.setprop("SpanningTree", "globalEnable", [1, "Disabled"])
@@ -659,15 +687,18 @@ def set_stp_mode(switch_instance=None, mode="STP"):
 
 
 def change_stp_state(switche_instance, state):
-    """
-    @brief  Disables/Enables STP state on per-port basis.
+    """Disables/Enables STP state on per-port basis.
 
-    @note  Very useful to prevent packet storm caused by global STP disabling.
+    Notes:
+        Very useful to prevent packet storm caused by global STP disabling.
 
-    @param switche_instance:  Switche xmlrpc.ServerProxy object (object)
-    @param state:  Desired STP state change action ('Enabled' or 'Disabled')
+    Args:
+        switche_instance(object):  Switche xmlrpc.ServerProxy object (object)
+        state(str):  Desired STP state change action ('Enabled' or 'Disabled')
 
-    @return  none
+    Returns:
+        None
+
     """
     # define ports directly from the switch
     ports_table = switche_instance.nb.Ports.getTable()
@@ -681,16 +712,16 @@ def change_stp_state(switche_instance, state):
 
 
 def set_lldp_ports_admin_status(switch_instance, port_list, status="Disabled"):
-    """
-    @brief  Set LLDP port admin status on ports.
+    """Set LLDP port admin status on ports.
 
-    @param switch_instance:  the switch instance.
-    @param port_list:  the list of ports.
-    @param status:  the LLDP port admin status.
+    Args
+        switch_instance(object):  the switch instance.
+        port_list(list):  the list of ports.
+        status(str):  the LLDP port admin status.
 
-    @return  True or False
+    Returns:
+        bool: True or False
 
-    @end
     """
     # check if LLDP feature is enabled
     if 'nb.LldpPorts.set.adminStatus' in switch_instance.system.listMethods():
@@ -701,25 +732,26 @@ def set_lldp_ports_admin_status(switch_instance, port_list, status="Disabled"):
 
 
 def wait_until_value_is_changed(switch_instance=None, table_name=None, parameter_name=None, value=None, row_id=1, timeout=30, findlist=None):
-    """
-    @brief  Wait until value is changed in table
+    """Wait until value is changed in table
 
-    @param switch_instance:  Switch class instance to work with
-    @param table_name:  Specific getTable method (string)
-    @param parameter_name:  Parameter in table (string)
-    @param value:  Checking value
-    @param row_id:  Row id in table
-    @param timeout:  time to wait until value is changed
-    @param findlist:  list of parameters to find a row in the given table
+    Args:
+        switch_instance(object):  Switch class instance to work with
+        table_name(str):  Specific getTable method
+        parameter_name(str):  Parameter in table
+        value(int):  Checking value
+        row_id(int):  Row id in table
+        timeout(int):  time to wait until value is changed
+        findlist(list):  list of parameters to find a row in the given table
 
-    @return  True or False
+    Returns:
+        bool: True or False
 
-    @par  Example:
-    @code
-    wait_until_value_is_changed(env.switch[1], "Ports2LagRemote", "partnerOperSystemPriority", 0, 1)
-    wait_until_value_is_changed(switch_instance=env.switch[1], table_name="Ports2LagRemote", parameter_name="partnerOperSystemPriority",
-                                value=0, row_id=1, timeout=30, [1, 1])
-    @endcode
+    Examples::
+
+        wait_until_value_is_changed(env.switch[1], "Ports2LagRemote", "partnerOperSystemPriority", 0, 1)
+        wait_until_value_is_changed(switch_instance=env.switch[1], table_name="Ports2LagRemote", parameter_name="partnerOperSystemPriority",
+                                    value=0, row_id=1, timeout=30, [1, 1])
+
     """
     mod_logger.debug("Function wait_until_value_is_changed started.")
     end_time = time.time() + timeout
@@ -753,13 +785,13 @@ def wait_until_value_is_changed(switch_instance=None, table_name=None, parameter
 
 def send_receive_packets(packet_definition=None, count=5, src_port=None, dst_port=None,
                          sniff_time=5, sniff_filter="", tg=None, expect_rcv=True):
-    """
-    @brief  Send and verify receiving of packets
+    """Send and verify receiving of packets.
+
     """
 
     def _compare_packets(packet_definition=None, packet=None, tg=None):
-        """
-        @brief  Comparing packets.
+        """Comparing packets.
+
         """
         for i, v in enumerate(packet_definition):
             for layer in list(packet_definition[i].keys()):
@@ -773,8 +805,8 @@ def send_receive_packets(packet_definition=None, count=5, src_port=None, dst_por
         return True
 
     def _count_packets_by_definition(packets, packet_definition=None, tg=None):
-        """
-        @brief  Counting specific packets.
+        """Counting specific packets.
+
         """
         count = 0
         for packet in packets:
@@ -802,27 +834,28 @@ def send_receive_packets(packet_definition=None, count=5, src_port=None, dst_por
 
 
 def waiting_table_is_loaded(switch_instance, table_name, expected_table_length, watch_interval=1, timeout=120, deviation=None, direction=None, verbose=False):
-    """
-    @brief  Wait until any table become necessary size, for example it can ba Dynamic ARP table or Route table.
-            Use deviation parameter if expected_table_length is not strict and can be larger ("+") then expected on deviation value
-            or smaller ("-") then expected on deviation value or near (None=+/-) expected on deviation value
+    """Wait until any table become necessary size, for example it can ba Dynamic ARP table or Route table.
 
-    @param switch_instance:  switch instance from env (object)
-    @param table_name:  table name under test, example: "ARP" (string)
-    @param expected_table_length:  value table length should increase to (int)
-    @param watch_interval:  interval in seconds between re-reading table from switch instance (int)
-    @param timeout:  120 - timeout in seconds for function execution (int)
-    @param deviation:  if expected_table_length is not strict value and some deviation in entries is acceptable (int)
-    @param direction:  "+", "-" or None. In case None then assuming that deviation is bidirectional, both "+" and "-" (string)
-    @param verbose:  can be True or False. In case True then monitoring table content will be displayed in debug log (bool)
+    Use deviation parameter if expected_table_length is not strict and can be larger ("+") then expected on deviation value
+    or smaller ("-") then expected on deviation value or near (None=+/-) expected on deviation value
 
-    @return  True/False
+    Args:
+        switch_instance(object):  switch instance from env
+        table_name(str):  table name under test, example: "ARP"
+        expected_table_length(int):  value table length should increase to
+        watch_interval(int):  interval in seconds between re-reading table from switch instance
+        timeout(int):  120 - timeout in seconds for function execution
+        deviation(int):  if expected_table_length is not strict value and some deviation in entries is acceptable
+        direction(str):  "+", "-" or None. In case None then assuming that deviation is bidirectional, both "+" and "-"
+        verbose(bool):  can be True or False. In case True then monitoring table content will be displayed in debug log
 
-    @par  Example:
-    @code
-    helpers.waiting_table_is_loaded(env.switch[1], "Route", 21, watch_interval = 1, timeout = 120, deviation = 2, direction = "+")
+    Returns:
+        bool: True/False
 
-    @endcode
+    Examples::
+
+        helpers.waiting_table_is_loaded(env.switch[1], "Route", 21, watch_interval = 1, timeout = 120, deviation = 2, direction = "+")
+
     """
     mod_logger.debug("Starting 'waiting_table_is_loaded' function.")
 
@@ -868,18 +901,19 @@ def waiting_table_is_loaded(switch_instance, table_name, expected_table_length, 
 
 
 def generate_random_mac(mac_exclusions=None, quantity=1):
-    """
-    @brief  Generate list that contains randomly generated MAC addresses that starts from 00
+    """Generate list that contains randomly generated MAC addresses that starts from 00.
 
-    @param mac_exclusions:  list if MAC addresses that should be excluded from generated list (list)
-    @param quantity:  quantity of mac addresses that should be generated (int)
+    Args:
+        mac_exclusions(list):  list if MAC addresses that should be excluded from generated list
+        quantity(int):  quantity of mac addresses that should be generated (int)
 
-    @return  mac_pool  list of generated MAC addresses
+    Returns:
+        list: mac_pool  list of generated MAC addresses
 
-    @par  Example: mac_exclusions = ["01:00:02:00:00:01", ], quantity = 10
-    @code
-    source_macs = helpers.generate_random_mac(mac_exclusions = ["01:00:02:00:00:01", ], quantity = 10)
-    @endcode
+    Examples::
+
+        source_macs = helpers.generate_random_mac(mac_exclusions = ["01:00:02:00:00:01", ], quantity = 10)
+
     """
     mod_logger.debug("Starting 'generate_random_mac' function.")
     if mac_exclusions is None:
@@ -906,19 +940,20 @@ def generate_random_mac(mac_exclusions=None, quantity=1):
 
 
 def generate_random_ip(ip_exclusions=None, prefix=None, quantity=1):
-    """
-    @brief  Generate list that contains randomly generated IP addresses that starts from prefix.
+    """Generate list that contains randomly generated IP addresses that starts from prefix.
 
-    @param ip_exclusions:  list if IP addresses that should be excluded from generated list, for example Route Interface address used on device (list)
-    @param prefix:  Network part of IP address (string)
-    @param quantity:  quantity of ip addresses that should be generated (int)
+    Args:
+        ip_exclusions(list):  list if IP addresses that should be excluded from generated list, for example Route Interface address used on device
+        prefix(str):  Network part of IP address
+        quantity(int):  quantity of ip addresses that should be generated
 
-    @return  ip_pool  list of generated MAC addresses
+    Returns:
+        list: ip_pool  list of generated MAC addresses
 
-    @par  Example: ip_exclusions = ["10.0.1.1", ], quantity = 10
-    @code
-    source_ips = helpers.generate_random_ip(ip_exclusions = router_ips, prefix = "10.0.1", quantity = streams_quantity)
-    @endcode
+    Examples::
+
+        source_ips = helpers.generate_random_ip(ip_exclusions = router_ips, prefix = "10.0.1", quantity = streams_quantity)
+
     """
     mod_logger.debug("Starting 'generate_random_ip' function.")
     if ip_exclusions is None:
@@ -948,21 +983,23 @@ def generate_random_ip(ip_exclusions=None, prefix=None, quantity=1):
 
 
 def stat_counters_clear(switch_instances=None, ports=None, counter_name="EtherStatsPkts"):
-    """
-    @brief  Clear all statistic counters on defined port.
+    """Clear all statistic counters on defined port.
 
-    @note  DO NOT USE ON CONTINUOUSLY RUNNING TRAFFIC - FUNCTION IS WAITING THAT COUNTER BECOME 0
+    Notes:
+        DO NOT USE ON CONTINUOUSLY RUNNING TRAFFIC - FUNCTION IS WAITING THAT COUNTER BECOME 0
 
-    @param switch_instances:  list of switch instances from env
-    @param ports:  list of ports where statistic should be cleared
-    @param counter_name:  counter that checked to become 0 after clear action. "EtherStatsPkts" used by default.
+    Args:
+        switch_instances(list):  list of switch instances from env
+        ports(list):  list of ports where statistic should be cleared
+        counter_name(str):  counter that checked to become 0 after clear action. "EtherStatsPkts" used by default.
 
-    @return  nothing
+    Returns:
+        None
 
-    @par  Example: switch_instances=[env.switch[2], ], ports=ports["sw2", "sw1"].values(), counter_name="EtherStatsPkts256to511Octets"
-    @code
-    helpers.stat_counters_clear(switch_instances=[env.switch[2], ], ports=ports["sw2", "sw1"].values(), counter_name="EtherStatsPkts256to511Octets")
-    @endcode
+    Examples::
+
+        helpers.stat_counters_clear(switch_instances=[env.switch[2], ], ports=ports["sw2", "sw1"].values(), counter_name="EtherStatsPkts256to511Octets")
+
     """
     mod_logger.debug("Starting 'stat_counters_clear' function.")
     if switch_instances is None:
@@ -981,32 +1018,33 @@ def stat_counters_clear(switch_instances=None, ports=None, counter_name="EtherSt
 
 
 def stat_counters_read(switch_instances=None, ports=None, counter_name="EtherStatsPkts", previous_results=None, expected_results=None, timeout=30):
-    """
-    @brief  read statistic counter on defined port on defined switch.
-            In addition if previous_results defined then sum of read results compared with sum of previous results.
-            If expected results defined then sum of current results compared with sum of expected results and if match occurred then return results
-            In case expected results is not defined then sum of currently read results == sum of previous results counters read again until timeout
-            But,
+    """Read statistic counter on defined port on defined switch.
 
-    @param switch_instances:  list of switch instances from env
-    @param ports:  list of ports where statistic should be read
-    @param counter_name:  counter that should be read
-    @param previous_results:  list with previous statistics results.
-    @param expected_results:  list with expected counters values from ports
-    @param timeout:  timeout for re-reading counters in case sum of previous results matchedwith current results, default = 30
+    In addition if previous_results defined then sum of read results compared with sum of previous results.
+    If expected results defined then sum of current results compared with sum of expected results and if match occurred then return results
+    In case expected results is not defined then sum of currently read results == sum of previous results counters read again until timeout
 
-    @return  list with read counters from ports
+    Args:
+        switch_instances(list):  list of switch instances from env
+        ports(list):  list of ports where statistic should be read
+        counter_name(str):  counter that should be read
+        previous_results(list):  list with previous statistics results.
+        expected_results(list):  list with expected counters values from ports
+        timeout(int):  timeout for re-reading counters in case sum of previous results matchedwith current results, default = 30
 
-    @par  Example:
-    @code
-    sw2_statistics = helpers.stat_counters_read(switch_instances=[env.switch[2], ], ports=ports["sw2","sw1"].values(),
-                                                counter_name="EtherStatsPkts256to511Octets", previous_results=previous_sw2_stats, timeout=30)
-    @endcode
+    Returns:
+        list: list with read counters from ports
+
+    Examples::
+
+        sw2_statistics = helpers.stat_counters_read(switch_instances=[env.switch[2], ], ports=ports["sw2","sw1"].values(),
+                                                    counter_name="EtherStatsPkts256to511Octets", previous_results=previous_sw2_stats, timeout=30)
+
     """
 
     def reading_counters(switch_instances, ports, counter_name):
-        """
-        @brief  Once read defined counter for defined port and return results
+        """Once read defined counter for defined port and return results.
+
         """
         current_results = []
         for switch in switch_instances:
@@ -1060,20 +1098,21 @@ def stat_counters_read(switch_instances=None, ports=None, counter_name="EtherSta
 
 
 def get_packet_from_the_port(sniff_port=None, params=None, sniff_data=None, tg=None):
-    """
-    @brief  Return packet from the sniffer data according to search criteria
+    """Return packet from the sniffer data according to search criteria.
 
-    @param sniff_port:  port where packet was sniffed
-    @param params:  params list for packet search
-    @param sniff_data:  sniffed data
-    @param tg:  traffic generator
+    Args:
+        sniff_port(list):  port where packet was sniffed
+        params(list):  params list for packet search
+        sniff_data:  sniffed data
+        tg(object):  traffic generator
 
-    @return  packet or None
+    Returns:
+        packet or None
 
-    @par  Example:
-    @code
-    helpers.get_packet_from_the_port('vlab0', ({'layer': "Ether", 'field': "src", 'value': "00:00:00:01:02:03".lower()},), data, env.tg[1])
-    @endcode
+    Examples::
+
+        helpers.get_packet_from_the_port('vlab0', ({'layer': "Ether", 'field': "src", 'value': "00:00:00:01:02:03".lower()},), data, env.tg[1])
+
     """
     packets = []
     if sniff_port in list(sniff_data.keys()):
@@ -1089,15 +1128,15 @@ def get_packet_from_the_port(sniff_port=None, params=None, sniff_data=None, tg=N
 
 
 def print_sniffed_data_brief(sniffer_data):
-    """
-    @brief  Print sniffed packets with sniffed count
+    """Print sniffed packets with sniffed count.
 
-    @param sniffer_data:  sniffed data
+    Args:
+        sniffer_data:  sniffed data
 
-    @par  Example:
-    @code
-    helpers.print_sniffed_data_brief(data)
-    @endcode
+    Examples::
+
+        helpers.print_sniffed_data_brief(data)
+
     """
     for _port in list(sniffer_data.keys()):
         _packets_sniffed = {"packets": [], "count": []}
@@ -1118,31 +1157,32 @@ def print_sniffed_data_brief(sniffer_data):
 def is_packet_received(data=None, iface_1=None, iface_2=None, layer_1="Ether", field_1="dst", value_1=None,
                        layer_2="IP", field_2="dst", value_2=None,
                        tg_instance=None, result=True, lag_available=False, f_result=False):
-    """
-    @brief  Checking if packet is received.
+    """Checking if packet is received.
 
-    @param data:  Captured data (string)
-    @param iface_1:  Interface (string)
-    @param iface_2:  Interface (string)
-    @param layer_1:  Layer to analyze (string)
-    @param field_1:  Field to look for (string)
-    @param value_1:  Comparing value (can be different)
-    @param layer_2:  Layer to analyze (string)
-    @param field_2:  Field to look for (string)
-    @param value_2:  Comparing value (can be different)
-    @param tg_instance:  TG instance (string)
-    @param result:  Expected result: true or false (boolean)
-    @param lag_available:  is ports are in LAG: true or false (boolean)
-    @param f_result:  Flag to
+    Args:
+        data(str):  Captured data
+        iface_1(str):  Interface
+        iface_2(str):  Interface
+        layer_1(str):  Layer to analyze
+        field_1(str):  Field to look for
+        value_1(can be different):  Comparing value
+        layer_2(str):  Layer to analyze
+        field_2(str):  Field to look for
+        value_2(can be different):  Comparing value
+        tg_instance(str):  TG instance
+        result(bool):  Expected result: true or false
+        lag_available(bool):  is ports are in LAG: true or false
+        f_result(bool):  Flag to
 
-    @return  True or raise exception
+    Returns:
+        True or raise exception
 
-    @par  Example:
-    @code
-    helpers.is_packet_received(data=data, iface_1=sniff_ports[1], iface_2=sniff_ports[0], value_1="ff:ff:ff:ff:ff:ff",
-                               layer_2="ARP", field_2="pdst", value_2="10.0.31.2",
-                               tg_instance=env.tg[1], lag_available=True)
-    @endcode
+    Examples::
+
+        helpers.is_packet_received(data=data, iface_1=sniff_ports[1], iface_2=sniff_ports[0], value_1="ff:ff:ff:ff:ff:ff",
+                                   layer_2="ARP", field_2="pdst", value_2="10.0.31.2",
+                                   tg_instance=env.tg[1], lag_available=True)
+
     """
     packet_received = False
     if iface_1 in data:
@@ -1173,28 +1213,29 @@ def is_packet_received(data=None, iface_1=None, iface_2=None, layer_1="Ether", f
 
 def is_double_tag_packet_received(iface=None, destination_mac=None, eth_type=0x9100, prio_1=6, prio_2=None, vlan_1=None, vlan_2=None,
                                   result=True, type_1=None, type_2=None, tg_instance=None):
-    """
-    @brief  Check if proper packet is received
+    """Check if proper packet is received.
 
-    @param  iface:  Interface (string)
-    @param  destination_mac:  Destination MAC address (string)
-    @param  eth_type:  Ether.type (hex)
-    @param  prio_1:  Dot1Q.prio of outer layer (int)
-    @param  prio_2:  Dot1Q.prio of inner layer (int)
-    @param  vlan_1:  Dot1Q.vlan of outer layer (int)
-    @param  vlan_2:  Dot1Q.vlan of inner layer (int)
-    @param  type_1:  Dot1Q.type of outer layer (int)
-    @param  type_2:  Dot1Q.type of inner layer (int)
-    @param  result:  Expected result: true or false (boolean)
-    @param  tg_instance:  TG instancestring
+    Args:
+        iface(str):  Interface
+        destination_mac(str):  Destination MAC address
+        eth_type(hex):  Ether.type
+        prio_1(int):  Dot1Q.prio of outer layer
+        prio_2(int):  Dot1Q.prio of inner layer
+        vlan_1(int):  Dot1Q.vlan of outer layer
+        vlan_2(int):  Dot1Q.vlan of inner layer
+        type_1(int):  Dot1Q.type of outer layer
+        type_2(int):  Dot1Q.type of inner layer
+        result(bool):  Expected result: true or false
+        tg_instance(str):  TG instance
 
-    @return  True or raise exception
+    Returns:
+        True or raise exception
 
-    @par  Example:
-    @code
-    self._check_if_double_tag_packet_received(iface=data[sniff_ports[3]],destination_mac=self.destination_mac, vlan_1=self.vlan_id_20,
-                                              vlan_2=self.vlan_id_10, type_1=0x8100, type_2=0x800, tg_instance=env.tg[1])
-    @endcode
+    Examples::
+
+        self._check_if_double_tag_packet_received(iface=data[sniff_ports[3]],destination_mac=self.destination_mac, vlan_1=self.vlan_id_20,
+                                                  vlan_2=self.vlan_id_10, type_1=0x8100, type_2=0x800, tg_instance=env.tg[1])
+
     """
     packet_received = False
     for packet in iface:
@@ -1218,8 +1259,8 @@ def is_double_tag_packet_received(iface=None, destination_mac=None, eth_type=0x9
 
 
 def is_row_added_to_arp_table(timeout=60, switch_instance=None, net_address=None, if_id=None, result=True):
-    """
-    @brief  Wait until proper row will be added to ARP table.
+    """Wait until proper row will be added to ARP table.
+
     """
     end_time = time.time() + timeout
     is_entry_added_to_arp_table = False
@@ -1242,8 +1283,8 @@ def is_row_added_to_arp_table(timeout=60, switch_instance=None, net_address=None
 
 
 def is_row_added_to_l2multicast_table(mac_address=None, port_id=None, vlan_id=1, switch_instance=None, result=True):
-    """
-    @brief  Check if row with specified parameters added to L2Multicast table.
+    """Check if row with specified parameters added to L2Multicast table.
+
     """
     # Need to wait until entry will be added to L2Multicast table.
     time.sleep(1)
@@ -1263,20 +1304,21 @@ def is_row_added_to_l2multicast_table(mac_address=None, port_id=None, vlan_id=1,
 
 
 def wait_until_row_is_added_to_routes_table(timeout=60, switch_instance=None, network_ip="10.0.2.0/24", nexthop=None):
-    """
-    @brief  Wait until proper row will be added to Route table.
+    """Wait until proper row will be added to Route table.
 
-    @param switch_instance:  Switch class instance to work with (string)
-    @param timeout:  Time to wait (integer)
-    @param network_ip:  Network IP address (string)
-    @param nexthop:  Network IP (string)
+    Args:
+        switch_instance(str):  Switch class instance to work with
+        timeout(int):  Time to wait
+        network_ip(str):  Network IP address
+        nexthop(str):  Network IP
 
-    @return  Raise exception
+    Returns:
+        Raise exception
 
-    @par  Example:
-    @code
-    helpers._wait_until_row_is_added_to_routes_table(switch_instance=env.switch[1], nexthop="10.0.31.2")
-    @endcode
+    Examples::
+
+        helpers._wait_until_row_is_added_to_routes_table(switch_instance=env.switch[1], nexthop="10.0.31.2")
+
     """
     end_time = time.time() + timeout
     result = False
@@ -1297,19 +1339,20 @@ def wait_until_row_is_added_to_routes_table(timeout=60, switch_instance=None, ne
 
 
 def wait_until_entry_is_expired(expected_timeout=1, switch_instance=None, table_name="L2Multicast"):
-    """
-    @brief  wait until entry is expired from table
+    """Wait until entry is expired from table
 
-    @param  switch_instance:  Switch class instance to work with
-    @param  expected_timeout:  Time to wait (integer)
-    @param  table_name:  XML-RPC table name (string)
+    Args:
+        switch_instance(object):  Switch class instance to work with
+        expected_timeout(int):  Time to wait
+        table_name(str):  XML-RPC table name
 
-    @return  True or raise exception
+    Returns:
+        True or raise exception
 
-    @par  Example:
-    @code
-    assert self.wait_until_entry_is_expired(timeout=10, switch_instance=env.switch[2])
-    @endcode
+    Examples::
+
+        assert self.wait_until_entry_is_expired(timeout=10, switch_instance=env.switch[2])
+
     """
     default_interval = switch_instance.getprop("IGMPSnoopingGlobalAdmin", "queryInterval", 1)
     default_robustness = switch_instance.getprop("IGMPSnoopingGlobalAdmin", "querierRobustness", 1)
@@ -1349,17 +1392,19 @@ def wait_until_entry_is_expired(expected_timeout=1, switch_instance=None, table_
 
 
 def set_admin_mode_for_slave_ports(switch_instance=None, admin_mode="Down"):
-    """
-    @brief  Set adminMode for logical ports.
+    """Set adminMode for logical ports.
 
-    @param switch_instance:  Switch class instance to work with
-    @param admin_mode:  Ports adminMode(string)
+    Args:
+        switch_instance(object):  Switch class instance to work with
+        admin_mode(str):  Ports adminMode
 
-    @return  True or raise exception
-    @par  Example:
-    @code
-    assert helpers.set_admin_mode_for_slave_ports(switch_instance=env.switch[1])
-    @endcode
+    Returns:
+        True or raise exception
+
+    Examples::
+
+        assert helpers.set_admin_mode_for_slave_ports(switch_instance=env.switch[1])
+
     """
     timeout = 10
     end_time = time.time() + timeout
@@ -1387,26 +1432,28 @@ def set_admin_mode_for_slave_ports(switch_instance=None, admin_mode="Down"):
 
 
 def raises(expected_exception, fail_message, *args, **kwargs):
-    """
-    @brief  Assert that a code block/function call raises ExpectedException and raise a failure exception otherwise.
+    """Assert that a code block/function call raises ExpectedException and raise a failure exception otherwise.
 
-    @note  You can specify a callable by passing a to-be-called lambda or an arbitrary callable with arguments.
+    Notes:
+        You can specify a callable by passing a to-be-called lambda or an arbitrary callable with arguments.
 
-    @param expected_exception:  Expected exception type (Exception)
-    @param fail_message:  Fail message in case exception doesn't raise (string)
-    @param  args, kwargs  function to test as first argument and it's parameters
+    Args:
+        expected_exception(Exception):  Expected exception type
+        fail_message(str):  Fail message in case exception doesn't raise (string)
+        args, kwargs:  function to test as first argument and it's parameters
 
-    @return  Exception info or pytest.fail
+    Returns:
+        Exception info or pytest.fail
 
-    @par  Example:
-    @code
-    helpers.raises(ZeroDivisionError, "Expected ZeroDevision didn't raise.", lambda: 1/0)
+    Examples::
 
-    def f(x): return 1/x
-    ...
-    helpers.raises(ZeroDivisionError, "Expected exception didn't raise.", f, 0)
-    helpers.raises(ZeroDivisionError, "Did not raise", f, x=0)
-    @endcode
+        helpers.raises(ZeroDivisionError, "Expected ZeroDevision didn't raise.", lambda: 1/0)
+
+        def f(x): return 1/x
+        ...
+        helpers.raises(ZeroDivisionError, "Expected exception didn't raise.", f, 0)
+        helpers.raises(ZeroDivisionError, "Did not raise", f, x=0)
+
     """
     # __tracebackhide__ = True
     if expected_exception is AssertionError:
@@ -1434,12 +1481,12 @@ def raises(expected_exception, fail_message, *args, **kwargs):
 
 
 def pass_xmlrpc_fault(func):
-    """
-    @brief  Decorator to create raises functions with predefined xmlrpclib. Fault exception.
+    """Decorator to create raises functions with predefined xmlrpclib. Fault exception.
+
     """
     def wrapper(*args, **kwargs):
-        """
-        @brief  Decorator to create raises functions with predefined xmlrpclib.
+        """Decorator to create raises functions with predefined xmlrpclib.
+
         """
         return func(XMLRPCFault, *args, **kwargs)
 
@@ -1447,8 +1494,8 @@ def pass_xmlrpc_fault(func):
 
 
 def is_error_in_expected(exception):
-    """
-    @brief  Check if exception is in list of expected errors
+    """Check if exception is in list of expected errors.
+
     """
     if not ERRORS:
         raise CustomException("ERRORS variable id not present.")
@@ -1477,8 +1524,8 @@ def is_error_in_expected(exception):
 
 @pass_xmlrpc_fault
 def xmlrpc_raises(expected_exception, fail_message, *args, **kwargs):
-    """
-    @brief  Temporary replacement for original xmlrpc_raises.
+    """Temporary replacement for original xmlrpc_raises.
+
     """
     if expected_exception is AssertionError:
         from _pytest.assertion.util import BuiltinAssertionError
@@ -1504,16 +1551,18 @@ def xmlrpc_raises(expected_exception, fail_message, *args, **kwargs):
 
 
 def set_equal_ports_costs(ports, switch, switch_id, table, cost=2000):
-    """
-    @brief  Sets equal port costs for switch ports.
+    """Sets equal port costs for switch ports.
 
-    @param ports:  ports dictionary (dict of dict)
-    @param switch:  switch instance (SwitchX object)
-    @param switch_id:  id of switch in environment (int)
-    @param table:  table name (e.g. "MSTPPorts") (str)
-    @param cost:  port cost value (int)
+    Args:
+        ports(dict of dict):  ports dictionary
+        switch(SwitchX object):  switch instance
+        switch_id(int):  id of switch in environment
+        table(str):  table name (e.g. "MSTPPorts")
+        cost(int):  port cost value
 
-    @return  None
+    Returns:
+        None
+
     """
     for key in ports:
         if 'sw%d' % (switch_id, ) in key[0] and "tg1" not in key[0]:
@@ -1532,15 +1581,17 @@ def set_equal_ports_costs(ports, switch, switch_id, table, cost=2000):
 
 
 def set_equal_ports_speed(ports, switch, switch_id, speed=10000):
-    """
-    @brief  Sets equal port costs for switch ports
+    """Sets equal port costs for switch ports.
 
-    @param ports:  ports dictionary
-    @param switch:  switch instance
-    @param switch_id:  id of switch in environment
-    @param speed:  port speed value, integer
+    Args:
+        ports(dict):  ports dictionary
+        switch(object):  switch instance
+        switch_id(int):  id of switch in environment
+        speed(int):  port speed value, integer
 
-    @return  none
+    Returns:
+        None
+
     """
     if switch.type != 'lxc':
         for key in list(ports.keys()):
@@ -1551,24 +1602,25 @@ def set_equal_ports_speed(ports, switch, switch_id, speed=10000):
 
 
 def set_equal_port_speed_and_cost(ports, switch, table, switch_id=None, cost=2000, speed=10000):
-    """
-    @brief  Sets equal ports cost and speed for switch ports, and disables slave 40G ports
+    """Sets equal ports cost and speed for switch ports, and disables slave 40G ports
 
-    @param ports:  ports dictionary
-    @param switch:  switch instance
-    @param switch_id:  id of switch in environment
-    @param table:  table name or list of table names (f.e. "MSTPPorts" or ["RSTPPorts", "MSTPPorts"])
-    @param cost:  port cost value, integer
-    @param speed:  port speed value, integer
+    Args:
+        ports(dict):  ports dictionary
+        switch(object):  switch instance
+        switch_id(int):  id of switch in environment
+        speed(int):  port speed value, integer
+        table:  table name or list of table names (f.e. "MSTPPorts" or ["RSTPPorts", "MSTPPorts"])
+        cost(int):  port cost value, integer
 
-    @return  none
+    Returns:
+        None
 
-    @par  Example:
-    @code
-    helpers.set_equal_port_speed_and_cost(ports, env.switch, ["MSTPPorts", "RSTPPorts", "RSTPPorts"])
-    helpers.set_equal_port_speed_and_cost(ports, env.switch, "RSTPPorts")
-    helpers.set_equal_port_speed_and_cost(ports, env.switch[1], "RSTPPorts", switch_id=1]
-    @endcode
+    Examples::
+
+        helpers.set_equal_port_speed_and_cost(ports, env.switch, ["MSTPPorts", "RSTPPorts", "RSTPPorts"])
+        helpers.set_equal_port_speed_and_cost(ports, env.switch, "RSTPPorts")
+        helpers.set_equal_port_speed_and_cost(ports, env.switch[1], "RSTPPorts", switch_id=1]
+
     """
     if isinstance(switch, dict) and not switch_id:
         for switch_id in list(switch.keys()):
@@ -1593,55 +1645,56 @@ def set_equal_port_speed_and_cost(ports, switch, table, switch_id=None, cost=200
 
 
 def designated_port(priority, port_id):
-    """
-    @brief  Function for return hex string value that is sum of bridgePriority and port_id in hex format.
+    """Function for return hex string value that is sum of bridgePriority and port_id in hex format.
 
-    @param priority:  Port bridgePriority
-    @param port_id:  Port ID
+    Args:
+        priority(int):  Port bridgePriority
+        port_id(int):  Port ID
 
-    @return  Hex Value without 0x prefix
+    Returns:
+        Hex Value without 0x prefix
 
-    @par  Example:
-    @code
-    helpers.designated_port(32768, 28)
-    @endcode
+    Examples::
+
+        helpers.designated_port(32768, 28)
+
     """
     return hex(priority)[2:].zfill(2).upper() + hex(port_id)[2:].zfill(2).upper()
 
 
 def set_rstp_mode(switch_instance=None):
-    """
-    @brief  Obsoleted function. Use set_stp_mode with proper option instead.
+    """Obsoleted function. Use set_stp_mode with proper option instead.
+
     """
     return set_stp_mode(switch_instance=switch_instance, mode="RSTP")
 
 
 def set_mstp_mode(switch_instance=None):
-    """
-    @brief  Obsoleted function. Use set_stp_mode with proper option instead.
+    """Obsoleted function. Use set_stp_mode with proper option instead.
+
     """
     return set_stp_mode(switch_instance=switch_instance, mode="MSTP")
 
 
 def wait_until_stp_state(switch_instance=None, table="STPPorts", port=1, state="Disabled", timeout=30):
-    """
-    @brief  Obsoleted function. Use wait_until_value_is_changed with proper option instead.
+    """Obsoleted function. Use wait_until_value_is_changed with proper option instead.
+
     """
     return wait_until_value_is_changed(switch_instance=switch_instance, table_name=table, parameter_name="state",
                                        value=state, row_id=port, timeout=timeout)
 
 
 def wait_until_ops_state(switch_instance=None, port=1, state="Up", timeout=30):
-    """
-    @brief  Obsoleted function. Use wait_until_value_is_changed with proper option instead.
+    """Obsoleted function. Use wait_until_value_is_changed with proper option instead.
+
     """
     return wait_until_value_is_changed(switch_instance=switch_instance, table_name="Ports", parameter_name="operationalStatus",
                                        value=state, row_id=port, timeout=timeout)
 
 
 def process_multicall(return_list):
-    """
-    @brief  Returns list of methods with errors
+    """Returns list of methods with errors.
+
     """
     mod_logger.debug("Multicall results processing starts")
     results = []
@@ -1654,24 +1707,25 @@ def process_multicall(return_list):
 
 
 def is_entry_added_to_table(switch_inst, table_name, srch_params, timeout=1, expect_count=1, exist=True):
-    """
-    @brief  Check if entry with specified fields values is added to table
+    """Check if entry with specified fields values is added to table
 
-    @param switch_inst:  Switch instance to work with
-    @param table_name:  The name of table to perform search in (string)
-    @param srch_params:  Parameters for entry search (dictionary)
-    @param timeout:  Time to wait (integer)
-    @param expect_count:  Number of entries in the table that correspond to search parameters (integer)
-    @param exist:  Decided if entry exists in table or not (boolean)
+    Args:
+        switch_inst(object):  Switch instance to work with
+        table_name(str):  The name of table to perform search in
+        srch_params(dict):  Parameters for entry search
+        timeout(int):  Time to wait
+        expect_count(int):  Number of entries in the table that correspond to search parameters (integer)
+        exist(bool):  Decided if entry exists in table or not (boolean)
 
-    @return  True/False
+    Returns:
+        bool: True/False
 
-    @par  Example:
-    @code
-    srch_params = {'macAddress': '00:00:00:BB:00:AA', 'portId': 24, 'valid': 'Enabled'}
-    assert helpers.is_entry_added_to_table(env.switch[1], "DcbxRemotes", srch_params, timeout=5)
-    assert helpers.is_entry_added_to_table(env.switch[1], "DcbxRemotes", srch_params, timeout=5, exist=False)
-    @endcode
+    Examples::
+
+        srch_params = {'macAddress': '00:00:00:BB:00:AA', 'portId': 24, 'valid': 'Enabled'}
+        assert helpers.is_entry_added_to_table(env.switch[1], "DcbxRemotes", srch_params, timeout=5)
+        assert helpers.is_entry_added_to_table(env.switch[1], "DcbxRemotes", srch_params, timeout=5, exist=False)
+
     """
     end_time = time.time() + timeout
     while True:
@@ -1700,24 +1754,25 @@ def is_entry_added_to_table(switch_inst, table_name, srch_params, timeout=1, exp
 
 
 def verify_port_params_in_table(switch_inst, table_name, params, find_params=None, row_id=None, timeout=0, interval=0.25):
-    """
-    @brief  Verify that row has correct parameters' values in table
+    """Verify that row has correct parameters' values in table.
 
-    @param switch_inst:  Switch instance to work with
-    @param table_name:  The name of table to validate the row parameters (string)
-    @param params:  Parameters and values the row in table should match (dictionary)
-    @param find_params:  List of parameters to find a row in table (list)
-    @param row_id:  Row ID in table (integer)
-    @param timeout:  Time to wait (integer)
-    @param interval:  interval in seconds between re-reading the table (integer)
+    Args:
+        switch_inst(object):  Switch instance to work with
+        table_name(str):  The name of table to validate the row parameters
+        params(dict):  Parameters and values the row in table should match
+        find_params(list):  List of parameters to find a row in table
+        row_id(int):  Row ID in table
+        timeout(int):  Time to wait
+        interval(int):  interval in seconds between re-reading the table
 
-    @return  None (Raises error if values are incorrect)
+    Returns:
+        None (Raises error if values are incorrect)
 
-    @par  Example:
-    @code
-    helpers.verify_port_params_in_table(env.switch[1], "DcbxPfcPortsLocal", {"willing": "Enabled", "enabled": "0,0,0,0,0,0,0,1"}, [port_id, ], timeout=1)
-    helpers.verify_port_params_in_table(env.switch[1], "DcbxPorts", {"multiplePeers": 'Enabled'}, row_id=24, timeout=1)
-    @endcode
+    Examples::
+
+        helpers.verify_port_params_in_table(env.switch[1], "DcbxPfcPortsLocal", {"willing": "Enabled", "enabled": "0,0,0,0,0,0,0,1"}, [port_id, ], timeout=1)
+        helpers.verify_port_params_in_table(env.switch[1], "DcbxPorts", {"multiplePeers": 'Enabled'}, row_id=24, timeout=1)
+
     """
     end_time = time.time() + timeout
     while True:
@@ -1747,23 +1802,24 @@ def verify_port_params_in_table(switch_inst, table_name, params, find_params=Non
 
 
 def update_table_params(switch_inst, table_name, params, find_params=None, row_id=None, validate_updates=True):
-    """
-    @brief  Configure port parameters in table
+    """Configure port parameters in table.
 
-    @param switch_inst:  Switch instance to work with
-    @param table_name:  The name of table to work with (string)
-    @param params:  Parameters and values that should be configured for port (dictionary)
-    @param find_params:  List of parameters to find a row in table (list)
-    @param row_id:  Row ID in table (integer)
-    @param validate_updates:  Verify if updates were set (bool)
+    Args:
+        switch_inst(object):  Switch instance to work with
+        table_name(str):  The name of table to work with
+        params(dict):  Parameters and values that should be configured for port
+        find_params(list):  List of parameters to find a row in table
+        row_id(int):  Row ID in table
+        validate_updates(bool):  Verify if updates were set
 
-    @return  None
+    Returns:
+        None
 
-    @par  Example:
-    @code
-    helpers.update_table_params(env.switch[1], "DcbxPfcPortsAdmin", {"willing": "Enabled", "enabled": "0,0,0,1,0,0,0,0"}, [port_id, ])
-    helpers.update_table_params(env.switch[1], "DcbxPorts", {"adminStatus": 'Disabled'}, row_id=24)
-    @endcode
+    Examples::
+
+        helpers.update_table_params(env.switch[1], "DcbxPfcPortsAdmin", {"willing": "Enabled", "enabled": "0,0,0,1,0,0,0,0"}, [port_id, ])
+        helpers.update_table_params(env.switch[1], "DcbxPorts", {"adminStatus": 'Disabled'}, row_id=24)
+
     """
     if row_id is None and find_params is not None:
         row_id = switch_inst.findprop(table_name, find_params)
@@ -1780,17 +1836,18 @@ def update_table_params(switch_inst, table_name, params, find_params=None, row_i
 
 
 def disable_lldp_for_all_ports(switch_instance):
-    """
-    @brief  Disable Lldp on all device ports
+    """Disable Lldp on all device ports.
 
-    @param switch_instance:  Switch instance to work with
+    Args:
+        switch_instance(object):  Switch instance to work with
 
-    @return  None
+    Returns:
+        None
 
-    @par  Example:
-    @code
-    helpers.disable_lldp_for_all_ports(env.switch[1])
-    @endcode
+    Examples::
+
+        helpers.disable_lldp_for_all_ports(env.switch[1])
+
     """
     mod_logger.debug("Set LLDP adminStatus to Disabled for all ports")
     switch_instance.ui.disable_lldp_on_device_ports()
@@ -1800,26 +1857,27 @@ def disable_lldp_for_all_ports(switch_instance):
 
 
 def validate_frame_against_multiple_layers(packet, src_mac=None, unexpected_layers=None, expected_layers=None):
-    """
-    @brief  Verify that frame doesn't contain specific set of Layers and contains correct values for other expected Layers
+    """Verify that frame doesn't contain specific set of Layers and contains correct values for other expected Layers.
 
-    @param packet:  Packet that should be validated (pypacker packet)
-    @param src_mac:  Expected src mac address of packet (None or MacAddress)
-    @param unexpected_layers:  List of layers that should not be present is the frame (list of strings)
-    @param expected_layers:  List or Dictionary of layers with expected values that should be present in frame. If the frame contains multiple number
-                             of specific layer than value in expected_layer dictionary should be a list (list or dictionary)
+    Args:
+        packet(pypacker packet):  Packet that should be validated
+        src_mac(None or MacAddress):  Expected src mac address of packet
+        unexpected_layers(list of strings):  List of layers that should not be present is the frame
+        expected_layers(list or dict):  List or Dictionary of layers with expected values that should be present in frame. If the frame contains multiple number
+                                        of specific layer than value in expected_layer dictionary should be a list (list or dictionary)
 
-    @return  None (Raises error if packet is incorrect)
+    Returns:
+        None (Raises error if packet is incorrect)
 
-    @par  Example:
-    @code
-    expected_layers = {"DCBXApplicationPriority": {"type": 127L, "length": 5L, "oui": 0x80c2, "subtype": 12L, "reserved": 0},
-                       "DCBXApplicationPriorityTable": [{'priority': 7, 'protocolid': 125, 'sel': 2, 'reserved': 0L},
-                                                        {'priority': 6, 'protocolid': 555, 'sel': 4, 'reserved': 0L}],
-                       "LLDPDUEnd": {"type": 0, "length": 0}}
-    unexpected_layers = ["DCBXCongestionNotification", "DCBXConfiguration"]
-    helpers.validate_frame_against_multiple_layers(packet, dut_mac, unexpected_layers=unexpected_layers, expected_layers=expected_layers)
-    @endcode
+    Examples::
+
+        expected_layers = {"DCBXApplicationPriority": {"type": 127L, "length": 5L, "oui": 0x80c2, "subtype": 12L, "reserved": 0},
+                           "DCBXApplicationPriorityTable": [{'priority': 7, 'protocolid': 125, 'sel': 2, 'reserved': 0L},
+                                                            {'priority': 6, 'protocolid': 555, 'sel': 4, 'reserved': 0L}],
+                           "LLDPDUEnd": {"type": 0, "length": 0}}
+        unexpected_layers = ["DCBXCongestionNotification", "DCBXConfiguration"]
+        helpers.validate_frame_against_multiple_layers(packet, dut_mac, unexpected_layers=unexpected_layers, expected_layers=expected_layers)
+
     """
     failures = []
     if src_mac is not None:
@@ -1872,8 +1930,8 @@ def validate_frame_against_multiple_layers(packet, src_mac=None, unexpected_laye
 
 
 def process_cli_results(return_list):
-    """
-    @brief  Returns list of errors in CLI set results
+    """Returns list of errors in CLI set results.
+
     """
     if return_list:
         mod_logger.debug("Multicall results processing starts")
@@ -1883,8 +1941,7 @@ def process_cli_results(return_list):
 
 
 def grouper(iterable, n):
-    """
-    Collect data into fixed-length chunks or blocks
+    """Collect data into fixed-length chunks or blocks
 
     grouper('ABCDEFG', 3) --> ABC DEF G
 
@@ -1893,12 +1950,13 @@ def grouper(iterable, n):
 
     http://stackoverflow.com/a/8998040
 
-    @param iterable: iterable to group into chunks
-    @type iterable: iter()
-    @param n: chunk size
-    @type n: int
-    @return: itererable of chunks of size n
-    @rtype: iter(list)
+    Args:
+        iterable(iter()): iterable to group into chunks
+        n(int): chunk size
+
+    Returns:
+        iter(list): itererable of chunks of size n
+
     """
     it = iter(iterable)
     while True:
@@ -1912,8 +1970,7 @@ def grouper(iterable, n):
 
 
 def grouper_it(iterable, n):
-    """
-    Collect data into iterables of fixed-length chunks or blocks
+    """Collect data into iterables of fixed-length chunks or blocks
 
     grouper_it('ABCDEFG', 3) --> iter(ABC) iter(DEF) iter(G)
 
@@ -1922,12 +1979,13 @@ def grouper_it(iterable, n):
 
     http://stackoverflow.com/a/8998040
 
-    @param iterable: iterable to group into chunks
-    @type iterable: iter()
-    @param n: chunk size
-    @type n: int
-    @return: return an iterable of iterables of chunk size n
-    @rtype:  iter(iter())
+    Args:
+        iterable(iter()): iterable to group into chunks
+        n(int): chunk size
+
+    Returns:
+        iter(iter()): return an iterable of iterables of chunk size n
+
     """
     it = iter(iterable)
     while True:
@@ -1943,8 +2001,9 @@ def grouper_it(iterable, n):
 def group_get(match, *args, **kwargs):
     """
 
-    @type match: _sre.SRE_Match
-    @param default: default value, kwargs only
+    Args:
+        match(_sre.SRE_Match)
+
     """
     try:
         return match.group(*args)
@@ -1957,8 +2016,12 @@ def merge_dicts(*dict_args):
 
     When same keys present the last dictionary in args list has the highest priority.
 
-    :@aram tuple(dict) dict_args:
-    @return dict: merged dictionary
+    Args:
+        dict_args(tuple(dict))
+
+    Returns:
+        dict: merged dictionary
+
     """
     result = {}
     for d in dict_args:

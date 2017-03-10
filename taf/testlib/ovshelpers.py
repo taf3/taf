@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``ovshelpers.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Helpers functions for OVS test suites`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  ovshelpers.py
-
-@summary  Helpers functions for OVS test suites.
 """
 
 import time
@@ -28,15 +27,16 @@ mod_logger = loggers.module_logger(name=__name__)
 
 
 def set_ovs_config_with_controller(ports, switch, controller):
-    """
-    @brief  Set OVS configuration on Switch
-    @param  ports:  Links information
-    @type  ports:  dict
-    @param  switch:  switch
-    @type  switch:  SwitchGeneral
-    @param  controller:  Controller
-    @type  controller:  OvsControllerGeneralMixin
-    @return: None
+    """Set OVS configuration on Switch.
+
+    Args:
+        ports(dict):  Links information
+        switch(SwitchGeneral):  switch
+        controller(OvsControllerGeneralMixin):  Controller
+
+    Returns:
+        None
+
     """
     switch.ui.create_ovs_bridge(bridge_name="spp0")
     controller_ip = "tcp:%s:%s" % (controller.ipaddr, controller.cport, )
@@ -53,17 +53,17 @@ def set_ovs_config_with_controller(ports, switch, controller):
 
 
 def set_ovs_complex_config_with_controller(ports, switch, sw_id, controller):
-    """
-    @brief  Set OVS configuration on Switch
-    @param  ports:  Links information
-    @type  ports:  dict
-    @param  switch:  switch
-    @type  switch:  SwitchGeneral
-    @param  sw_id:  id of switch in complex setup on which OVS is configured
-    @type  sw_id:  int
-    @param  controller:  Controller
-    @type  controller:  OvsControllerGeneralMixin
-    @return: None
+    """Set OVS configuration on Switch.
+
+    Args:
+        ports(dict):  Links information
+        switch(SwitchGeneral):  switch
+        sw_id(int):  id of switch in complex setup on which OVS is configured
+        controller(OvsControllerGeneralMixin):  Controller
+
+    Returns:
+        None
+
     """
     switch.ui.create_ovs_bridge(bridge_name="spp0")
     controller_ip = "tcp:%s:%s" % (controller.ipaddr, str(controller.cport), )
@@ -80,19 +80,18 @@ def set_ovs_complex_config_with_controller(ports, switch, sw_id, controller):
 
 
 def add_flow_via_controller(qualifiers, action, controller, name=None, dpid=None):
-    """
-    @brief  Add flow to OVS bridge via Controller
-    @param  qualifiers:  flow qualifiers
-    @type  qualifiers:  str
-    @param  action:  flow actions
-    @type  action:  str
-    @param  controller:  Controller
-    @type  controller:  OvsControllerGeneralMixin
-    @param  name:  flow name
-    @type  name:  name
-    @type  dpid:  Get process ID
-    @type  dpid:  bool
-    @return: None
+    """Add flow to OVS bridge via Controller.
+
+    Args:
+        qualifiers(str):  flow qualifiers
+        action(str):  flow actions
+        controller(OvsControllerGeneralMixin):  Controller
+        name(str):  flow name
+        dpid(bool):  Get process ID
+
+    Returns:
+        None
+
     """
     flow_command = "flow_add"
     flow = "%s %s" % (qualifiers, action, )
@@ -110,15 +109,16 @@ def add_flow_via_controller(qualifiers, action, controller, name=None, dpid=None
 
 
 def delete_flow_via_controller(qualifiers, controller, name=None):
-    """
-    @brief  Delete flow from OVS bridge via Controller
-    @param  qualifiers:  flow qualifiers
-    @type  qualifiers:  str
-    @param  controller:  Controller
-    @type  controller:  OvsControllerGeneralMixin
-    @param  name:  flow name
-    @type  name:  name
-    @return: None
+    """Delete flow from OVS bridge via Controller.
+
+    Args:
+        qualifiers(str):  flow qualifiers
+        controller(OvsControllerGeneralMixin):  Controller
+        name(str):  flow name
+
+    Returns:
+        None
+
     """
     flow_command = "flow_delete"
     flow = qualifiers
@@ -133,12 +133,14 @@ def delete_flow_via_controller(qualifiers, controller, name=None):
 
 
 def create_packet_definition(packet_to_send):
-    """
-    @brief  Create packet definition to send
-    @param  packet_to_send:  dictionary with specified packet type and fields with values
-    @type  packet_to_send:  dict
-    @rtype:  tuple(dict)
-    @return: packet_definition
+    """Create packet definition to send.
+
+    Args:
+        packet_to_send(dict):  dictionary with specified packet type and fields with values
+
+    Returns:
+        tuple(dict): packet_definition
+
     """
     source_mac = "00:00:00:00:00:01"
     destination_mac = "00:00:00:00:00:02"
@@ -210,17 +212,17 @@ def create_packet_definition(packet_to_send):
 
 
 def set_ovs_test_preconditions(ports, test_preconditions, switch, controller):
-    """
-    @brief  Set test preconditions, e.g. flows
-    @param  ports:  ports
-    @type  ports:  dict
-    @param  test_preconditions:  test preconditions
-    @type  test_preconditions:  tuple
-    @param  switch:  switch
-    @type  switch:  SwitchGeneral
-    @param  controller:  Controller
-    @type  controller:  OvsControllerGeneralMixin
-    @return: None
+    """Set test preconditions, e.g. flows.
+
+    Args:
+        ports(dict):  ports
+        test_preconditions(tuple):  test preconditions
+        switch(SwitchGeneral):  switch
+        controller(OvsControllerGeneralMixin):  Controller
+
+    Returns:
+        None
+
     """
     if isinstance(test_preconditions, tuple):
         for i, v in enumerate(test_preconditions):
@@ -261,19 +263,18 @@ def set_ovs_test_preconditions(ports, test_preconditions, switch, controller):
 
 
 def set_ovs_complex_test_preconditions(ports, test_preconditions, switch, controller, dpid=None):
-    """
-    @brief  Set test preconditions, e.g. flows
-    @param  ports:  ports
-    @type  ports:  dict
-    @param  test_preconditions:  test preconditions
-    @type  test_preconditions:  tuple
-    @param  switch:  switch
-    @type  switch:  SwitchGeneral
-    @param  controller:  Controller
-    @type  controller:  OvsControllerGeneralMixin
-    @type  dpid:  Get process ID
-    @type  dpid:  bool
-    @return  None
+    """Set test preconditions, e.g. flows.
+
+    Args:
+        ports(dict):  ports
+        test_preconditions(tuple):  test preconditions
+        switch(SwitchGeneral):  switch
+        controller(OvsControllerGeneralMixin):  Controller
+        dpid(bool):  Get process ID
+
+    Returns:
+        None
+
     """
     if isinstance(test_preconditions, tuple):
         for i, v in enumerate(test_preconditions):

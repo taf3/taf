@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``clitelnet.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Basic telnet class with command oriented functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  clitelnet.py
-
-@summary Basic telnet class with command oriented functionality.
 """
 
 import telnetlib
@@ -32,13 +31,13 @@ from . import loggers
 # TODO: cmd retry
 # TODO: Add logout/exit command for proper closing telnet connections
 class TelnetCMD(CLIGenericMixin):
-    """
-    @description HighLevel telnet command oriented class. Unused parameters added to support the same interface for other CLI classes.
+    """HighLevel telnet command oriented class. Unused parameters added to support the same interface for other CLI classes.
 
-    @code{.py}
-    client = TelnetCMD("1.1.1.1", 22)
-    client.login("username", "paSSword")
-    @endcode
+    Examples::
+
+        client = TelnetCMD("1.1.1.1", 22)
+        client.login("username", "paSSword")
+
     """
 
     class_logger = loggers.ClassLogger()
@@ -46,33 +45,23 @@ class TelnetCMD(CLIGenericMixin):
     def __init__(self, host=None, port=23, username=None, password=None, page_break="--More--",
                  prompt=None, pass_prompt="Password: ", sudo_prompt=None, timeout=10, login_prompt="login: ", page_break_lines=3,
                  exit_cmd=None, quiet=False):
-        """
-        @param  host:  Target host IP address.
-        @type  host:  str
-        @param  port:  SSH port (integer).
-        @type  port:  int
-        @param  username:  SSH login user.
-        @type  username:  str
-        @param  password:  SSH user password.
-        @type  password:  str
-        @param  page_break:  Page brake marker.
-        @type  page_break:  str
-        @param  prompt:  Shell prompt or list of shell prompts.
-        @type  prompt:  str, list[str]
-        @param  pass_prompt:  Login password prompt.
-        @type  pass_prompt:  str
-        @param  sudo_prompt:  Sudo password prompt.
-        @type  sudo_prompt:  str
-        @param  timeout:  Default timeout for commands.
-        @type  timeout:  int
-        @param login_prompt:  Login prompt (str).
-        @type  login_prompt:  str
-        @param page_break_lines:  Number of page brake lines (int).
-        @type  page_break_lines:  int
-        @param exit_cmd:  Command to perform telnet exit (str).
-        @type  exit_cmd:  str
-        @param  quiet:  Flag for return code verification.
-        @type  quiet:  bool
+        """Initialize TelnetCMD class.
+
+        Args:
+            host(str):  Target host IP address.
+            port(int):  SSH port.
+            username(str):  SSH login user.
+            password(str):  SSH user password.
+            page_break(str):  Page brake marker.
+            prompt(str, list[str]):  Shell prompt or list of shell prompts.
+            pass_prompt(str):  Login password prompt.
+            sudo_prompt(str):  Sudo password prompt.
+            timeout(int):  Default timeout for commands.
+            login_prompt(str):  Login prompt.
+            page_break_lines(int):  Number of page brake lines.
+            exit_cmd(str):  Command to perform telnet exit (str).
+            quiet(bool):  Flag for return code verification.
+
         """
 
         super(TelnetCMD, self).__init__()
@@ -102,27 +91,26 @@ class TelnetCMD(CLIGenericMixin):
         self.quiet = quiet
 
     def connect(self, with_login=True, wait_login=5, alternatives=None, wait_prompt=True, socket_closed=False):
-        """
-        @brief  Create telnet connection and do login if necessary.
+        """Create telnet connection and do login if necessary.
 
-        @param  with_login:  Perform login procedure or not.
-                             If param isn't set try automatically determine login necessity. (True|False|None)
-        @type  with_login:  bool
-        @param  wait_login:  time to wait login before sending <Enter>.
-                             <Enter> is necessary if login is already appiered.
-        @type  wait_login:  int
-        @param  alternatives: Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
-                              action can be:
-                              - str - in case this is just command;
-                              - function - callable object to execute without parameters;
-        @type  alternatives:  tuple
-        @param  wait_prompt:  Wait for prompt message or not.
-        @type  wait_prompt:  bool
-        @param  socket_closed:  Determines if socket has been closed or not.
-        @type  socket_closed:  bool
-        @raise  Exception:  self.host is None; self.prompt is None
-        @rtype:  str
-        @return:  telnet stdout
+        Args:
+            with_login(bool):  Perform login procedure or not.
+                               If param isn't set try automatically determine login necessity. (True|False|None)
+            wait_login(int):  time to wait login before sending <Enter>.
+                              <Enter> is necessary if login is already appeared.
+            alternatives(tuple): Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
+                                 action can be:
+                                     - str - in case this is just command;
+                                     - function - callable object to execute without parameters;
+            wait_prompt(bool):  Wait for prompt message or not.
+            socket_closed(bool):  Determines if socket has been closed or not.
+
+        Raises:
+            Exception:  self.host is None; self.prompt is None
+
+        Returns:
+            str:  telnet stdout
+
         """
         if not self.host:
             raise Exception("Remote host was not defined.")
@@ -165,17 +153,21 @@ class TelnetCMD(CLIGenericMixin):
         return telnet_output
 
     def _check_telnet_obj(self):
-        """
-        @brief  Check if telnet object exists (connection is established)
-        @raise  Exception:  telnet connection is not established
+        """Check if telnet object exists (connection is established).
+
+        Raises:
+            Exception:  telnet connection is not established
+
         """
         if not (self.telnet_obj and self._check_telnet_obj_connection()):
             raise Exception("Connection to host has not been established yet.")
 
     def check_shell(self):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::check_shell()
-        @raise  CLITelnetException:  telnet connection is not established; user is not logged in
+        """Check if CLI connection is alive.
+
+        Raises:
+            CLITelnetException:  telnet connection is not established; user is not logged in
+
         """
         # Why are we raising execptions, return False
         if not self.telnet_obj or not self._check_telnet_obj_connection():
@@ -186,20 +178,24 @@ class TelnetCMD(CLIGenericMixin):
             return True
 
     def close(self):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::close()
+        """Close CLI object connection.
+
         """
         self.telnet_obj.close()
 
     def close_shell(self):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::close_shell()
+        """Close interactive CLI shell on existing connection.
+
         """
         self.close()
 
     def shell_read(self, timeout=0, interval=0.1):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::shell_read()
+        """Read data from output buffer.
+
+        Args:
+            timeout(int):  Increases time to read data from output buffer.
+            interval(int):  Time delay between attempts to read data from output buffer.
+
         """
         self.check_shell()
         data = ""
@@ -216,21 +212,28 @@ class TelnetCMD(CLIGenericMixin):
         return data
 
     def send_command(self, command):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::send_command()
+        """Run command without waiting response.
+
+        Args:
+            command(str):  Command to be executed.
+
         """
         self.check_shell()
         self.class_logger.debug("{0}@{1}: {2}".format(self.user, self.host, command))
         self.telnet_obj.write(command + "\n")
 
     def open_shell(self, raw_output=False):
-        """
-        @brief  Call login method. Added to support other CLI objects interface.
-        @param  raw_output: Flag whether to read output buffer.
-        @type  raw_output:  bool
-        @raise  CLITelnetException:  telnet connection is not established
-        @rtype:  str
-        @return:  telnet otput
+        """Call login method. Added to support other CLI objects interface.
+
+        Args:
+            raw_output(bool): Flag whether to read output buffer.
+
+        Raises:
+            CLITelnetException:  telnet connection is not established
+
+        Returns:
+            str:  telnet output
+
         """
         data = ""
         if self._check_telnet_obj_connection():
@@ -248,10 +251,11 @@ class TelnetCMD(CLIGenericMixin):
             raise CLITelnetException("Telnet object has no connection")
 
     def _check_telnet_obj_connection(self):
-        """
-        @brief  Verify if telnet connection exists
-        @rtype:  bool
-        @return:  True if telnet connection exists
+        """Verify if telnet connection exists.
+
+        Returns:
+            bool:  True if telnet connection exists
+
         """
         flag = True
         try:
@@ -263,10 +267,25 @@ class TelnetCMD(CLIGenericMixin):
         return flag
 
     def login(self, username=None, password=None, timeout=None, wait_login=0, alternatives=None, connect=True):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::login()
-        @raise  Exception:  username is not defined
-        @raise  CLITelnetException:  login timeout exceeded, unexpected login prompt
+        """Do CLI object login procedure.
+
+        Args:
+            username(str):  Host login (string).
+            password(str): Host password(string).
+            timeout(int): Time to execute login procedure (integer).
+            wait_login(int):  time to wait login prompt before sending <Enter>.
+                              <Enter> is necessary if login prompt has been already appeared
+                              before connection is established.
+            alternatives(list of tuples): list of alternative prompts and actions.
+            connect(bool): Flag if connection should be established before login procedure (bool).
+
+        Returns:
+            None
+
+        Raises:
+            Exception:  username is not defined
+            CLITelnetException:  login timeout exceeded, unexpected login prompt
+
         """
         if not self.user and not username:
             raise Exception("User login name was not defined.")
@@ -348,10 +367,11 @@ class TelnetCMD(CLIGenericMixin):
         return telnet_output
 
     def exit(self, wait_close=True):
-        """
-        @brief  Do telnet exit/logout procedure. Wait until connection closed
-        @param  wait_close:  Flag specifies whether to verify successful exit and to return output data.
-        @type  wait_close:  bool
+        """Do telnet exit/logout procedure. Wait until connection closed.
+
+        Args:
+            wait_close(bool):  Flag specifies whether to verify successful exit and to return output data.
+
         """
         self._check_telnet_obj()
         telnet_output = []
@@ -374,10 +394,11 @@ class TelnetCMD(CLIGenericMixin):
         return None
 
     def disconnect(self, with_exit=True):
-        """
-        @brief  Do disconnect
-        @param  with_exit:  Flag specifies whether perform exit procedure.
-        @type  with_exit:  bool
+        """Do disconnect.
+
+        Args:
+            with_exit(bool):  Flag specifies whether perform exit procedure.
+
         """
         if self.telnet_obj:
             try:
@@ -390,13 +411,26 @@ class TelnetCMD(CLIGenericMixin):
 
     def shell_command(self, command, alternatives=None, timeout=None, sudo=False, ret_code=True,
                       new_prompt=None, expected_rc="0", quiet=None, raw_output=False, interval=0.1):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::shell_command()
-        @param  interval:  Interval between read data cycles.
-        @type  interval:  int | float
-        @param  new_prompt:  Prompt which will replace current prompt after successful mode changing.
-        @type  new_prompt:  str
-        @raise  CLITelnetException:  unexpected return code
+        """Run interactive command on previously created shell (tty).
+
+        Args:
+            command(str):  Command to be executed.
+            alternatives(tuple):  Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
+                                  action can be:
+                                      - str - in case this is just command;
+                                      - function - callable object to execute without parameters;
+            timeout(int):  Expecting timeout.
+            sudo(bool):  Flag if sudo should be added to the list of alternatives.
+            ret_code(bool):  Flag if return code should be added to the list of alternatives.
+            expected_rc(int): Sets return code and verifies if return code of executed command the same as expected return code (int or str).
+            quiet(bool):  Flag to verify if expected return equals expected.
+            raw_output(bool):  Flag whether to return 'pure' output.
+            interval(int | float):  Interval between read data cycles.
+            new_prompt(str):  Prompt which will replace current prompt after successful mode changing.
+
+        Raises:
+            CLITelnetException:  unexpected return code
+
         """
         self._check_telnet_obj()
         self.class_logger.debug("{0}@{1}: {2}".format(self.user, self.host, command))
@@ -435,14 +469,17 @@ class TelnetCMD(CLIGenericMixin):
         return data, return_code
 
     def exec_command(self, command, timeout=None, sudo=False, ret_code=False):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::exec_command()
-        @param  sudo:  Flag  if sudo should be added to the list of alternatives.
-        @type  sudo:  bool
-        @param  ret_code:  Flag if return code should be added to the list of alternatives (bool).
-        @type  ret_code:  bool
-        @rtype:  tuple(str, str, int)
-        @return:  output, "", return code
+        """Execute command without shell (tty).
+
+        Args:
+            command(str):  Command to be executed.
+            timeout(int):  Timeout for command execution.
+            sudo(bool):  Flag  if sudo should be added to the list of alternatives.
+            ret_code(bool):  Flag if return code should be added to the list of alternatives (bool).
+
+        Returns:
+            tuple(str, str, int): output, "", return code
+
         """
 
         output, rc = self.shell_command(command, timeout=timeout, sudo=sudo, ret_code=ret_code)
@@ -450,14 +487,18 @@ class TelnetCMD(CLIGenericMixin):
         return CmdStatus(output, "", rc)
 
     def enter_mode(self, cmd=None, new_prompt=None):
-        """
-        @brief  Enter config/priv or other mode with specific prompt
-        @param  cmd:  Command to change mode.
-        @type  cmd:  str
-        @param  new_prompt:  Prompt which will replace current prompt after successful mode changing.
-        @type  new_prompt:  str
-        @raise  Exception:  undefined prompt, unexpected new prompt
-        @note  After success execution current prompt will be replaced with new propmt and saved in prompt_stack
+        """Enter config/priv or other mode with specific prompt.
+
+        Args:
+            cmd(str):  Command to change mode.
+            new_prompt(str):  Prompt which will replace current prompt after successful mode changing.
+
+        Raises:
+            Exception:  undefined prompt, unexpected new prompt
+
+        Note:
+            After success execution current prompt will be replaced with new propmt and saved in prompt_stack.
+
         """
         if not self.prompt:
             message = "Prompt isn't defined. Please set the prompt."
@@ -475,11 +516,14 @@ class TelnetCMD(CLIGenericMixin):
         return self.prompt
 
     def exit_mode(self, exit_cmd=None):
-        """
-        @brief  Exit config/priv or other mode with specific prompt
-        @param  exit_cmd:  Command to exit from current mode.
-        @type  exit_cmd:  str
-        @raise  Exception:  undefined prompt, unexpected new prompt
+        """Exit config/priv or other mode with specific prompt.
+
+        Args:
+            exit_cmd(str):  Command to exit from current mode.
+
+        Raises:
+            Exception:  undefined prompt, unexpected new prompt
+
         """
         if not self.prompt:
             message = "Prompt isn't defined. Please set the prompt."
@@ -498,14 +542,12 @@ class TelnetCMD(CLIGenericMixin):
         return self.prompt
 
     def _normalize_output(self, output=None, cmd=None, prompt=None):
-        """
-        @brief  Remove everything from the response except the actual command output.
-        @param  output:  Output data to be normalized.
-        @type  output:  str
-        @param  cmd:  Command which was used for program execution.
-        @type  cmd:  str
-        @param  prompt:  Prompt which will be removed form output data.
-        @type  prompt:  str
+        """Remove everything from the response except the actual command output.
+
+        Args:
+            output(str):  Output data to be normalized.
+            cmd(str):  Command which was used for program execution.
+            prompt(str):  Prompt which will be removed form output data.
 
         """
         lines = output.splitlines(True)
@@ -522,15 +564,19 @@ class TelnetCMD(CLIGenericMixin):
         return "".join(lines)
 
     def put_file(self):
-        """
-        @brief  This method isn't supported by telnetlib
-        @raise  CLITelnetException:  unsupported
+        """This method isn't supported by telnetlib.
+
+        Raises:
+            CLITelnetException:  unsupported
+
         """
         raise CLITelnetException("cli_telnet object doesn't support put_file method ")
 
     def get_file(self):
-        """
-        @brief  This method isn't supported by telnetlib
-        @raise  CLITelnetException:  unsupported
+        """This method isn't supported by telnetlib.
+
+        Raises:
+            CLITelnetException:  unsupported
+
         """
         raise CLITelnetException("cli_telnet object doesn't support get_file method ")

@@ -1,23 +1,23 @@
-#! /usr/bin/env python
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``cli_template.py``
+
+`Abstract class for any CLI classes`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  cli_template.py
-
-@summary  Abstract class for any CLI classes.
-"""
 import io
 import random
 import time
@@ -31,8 +31,8 @@ from . import loggers
 
 
 class Raw(str):
-    """
-    @details  This class represents raw commands for cli object.
+    """This class represents raw commands for cli object.
+
     """
     pass
 
@@ -40,16 +40,16 @@ CmdStatus = namedtuple("CmdStatus", "stdout, stderr, rc")
 
 
 class CLIGenericMixin(object, metaclass=ABCMeta):
-    """
-    @description  Base class for CLI configuration.
+    """Base class for CLI configuration.
+
     """
 
     Raw = Raw
     class_logger = loggers.ClassLogger()
 
     def __init__(self):
-        """
-        @brief  Entry __init__ method defines class variable.
+        """Entry __init__ method defines class variable.
+
         """
         self.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
         self.prompt = None
@@ -58,30 +58,28 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
         self.password = None
 
     def randstr(self, length):
-        """
-        @brief  Return random string with required length.
-        @param  length:  Required length
-        @type  length:  int
+        """Return random string with required length.
+
+        Args:
+            length(int):  Required length
+
         """
         return "".join(random.choice(self.CHARS) for x in range(length))
 
     def expect(self, obj, expect_list, timeout=60, interval=0.1, remove_cmd=True, is_shell=False):
-        """
-        @brief  Expecting prompts and return prompt index in expect_list.
-        @param  obj:  CLI obj of different types.
-        @type  obj:  Channel
-        @param  expect_list:  List of compiled re objects to find prompt in data.
-        @type  expect_list:  list
-        @param  timeout:  Expecting timeout.
-        @type  timeout:  int
-        @param  interval:  Interval between read data cycles.
-        @type  interval:  int
-        @param  remove_cmd:  Flag whether to remove command from output during searching prompt in data.
-        @type  remove_cmd:  bool
-        @param  is_shell:  Indicates shell command
-        @type  is_shell:  bool
-        @rtype:  tuple
-        @return:  Found position from expect_list and full command output
+        """Expecting prompts and return prompt index in expect_list.
+
+        Args:
+            obj(Channel):  CLI obj of different types.
+            expect_list(list):  List of compiled re objects to find prompt in data.
+            timeout(int):  Expecting timeout.
+            interval(int):  Interval between read data cycles.
+            remove_cmd(bool):  Flag whether to remove command from output during searching prompt in data.
+            is_shell(bool):  Indicates shell command
+
+        Returns:
+            tuple:  Found position from expect_list and full command output
+
         """
         full_out = ""
         temp_data = ""
@@ -123,26 +121,25 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
                 return -1, full_out
 
     def action_on_expect(self, obj, alternatives, timeout=60, interval=0.1, command_timeout=600, is_shell=False):
-        """
-        @brief  Performs actions on found prompts. Returns command output data
-        @param  obj:  CLI object of different types.
-        @type  obj:  Channel
-        @param  alternatives:  Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
-                              action can be:
-                              - str - in case this is just command;
-                              - function - callable object to execute without parameters;
-        @type  alternatives:  tuple | list
-        @param  timeout:  Expecting timeout.
-        @type  timeout:  int
-        @param  interval:  Interval between read data cycles.
-        @type  interval:  int | float
-        @param  command_timeout: Command execution timeout.
-        @type  command_timeout:  int
-        @param  is_shell: Indicates shell command
-        @type  is_shell:  bool
-        @raise  CLIException:  timeout exceeded for command execution
-        @rtype:  str
-        @return:  Full output
+        """Performs actions on found prompts. Returns command output data.
+
+        Args:
+            obj(Channel):  CLI object of different types.
+            alternatives(tuple | list):  Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
+                                         action can be:
+                                             - str - in case this is just command;
+                                             - function - callable object to execute without parameters;
+            timeout(int):  Expecting timeout.
+            interval(int | float):  Interval between read data cycles.
+            command_timeout(int): Command execution timeout.
+            is_shell(bool): Indicates shell command
+
+        Raises:
+            CLIException:  timeout exceeded for command execution
+
+        Returns:
+            str:  Full output
+
         """
         # Flag whether to remove command from output during searching prompt in data
         remove_cmd = True
@@ -196,26 +193,25 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
         return full_out
 
     def action_on_connect(self, obj, alternatives, timeout=60, interval=0.1, command_timeout=600, is_shell=False):
-        """
-        @brief Performs actions on found prompts. Returns command output data. This is only for CLI connect. See action_on_expect for details.
-        @param  obj:  CLI object of different types.
-        @type  obj:  Channel
-        @param  alternatives:  Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
-                              action can be:
-                              - str - in case this is just command;
-                              - function - callable object to execute without parameters;
-        @type  alternatives:  tuple
-        @param  timeout:  Expecting timeout.
-        @type  timeout:  int
-        @param  interval:  Interval between read data cycles.
-        @type  interval:  int
-        @param  command_timeout: Command execution timeout.
-        @type  command_timeout:  int
-        @param  is_shell: Indicates shell command
-        @type  is_shell:  bool
-        @raise  CLIException:  sudoprompt is not defined
-        @rtype:  str
-        @return:  Full output
+        """Performs actions on found prompts. Returns command output data. This is only for CLI connect. See action_on_expect for details.
+
+        Args:
+            obj(Channel):  CLI object of different types.
+            alternatives(tuple):  Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
+                                  action can be:
+                                      - str - in case this is just command;
+                                      - function - callable object to execute without parameters;
+            timeout(int):  Expecting timeout.
+            interval(int):  Interval between read data cycles.
+            command_timeout(int): Command execution timeout.
+            is_shell(bool): Indicates shell command
+
+        Raises:
+            CLIException:  sudoprompt is not defined
+
+        Returns:
+            str:  Full output
+
         """
         # Update alternatives.
         expect_list = []
@@ -249,16 +245,20 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
         return full_out
 
     def prepare_ssh_shell_obj(self, shell):
-        """
-        @brief  Add read(), write() and expect() methods to emulate object IO methods.
-        @param  shell:  paramiko.Channel object.
-        @type  shell:  paramiko.Channel
-        @rtype:  paramiko.Channel
-        @return  paramiko.Channel object.
+        """Add read(), write() and expect() methods to emulate object IO methods.
+
+        Args:
+            shell(paramiko.Channel):  paramiko.Channel object.
+
+        Returns:
+            paramiko.Channel:  paramiko.Channel object.
+
         """
         # use a closure
         def read():
-            """ Non blocking read implementation. """
+            """ Non blocking read implementation.
+
+            """
             data = ""
             while shell.recv_ready():
                 # += for strings is optimized, don't worry.
@@ -275,18 +275,17 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
         return shell
 
     def normalize_output(self, data, command, ret_code, end_pattern=None):
-        """
-        @brief Removes command and command's end flag from output data. Extracts return code of the command.
-        @param  data:  Output data of command.
-        @type  data:  str
-        @param  command:  Executed command.
-        @type  command:  str
-        @param  ret_code:  Flag which shows if return code command was added to main command.
-        @type  ret_code:  bool
-        @param  end_pattern: pattern which is used to find end command flag.
-        @type  end_pattern:  str
-        @rtype:  tuple
-        @return:  data and return code
+        """Removes command and command's end flag from output data. Extracts return code of the command.
+
+        Args:
+            data(str):  Output data of command.
+            command(str):  Executed command.
+            ret_code(bool):  Flag which shows if return code command was added to main command.
+            end_pattern(str): pattern which is used to find end command flag.
+
+        Returns:
+            tuple:  data and return code
+
         """
 
         # Remove command itself from output
@@ -343,28 +342,29 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
         return data, return_code
 
     def prepare_pexpect_obj(self, pexp_obj):
-        """
-        @brief  Add read(), write() and expect() methods to emulate object IO methods.
+        """Add read(), write() and expect() methods to emulate object IO methods.
 
-        @param  pexp_obj:  pexpect object.
-        @type  pexp_obj:  pexpect
-        @rtype:  pexpect
-        @return:  pexpect object.
+        Args:
+            pexp_obj(pexpect):  pexpect object.
+
+        Returns:
+            pexpect:  pexpect object.
+
         """
 
         pexp_obj.mod_expect = pexp_obj.expect
 
         def wrap_exp(obj, prompt_list, timeout, interval, remove_cmd, is_shell):
-            """
-            @brief  Add expect() method to emulate object IO methods.
+            """Add expect() method to emulate object IO methods.
+
             """
             rc, data = self.expect(obj, prompt_list, timeout, interval, remove_cmd, is_shell)
 
             return rc, data
 
         def wrap_read(pexp_obj):
-            """
-            @brief  Add read() method to emulate object IO methods.
+            """Add read() method to emulate object IO methods.
+
             """
             try:
                 data = pexp_obj.read_nonblocking(200000, 1)
@@ -380,28 +380,29 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
         return pexp_obj
 
     def prepare_telnet_obj(self, telnet_obj):
-        """
-        @brief  Add read() and expect() methods to object to emulate object IO methods.
+        """Add read() and expect() methods to object to emulate object IO methods.
 
-        @param  telnet_obj:  telnetlib  object.
-        @type  telnet_obj:  telnetlib
-        @rtype:  telnetlib
-        @return:  telnetlib object
+        Args:
+            telnet_obj(telnetlib):  telnetlib  object.
+
+        Returns:
+            telnetlib:  telnetlib object
+
         """
 
         telnet_obj.mod_expect = telnet_obj.expect
 
         def wrap_exp(obj, prompt_list, timeout, interval, remove_cmd, is_shell):
-            """
-            @brief  Add expect() method to emulate object IO methods.
+            """Add expect() method to emulate object IO methods.
+
             """
             rc, data = self.expect(obj, prompt_list, timeout, interval, remove_cmd, is_shell)
 
             return rc, data
 
         def wrap_read(telnet_obj):
-            """
-            @brief  Add read() method to emulate object IO methods.
+            """Add read() method to emulate object IO methods.
+
             """
             try:
                 data = telnet_obj.read_very_eager()
@@ -421,14 +422,15 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
         return telnet_obj
 
     def cmd_output_log(self, so, se):
-        """
-        @brief  log message normalizer.
-        @param  so:  StdOut
-        @type  so:  str
-        @param  se:  StdErr
-        @type  se:  str
-        @rtype:  str
-        @return:  Normalized output
+        """log message normalizer.
+
+        Args:
+            so(str):  StdOut
+            se(str):  StdErr
+
+        Returns:
+            str: Normalized output
+
         """
         message = "Command output:"
         if so:
@@ -442,24 +444,21 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
         return message
 
     def prepare_alter(self, command, alternatives=None, sudo=False, ret_code=True, page_break=None):
-        """
-        @brief  Adds specified alternatives to list, updates command with end command and sudo if needed.
+        """Adds specified alternatives to list, updates command with end command and sudo if needed.
 
-        @param  command:  Command to be executed.
-        @type  command:  str
-        @param  alternatives:  Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
-                              action can be:
-                              - str - in case this is just command;
-                              - function - callable object to execute without parameters;
-        @type  alternatives:  tuple
-        @param  sudo:  Flag if sudo should be added to the list of alternatives .
-        @type  sudo:  bool
-        @param  ret_code:  Flag if return code should be added to the list of alternatives.
-        @type  ret_code:  bool
-        @param  page_break:  Flag if page break should be added to the list of alternatives.
-        @type  page_break:  bool
-        @rtype:  tuple
-        @return:  command, alternatives, end_pattern
+        Args:
+            command(str):  Command to be executed.
+            alternatives(tuple):  Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
+                                  action can be:
+                                      - str - in case this is just command;
+                                      - function - callable object to execute without parameters;
+            sudo(bool):  Flag if sudo should be added to the list of alternatives .
+            ret_code(bool):  Flag if return code should be added to the list of alternatives.
+            page_break(bool):  Flag if page break should be added to the list of alternatives.
+
+        Returns:
+            tuple:  command, alternatives, end_pattern
+
         """
 
         if alternatives is None:
@@ -500,127 +499,125 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
 
     @abstractmethod
     def login(self):
-        """
-        @brief  Do CLI object login procedure
+        """Do CLI object login procedure.
 
-        @param username:  Host login (string).
-        @param password: Host password(string).
-        @param timeout: Time to execute login procedure (integer).
-        @param wait_login:   time to wait login prompt before sending <Enter>.
-                             <Enter> is necessary if login prompt has been already appeared
-                             before connection is established.
-        @param alternatives: list of alternative prompts and actions (list of tuples).
-        @param connect: Flag if connection should be established before login procedure (bool).
+        Args:
+            username(str):  Host login (string).
+            password(str): Host password(string).
+            timeout(int): Time to execute login procedure (integer).
+            wait_login(int):  time to wait login prompt before sending <Enter>.
+                              <Enter> is necessary if login prompt has been already appeared
+                              before connection is established.
+            alternatives(list of tuples): list of alternative prompts and actions.
+            connect(bool): Flag if connection should be established before login procedure (bool).
 
-        @return  None
+        Returns:
+            None
+
         """
         pass
 
     @abstractmethod
     def close(self):
-        """
-        @brief  Close CLI object connection.
+        """Close CLI object connection.
+
         """
         pass
 
     @abstractmethod
     def open_shell(self):
-        """
-        @brief  Create interactive CLI shell on existing connection.
+        """Create interactive CLI shell on existing connection.
+
         """
         pass
 
     @abstractmethod
     def close_shell(self):
-        """
-        @brief  Close interactive CLI shell on existing connection.
+        """Close interactive CLI shell on existing connection.
+
         """
         pass
 
     @abstractmethod
     def check_shell(self):
-        """
-        @brief  Check if CLI connection is alive.
+        """Check if CLI connection is alive.
+
         """
         pass
 
     @abstractmethod
     def shell_read(self):
-        """
-        @brief  Read data from output buffer
-        @param  timeout:  Increases time to read data from output buffer.
-        @type  timeout:  int
-        @param  interval:  Time delay between attempts to read data from output buffer.
-        @type  timeout:  int
+        """Read data from output buffer.
+
+        Args:
+            timeout(int):  Increases time to read data from output buffer.
+            interval(int):  Time delay between attempts to read data from output buffer.
+
         """
         pass
 
     @abstractmethod
     def send_command(self):
-        """
-        @brief  Run command without waiting response.
-        @param  command:  Command to be executed.
-        @type  command:  str
+        """Run command without waiting response.
+
+        Args:
+            command(str):  Command to be executed.
+
         """
         pass
 
     @abstractmethod
     def exec_command(self):
-        """
-        @brief  Execute command without shell (tty).
-        @param  command  Command to be executed.
-        @type  command:  str
-        @param  timeout  Timeout for command execution.
-        @type  timeout:  int
-        @return:  tuple of stdout, stderr, rc
-        @rtype:  tuple(str, str, int)
+        """Execute command without shell (tty).
+
+        Args:
+            command(str):  Command to be executed.
+            timeout(int):  Timeout for command execution.
+
+        Returns:
+            tuple(str, str, int): tuple of stdout, stderr, rc
+
         """
         pass
 
     @abstractmethod
     def shell_command(self):
-        """
-        @brief  Run interactive command on previously created shell (tty).
-        @param  command:  Command to be executed.
-        @type  command:  str
-        @param  alternatives:  Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
-                              action can be:
-                              - str - in case this is just command;
-                              - function - callable object to execute without parameters;
-        @type  alternatives:  tuple
-        @param  timeout:  Expecting timeout.
-        @type  timeout:  int
-        @param  sudo:  Flag if sudo should be added to the list of alternatives.
-        @type  sudo:  bool
-        @param  ret_code:  Flag if return code should be added to the list of alternatives.
-        @type  ret_code:  bool
-        @param  expected_rc: Sets return code and verifies if return code of executed command the same as expected return code (int or str).
-        @type  expected_rc:  int
-        @param  quiet:  Flag to verify if expected return equals expected.
-        @type  quiet:  bool
-        @param  raw_output:  Flag whether to return 'pure' output.
-        @type  raw_output:  bool
+        """Run interactive command on previously created shell (tty).
+
+        Args:
+            command(str):  Command to be executed.
+            alternatives(tuple):  Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
+                                  action can be:
+                                      - str - in case this is just command;
+                                      - function - callable object to execute without parameters;
+            timeout(int):  Expecting timeout.
+            sudo(bool):  Flag if sudo should be added to the list of alternatives.
+            ret_code(bool):  Flag if return code should be added to the list of alternatives.
+            expected_rc(int): Sets return code and verifies if return code of executed command the same as expected return code (int or str).
+            quiet(bool):  Flag to verify if expected return equals expected.
+            raw_output(bool):  Flag whether to return 'pure' output.
+
         """
         pass
 
     @abstractmethod
     def put_file(self):
-        """
-        @brief  Transfer file from/to remote host.
-        @param  src:  File's source.
-        @type  src:  str
-        @param  dst:  File's destination.
-        @type  dst:  str
+        """Transfer file from/to remote host.
+
+        Args:
+            src(str):  File's source.
+            dst(str):  File's destination.
+
         """
         pass
 
     @abstractmethod
     def get_file(self):
-        """
-        @brief  Put file to remote host.
-        @param  src:  File's source.
-        @type  src:  str
-        @param  dst:  File's destination.
-        @type  dst:  str
+        """Put file to remote host.
+
+        Args:
+            src(str):  File's source.
+            dst(str):  File's destination.
+
         """
         pass

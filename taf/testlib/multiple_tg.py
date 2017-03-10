@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2015 - 2016, Intel Corporation.
+# Copyright (c) 2015 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``pytest_onsenv.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Multiple traffic generator specific functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_onsenv.py
-
-@summary  Multiple traffic generator specific functionality.
 """
 from collections import namedtuple
 
@@ -31,21 +31,20 @@ Port = namedtuple('Port', 'tg, port')
 
 
 class MultipleTG(PacketProcessor, GenericTG):
-    """
-    @description  Class for general TG instance combined with multiple different TGs.
+    """Class for general TG instance combined with multiple different TGs.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, traffic_generators, config, opts):
-        """
-        @brief  Initialize RemoteMultiHostTG class
-        @param  traffic_generators:  Dictionary with TG instances in format {id:tg_instance}
-        @type  traffic_generators:  dict
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
+        """Initialize RemoteMultiHostTG class.
+
+        Args:
+            traffic_generators(dict):  Dictionary with TG instances in format {id:tg_instance}
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
         """
         super(MultipleTG, self).__init__(config, opts)
 
@@ -63,11 +62,13 @@ class MultipleTG(PacketProcessor, GenericTG):
                                                  for x in self.tgs.values())
 
     def _get_speed_ports(self):
+        """Get ports with speed from TG instances.
+
+        Returns:
+            tuple(list[tuple], list[tuple, int]):  Tuple with list of ports used in real config and list of port/speed values
+
         """
-        @brief  Get ports with speed from TG instances.
-        @rtype:  tuple(list[tuple], list[tuple, int])
-        @return:  Tuple with list of ports used in real config and list of port/speed values
-        """
+
         ports = []
         ports_list = []
         if any(x.port_list for x in self.tgs.values()):
@@ -83,12 +84,14 @@ class MultipleTG(PacketProcessor, GenericTG):
         return ports, ports_list
 
     def get_tg_port_map(self, ifaces):
-        """
-        @brief  Return ports related to specific TG
-        @param ifaces: list of interfaces in format (tg_id, port_id)
-        @type  ifaces:  list(tuple)
-        @rtype:  dict
-        @return:  dictionary in format {'host id': [port ids]}
+        """Return ports related to specific TG.
+
+        Args:
+            ifaces(list(tuple)): list of interfaces in format (tg_id, port_id)
+
+        Returns:
+            dict:  dictionary in format {'host id': [port ids]}
+
         """
         iface_map = {}
         for iface in ifaces:
@@ -96,22 +99,25 @@ class MultipleTG(PacketProcessor, GenericTG):
         return iface_map
 
     def get_port_id(self, tg_id, port_id):
-        """
-        @brief  Return port's sequence number in list of ports
-        @param  tg_id:  TG instance ID
-        @type  tg_id:  int
-        @param  port_id:  TG instance port's sequence number
-        @type  port_id:  int
-        @raises  ValueError:  in case expected port is not in list of ports
-        @rtype:  int
-        @return:  Port sequence number in list of ports starting from 1
+        """Return port's sequence number in list of ports.
+
+        Args:
+            tg_id(int):  TG instance ID
+            port_id(int):  TG instance port's sequence number
+
+        Raises:
+            ValueError:  in case expected port is not in list of ports
+
+        Returns:
+            int:  Port sequence number in list of ports starting from 1
+
         """
         port_name = self.tgs[tg_id].ports[port_id - 1]
         return self.ports.index(Port(tg_id, port_name)) + 1
 
     def start(self, wait_on=True):
-        """
-        @brief  Start TG instances.
+        """Start TG instances.
+
         """
         for tg in self.tgs.values():
             tg.start()
@@ -119,52 +125,52 @@ class MultipleTG(PacketProcessor, GenericTG):
         self.status = all(x.status for x in self.tgs.values())
 
     def stop(self):
-        """
-        @brief  Shutdown TG instances.
+        """Shutdown TG instances.
+
         """
         for tg in self.tgs.values():
             tg.stop()
 
     def create(self):
-        """
-        @brief  Start TG instances or get running ones..
+        """Start TG instances or get running ones.
+
         """
         for tg in self.tgs.values():
             tg.create()
 
     def destroy(self):
-        """
-        @brief  Stop or release TG instances.
+        """Stop or release TG instances.
+
         """
         for tg in self.tgs.values():
             tg.destroy()
 
     def cleanup(self, *args, **kwargs):
-        """
-        @brief  Cleanup TG instances.
+        """Cleanup TG instances.
+
         """
         self.streams = []
         for tg in self.tgs.values():
             tg.cleanup()
 
     def check(self):
-        """
-        @brief  Check TG instances.
+        """Check TG instances.
+
         """
         for tg in self.tgs.values():
             tg.check()
 
     def sanitize(self):
-        """
-        @brief  Perform any necessary operations to leave environment in normal state.
+        """Perform any necessary operations to leave environment in normal state.
+
         """
         self.streams = []
         for tg in self.tgs.values():
             tg.sanitize()
 
     def stop_sniff(self, *args, **kwargs):
-        """
-        @brief  Collect sniffed data from all TG instances.
+        """Collect sniffed data from all TG instances.
+
         """
         iface_map = self.get_tg_port_map(*args)
         data_hosts = {}
@@ -178,28 +184,60 @@ class MultipleTG(PacketProcessor, GenericTG):
         return data
 
     def connect_port(self, iface):
-        """
-        @copydoc  testlib::tg_template::GenericTG::connect_port()
+        """Simulate port link connecting (set it to admin up etc).
+
+        Args:
+            iface(str):  Interface to connect.
+
+        Raises:
+            NotImplementedError:  not implemented
+
+        Returns:
+            None or raise and exception.
+
         """
         self.tgs[iface.tg].connect_port(iface.port)
 
     def disconnect_port(self, iface):
-        """
-        @copydoc  testlib::tg_template::GenericTG::disconnect_port()
+        """Simulate port link disconnecting (set it to admin down etc).
+
+        Args:
+            iface(str):  Interface to disconnect.
+
+        Raises:
+            NotImplementedError:  not implemented
+
+        Returns:
+            None or raise and exception.
+
         """
         self.tgs[iface.tg].disconnect_port(iface.port)
 
     def clear_streams(self):
-        """
-        @brief  Stop and remove all streams
+        """Stop and remove all streams.
+
         """
         self.streams = []
         for tg in self.tgs.values():
             tg.clear_streams()
 
     def set_stream(self, *args, **kwargs):
-        """
-        @copydoc  testlib::tg_template::GenericTG::set_stream()
+        """Set traffic stream with specified parameters on specified TG port.
+
+        Returns:
+            int: stream id
+
+        Notes:
+            It's not expected to configure a lot of incrementation options. Different traffic generator could have different limitations for these options.
+
+        Examples::
+
+            stream_id_1 = tg.set_stream(pack_ip, count=100, iface=iface)
+            stream_id_2 = tg.set_stream(pack_ip, continuous=True, inter=0.1, iface=iface)
+            stream_id_3 = tg.set_stream(pack_ip_udp, count=5, protocol_increment=(3, 5), iface=iface)
+            stream_id_4 = tg.set_stream(pack_ip_udp, count=18, sip_increment=(3, 3), dip_increment=(3, 3), iface=iface,
+                                        udf_dependancies={'sip_increment': 'dip_increment'})
+
         """
         tg, kwargs['iface'] = kwargs['iface']
         stream_id = self.tgs[tg].set_stream(*args, **kwargs)
@@ -208,15 +246,27 @@ class MultipleTG(PacketProcessor, GenericTG):
         return tg_stream_id
 
     def send_stream(self, stream_id, **kwargs):
-        """
-        @copydoc  testlib::tg_template::GenericTG::send_stream()
+        """Sends the stream created by 'set_stream' method.
+
+        Args:
+            stream_id(int):  ID of the stream to be send.
+
+        Returns:
+            float: timestamp.
+
         """
         tg, stream = stream_id
         self.tgs[tg].send_stream(stream, **kwargs)
 
     def start_streams(self, stream_list):
-        """
-        @copydoc  testlib::tg_template::GenericTG::start_streams()
+        """Enable and start streams from the list simultaneously.
+
+        Args:
+            stream_list(list[int]):  List of stream IDs.
+
+        Returns:
+            None
+
         """
         stream_map = self.get_tg_port_map(stream_list)
 
@@ -224,8 +274,14 @@ class MultipleTG(PacketProcessor, GenericTG):
             self.tgs[tg].start_streams(streams)
 
     def stop_streams(self, stream_list=None):
-        """
-        @copydoc  testlib::tg_template::GenericTG::stop_streams()
+        """ Disable streams from the list.
+
+        Args:
+            stream_list(list[int]):  Stream IDs to stop. In case stream_list is not set all running streams will be stopped.
+
+        Returns:
+            None
+
         """
         stream_map = self.get_tg_port_map(stream_list)
 
@@ -233,8 +289,23 @@ class MultipleTG(PacketProcessor, GenericTG):
             self.tgs[tg].stop_streams(streams)
 
     def start_sniff(self, ifaces, **kwargs):
-        """
-        @copydoc  testlib::tg_template::GenericTG::start_sniff()
+        """Starts sniffing on specified interfaces.
+
+        Args:
+            ifaces(list):  List of TG interfaces for capturing.
+            kwargs(dict):  Possible parameters to configure.
+
+        Returns:
+            None
+
+        Notes:
+            This method introduces additional 1.5 seconds timeout after capture enabling.
+            It's required by Ixia sniffer to wait until capturing is started.
+
+        Examples::
+
+            env.tg[1].start_sniff(['eth0', ], filter_layer='IP', src_filter='00:00:00:01:01:01', dst_filter='00:00:00:22:22:22')
+
         """
         iface_map = self.get_tg_port_map(ifaces)
 
@@ -242,8 +313,8 @@ class MultipleTG(PacketProcessor, GenericTG):
             self.tgs[tg].start_sniff(ports, **kwargs)
 
     def clear_statistics(self, sniff_port_list):
-        """
-        @brief  Clearing statistics on TG ports.
+        """Clearing statistics on TG ports.
+
         """
         iface_map = self.get_tg_port_map(sniff_port_list)
 
@@ -251,80 +322,100 @@ class MultipleTG(PacketProcessor, GenericTG):
             self.tgs[tg].clear_statistics(ports)
 
     def get_received_frames_count(self, iface):
-        """
-        @brief  Read statistics - framesReceived
+        """Read statistics - framesReceived.
+
         """
         return self.tgs[iface.tg].get_received_frames_count(iface.port)
 
     def get_filtered_frames_count(self, iface):
-        """
-        @brief  Read statistics - filtered frames received
+        """Read statistics - filtered frames received.
+
         """
         return self.tgs[iface.tg].get_filtered_frames_count(iface.port)
 
     def get_uds_3_frames_count(self, iface):
-        """
-        @brief  Read statistics - UDS3 - Capture Trigger (UDS3) -
-        count of non-filtered received packets (valid and invalid)
+        """Read statistics - UDS3 - Capture Trigger (UDS3) - count of non-filtered received packets (valid and invalid).
+
         """
         return self.tgs[iface.tg].get_uds_3_frames_count(iface.port)
 
     def clear_received_statistics(self, iface):
-        """
-        @brief  Clear statistics
+        """Clear statistics.
+
         """
         return self.tgs[iface.tg].clear_received_statistics(iface.port)
 
     def get_sent_frames_count(self, iface):
-        """
-        @brief  Read statistics - framesSent
+        """Read statistics - framesSent.
+
         """
         return self.tgs[iface.tg].get_sent_frames_count(iface.port)
 
     def get_port_txrate(self, iface):
-        """
-        @brief  Get port Tx rate
+        """Get port Tx rate.
+
         """
         return self.tgs[iface.tg].get_port_txrate(iface.port)
 
     def get_port_rxrate(self, iface):
-        """
-        @brief  Get port Rx rate
+        """Get port Rx rate.
+
         """
         return self.tgs[iface.tg].get_port_rxrate(iface.port)
 
     def get_port_qos_rxrate(self, iface, qos):
-        """
-        @brief  Get ports Rx rate for specific qos
+        """Get ports Rx rate for specific qos.
+
         """
         return self.tgs[iface.tg].get_port_qos_rxrate(iface.port, qos)
 
     def get_qos_frames_count(self, iface, prio):
-        """
-        @brief  Get QoS packets count
+        """Get QoS packets count.
+
         """
         return self.tgs[iface.tg].get_qos_frames_count(iface.port, prio)
 
     def set_qos_stat_type(self, iface, ptype):
-        """
-        @brief  Set QoS stats type
+        """Set QoS stats type.
+
         """
         return self.tgs[iface.tg].set_qos_stat_type(iface.port, ptype)
 
     def set_flow_control(self, iface, mode):
-        """
-        @brief  Set Flow Control
+        """Set Flow Control.
+
         """
         return self.tgs[iface.tg].set_flow_control(iface.port, mode)
 
     def get_os_mtu(self, iface=None):
-        """
-        @copydoc  testlib::tg_template::GenericTG::get_os_mtu()
+        """Get MTU value in host OS.
+
+        Args:
+            iface(str):  Interface for getting MTU in host OS
+
+        Returns:
+            int: Original MTU value
+
+        Examples::
+
+            env.tg[1].get_os_mtu(iface=ports[('tg1', 'sw1')][1])
+
         """
         return self.tgs[iface.tg].get_os_mtu(iface.port)
 
     def set_os_mtu(self, iface=None, mtu=None):
-        """
-        @copydoc  testlib::tg_template::GenericTG::set_os_mtu()
+        """Set MTU value in host OS.
+
+        Args:
+            iface(str):  Interface for changing MTU in host OS
+            mtu(int):  New MTU value
+
+        Returns:
+            int:  Original MTU value
+
+        Examples::
+
+            env.tg[1].set_os_mtu(iface=ports[('tg1', 'sw1')][1], mtu=1650)
+
         """
         return self.tgs[iface.tg].set_os_mtu(iface.port, mtu)

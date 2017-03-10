@@ -10,15 +10,23 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""``cluster_id_model.py``
+
+"""
+
 from testlib.tempest_clients.magnum.models import models
 
 
 class ClusterIdData(models.BaseModel):
-    """Data that encapsulates ClusterId attributes"""
+    """Data that encapsulates ClusterId attributes
+
+    """
     pass
 
 
 class ClusterIdEntity(models.EntityModel):
-    """Entity Model that represents a single instance of CertData"""
+    """Entity Model that represents a single instance of CertData
+
+    """
     ENTITY_NAME = 'clusterid'
     MODEL_TYPE = ClusterIdData

@@ -1,26 +1,28 @@
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``testpmd.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Class for testpmd operations`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Note:
+    Examples of testpmd usage in tests::
 
-@file testpmd.py
+        inst.ui.testpmd.start(end_options='--burst=64', cores='0x3', mem_channels=4, driver_dir='librte_pmd_e1000.so', socket_mem='1024,0', huge_unlink=True)
+        inst.ui.testpmd.exec_cmd('help')
+        inst.ui.testpmd.stop()
 
-@summary Class for testpmd operations
-@note
-Examples of testpmd usage in tests:
-inst.ui.testpmd.start(end_options='--burst=64', cores='0x3', mem_channels=4, driver_dir='librte_pmd_e1000.so', socket_mem='1024,0', huge_unlink=True)
-inst.ui.testpmd.exec_cmd('help')
-inst.ui.testpmd.stop()
 """
 
 import re
@@ -61,8 +63,8 @@ STANDALONE_ARGS = {'huge_unlink': '--huge-unlink',
 
 class TestPmd(object):
     def __init__(self, host):
-        """
-        @brief Initialize TestPmd class.
+        """Initialize TestPmd class.
+
         """
         super(TestPmd, self).__init__()
         self.host = host
@@ -73,18 +75,20 @@ class TestPmd(object):
         self.run_status = False
 
     def start(self, interactive_shell=True, end_options='', timeout=10, **kwargs):
-        """
-        @brief Start testpmd tool
-        @param  interactive_shell:  Interactive shell flag
-        @type  interactive_shell:  bool
-        @param  end_options:  Arguments to be passed after '--' in command line
-        @type  end_options:  str
-        @param  timeout:  Timeout
-        @type  timeout:  int
-        @param  kwargs:  Arguments to be passed for testpmd tool
-        @type  kwargs:  dict
-        @raise  AssertionError: in case unsupported arguments are passed
-        @return: None
+        """Start testpmd tool.
+
+        Args:
+            interactive_shell(bool):  Interactive shell flag
+            end_options(str):  Arguments to be passed after '--' in command line
+            timeout(int):  Timeout
+            kwargs(dict):  Arguments to be passed for testpmd tool
+
+        Raises:
+            AssertionError: in case unsupported arguments are passed
+
+        Returns:
+            None
+
         """
         assert all([par in ARGS_MAP or par in STANDALONE_ARGS for par in kwargs]), \
             "Unsupported arguments are passed into current method. Supported are: \n {}\n{}".format(ARGS_MAP.keys(),STANDALONE_ARGS.keys())
@@ -105,12 +109,17 @@ class TestPmd(object):
         self.run_status = True
 
     def stop(self, timeout=2):
-        """
-        @brief Stop testpmd tool
-        @param  timeout:  Timeout
-        @type  timeout:  int
-        @raise  CustomException:  in case testpmd is not started
-        @return: None
+        """Stop testpmd tool.
+
+        Args:
+            timeout(int):  Timeout
+
+        Raises:
+            CustomException:  in case testpmd is not started
+
+        Returns:
+            None
+
         """
         if self.run_status:
             self.host.ssh.prompt = self.ssh_prompt
@@ -123,13 +132,17 @@ class TestPmd(object):
             raise CustomException("Testpmd is not started. Nothing to stop")
 
     def exec_cmd(self, cmd, timeout=5):
-        """
-        @brief Execute command in interactive testpmd shell
-        @param  timeout:  Timeout
-        @type  timeout:  int
-        @raise  CustomException: in case testpmd is not started in interactive mode
-        @rtype:  str
-        @return:  Output of command execution
+        """Execute command in interactive testpmd shell.
+
+        Args:
+            timeout(int):  Timeout
+
+        Raises:
+            CustomException: in case testpmd is not started in interactive mode
+
+        Returns:
+            str:  Output of command execution
+
         """
         if self.interactive:
             data, _ = self.host.ssh.shell_command(cmd, raw_output=True, timeout=timeout, ret_code=False)

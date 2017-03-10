@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``afs.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`AFS-specific functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  afs.py
-
-@summary  AFS-specific functionality.
 """
 
 import re
@@ -31,12 +30,12 @@ from .custom_exceptions import AFSException
 # Decorators to set CLI privilege mode and return TelnetCMD object
 
 def afs_normal_mode(function):
-    """
-    @brief  Decorator: get afs_instance for class methods
+    """Decorator: get afs_instance for class methods.
+
     """
     def wrapper(*args, **kwargs):
-        """
-        @brief  Get afs_instance for class methods
+        """Get afs_instance for class methods.
+
         """
         afs_instance = args[0].connection_pool.get_connection()
         set_vty_timeout(afs_instance, args[0].config_prompt)
@@ -54,12 +53,12 @@ def afs_normal_mode(function):
 
 
 def afs_conf_mode(function):
-    """
-    @brief  Decorator: get afs_instance with enabled config mode for class methods
+    """Decorator: get afs_instance with enabled config mode for class methods.
+
     """
     def wrapper(*args, **kwargs):
-        """
-        @brief  Get afs_instance with enabled config mode for class methods
+        """Get afs_instance with enabled config mode for class methods.
+
         """
         afs_instance = args[0].connection_pool.get_connection()
         set_vty_timeout(afs_instance, args[0].config_prompt)
@@ -79,14 +78,16 @@ def afs_conf_mode(function):
 
 
 def set_vty_timeout(afs_instance, config_prompt):
-    """
-    @brief  Set AFS vty timeout.
-    @param  afs_instance:  Instance of AFS device
-    @type  afs_instance:  CLIGenericMixin
-    @param  config_prompt:  Prompt message
-    @type  config_prompt:  str
-    @note  By default AFS has timeout = 1800 seconds.
-           Such long timeout could cause excided number of allowed connection in case any error.
+    """Set AFS vty timeout.
+
+    Args:
+        afs_instance(CLIGenericMixin):  Instance of AFS device
+        config_prompt(str):  Prompt message
+
+    Notes:
+        By default AFS has timeout = 1800 seconds.
+        Such long timeout could cause excided number of allowed connection in case any error.
+
     """
     # Switch# config
     # Configuring from memory or network is not supported
@@ -102,17 +103,19 @@ def set_vty_timeout(afs_instance, config_prompt):
 
 
 def get_unused_values(used_values, min_value, max_value):
-    """
-    @brief  Return two first unused values from range min_value - max_value
-    @param  used_values:  List of used integers
-    @type  used_values:  list[int]
-    @param  min_value:  Min value
-    @type  min_value:  int
-    @param  max_value:  Max value
-    @type  max_value:  int
-    @raise  AFSException:  not enough free values
-    @rtype:  list[int]
-    @return:  Two first unused values from range min_value - max_value
+    """Return two first unused values from range min_value - max_value.
+
+    Args:
+        used_values(list[int]):  List of used integers
+        min_value(int):  Min value
+        max_value(int):  Max value
+
+    Raises:
+        AFSException:  not enough free values
+
+    Returns:
+        list[int]:  Two first unused values from range min_value - max_value
+
     """
     used_set = set(used_values)
     free_set = set(range(min_value, max_value + 1))
@@ -127,17 +130,18 @@ def get_unused_values(used_values, min_value, max_value):
 # TODO: Add xconnect_array method to do fast connection of many ports
 # TODO: Add port_shutdown for emulating operState Down
 class AFS(object):
-    """
-    @description  Basic interact with AFS
+    """Basic interact with AFS.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config):
-        """
-        @brief Initialize AFS class
-        @param  config:  Configuration
-        @type  config:  dict
+        """Initialize AFS class.
+
+        Args:
+            config(dict):  Configuration
+
         """
 
         # self.class_logger = loggers.ClassLogger()
@@ -176,21 +180,25 @@ class AFS(object):
         self.max_map_number = 4094
 
     def clear_connection_pool(self):
-        """
-        @brief  Close all connections from connection pool.
+        """Close all connections from connection pool.
+
         """
         self.class_logger.debug("Destroy all AFS telnet connections.")
         self.connection_pool.disconnect_all()
 
     @afs_normal_mode
     def get_run_config(self, afs_instance=None):
-        """
-        @brief  Return running config and write it to self.running_config
-        @param  afs_instance:  Instance of AFS device
-        @type  afs_instance:  CLIGenericMixin
-        @raise  AFSException:  error in getting AFS running config
-        @rtype:  str
-        @return:  Running config
+        """Return running config and write it to self.running_config.
+
+        Args:
+            afs_instance(CLIGenericMixin):  Instance of AFS device
+
+        Raises:
+            AFSException:  error in getting AFS running config
+
+        Returns:
+            str:  Running config
+
         """
         running_config, err = afs_instance.shell_command("show running-config", ret_code=False)
         if err:
@@ -200,13 +208,17 @@ class AFS(object):
 
     @afs_normal_mode
     def get_sys_info(self, afs_instance=None):
-        """
-        @brief  Return AFS system information.
-        @param  afs_instance:  Instance of AFS device
-        @type  afs_instance:  CLIGenericMixin
-        @raise  AFSException:  error in getting AFS system information
-        @rtype:  str
-        @return:  AFS system information
+        """Return AFS system information.
+
+        Args:
+            afs_instance(CLIGenericMixin):  Instance of AFS device
+
+        Raises:
+            AFSException:  error in getting AFS system information
+
+        Returns:
+            str:  AFS system information
+
         """
         sysinfo, err = afs_instance.shell_command("show system information", ret_code=False)
         if err:
@@ -214,11 +226,14 @@ class AFS(object):
         return sysinfo
 
     def _get_maps_id(self):
-        """
-        @brief  Return list of map's ids founded in running config
-        @raise  AFSException:  AFS running config is not available
-        @rtype:  list
-        @return:  list of map's ids founded in running config
+        """Return list of map's ids founded in running config.
+
+        Raises:
+            AFSException:  AFS running config is not available
+
+        Returns:
+            list:  list of map's ids founded in running config
+
         """
         if self.running_config is None:
             raise AFSException("No running config!")
@@ -232,13 +247,17 @@ class AFS(object):
 
     @afs_normal_mode
     def _get_port_map(self, afs_instance=None):
-        """
-        @brief  Return list of VLAN ids and port to VLAN map
-        @param  afs_instance:  Instance of AFS device
-        @type  afs_instance:  CLIGenericMixin
-        @raise  AFSException:  error on getting AFS MAP information
-        @rtype:  tuple
-        @return:  tuple set(['1', '3', '2', '4']), {'1': set(['2', '4']), '17': set(['3'])}
+        """Return list of VLAN ids and port to VLAN map.
+
+        Args:
+            afs_instance(CLIGenericMixin):  Instance of AFS device
+
+        Raises:
+            AFSException:  error on getting AFS MAP information
+
+        Returns:
+            tuple:  tuple set(['1', '3', '2', '4']), {'1': set(['2', '4']), '17': set(['3'])}
+
         """
         output, err = afs_instance.shell_command("show configuration map all", ret_code=False)
         if err:
@@ -275,17 +294,17 @@ class AFS(object):
 
     @afs_conf_mode
     def _add_map(self, afs_instance=None, mid=None, pid1=None, pid2=None):
-        """
-        @brief  Add port configuration map
-        @param  afs_instance:  Instance of AFS device
-        @type  afs_instance:  CLIGenericMixin
-        @param  mid:  Configuration map
-        @type  mid:  str
-        @param  pid1:  Port 1 ID
-        @type  pid1:  str
-        @param  pid2:  Port 2 ID
-        @type  pid2:  str
-        @note  map is monodirectional pid1 -> pid2
+        """Add port configuration map.
+
+        Args:
+            afs_instance(CLIGenericMixin):  Instance of AFS device
+            mid(str):  Configuration map
+            pid1(str):  Port 1 ID
+            pid2(str):  Port 2 ID
+
+        Notes:
+            Map is monodirectional pid1 -> pid2
+
         """
         # Switch(config)# configuration map 1
         # Switch(config-map-1)# input-ports extreme-ethernet 0/6 output-ports extreme-ethernet 0/25
@@ -299,23 +318,23 @@ class AFS(object):
 
     @afs_conf_mode
     def _del_map(self, afs_instance=None, mid=None):
-        """
-        @brief  Delete configuration map
-        @param  afs_instance:  Instance of AFS device
-        @type  afs_instance:  CLIGenericMixin
-        @param  mid:  Configuration map
-        @type  mid:  str
+        """Delete configuration map.
+
+        Args:
+            afs_instance(CLIGenericMixin):  Instance of AFS device
+            mid(str):  Configuration map
+
         """
         # Switch(config)# no configuration map 1
         afs_instance.shell_command('no configuration map %s' % mid, ret_code=False)
 
     def _del_port_config(self, port, port_map=None):
-        """
-        @brief  Delete maps mapped to port
-        @param  port:  Port ID
-        @type  port:  int
-        @param  port_map:  Port map
-        @type  port_map:  dict
+        """Delete maps mapped to port.
+
+        Args:
+            port(int):  Port ID
+            port_map(dict):  Port map
+
         """
         # Delete all maps mapped to port.
         if port in port_map:
@@ -323,13 +342,17 @@ class AFS(object):
                 self._del_map(mid=mid)
 
     def _get_port(self, connection_element):
-        """
-        @brief  Get AFS port number from portmap.
-        @param  connection_element:  Link information
-        @type  connection_element:  list
-        @raise  AFSException:  invalid port number in connection element
-        @rtype:  int
-        @return:  Port number
+        """Get AFS port number from portmap.
+
+        Args:
+            connection_element(list):  Link information
+
+        Raises:
+            AFSException:  invalid port number in connection element
+
+        Returns:
+            int:  Port number
+
         """
         port = None
         for element in self.portmap:
@@ -341,12 +364,14 @@ class AFS(object):
         return port
 
     def _get_ports_from_config(self, connection=None):
-        """
-        @brief  Return AFS port number from given connection.
-        @param  connection:  Link information
-        @type  connection:  list
-        @rtype:  tuple
-        @return:  Port numbers
+        """Return AFS port number from given connection.
+
+        Args:
+            connection(list):  Link information
+
+        Returns:
+            tuple: Port numbers
+
         """
         port1 = self._get_port(connection[2:])
         port2 = self._get_port(connection[:2])
@@ -354,12 +379,12 @@ class AFS(object):
 
     @afs_conf_mode
     def _set_port_disabled(self, afs_instance=None, pid=None):
-        """
-        @brief  Shutdown port.
-        @param  afs_instance:  Instance of AFS device
-        @type  afs_instance:  CLIGenericMixin
-        @param  pid:  Port ID
-        @type  pid:  int
+        """Shutdown port.
+
+        Args:
+            afs_instance(CLIGenericMixin):  Instance of AFS device
+            pid(int):  Port ID
+
         """
         # Switch(config)# interface extreme-ethernet 0/18
         # Switch(config-if)# shutdown
@@ -370,12 +395,12 @@ class AFS(object):
 
     @afs_conf_mode
     def _set_port_enabled(self, afs_instance=None, pid=None):
-        """
-        @brief  Turn On port.
-        @param  afs_instance:  Instance of AFS device
-        @type  afs_instance:  CLIGenericMixin
-        @param  pid:  Port ID
-        @type  pid:  int
+        """Turn On port.
+
+        Args:
+            afs_instance(CLIGenericMixin):  Instance of AFS device
+            pid(int):  Port ID
+
         """
         # Switch(config)# interface extreme-ethernet 0/18
         # Switch(config-if)# no shutdown
@@ -386,12 +411,12 @@ class AFS(object):
 
     @afs_conf_mode
     def _set_port_loopback(self, afs_instance=None, pid=None):
-        """
-        @brief  Set loopback on port.
-        @param  afs_instance:  Instance of AFS device
-        @type  afs_instance:  CLIGenericMixin
-        @param  pid:  Port ID
-        @type  pid:  int
+        """Set loopback on port.
+
+        Args:
+            afs_instance(CLIGenericMixin):  Instance of AFS device
+            pid(int):  Port ID
+
         """
         # Switch(config)# interface extreme-ethernet 0/18
         # Switch(config-if)# loopback local
@@ -401,10 +426,11 @@ class AFS(object):
         afs_instance.exit_mode("exit")
 
     def xconnect(self, connection=None):
-        """
-        @brief  Make cross connection device <-> device
-        @param  connection:  Link info - list [dev1Id, dev1portId, dev2Id, dev2portId] ([0, 1, 1, 24])
-        @type  connection:  list[int]
+        """Make cross connection device <-> device.
+
+        Args:
+            connection(list[int]):  Link info - list [dev1Id, dev1portId, dev2Id, dev2portId] ([0, 1, 1, 24])
+
         """
         self.class_logger.debug("Make connection: %s" % (connection, ))
         map_list, port_map = self._get_port_map()
@@ -422,14 +448,15 @@ class AFS(object):
 
     # WORKAROUND BEGIN: To avoid situations when AFS port in down state, but actually the link is good.
     def reenable_port(self, port, dev_id):
-        """
-        @brief  Set Down and than Up status for AFS port connected to given port and device.
-        @param  port:  Port ID
-        @type  port:  int
-        @param  dev_id:  Device ID
-        @type  dev_id:  int
-        @rtype:  bool
-        @return:  True if workaround performed and False if skipped.
+        """Set Down and than Up status for AFS port connected to given port and device.
+
+        Args:
+            port(int):  Port ID
+            dev_id(int):  Device ID
+
+        Returns:
+            bool:  True if workaround performed and False if skipped.
+
         """
         try:
             afs_port = self._get_port([dev_id, port])
@@ -446,10 +473,11 @@ class AFS(object):
         # WORKAROUND END
 
     def xdisconnect(self, connection=None):
-        """
-        @brief  Destroy cross connection device <-> device
-        @param  connection:  Link info - list [dev1Id, dev1portId, dev2Id, dev2portId] ([0, 1, 1, 24])
-        @type  connection:  list[int]
+        """Destroy cross connection device <-> device.
+
+        Args:
+            connection(list[int]):  Link info - list [dev1Id, dev1portId, dev2Id, dev2portId] ([0, 1, 1, 24])
+
         """
         _, port_map = self._get_port_map()
         # Get AFS ports numbers
@@ -459,8 +487,8 @@ class AFS(object):
         self._del_port_config(ports[1], port_map)
 
     def __del__(self):
-        """
-        @brief  Disconnect all telnet connections to AFS on destroy
+        """Disconnect all telnet connections to AFS on destroy.
+
         """
         self.class_logger.debug("Destroy AFS object.")
         self.clear_connection_pool()

@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``rrdtool_graph.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Generate commands for rrdtool graph creation`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  rrdtool_graph.py
-
-@summary  Generate commands for rrdtool graph creation
 """
 
 import os
@@ -318,8 +318,8 @@ XGRID = [
 
 
 class GraphHrule(object):
-    """
-    @brief  Graph Hrule representation HRULE:value#color
+    """Graph Hrule representation HRULE:value#color.
+
     """
 
     def __init__(self, value, color):
@@ -331,22 +331,19 @@ class GraphHrule(object):
 
 
 def _graph(graph_vars, start, end, units_length=8, destination='/tmp/rrd.png', **kwargs):
-    """
-    @brief  Generate rrdtool command for graph creation
-    @param graph_vars:  graph calculations and data definitions
-    @type  graph_vars:  list
-    @param start:  graph's start time in seconds
-    @type  start:  int
-    @param end:  graph's end time in seconds
-    @type  end:  int
-    @param units_length:  length of y-axis labels
-    @type  units_length:  int
-    @param destination:  destination PNG file
-    @type  destination:  str
-    @param kwargs:  additional graph configuration
-    @type  kwargs:  dict
-    @rtype:  str
-    @return:  rrdtool graph command
+    """Generate rrdtool command for graph creation.
+
+    Args:
+        graph_vars(list):  graph calculations and data definitions
+        start(int):  graph's start time in seconds
+        end(int):  graph's end time in seconds
+        units_length(int):  length of y-axis labels
+        destination(str):  destination PNG file
+        kwargs(dict):  additional graph configuration
+
+    Returns:
+        str:  rrdtool graph command
+
     """
     # Set graph's background colors
     color = ColorAttributes(lefttop_border='#0000', rightbottom_border='#0000',
@@ -375,20 +372,18 @@ def _graph(graph_vars, start, end, units_length=8, destination='/tmp/rrd.png', *
 
 
 def get_graph_command(plugin_dir, start, end, gtype='CPU', destination='/tmp/rrd.png'):
-    """
-    @brief  Generate rrdtool command for graph creation
-    @param plugin_dir:  folder with rrd files
-    @type  plugin_dir:  str
-    @param start:  graph's start time in seconds
-    @type  start:  int
-    @param end:  graph's end time in seconds
-    @type  end:  int
-    @param gtype:  rrd info type
-    @type  gtype:  str
-    @param destination:  destination PNG file
-    @type  destination:  str
-    @rtype:  str
-    @return:  rrdtool graph command
+    """Generate rrdtool command for graph creation.
+
+    Args:
+        plugin_dir(str):  folder with rrd files
+        start(int):  graph's start time in seconds
+        end(int):  graph's end time in seconds
+        gtype(str):  rrd info type
+        destination(str):  destination PNG file
+
+    Returns:
+        str:  rrdtool graph command
+
     """
     # Generate title for graph
     title = '"{0} {1}"'.format(*plugin_dir.split(os.path.sep)[-2:])
@@ -459,18 +454,17 @@ RRDTOOL_FETCH = "rrdtool fetch {0} {1} --start {2} --end {3}"
 
 
 def get_fetch_commands(plugin_dir, start, end, gtype='CPU'):
-    """
-    @brief  Generate rrdtool fetch commands for RRD files from folder
-    @param plugin_dir:  folder with rrd files
-    @type  plugin_dir:  str
-    @param start:  graph's start time in seconds
-    @type  start:  int
-    @param end:  graph's end time in seconds
-    @type  end:  int
-    @param gtype:  rrd info type
-    @type  gtype:  str
-    @rtype:  str
-    @return:  rrdtool fetch command
+    """Generate rrdtool fetch commands for RRD files from folder.
+
+    Args:
+        plugin_dir(str):  folder with rrd files
+        start(int):  graph's start time in seconds
+        end(int):  graph's end time in seconds
+        gtype(str):  rrd info type
+
+    Returns:
+        str:  rrdtool fetch command
+
     """
     commands = []
     for _rrdfile in FILES[gtype]:

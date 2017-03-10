@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2017, Intel Corporation.
+# Copyright (c) 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``dev_rpypacker.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Remote Pypacker traffic generators specific functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  dev_rpypacker.py
-
-@summary  Remote Pypacker traffic generators specific functionality.
 """
 import os
 import time
@@ -42,36 +42,38 @@ from .tg_helpers import TGHelperMixin
 
 
 class RemotePypackerTG(PacketProcessor, TGHelperMixin, GenericEntry):
-    """
-    @description  Class for launching pypacker on remote server
+    """Class for launching pypacker on remote server.
 
-    @par  Configuration examples:
+    Configuration examples:
 
-    @par  Remote Pypacker Example (pypacker instance on remote host):
-    @code{.json}
-    {
-     "name": "RemotePypacker"
-     "entry_type": "tg",
-     "instance_type": "rpypacker",
-     "id": "TG1",
-     "ports": ["eth1", "eth2"],
-     "ipaddr": "1.1.1.1",
-     "ssh_user": "user",
-     "ssh_pass": "PassworD"
-    }
-    @endcode
-    @par  Where:
-    \b entry_type and \b instance_type are mandatory values and cannot be changed for current device type.
-    \n\b id - int or str uniq device ID (mandatory)
-    \n\b name - User defined device name (optional)
-    \n\b ports or \b port_list - short or long ports configuration (Only one of them has to be used)
-    \n\b ipaddr - remote host IP address (mandatory)
-    \n\b ssh_user - remote host login user (mandatory)
-    \n\b ssh_pass - remote host login password (mandatory)
-    \n\b ssh_port - remote host SSH port (optional. 22 is default)
-    \n\b src_path - path to folder with pypacker_server.py and associated files (optional. Current module folder will be used by default)
+    Remote Pypacker Example (pypacker instance on remote host)::
 
-    @note  You can safely add additional custom attributes. Only attributes described below will be analysed.
+        {
+         "name": "RemotePypacker"
+         "entry_type": "tg",
+         "instance_type": "rpypacker",
+         "id": "TG1",
+         "ports": ["eth1", "eth2"],
+         "ipaddr": "1.1.1.1",
+         "ssh_user": "user",
+         "ssh_pass": "PassworD"
+        }
+
+    Where::
+
+        \b entry_type and \b instance_type are mandatory values and cannot be changed for current device type.
+        \n\b id - int or str uniq device ID (mandatory)
+        \n\b name - User defined device name (optional)
+        \n\b ports or \b port_list - short or long ports configuration (Only one of them has to be used)
+        \n\b ipaddr - remote host IP address (mandatory)
+        \n\b ssh_user - remote host login user (mandatory)
+        \n\b ssh_pass - remote host login password (mandatory)
+        \n\b ssh_port - remote host SSH port (optional. 22 is default)
+        \n\b src_path - path to folder with pypacker_server.py and associated files (optional. Current module folder will be used by default)
+
+    Notes:
+        You can safely add additional custom attributes. Only attributes described below will be analysed.
+
     """
 
     class_logger = loggers.ClassLogger()
@@ -80,8 +82,8 @@ class RemotePypackerTG(PacketProcessor, TGHelperMixin, GenericEntry):
     RUN_SERVER = "cd /tmp/; python3 -m {0} --loglevel=DEBUG --logdir={1} --ppfile={2}"
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize RemotePypackerTG class
+        """Initialize RemotePypackerTG class.
+
         """
         super().__init__(config, opts)
         self.config = config
@@ -107,15 +109,15 @@ class RemotePypackerTG(PacketProcessor, TGHelperMixin, GenericEntry):
         self.status = None
 
     def __getattr__(self, attr):
-        """
-        @brief  Redirect all unknown calls to remote pypacker server.
+        """Redirect all unknown calls to remote pypacker server.
+
         """
         if attr not in self.__dict__:
             return lambda *args, **kwargs: self._send_request(attr, *args, **kwargs)
 
     def _send_request(self, method, *args, **kwargs):
-        """
-        @brief  Send xmlrpc request to remote pypacker server.
+        """Send xmlrpc request to remote pypacker server.
+
         """
         try:
             return getattr(self.xmlproxy, method)(pickle.dumps(args), pickle.dumps(kwargs))
@@ -131,17 +133,20 @@ class RemotePypackerTG(PacketProcessor, TGHelperMixin, GenericEntry):
                 raise
 
     def probe_port(self):
-        """
-        @brief  Check if server listen on port.
+        """Check if server listen on port.
+
         """
         return probe_port(self.ipaddr, self.ssh_port, self.class_logger)
 
     def start(self, wait_on=True):
-        """
-        @brief  Copy files to remote host and start pypacker server.
-        @param  wait_on:  Wait for device is loaded
-        @type  wait_on:  bool
-        @raise  PypackerException:  error on start
+        """Copy files to remote host and start pypacker server.
+
+        Args:
+            wait_on(bool):  Wait for device is loaded
+
+        Raises:
+            PypackerException:  error on start
+
         """
         if not self.opts.get_only:
             self.class_logger.info("Wait for RPypacker host to become Up during %s seconds", self.reboot_latency)
@@ -202,8 +207,8 @@ class RemotePypackerTG(PacketProcessor, TGHelperMixin, GenericEntry):
         self.status = True
 
     def stop(self):
-        """
-        @brief  Shutdown remote pypacker server and cleanup directory.
+        """Shutdown remote pypacker server and cleanup directory.
+
         """
         # Cleanup platform first.
         self._lhost.cleanup()
@@ -231,22 +236,25 @@ class RemotePypackerTG(PacketProcessor, TGHelperMixin, GenericEntry):
         self.status = False
 
     def create(self):
-        """
-        @brief  Start RPypacker or get running one.
+        """Start RPypacker or get running one.
 
-        @note  This is mandatory method for all environment classes.
-               Also self.opts.get_only attribute affects logic of this method.
-               get_only is set in py.test command line options (read py.test --help for more information).
+        Notes:
+
+            This is mandatory method for all environment classes.
+            Also self.opts.get_only attribute affects logic of this method.
+            get_only is set in py.test command line options (read py.test --help for more information).
+
         """
         return self.start()
 
     def destroy(self):
-        """
-        @brief  Stop or release RPypacker.
+        """Stop or release RPypacker.
 
-        @note  This is mandatory method for all environment classes.
-               Also self.opts.leave_on and get_only  attributes affect logic of this method.
-               leave_on and get_only are set in py.test command line options (read py.test --help for more information).
+        Notes:
+            This is mandatory method for all environment classes.
+            Also self.opts.leave_on and get_only  attributes affect logic of this method.
+            leave_on and get_only are set in py.test command line options (read py.test --help for more information).
+
         """
         if not self.status:
             self.class_logger.info("Node id:%s(%s) status is Off. Skip destroying.",
@@ -257,29 +265,29 @@ class RemotePypackerTG(PacketProcessor, TGHelperMixin, GenericEntry):
         self.sanitize()
 
     def cleanup(self, *args, **kwargs):
-        """
-        @brief  Cleanup host.
+        """Cleanup host.
+
         """
         self._lhost.cleanup()
         return self._send_request("cleanup", *args, **kwargs)
 
     def check(self):
-        """
-        @brief  Check host.
+        """Check host.
+
         """
         self._lhost.check()
         if self.xmlproxy is not None:
             self.xmlproxy.ping()
 
     def sanitize(self):
-        """
-        @brief  Perform any necessary operations to leave environment in normal state.
+        """Perform any necessary operations to leave environment in normal state.
+
         """
         pass
 
     def copy_folder(self, src, dst):
-        """
-        @brief  Copy folder and subfolders to remote host.
+        """Copy folder and subfolders to remote host.
+
         """
 
         src_list, dst_list = [], []
@@ -293,8 +301,8 @@ class RemotePypackerTG(PacketProcessor, TGHelperMixin, GenericEntry):
         self.ssh.put_file(src_list, dst_list)
 
     def get_logs(self):
-        """
-        @brief  Get rpypacker runtime logs from remote host to local logdir.
+        """Get rpypacker runtime logs from remote host to local logdir.
+
         """
         # Don't get logs in case logdir isn't set
         if not loggers.LOG_DIR:
@@ -315,8 +323,8 @@ class RemotePypackerTG(PacketProcessor, TGHelperMixin, GenericEntry):
         self.ssh.get_file(src_list, dst_list)
 
     def stop_sniff(self, *args, **kwargs):
-        """
-        @brief  Convert string packets back to Pypacker objects.
+        """Convert string packets back to Pypacker objects.
+
         """
         data_str = pickle.loads(self.xmlproxy.stop_sniff(args, kwargs).data)
         data = defaultdict(list)
@@ -329,90 +337,107 @@ class RemotePypackerTG(PacketProcessor, TGHelperMixin, GenericEntry):
         return data
 
     def connect_port(self, iface):
-        """
-        @copydoc  testlib::tg_template::GenericTG::connect_port()
+        """Simulate port link connecting (set it to admin up etc).
+
+        Args:
+            iface(str):  Interface to connect.
+
+        Raises:
+            NotImplementedError:  not implemented
+
+        Returns:
+            None or raise and exception.
+
         """
         self._lhost.ifconfig("up", [iface])
 
     def disconnect_port(self, iface):
-        """
-        @copydoc  testlib::tg_template::GenericTG::disconnect_port()
+        """Simulate port link disconnecting (set it to admin down etc).
+
+        Args:
+            iface(str):  Interface to disconnect.
+
+        Raises:
+            NotImplementedError:  not implemented
+
+        Returns:
+            None or raise and exception.
+
         """
         self._lhost.ifconfig("down", [iface])
 
     def get_port_txrate(self, iface):
-        """
-        @brief  Get port Tx rate
+        """Get port Tx rate.
+
         """
         pytest.skip("Method is not supported by Pypacker TG")
 
     def get_port_rxrate(self, iface):
-        """
-        @brief  Get port Rx rate
+        """Get port Rx rate.
+
         """
         pytest.skip("Method is not supported by Pypacker TG")
 
     def get_port_qos_rxrate(self, iface, qos):
-        """
-        @brief  Get ports Rx rate for specific qos
+        """Get ports Rx rate for specific qos.
+
         """
         pytest.skip("Method is not supported by Pypacker TG")
 
     def get_qos_frames_count(self, iface, prio):
-        """
-        @brief  Get QoS packets count
+        """Get QoS packets count.
+
         """
         pytest.skip("Method is not supported by Pypacker TG")
 
     def set_qos_stat_type(self, iface, ptype):
-        """
-        @brief  Set QoS stats type
+        """Set QoS stats type.
+
         """
         pytest.skip("Method is not supported by Pypacker TG")
 
     def set_flow_control(self, iface, mode):
-        """
-        @brief  Set Flow Control
+        """Set Flow Control.
         """
         pytest.skip("Method is not supported by Pypacker TG")
 
 
 class RemotePypackerMultipleTG(PacketProcessor, GenericEntry):
-    """
-    @description  Class for launching pypacker on remote servers or inside Linux network namespace
+    """Class for launching pypacker on remote servers or inside Linux network namespace.
 
-    @par  Configuration examples:
+    Configuration examples:
 
-    @par  Remote Pypacker Example (pypacker instance on remote host):
-    @code{.json}
-    {
-     "name": "RemotePypackerMultiHost"
-     "entry_type": "tg",
-     "instance_type": "rpypacker_multiple",
-     "id": "TG1",
-     "related_hosts": ["TG2", "TG3"]
-     "ports": ["TG2 eth1", "TG3 eth2"]
-    }
-    @endcode
-    @par  Where:
-    \b entry_type and \b instance_type are mandatory values and cannot be changed
-    for current device type.
-    \n\b id - int or str unique device ID (mandatory)
-    \n\b related_hosts - IDs of Remote hosts where RPypacker should be started
-    \n\b name - User defined device name (optional)
-    \n\b ports or \b port_list - short or long ports configuration
-    (Only one of them has to be used)
-    @endcode
+        Remote Pypacker Example (pypacker instance on remote host)::
 
-    @note  You can safely add additional custom attributes.
-    Only attributes described below will be analyzed.
+            {
+             "name": "RemotePypackerMultiHost"
+             "entry_type": "tg",
+             "instance_type": "rpypacker_multiple",
+             "id": "TG1",
+             "related_hosts": ["TG2", "TG3"]
+             "ports": ["TG2 eth1", "TG3 eth2"]
+            }
+
+        Where::
+
+            \b entry_type and \b instance_type are mandatory values and cannot be changed
+            for current device type.
+            \n\b id - int or str unique device ID (mandatory)
+            \n\b related_hosts - IDs of Remote hosts where RPypacker should be started
+            \n\b name - User defined device name (optional)
+            \n\b ports or \b port_list - short or long ports configuration
+            (Only one of them has to be used)
+
+    Notes:
+        You can safely add additional custom attributes. Only attributes described below will be analyzed.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize RemotePypackerMultiHostTG class
+        """Initialize RemotePypackerMultiHostTG class.
+
         """
         super().__init__(config, opts)
         self.config = config
@@ -436,23 +461,27 @@ class RemotePypackerMultipleTG(PacketProcessor, GenericEntry):
 
     @staticmethod
     def get_host_port(iface):
-        """
-        @brief  Return host name and port name based on iface name
-        @param iface: interface name in format 'host_name port_name'
-        @type  iface:  str
-        @rtype:  tuple
-        @return:  host name, port name
+        """Return host name and port name based on iface name.
+
+        Args:
+            iface(str): interface name in format 'host_name port_name'
+
+        Returns:
+            tuple:  host name, port name
+
         """
         host, port = iface.split(' ', 1)
         return host, port
 
     def get_host_port_map(self, ifaces):
-        """
-        @brief  Return ports related to specific host
-        @param ifaces: list of interface names in format 'host_name port_name'
-        @type  ifaces:  list(str)
-        @rtype:  dict
-        @return:  dictionary in format {'host name': [port names]}
+        """Return ports related to specific host.
+
+        Args:
+            ifaces(list(str)): list of interface names in format 'host_name port_name'
+
+        Returns:
+            dict:  dictionary in format {'host name': [port names]}
+
         """
         iface_map = defaultdict(list)
         for iface in ifaces:
@@ -461,68 +490,70 @@ class RemotePypackerMultipleTG(PacketProcessor, GenericEntry):
         return iface_map
 
     def start(self, wait_on=True):
-        """
-        @brief  Start hosts.
+        """Start hosts.
+
         """
         for rhost in self.hosts.values():
             rhost.start()
         self.status = True
 
     def stop(self):
-        """
-        @brief  Shutdown remote pypacker server and cleanup directory.
+        """Shutdown remote pypacker server and cleanup directory.
+
         """
         for rhost in self.hosts.values():
             rhost.stop()
 
     def create(self):
-        """
-        @brief  Start RPypacker or get running one.
+        """Start RPypacker or get running one.
 
-        @note  This is mandatory method for all environment classes.
-               Also self.opts.get_only attribute affects logic of this method.
-               get_only is set in py.test command line options (read py.test --help for more information).
+        Notes:
+            This is mandatory method for all environment classes.
+            Also self.opts.get_only attribute affects logic of this method.
+            get_only is set in py.test command line options (read py.test --help for more information).
+
         """
         for rhost in self.hosts.values():
             rhost.create()
 
     def destroy(self):
-        """
-        @brief  Stop or release RPypacker.
+        """Stop or release RPypacker.
 
-        @note  This is mandatory method for all environment classes.
-               Also self.opts.leave_on and get_only  attributes affect logic of this method.
-               leave_on and get_only are set in py.test command line options (read py.test --help for more information).
+        Notes:
+            This is mandatory method for all environment classes.
+            Also self.opts.leave_on and get_only  attributes affect logic of this method.
+            leave_on and get_only are set in py.test command line options (read py.test --help for more information).
+
         """
         for rhost in self.hosts.values():
             rhost.destroy()
 
     def cleanup(self):
-        """
-        @brief  Cleanup host.
+        """Cleanup host.
+
         """
         self.streams = []
         for rhost in self.hosts.values():
             rhost.cleanup()
 
     def check(self):
-        """
-        @brief  Check host.
+        """Check host.
+
         """
         for rhost in self.hosts.values():
             rhost.check()
 
     def sanitize(self):
-        """
-        @brief  Perform any necessary operations to leave environment in normal state.
+        """Perform any necessary operations to leave environment in normal state.
+
         """
         self.streams = []
         for rhost in self.hosts.values():
             rhost.sanitize()
 
     def stop_sniff(self, *args, **kwargs):
-        """
-        @brief  Convert string packets back to pypacker objects.
+        """Convert string packets back to pypacker objects.
+
         """
         iface_map = self.get_host_port_map(*args)
         data = defaultdict(list)
@@ -534,30 +565,106 @@ class RemotePypackerMultipleTG(PacketProcessor, GenericEntry):
         return data
 
     def connect_port(self, iface):
-        """
-        @copydoc  testlib::tg_template::GenericTG::connect_port()
+        """Simulate port link connecting (set it to admin up etc).
+
+        Args:
+            iface(str):  Interface to connect.
+
+        Raises:
+            NotImplementedError:  not implemented
+
+        Returns:
+            None or raise and exception.
+
         """
         host, port = self.get_host_port(iface)
         self.hosts[host].connect_port(port)
 
     def disconnect_port(self, iface):
-        """
-        @copydoc  testlib::tg_template::GenericTG::disconnect_port()
+        """Simulate port link disconnecting (set it to admin down etc).
+
+        Args:
+            iface(str):  Interface to disconnect.
+
+        Raises:
+            NotImplementedError:  not implemented
+
+        Returns:
+            None or raise and exception.
+
         """
         host, port = self.get_host_port(iface)
         self.hosts[host].disconnect_port(port)
 
     def clear_streams(self):
-        """
-        @brief  Stop and remove all streams
+        """Stop and remove all streams.
+
         """
         self.streams = []
         for host in self.hosts.values():
             host.clear_streams()
 
     def set_stream(self, *args, **kwargs):
-        """
-        @copydoc  testlib::tg_template::GenericTG::set_stream()
+        """Set traffic stream with specified parameters on specified TG port.
+
+        Args:
+            packet_def(tuple(dict{dict})):  Packet definition. Tuple of dictionaries of dictionaries in format:
+                                            ({layerX: {field1: value, field2: value}, {layerY: {field1:value, fieldN: value}})
+            count(int):  How many packets to send in a stream.
+            inter(int):  Interval between sending each packet.
+            rate(int):  Interface rate in percents.
+            continuous(bool):  Should stream be sent continuously or not. Continuous streams have to be started using start_streams method.
+            iface(str, tuple):  Interface to use for packet sending (type depends on particular tg ports type).
+            adjust_size(bool):  See description for _build_pypacker_packet function.
+            required_size(int, tuple):  Integer or tuple of parameters needed to be set when packet size should be incremented.
+                                        Tuple examples: ('Increment', <step>, <min>, <max>), ('Random', <min>, <max>)
+            fragsize(int):  Max size of packet's single frame
+            is_valid(bool):  Recalculate check sum and length for each packet layer
+                             (by default pypacker do this automatically in case length and check sum aren't set).
+                             This parameter has to be set True with all incrementation parameters.
+            build_packet(bool):  Build packet from definition or use already built pypacker packet.
+            sa_increment(tuple):  Source MAC increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            da_increment(tuple):  Destination MAC increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            sip_increment(tuple):  Source IPv4 increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            dip_increment(tuple):  Destination IPv4 increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            arp_sa_increment(tuple):  Source MAC increment parameters for ARP packet. Tuple (<step>, <count>). Has to be used in pair with arp_sip_increment.
+            arp_sip_increment(tuple):  Source IP increment parameters for ARP packet. Tuple (<step>, <count>). Has to be used in pair with arp_sa_increment.
+            igmp_ip_increment(tuple):  Destination IP increment parameters for IGMP packet. Tuple (<step>, <count>).
+            lldp_sa_increment(tuple):  Source MAC increment parameters for LLDP packet. Tuple (<step>, <count>).
+            vlan_increment(tuple):  VLAN increment parameters for tagged packet. Tuple (<step>, <count>).
+            sudp_increment(tuple):  UDP source port increment parameters.
+            dudp_increment(tuple):  UDP destination port increment parameters.
+            eth_type_increment(tuple):  Ethernet frame type increment parameters.
+            dscp_increment(tuple):  DSCP increment parameters.
+            protocol_increment(tuple):  IP protocol incrementation..
+            sipv6_increment(tuple):  Source IPv6 increment parameters.
+            dipv6_increment(tuple):  Destination IPv6 increment parameters.
+            fl_increment(tuple):  Flow label increment parameters.
+            dhcp_si_increment(tuple):  DHCP IP increment parameters.
+            in_vlan_increment(tuple):  Inner vlan ID increment parameters for double tagged frames. Tuple (<step>, <count>).
+            tc_increment(tuple):  IPv6 Traffic Class increment parameters.
+            nh_increment(tuple):  IPv6 Next Header increment parameters.
+
+            cont_burst(bool):  Should stream be sent as continuous burst or not. Continuous streams have to be started using start_streams method.
+            force_errors(str):  Emulate Errors for configured stream.
+                                Enum ("bad" /*streamErrorBadCRC, "none" /*streamErrorNoCRC, "dribble" /*streamErrorDribble, "align" /*streamErrorAlignment).
+            udf_dependancies(dict):  Set UDF dependencies in case one incerement is dependant from another.
+                                     Dictionary {<dependant_increment> : <initial_increment>}
+
+        Returns:
+            int: stream id
+
+        Notes:
+            It's not expected to configure a lot of incrementation options. Different traffic generator could have different limitations for these options.
+
+        Examples::
+
+            stream_id_1 = tg.set_stream(pack_ip, count=100, iface=iface)
+            stream_id_2 = tg.set_stream(pack_ip, continuous=True, inter=0.1, iface=iface)
+            stream_id_3 = tg.set_stream(pack_ip_udp, count=5, protocol_increment=(3, 5), iface=iface)
+            stream_id_4 = tg.set_stream(pack_ip_udp, count=18, sip_increment=(3, 3), dip_increment=(3, 3), iface=iface,
+                                        udf_dependancies={'sip_increment': 'dip_increment'})
+
         """
         host, kwargs['iface'] = self.get_host_port(kwargs['iface'])
         stream_id = self.hosts[host].set_stream(*args, **kwargs)
@@ -566,15 +673,27 @@ class RemotePypackerMultipleTG(PacketProcessor, GenericEntry):
         return host_stream_id
 
     def send_stream(self, stream_id, **kwargs):
-        """
-        @copydoc  testlib::tg_template::GenericTG::send_stream()
+        """Sends the stream created by 'set_stream' method.
+
+        Args:
+            stream_id(int):  ID of the stream to be send.
+
+        Returns:
+            float: timestamp.
+
         """
         host, stream = self.get_host_port(stream_id)
         self.hosts[host].send_stream(int(stream), **kwargs)
 
     def start_streams(self, stream_list):
-        """
-        @copydoc  testlib::tg_template::GenericTG::start_streams()
+        """Enable and start streams from the list simultaneously.
+
+        Args:
+            stream_list(list[int]):  List of stream IDs.
+
+        Returns:
+            None
+
         """
         stream_map = self.get_host_port_map(stream_list)
 
@@ -582,8 +701,14 @@ class RemotePypackerMultipleTG(PacketProcessor, GenericEntry):
             self.hosts[host].start_streams(list(map(int, streams)))
 
     def stop_streams(self, stream_list=None):
-        """
-        @copydoc  testlib::tg_template::GenericTG::stop_streams()
+        """ Disable streams from the list.
+
+        Args:
+            stream_list(list[int]):  Stream IDs to stop. In case stream_list is not set all running streams will be stopped.
+
+        Returns:
+            None
+
         """
         if not stream_list:
             stream_list = self.streams
@@ -593,8 +718,27 @@ class RemotePypackerMultipleTG(PacketProcessor, GenericEntry):
             self.hosts[host].stop_streams(list(map(int, streams)))
 
     def start_sniff(self, ifaces, **kwargs):
-        """
-        @copydoc  testlib::tg_template::GenericTG::start_sniff()
+        """Starts sniffing on specified interfaces.
+
+        Args:
+            ifaces(list):  List of TG interfaces for capturing.
+            sniffing_time(int):  Time in seconds for sniffing.
+            packets_count(int):  Count of packets to sniff (no count limitation in case 0).
+            filter_layer(str):  Name of predefined sniffing filter criteria.
+            src_filter(str):  Sniff only packet with defined source MAC.
+            dst_filter(str):  Sniff only packet with defined destination MAC.
+
+        Returns:
+            None
+
+        Notes:
+            This method introduces additional 1.5 seconds timeout after capture enabling.
+            It's required by Ixia sniffer to wait until capturing is started.
+
+        Examples::
+
+            env.tg[1].start_sniff(['eth0', ], filter_layer='IP', src_filter='00:00:00:01:01:01', dst_filter='00:00:00:22:22:22')
+
         """
         iface_map = self.get_host_port_map(ifaces)
 
@@ -602,8 +746,8 @@ class RemotePypackerMultipleTG(PacketProcessor, GenericEntry):
             self.hosts[host].start_sniff(ports, **kwargs)
 
     def clear_statistics(self, sniff_port_list):
-        """
-        @brief  Clearing statistics on TG ports.
+        """Clearing statistics on TG ports.
+
         """
         iface_map = self.get_host_port_map(sniff_port_list)
 
@@ -611,87 +755,86 @@ class RemotePypackerMultipleTG(PacketProcessor, GenericEntry):
             self.hosts[host].clear_statistics(ports)
 
     def get_received_frames_count(self, iface):
-        """
-        @brief  Read statistics - framesReceived
+        """Read statistics - framesReceived.
+
         """
         host, port = self.get_host_port(iface)
         return self.hosts[host].get_received_frames_count(port)
 
     def get_filtered_frames_count(self, iface):
-        """
-        @brief  Read statistics - filtered frames received
+        """Read statistics - filtered frames received.
+
         """
         host, port = self.get_host_port(iface)
         return self.hosts[host].get_filtered_frames_count(port)
 
     def get_uds_3_frames_count(self, iface):
-        """
-        @brief  Read statistics - UDS3 - Capture Trigger (UDS3) -
-        count of non-filtered received packets (valid and invalid)
+        """Read statistics - UDS3 - Capture Trigger (UDS3) - count of non-filtered received packets (valid and invalid).
+
         """
         host, port = self.get_host_port(iface)
         return self.hosts[host].get_uds_3_frames_count(port)
 
     def clear_received_statistics(self, iface):
-        """
-        @brief  Clear statistics
+        """Clear statistics.
+
         """
         host, port = self.get_host_port(iface)
         return self.hosts[host].clear_received_statistics(port)
 
     def get_sent_frames_count(self, iface):
-        """
-        @brief  Read Pypacker statistics - framesSent
+        """Read Pypacker statistics - framesSent.
+
         """
         host, port = self.get_host_port(iface)
         return self.hosts[host].get_sent_frames_count(port)
 
     def get_port_txrate(self, iface):
-        """
-        @brief  Get port Tx rate
+        """Get port Tx rate.
+
         """
         pytest.skip("Method is not supported by Pypacker TG")
 
     def get_port_rxrate(self, iface):
-        """
-        @brief  Get port Rx rate
+        """Get port Rx rate.
+
         """
         pytest.skip("Method is not supported by Pypacker TG")
 
     def get_port_qos_rxrate(self, iface, qos):
-        """
-        @brief  Get ports Rx rate for specific qos
+        """Get ports Rx rate for specific qos.
+
         """
         pytest.skip("Method is not supported by Pypacker TG")
 
     def get_qos_frames_count(self, iface, prio):
-        """
-        @brief  Get QoS packets count
+        """Get QoS packets count.
+
         """
         pytest.skip("Method is not supported by Pypacker TG")
 
     def set_qos_stat_type(self, iface, ptype):
-        """
-        @brief  Set QoS stats type
+        """Set QoS stats type.
+
         """
         pytest.skip("Method is not supported by Pypacker TG")
 
     def set_flow_control(self, iface, mode):
-        """
-        @brief  Set Flow Control
+        """Set Flow Control.
+
         """
         pytest.skip("Method is not supported by Pypacker TG")
 
     def get_os_mtu(self, iface=None):
-        """
-        @brief  Get OS MTU
+        """Get OS MTU.
+
         """
         host, port = self.get_host_port(iface)
         return self.hosts[host].get_os_mtu(port)
 
     def set_os_mtu(self, iface=None, mtu=None):
-        """
-        @brief  Set OS MTU
+        """Set OS MTU.
+
         """
         host, port = self.get_host_port(iface)
         return self.hosts[host].set_os_mtu(port, mtu)

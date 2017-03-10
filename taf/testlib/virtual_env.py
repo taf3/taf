@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2015-2016, Intel Corporation.
+# Copyright (c) 2015 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``virtual_env.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Tempest API UI specific functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  virtual_env.py
-
-@summary  Tempest API UI specific functionality.
 """
 
 # TEMPEST_VERSION  201610100101
@@ -84,13 +84,14 @@ def only_with_service(service):
 
 
 class VirtualEnv(object):
-    """
-    @description  Main class of all test virtual environment using tempest.
+    """Main class of all test virtual environment using tempest.
 
-    @note  This class has to be used as base fixture in all tempest test cases.
-           It provides number of common methods to initialize, shutdown,
-           cleanup environment functions which basically call appropriate methods
-           of particular device classes.
+    Notes:
+        This class has to be used as base fixture in all tempest test cases.
+        It provides number of common methods to initialize, shutdown,
+        cleanup environment functions which basically call appropriate methods
+        of particular device classes.
+
     """
 
     class_logger = loggers.ClassLogger()
@@ -258,16 +259,22 @@ class VirtualEnv(object):
         self.magnum = Magnum(self)
 
     def _get_settings(self, file_name=None):
-        """
-        @brief  Load environment config from file.
-        @param  file_name:  Name of a json file with a test environment configuration.
-        @type  file_name:  str
-        @raise  TAFCoreException:  configuration file is not found
-        @raise  IOError:  error on reading configuration file
-        @rtype:  dict
-        @return:  dict of the selected configuration.
-        @note  This method shouldn't be used outside this class.
-               Use "config" attribute to access environment configuration.
+        """Load environment config from file.
+
+        Args:
+            file_name(str):  Name of a json file with a test environment configuration.
+
+        Raises:
+            TAFCoreException:  configuration file is not found
+            IOError:  error on reading configuration file
+
+        Returns:
+            dict:  dict of the selected configuration.
+
+        Notes:
+            This method shouldn't be used outside this class.
+            Use "config" attribute to access environment configuration.
+
         """
         if not file_name:
             self.class_logger.info("Environment file isn't set." +
@@ -319,12 +326,14 @@ class VirtualEnv(object):
                              name=None, tenant_id=None, create_external_router=True):
         """Create or reuse public/external router & network.
 
-        :param bool try_reuse: attempt at resusing the public router/network or delete it
-        :param networks_client:
-        :param routers_client:
-        :param name:
-        :param tenant_id:
-        :return bool: whether or not creation/reuse has been successful
+        Args:
+            try_reuse(bool): attempt at resusing the public router/network or delete it
+            networks_client:
+            routers_client:
+            name:
+            tenant_id:
+            create_external_router(bool): whether or not creation/reuse has been successful
+
         """
 
         if not routers_client:
@@ -409,8 +418,8 @@ class VirtualEnv(object):
 
     def _delete_external_elements(self, routers_client=None, networks_client=None,
                                   ports_client=None):
-        """
-        @brief   Look for the external routers & networks and delete them
+        """Look for the external routers & networks and delete them.
+
         """
 
         if not routers_client:
@@ -429,8 +438,8 @@ class VirtualEnv(object):
             networks_client.delete_network(network_id)
 
     def _reuse_public_access(self, mgmt_net, routers_client=None):
-        """
-        @brief   Search for the external routers & networks
+        """Search for the external routers & networks.
+
         """
         if not routers_client:
             routers_client = self.handle.os_adm.routers_client
@@ -449,12 +458,14 @@ class VirtualEnv(object):
 
     def create_router(self, routers_client=None, name=None, network_id=None, tenant_id=None,
                       enable_snat=False, **kwargs):
-        """
-        @brief   Create a router
-        @param network_id: id of the network subnet of which to connect to the router
-        @type  network_id: str
-        @returns: the created router
-        @rtype: dict
+        """Create a router.
+
+        Args:
+            network_id(str): id of the network subnet of which to connect to the router
+
+        Returns:
+            dict: the created router
+
         """
         if not routers_client:
             routers_client = self.handle.os_adm.routers_client
@@ -543,12 +554,13 @@ class VirtualEnv(object):
                        **kwargs):
         """Create standard network, subnet, router.
 
-        :param bool with_router: whether or not to add the network to tenant_id router
-        :param bool with_subnet: whether or not to create a subnet for the network
-        :param name:
-        :param tenant_id:
-        :param kwargs:
-        :return:
+        Args:
+            with_router(bool): whether or not to add the network to tenant_id router
+            with_subnet(bool): whether or not to create a subnet for the network
+            name:
+            tenant_id:
+            kwargs:
+
         """
 
         if with_router and not with_subnet:
@@ -617,13 +629,14 @@ class VirtualEnv(object):
                               name=None, tenant_id=None, delete_external=False):
         """Creates a public networks with an optional subnet.
 
-        :param routers_client:
-        :param networks_client:
-        :param ports_client:
-        :param name:
-        :param tenant_id:
-        :param bool delete_external: whether or not to delete already existing networks/routers
-        :return: network
+        Args:
+            routers_client:
+            networks_client:
+            ports_client:
+            name:
+            tenant_id:
+            delete_external(bool): whether or not to delete already existing networks/routers
+
         """
 
         if not routers_client:
@@ -655,12 +668,13 @@ class VirtualEnv(object):
         return self._create_bare_network(**network_kwargs)
 
     def _create_bare_network(self, networks_client=None, name=None, tenant_id=None, **kwargs):
-        """
-        @brief   Creates a network.
-                 There is no router and no subnet created for this network.
+        """Creates a network.
 
-        @returns: the created bare network
-        @rtype: dict
+        There is no router and no subnet created for this network.
+
+        Returns:
+            dict: the created bare network
+
         """
         if not networks_client:
             networks_client = self.handle.os_adm.networks_client
@@ -687,22 +701,20 @@ class VirtualEnv(object):
                        routers_client=None, networks_client=None, subnets_client=None,
                        cidr=None, mask_bits=None, name=None, tenant_id=None,
                        pool_start=None, pool_end=None, **kwargs):
-        """
-        @brief   Create subnet for the specified network.
-                 The allocation range is defined for ONP lab environment.
+        """Create subnet for the specified network.
 
-        @param network_id: the network to create the subnet in
-        @type  network_id: str
-        @param cidr: IP/mask of the mgmt interface, None for project default
-        @type  cidr: str
-        @param mask_bits: subnet mask length in bits
-        @type  mask_bits: int
-        @param pool_start: allocation pool first host ipv4 tuple (host part)
-        @type  pool_start: int
-        @param pool_end: allocation pool last host ipv4 tuple (host part)
-        @type  pool_end: int
-        @returns: the created subnet
-        @rtype: DeletableSubnet
+        The allocation range is defined for ONP lab environment.
+
+        Args:
+            network_id(str): the network to create the subnet in
+            cidr(str): IP/mask of the mgmt interface, None for project default
+            mask_bits(int): subnet mask length in bits
+            pool_start(int): allocation pool first host ipv4 tuple (host part)
+            pool_end(int): allocation pool last host ipv4 tuple (host part)
+
+        Returns:
+            DeletableSubnet: the created subnet
+
         """
         if not routers_client:
             routers_client = self.handle.os_adm.routers_client
@@ -783,14 +795,14 @@ class VirtualEnv(object):
         return subnet
 
     def create_image(self, name, fmt, path, disk_format=None):
-        """Create OpenStack image
-        We need to use
+        """Create OpenStack image.
 
-        :param name:
-        :param fmt:
-        :param path:
-        :param disk_format:
-        :return:
+        Args:
+            name:
+            fmt:
+            path:
+            disk_format:
+
         """
         image_client = self.handle.manager.image_client_v2
         self.class_logger.debug('Creating image %s', name)
@@ -838,16 +850,13 @@ class VirtualEnv(object):
     def create_flavor(self, name, ram=64, disk=0, vcpus=1, **kwargs):
         """Create flavor.
 
-        :param name:
-        :type  name:  str
-        :param ram:
-        :type ram: int
-        :param disk:
-        :type disk: int
-        :param vcpus:
-        :type vcpus: int
-        :param kwargs:
-        :return:
+        Args:
+            name(str):
+            ram(int):
+            disk(int):
+            vcpus(int):
+            kwargs:
+
         """
         params = {
             'name': name,
@@ -913,13 +922,14 @@ class VirtualEnv(object):
         return self._get_flavors(flavors_client=flavors_client, do_show=True, do_extra_specs=True)
 
     def get_flavor_by_spec(self, flavor_spec, flavors_client=None):
-        """
-        @brief Flavor retrieval helper method.
-            Attempts to satisfy the requirements in the flavor specification input parameter.
-            The 'name' property is preference only (but the combination of the other properties is
-            overwhelming) and serves mostly for storage purposes instead, naming the newly created
-            flavor should the need for one arise - in case of the spec reqs not met by the already
-            existing ones.
+        """Flavor retrieval helper method.
+
+        Attempts to satisfy the requirements in the flavor specification input parameter.
+        The 'name' property is preference only (but the combination of the other properties is
+        overwhelming) and serves mostly for storage purposes instead, naming the newly created
+        flavor should the need for one arise - in case of the spec reqs not met by the already
+        existing ones.
+
         """
         if not flavors_client:
             flavors_client = self.handle.os_adm.flavors_client
@@ -974,12 +984,14 @@ class VirtualEnv(object):
         return port_map
 
     def allow_forwarding(self, server_id):
-        """
-        if a virtual instance is to forward a traffic,
+        """Allowing forwarding
+
+        If a virtual instance is to forward a traffic,
         the security extension 'port_security' must be allowed in the
         Open Stack. This allows create ports with port_security_enabled
         set to False. If this is set to false, then certain iptable
         rules are not generated and anti-spoofing checks are not done.
+
         """
         ip_addresses = self.get_interfaces(server_id)
         port_ids = (ip['port_id'] for ip in ip_addresses)
@@ -1004,15 +1016,17 @@ class VirtualEnv(object):
     def get_hosts(self):
         """Returns an array of dictionaries with available hypervisors.
 
-        Example of the output:
-        [{u'hypervisor_hostname': u'pod4-compute2',
-          u'id': 1,
-          u'state': u'up',
-          u'status': u'enabled'},
-         {u'hypervisor_hostname': u'pod4-compute1',
-          u'id': 2,
-          u'state': u'up',
-          u'status': u'enabled'}]
+        Example of the output::
+
+            [{u'hypervisor_hostname': u'pod4-compute2',
+              u'id': 1,
+              u'state': u'up',
+              u'status': u'enabled'},
+             {u'hypervisor_hostname': u'pod4-compute1',
+              u'id': 2,
+              u'state': u'up',
+              u'status': u'enabled'}]
+
         """
         client = self.handle.os_adm.hosts_client
         hosts = client.list_hosts()
@@ -1042,11 +1056,12 @@ class VirtualEnv(object):
                 h2z_map.setdefault(h_name, set()).add(h_zone)
 
         def dj_rec(map_level, zone_closed, zone_open, host_closed):
-            """
-            'disjoint recursive' zone/host maps build helper
+            """'disjoint recursive' zone/host maps build helper.
+
             GOAL: disjoint host aggregates to hosts mapping
             TODO: Need another helper to traverse the map-tree
             TODO: Use host aggregates instead of availability zones?
+
             """
             cnt_level = 0
             _cnt_level = 0
@@ -1101,6 +1116,7 @@ class VirtualEnv(object):
 
     def create_aggregate(self, name="aggr", availability_zone="zone"):
         """Creates an aggregate and availability zone.
+
         """
         aggregate_name = "{}-{}".format(name, int(time.time()))
         zone_name = "{}-{}".format(availability_zone, int(time.time()))
@@ -1128,19 +1144,18 @@ class VirtualEnv(object):
         return True
 
     def create_server(self, nets=None, ports=None, zone=None, image=None, flavor=None, **kwargs):
-        """
-        @brief: Create instance in OpenStack
-        @param nets: networks for the virtual instance to be created
-        @type  nets: list of dicts representing OpenStack network(,subnet,router)s
-        @param ports: ports for the virtual instance to be created
-        @type  ports: list of dicts representing OpenStack ports
-        @param zone: availability-zone for the virtual instance to be created
-        @type  zone: dict representing OpenStack availability-zone
-        @param image: image for the virtual instance to be created
-        @type  image: dict representing OpenStack image
-        @param flavor: flavor for the virtual instance to be created
-        @type  flavor: dict representing OpenStack flavor
-        @rtype: GenericLinuxVirtualHost
+        """Create instance in OpenStack.
+
+        Args:
+            nets(list[dict]representing OpenStack network(,subnet,router)s): networks for the virtual instance to be created
+            ports(list[dict] representing OpenStack ports): ports for the virtual instance to be createds
+            zone(dict representing OpenStack availability-zone): availability-zone for the virtual instance to be created
+            image(dict representing OpenStack image): image for the virtual instance to be created
+            flavor(dict representing OpenStack flavor): flavor for the virtual instance to be created
+
+        Returns:
+            GenericLinuxVirtualHost
+
         """
 
         if ports is None:
@@ -1196,16 +1211,19 @@ class VirtualEnv(object):
 
     def assign_floating_ip(self, host, private_net_name=None, public_network_id=None,
                            management=False):
-        """Assign floating IP to ACTIVE instance
+        """Assign floating IP to ACTIVE instance.
 
-        @param host: instance to wich assign the floating IP
-        @type host: GenericLinuxVirtualHost
-        @param private_net_name: private networks name, if not specified takes last from
-                                 host.os_networks
-        @param public_network_id: public network id, if not specified using one from tempest.conf
-        @param management: is this floating IP be management IP via which we communicate with the
-                           instance
-        @return: generated floating IP
+        Args:
+            host(GenericLinuxVirtualHost): instance to wich assign the floating IP
+            private_net_name(str): private networks name, if not specified takes last from
+                                   host.os_networks
+            public_network_id: public network id, if not specified using one from tempest.conf
+            management: is this floating IP be management IP via which we communicate with the
+                        instance
+
+        Returns:
+            generated floating IP
+
         """
 
         # the management interface is the one into the last (right most network in)
@@ -1310,8 +1328,8 @@ class VirtualEnv(object):
         return instances
 
     def get_host_instance_dict(self, instances=None):
-        """
-        gets a dictionary of details of all instances in the current project grouped by hostId.
+        """Gets a dictionary of details of all instances in the current project grouped by hostId.
+
         """
         if instances is None:
             instances = self.get_all_instances()

@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``sendjsoncommand.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`JSON communication with OVS Nox Conroller functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  sendjsoncommand.py
-
-@summary  JSON communication with OVS Nox Conroller functionality.
 """
 
 import socket
@@ -24,18 +23,17 @@ import json
 
 
 class SendJsonCommand(object):
-    """
-    @description  Class for sending and receiving Json commands to/from OVS Nox Controller
+    """Class for sending and receiving Json commands to/from OVS Nox Controller.
 
-    @param  ip:  Controller IP address
-    @type  ip:  str
-    @param  json_port:  Controller port to send to
-    @type  json_port:  int
+    Args:
+        ip(str):  Controller IP address
+        json_port(int):  Controller port to send to
+
     """
 
     def __init__(self, ip, json_port):
-        """
-        @brief  Initialize SendJsonCommand class
+        """Initialize SendJsonCommand class.
+
         """
         self.controller_ip = ip
         self.controller_port = json_port
@@ -43,10 +41,11 @@ class SendJsonCommand(object):
         self.sockets = []
 
     def probe(self, timeout=10):
-        """
-        @brief  Method for probing Nox Controller
-        @param  timeout:  timeout
-        @type  timeout:  int
+        """Method for probing Nox Controller.
+
+        Args:
+            timeout(int):  timeout
+
         """
         cmd = {"type": "probe", "command": "probe"}
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -66,17 +65,16 @@ class SendJsonCommand(object):
             sock.close()
 
     def flow_add(self, command, command_string, reply=False, timeout=30):
-        """
-        @brief  Method for sending flow command to Ovs Controller (connect, send json command, disconnect)
-                If reply is True - wait for reply from the Controller
-        @param  command:  command, e.g "flow add"
-        @type  command:  str
-        @param  command_string:  command string, e.g. flow qualifiers and actions, delimited with space
-        @type  command_string:  str
-        @param  reply:  specifies wait for reply or not
-        @type  reply:  bool
-        @param  timeout:  timeout
-        @type  timeout:  int
+        """Method for sending flow command to Ovs Controller (connect, send json command, disconnect).
+
+        If reply is True - wait for reply from the Controller
+
+        Args:
+            command(str):  command, e.g "flow add"
+            command_string(str):  command string, e.g. flow qualifiers and actions, delimited with space
+            reply(bool):  specifies wait for reply or not
+            timeout(int):  timeout
+
         """
         cmd = {}
         if not reply:
@@ -100,17 +98,16 @@ class SendJsonCommand(object):
         sock.close()
 
     def flow_with_wildcards_add(self, command, command_string, reply=False, timeout=30):
-        """
-        @brief  Method for sending flow command to Ovs Controller (connect, send json command, disconnect)
-                If reply is True - wait for reply from the Controller
-        @param  command:  command, e.g "flow add"
-        @type  command:  str
-        @param  command_string:  command string, e.g. flow qualifiers and actions, delimited with space
-        @type  command_string:  str
-        @param  reply:  specifies wait for reply or not
-        @type  reply:  bool
-        @param  timeout:  timeout
-        @type  timeout:  int
+        """Method for sending flow command to Ovs Controller (connect, send json command, disconnect).
+
+        If reply is True - wait for reply from the Controller
+
+        Args:
+            command(str):  command, e.g "flow add"
+            command_string(str):  command string, e.g. flow qualifiers and actions, delimited with space
+            reply(bool):  specifies wait for reply or not
+            timeout(int):  timeout
+
         """
         cmd = {}
         if not reply:
@@ -135,17 +132,16 @@ class SendJsonCommand(object):
         sock.close()
 
     def flow_with_prio_add(self, command, command_string, reply=False, timeout=30):
-        """
-        @brief  Method for sending flow command to Ovs Controller (connect, send json command, disconnect)
-                If reply is True - wait for reply from the Controller
-        @param  command:  command, e.g "flow add"
-        @type  command:  str
-        @param  command_string:  command string, e.g. flow qualifiers and actions, delimited with space
-        @type  command_string:  str
-        @param  reply:  specifies wait for reply or not
-        @type  reply:  bool
-        @param  timeout:  timeout
-        @type  timeout:  int
+        """Method for sending flow command to Ovs Controller (connect, send json command, disconnect).
+
+        If reply is True - wait for reply from the Controller
+
+        Args:
+            command(str):  command, e.g "flow add"
+            command_string(str):  command string, e.g. flow qualifiers and actions, delimited with space
+            reply(bool):  specifies wait for reply or not
+            timeout(int):  timeout
+
         """
         cmd = {}
         if not reply:
@@ -170,17 +166,16 @@ class SendJsonCommand(object):
         sock.close()
 
     def flow_with_flags_add(self, command, command_string, reply=False, timeout=30):
-        """
-        @brief  Method for sending flow command to Ovs Controller (connect, send json command, disconnect)
-                If reply is True - wait for reply from the Controller
-        @param  command:  command, e.g "flow add"
-        @type  command:  str
-        @param  command_string:  command string, e.g. flow qualifiers and actions, delimited with space
-        @type  command_string:  str
-        @param  reply:  specifies wait for reply or not
-        @type  reply:  bool
-        @param  timeout:  timeout
-        @type  timeout:  int
+        """Method for sending flow command to Ovs Controller (connect, send json command, disconnect).
+
+        If reply is True - wait for reply from the Controller
+
+        Args:
+            command(str):  command, e.g "flow add"
+            command_string(str):  command string, e.g. flow qualifiers and actions, delimited with space
+            reply(bool):  specifies wait for reply or not
+            timeout(int):  timeout
+
         """
         cmd = {}
         if not reply:
@@ -214,17 +209,16 @@ class SendJsonCommand(object):
         sock.close()
 
     def flow_delete(self, command, command_string, reply=False, timeout=30):
-        """
-        @brief  Method for sending flow delete command to Ovs Controller (connect, send json command, disconnect)
-                If reply is True - wait for reply from the Controller
-        @param  command:  command, e.g "flow add"
-        @type  command:  str
-        @param  command_string:  command string, e.g. flow qualifiers and actions, delimited with space
-        @type  command_string:  str
-        @param  reply:  specifies wait for reply or not
-        @type  reply:  bool
-        @param  timeout:  timeout
-        @type  timeout:  int
+        """Method for sending flow delete command to Ovs Controller (connect, send json command, disconnect).
+
+        If reply is True - wait for reply from the Controller
+
+        Args:
+            command(str):  command, e.g "flow add"
+            command_string(str):  command string, e.g. flow qualifiers and actions, delimited with space
+            reply(bool):  specifies wait for reply or not
+            timeout(int):  timeout
+
         """
         cmd = {}
         if not reply:
@@ -248,14 +242,13 @@ class SendJsonCommand(object):
         sock.close()
 
     def get_stats(self, command, reply=True, timeout=30):
-        """
-        @brief  Method for getting OVS statistics from Switch via Nox Controller
-        @param  command:  command, e.g "flow add"
-        @type  command:  str
-        @param  reply:  specifies wait for reply or not
-        @type  reply:  bool
-        @param  timeout:  reply waiting timeout
-        @type  timeout:  int
+        """Method for getting OVS statistics from Switch via Nox Controller.
+
+        Args:
+            command(str):  command, e.g "flow add"
+            reply(bool):  specifies wait for reply or not
+            timeout(int):  reply waiting timeout
+
         """
         cmd = {}
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -291,14 +284,13 @@ class SendJsonCommand(object):
         sock.close()
 
     def get_features(self, command, reply=True, timeout=30):
-        """
-        @brief  Method for getting OVS Switch features via Nox Controller
-        @param  command:  command, e.g "flow add"
-        @type  command:  str
-        @param  reply:  specifies wait for reply or not
-        @type  reply:  bool
-        @param  timeout:  reply waiting timeout
-        @type  timeout:  int
+        """Method for getting OVS Switch features via Nox Controller.
+
+        Args:
+            command(str):  command, e.g "flow add"
+            reply(bool):  specifies wait for reply or not
+            timeout(int):  reply waiting timeout
+
         """
         cmd = {}
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -318,18 +310,15 @@ class SendJsonCommand(object):
         sock.close()
 
     def set_config(self, command, port_no, port_config, reply=False, timeout=30):
-        """
-        @brief  Method for setting OVS Switch port comfiguration via Nox Controller
-        @param  command:  command, e.g "flow add"
-        @type  command:  str
-        @param  port_no:  port number
-        @type  port_no:  int
-        @param  port_config:  port configuration
-        @type  port_config:  str
-        @param  reply:  specifies wait for reply or not
-        @type  reply:  bool
-        @param  timeout:  reply waiting timeout
-        @type  timeout:  int
+        """Method for setting OVS Switch port configuration via Nox Controller.
+
+        Args:
+            command(str):  command, e.g "flow add"
+            port_no(int):  port number
+            port_config(str):  port configuration
+            reply(bool):  specifies wait for reply or not
+            timeout(int):  reply waiting timeout
+
         """
         cmd = {}
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -351,12 +340,12 @@ class SendJsonCommand(object):
         sock.close()
 
     def connect(self, controller_ip=None, controller_port=None):
-        """
-        @brief  Method for connecting to Ovs Controller socket
-        @param  controller_ip:  Controller IP address
-        @type  controller_ip:  str
-        @param  controller_port:  Controller port to send to
-        @type  controller_port:  int
+        """Method for connecting to Ovs Controller socket.
+
+        Args:
+            controller_ip(str):  Controller IP address
+            controller_port(int):  Controller port to send to
+
         """
         if not controller_ip:
             controller_ip = self.controller_ip
@@ -368,12 +357,12 @@ class SendJsonCommand(object):
         self.sockets.append(sock)
 
     def send(self, command, command_string):
-        """
-        @brief  Method for sending json command to Ovs Controller
-        @param  command:  command, e.g "flow add"
-        @type  command:  str
-        @param  command_string:  command string, e.g. flow qualifiers and actions, delimited with space
-        @type  command_string:  str
+        """Method for sending json command to Ovs Controller.
+
+        Args:
+            command(str):  command, e.g "flow add"
+            command_string(str):  command string, e.g. flow qualifiers and actions, delimited with space
+
         """
         cmd = {}
         if command == "flow_add":
@@ -404,8 +393,8 @@ class SendJsonCommand(object):
         self.sockets[0].send(json.dumps(cmd))
 
     def disconnect(self):
-        """
-        @brief  Method for disconnecting from Ovs Controller socket
+        """Method for disconnecting from Ovs Controller socket.
+
         """
         self.sockets[0].send("{\"type\":\"disconnect\"}")
         self.sockets[0].shutdown(1)

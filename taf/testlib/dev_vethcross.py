@@ -1,22 +1,22 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+"""``dev_vethcross.py``
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+`Cross connection based on creating Virtual Ethernet devices`
 
-@file  dev_vethcross.py
-
-@summary  Cross connection based on creating Virtual Ethernet devices.
 """
 
 from subprocess import Popen, PIPE
@@ -28,21 +28,22 @@ from .dev_basecross import GenericXConnectMixin
 
 
 class VethCross(GenericXConnectMixin):
-    """
-    @description  Xconnect based on creating virtual ethernet interfaces.
+    """Xconnect based on creating virtual ethernet interfaces.
 
-    @note  It is used for simulated environment.
+    Notes:
+        It is used for simulated environment.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize VethCross class
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
+        """Initialize VethCross class.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
         """
         self.class_logger.info("VethCross is selected.")
         self.id = config['id']
@@ -70,24 +71,26 @@ class VethCross(GenericXConnectMixin):
         self.tg = self.generic_generic
 
     def get_name_port(self, dev_id, port_id):
-        """
-        @brief  Get port name
-        @param  dev_id:  Device ID
-        @type  dev_id:  int
-        @param  port_id:  Port ID
-        @type  port_id:  int
-        @rtype:  tuple
-        @return:  Device name, Port name
+        """Get port name.
+
+        Args:
+            dev_id(int):  Device ID
+            port_id(int):  Port ID
+
+        Returns:
+            tuple:  Device name, Port name
+
         """
         dev_name = self.related_conf[dev_id]['name'].encode("ascii")
         dev_port = self.related_conf[dev_id]['ports'][port_id - 1].encode("ascii")
         return dev_name, dev_port
 
     def cross_connect(self, conn_list=None):
-        """
-        @brief  Create connections
-        @param  conn_list:  List of connections
-        @type  conn_list:  list[list]
+        """Create connections.
+
+        Args:
+            conn_list(list[list]):  List of connections
+
         """
         self.class_logger.debug("Connection list: {0}".format(conn_list))
         for conn in conn_list:
@@ -96,10 +99,11 @@ class VethCross(GenericXConnectMixin):
             self.xconnect(conn)
 
     def cross_disconnect(self, disconn_list=None):
-        """
-        @brief  Destroy connections
-        @param  disconn_list:  List of connections
-        @type  disconn_list:  list[list]
+        """Destroy connections.
+
+        Args:
+            disconn_list(list[list]):  List of connections
+
         """
         self.class_logger.debug("Disconnection list: {0}".format(disconn_list))
         for conn in disconn_list:
@@ -108,12 +112,12 @@ class VethCross(GenericXConnectMixin):
             self.xdisconnect(conn)
 
     def netns_netns(self, connection, action):
-        """
-        @brief  Returns set of commands to create/destroy connection between 2 Linux Network Namespaces.
-        @param  connection:  Connection info in format [sw1, port1, sw2, port2]
-        @type  connection:  list
-        @param  action:  Action for connection.
-        @type  action:  str
+        """Returns set of commands to create/destroy connection between 2 Linux Network Namespaces.
+
+        Args:
+            connection(list):  Connection info in format [sw1, port1, sw2, port2]
+            action(str):  Action for connection.
+
         """
         commands = []
         src_name, src_port = self.get_name_port(connection[0], connection[1])
@@ -132,12 +136,12 @@ class VethCross(GenericXConnectMixin):
         return commands
 
     def generic_netns(self, connection, action):
-        """
-        @brief  Returns set of commands to create/destroy connection between default NNS and custom NNS.
-        @param  connection:  Connection info in format [sw1, port1, sw2, port2]
-        @type  connection:  list
-        @param  action:  Action for connection.
-        @type  action:  str
+        """Returns set of commands to create/destroy connection between default NNS and custom NNS.
+
+        Args:
+            connection(list):  Connection info in format [sw1, port1, sw2, port2]
+            action(str):  Action for connection.
+
         """
         commands = []
         con1 = self.get_name_port(connection[0], connection[1])
@@ -165,13 +169,14 @@ class VethCross(GenericXConnectMixin):
         return commands
 
     def generic_generic(self, connection, action):
-        """
-        @brief  Returns set of commands to create connection between 2 default NNS.
-                This is used to create just veth interfaces without netns.
-        @param  connection:  Connection info in format [sw1, port1, sw2, port2]
-        @type  connection:  list
-        @param  action:  Action for connection.
-        @type  action:  str
+        """Returns set of commands to create connection between 2 default NNS.
+
+        This is used to create just veth interfaces without netns.
+
+        Args:
+            connection(list):  Connection info in format [sw1, port1, sw2, port2]
+            action(str):  Action for connection.
+
         """
         commands = []
         src_name, src_port = self.get_name_port(connection[0], connection[1])
@@ -187,29 +192,33 @@ class VethCross(GenericXConnectMixin):
         return commands
 
     def xconnect(self, connection):
-        """
-        @brief  Create single connection.
-        @param  connection:  Connection info in format [sw1, port1, sw2, port2]
-        @type  connection:  list
+        """Create single connection.
+
+        Args:
+            connection(list):  Connection info in format [sw1, port1, sw2, port2]
+
         """
         self._exec_x_command(connection, "Connecting")
 
     def xdisconnect(self, connection):
-        """
-        @brief  Destroy single connection.
-        @param  connection:  Connection info in format [sw1, port1, sw2, port2]
-        @type  connection:  list
+        """Destroy single connection.
+
+        Args:
+            connection(list):  Connection info in format [sw1, port1, sw2, port2]
+
         """
         self._exec_x_command(connection, "Disconnecting")
 
     def _exec_x_command(self, connection, action):
-        """
-        @brief  Create single connection.
-        @param  connection:  Connection info in format [sw1, port1, sw2, port2]
-        @type  connection:  list
-        @param  action:  Action for connection.
-        @type  action:  str
-        @raise  CrossException:  incorrect action type, error on connection
+        """Create single connection.
+
+        Args:
+            connection(list):  Connection info in format [sw1, port1, sw2, port2]
+            action(str):  Action for connection.
+
+        Raises:
+            CrossException:  incorrect action type, error on connection
+
         """
         if action not in ["Connecting", "Disconnecting"]:
             message = "Incorrect action type {0}. action has to be in ['connect', 'disconnect']".format(action)

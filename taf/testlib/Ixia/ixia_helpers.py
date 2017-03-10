@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+"""``ixia_helpers.py``
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  ixia_helpers.py
-
-@summary  Helpers functions for Ixia environment.
+`Helpers functions for Ixia environment`
 """
 
 import os
@@ -26,11 +25,14 @@ from ..clissh import CLISSH
 
 
 def ixtclhal_import(tcl_object):
-    """
-    @brief  Import IxTclHal package
-    @param tcl_object:  Tcl interpreter
-    @type  tcl_object:  Tkinter.Tcl
-    @return:  None
+    """Import IxTclHal package
+
+    Args:
+        tcl_object(Tkinter.Tcl):  Tcl interpreter
+
+    Returns:
+        None
+
     """
     command = ("catch {package require nonexistentName};" +
                "set available_packets_list [package names];" +
@@ -48,12 +50,17 @@ def ixtclhal_import(tcl_object):
 
 
 def ixload_import(tcl_object):
-    """
-    @brief  Import IxLoad package
-    @param tcl_object:  Tcl interpreter
-    @type  tcl_object:  Tkinter.Tcl
-    @return:  None
-    @note:  IxTclHal package should be already imported
+    """Import IxLoad package.
+
+    Args:
+        tcl_object(Tkinter.Tcl):  Tcl interpreter
+
+    Returns:
+        None
+
+    Notes:
+        IxTclHal package should be already imported
+
     """
     tcl_object.eval("catch {package require nonexistentName};" +
                     "set available_packets_list [package names];" +
@@ -71,12 +78,14 @@ def ixload_import(tcl_object):
 
 
 def tcl_puts_replace(tcl_interpret):
-    """
-    @brief  Replace original tcl puts function with new tcl_puts function
-            for logging tcl output
-    @param tcl_interpret:  Tcl interpreter
-    @type  tcl_interpret:  Tkinter.Tcl
-    @return:  None
+    """Replace original tcl puts function with new tcl_puts function for logging tcl output
+
+    Args:
+        tcl_interpret(Tkinter.Tcl):  Tcl interpreter
+
+    Returns:
+        None
+
     """
     tcl_interpret.eval("rename puts original_puts;" +
                        "proc puts {args} {" +
@@ -97,18 +106,17 @@ def tcl_puts_replace(tcl_interpret):
 
 
 def get_tcl_client_info(dst_file=None, tcl_srv_ip=None, tcl_srv_usr=None, tcl_srv_pass=None):
-    """
-    @brief  Get local or remote Tcl client version info
-    @param dst_file:  Path to file to be written
-    @type  dst_file:  str
-    @param tcl_srv_ip:  Tcl server IP address
-    @type  tcl_srv_ip:  str
-    @param tcl_srv_usr:  Tcl server user
-    @type  tcl_srv_usr:  str
-    @param tcl_srv_pass:  Tcl user password
-    @type  tcl_srv_pass:  str
-    @rtype:  str
-    @return:  Tcl client info
+    """Get local or remote Tcl client version info.
+
+    Args:
+        dst_file(str):  Path to file to be written
+        tcl_srv_ip(str):  Tcl server IP address
+        tcl_srv_usr(str):  Tcl server user
+        tcl_srv_pass(str):  Tcl user password
+
+    Returns:
+        str: Tcl client info
+
     """
     # Capture Tcl client info
     cmd1 = ("python -c \"import Tkinter; print Tkinter.Tcl().eval(" +

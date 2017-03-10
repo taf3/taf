@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``switch_ons.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`ONS switches-specific functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  switch_ons.py
-
-@summary  ONS switches-specific functionality.
 """
 from os.path import isfile as os_path_isfile
 from os.path import join as os_path_join
@@ -45,10 +44,11 @@ class SwitchONSGeneralMixin(object):
         self._use_sshtun = False
 
     def _get_port_for_probe(self):
-        """
-        @brief  Get port ID.
-        @rtype:  int
-        @return:  ssh tunnel ports ID
+        """Get port ID.
+
+        Returns:
+            int:  ssh tunnel ports ID
+
         """
         # In case using sshtun check device by ssh port.
         if self._use_sshtun:
@@ -57,62 +57,68 @@ class SwitchONSGeneralMixin(object):
             return int(self.port)
 
     def getprop(self, table, param, row_id, dst="nb"):
-        """
-        @brief  Return switchpp property.
-        @param  table:  Name of table where necessary parameter is stored
-        @type  table:  str
-        @param  param:  Name of necessary parameter
-        @type  param:  str
-        @param  row_id:  Row index in switch table
-        @type  row_id:  int
-        @param  dst:  Querry destination. E.g. nb, system, onsps
-        @type  dst:  str
-        @rtype:  str, int
-        @return  Parameter value
-        @note  This is just wrapper for xmlrpc nb call.
-        @par  Example:
-        @code
-        switch_instance.getprop("Ports", "operationalStatus", 5)
-        env.switch[1].getprop("SpanningTree", "mode", 1)
-        @endcode
+        """Return switchpp property.
+
+        Args:
+            table(str):  Name of table where necessary parameter is stored
+            param(str):  Name of necessary parameter
+            row_id(int):  Row index in switch table
+            dst(str):  Querry destination. E.g. nb, system, onsps
+
+        Returns:
+            str, int:  Parameter value
+
+        Notes:
+            This is just wrapper for xmlrpc nb call.
+
+        Examples::
+
+            switch_instance.getprop("Ports", "operationalStatus", 5)
+            env.switch[1].getprop("SpanningTree", "mode", 1)
+
         """
         return getattr(self.xmlproxy, "%s.%s.get.%s" % (dst, table, param))(row_id)
 
     def getprop_row(self, table, row_id, dst="nb"):
-        """
-        @brief  Return switchpp table row.
-        @param table:  Name of table
-        @type  table:  str
-        @param row_id:  Row index in switch table
-        @type  row_id:  int
-        @param dst:  Querry destination. E.g. nb, system, onsps
-        @type  dst:  str
-        @rtype:  dict
-        @return:  Table row (dict)
-        @note  This is just wrapper for xmlrpc nb call.
-        @par Example:
-        @code
-        switch_instance.getprop("Ports", 5)
-        env.switch[1].getprop("Platform", 1)
-        @endcode
+        """Return switchpp table row.
+
+        Args:
+            table(str):  Name of table
+            row_id(int):  Row index in switch table
+            dst(str):  Querry destination. E.g. nb, system, onsps
+
+        Returns:
+            dict:  Table row
+
+        Notes:
+            This is just wrapper for xmlrpc nb call.
+
+        Examples::
+
+            switch_instance.getprop("Ports", 5)
+            env.switch[1].getprop("Platform", 1)
+
         """
         return getattr(self.xmlproxy, "%s.%s.getRow" % (dst, table))(row_id)
 
     def getprop_table(self, table, dst="nb"):
-        """
-        @brief  Return switchpp table.
-        @param  table:  Name of table
-        @type  table:  str
-        @param  dst:  Querry destination. E.g. nb, system, onsps
-        @type  dst:  str
-        @rtype:  list[dict]
-        @return  Table
-        @note  This is just wrapper for xmlrpc nb call.
-        @par Example:
-        @code
-        switch_instance.getprop("SpanningTree")
-        env.switch[1].getprop("RSTPPorts")
-        @endcode
+        """Return switchpp table.
+
+        Args:
+            table(str):  Name of table
+            dst(str):  Querry destination. E.g. nb, system, onsps
+
+        Returns:
+            list[dict]: Table
+
+        Notes:
+            This is just wrapper for xmlrpc nb call.
+
+        Examples::
+
+            switch_instance.getprop("SpanningTree")
+            env.switch[1].getprop("RSTPPorts")
+
         """
         table_size = self.getprop_size(table, dst=dst)
         if table_size <= 1000:
@@ -132,225 +138,264 @@ class SwitchONSGeneralMixin(object):
             return table_content
 
     def getprop_size(self, table, dst="nb"):
-        """
-        @brief  Return switchpp table length.
-        @param  table:  Name of table
-        @type  table:  str
-        @param  dst:  Querry destination. E.g. nb, system, onsps
-        @type  dst:  str
-        @rtype:  int
-        @return:  Table size
-        @note  This is just wrapper for xmlrpc nb call.
-        @par Example:
-        @code
-        switch_instance.getprop_size("SpanningTree")
-        env.switch[1].getprop_size("RSTPPorts")
-        @endcode
+        """Return switchpp table length.
+
+        Args:
+            table(str):  Name of table
+            dst(str):  Querry destination. E.g. nb, system, onsps
+
+        Returns:
+            int:  Table size
+
+        Notes:
+            This is just wrapper for xmlrpc nb call.
+
+        Examples::
+
+            switch_instance.getprop_size("SpanningTree")
+            env.switch[1].getprop_size("RSTPPorts")
+
         """
         return getattr(self.xmlproxy, "%s.%s.size" % (dst, table))()
 
     def getprop_table_info(self, table, dst="nb"):
-        """
-        @brief  Return switchpp table info.
-        @param  table:  Name of table
-        @type  table:  str
-        @param  dst:  Querry destination. E.g. nb, system, onsps
-        @type  dst:  str
-        @rtype:  dict
-        @return  Table info
-        @note  This is just wrapper for xmlrpc nb call.
-        @par Example:
-        @code
-        switch_instance.getprop_table_info("SpanningTree")
-        env.switch[1].getprop_table_info("RSTPPorts")
-        @endcode
+        """Return switchpp table info.
+
+        Args:
+            table(str):  Name of table
+            dst(str):  Querry destination. E.g. nb, system, onsps
+
+        Returns:
+            dict:  Table info
+
+        Notes:
+            This is just wrapper for xmlrpc nb call.
+
+        Examples::
+
+            switch_instance.getprop_table_info("SpanningTree")
+            env.switch[1].getprop_table_info("RSTPPorts")
+
         """
         return getattr(self.xmlproxy, "%s.%s.getInfo" % (dst, table))()
 
     def getprop_field_info(self, table, field, dst="nb"):
-        """
-        @brief  Return switchpp table field info.
-        @param  table:  Name of table
-        @type  table:  str
-        @param field:  Name of field
-        @type  field:  str
-        @param  dst:  Querry destination. E.g. nb, system, onsps
-        @type  dst:  str
-        @rtype:  dict
-        @return  Field info
-        @note  This is just wrapper for xmlrpc nb call.
-        @par Example:
-        @code
-        switch_instance.getprop_field_info("Vlans", "vlanId")
-        env.switch[1].getprop_field_info("Vlans", "name")
-        @endcode
+        """Return switchpp table field info.
+
+        Args:
+            table(str):  Name of table
+            dst(str):  Querry destination. E.g. nb, system, onsps
+            field(str):  Name of field
+
+        Returns:
+            dict: Field info
+
+        Notes:
+            This is just wrapper for xmlrpc nb call.
+
+        Examples::
+
+            switch_instance.getprop_field_info("Vlans", "vlanId")
+            env.switch[1].getprop_field_info("Vlans", "name")
+
         """
         return getattr(self.xmlproxy, "%s.%s.getInfo.%s" % (dst, table, field))()
 
     def getprop_method_help(self, method):
-        """
-        @brief  Return switchpp table info.
-        @param  method:  xmlrpc method
-        @type  method:  str
-        @rtype:  str
-        @return:  Method help information
-        @note  This is just wrapper for xmlrpc call.
-        @par Example:
-        @code
-        switch_instance.getprop_method_help("nb.StaticARP.addRow")
-        env.switch[1].getprop_method_help("nb.StaticARP.addRow")
-        @endcode
+        """Return switchpp table info.
+
+        Args:
+            method(str):  xmlrpc method
+
+        Returns:
+            str:  Method help information
+
+        Notes:
+            This is just wrapper for xmlrpc call.
+
+        Examples::
+
+            switch_instance.getprop_method_help("nb.StaticARP.addRow")
+            env.switch[1].getprop_method_help("nb.StaticARP.addRow")
+
         """
         return getattr(self.xmlproxy, "system.methodHelp")(method)
 
     def setprop(self, table, param, values, dst="nb"):
-        """
-        @brief  Set switchpp property.
-        @param table:  Name of table where necessary parameter is stored
-        @type  table:  str
-        @param param:  Name of necessary parameter
-        @type  param:  str
-        @param values:  List on necessary set parameters
-        @type  values:  list
-        @param dst:  Querry destination. E.g. nb, system, onsps
-        @type  dst:  str
-        @raise:  xmlrpclib.Fault:
-        @rtype:  int
-        @return:  Set operation status (int or xmlrpclib.Fault exception)
-        @note  This is just wrapper for xmlrpc nb call.
-        @par Example:
-        @code
-        switch_instance.setprop("Ports", "adminMode", [10, "Up"])
-        env.switch[1].setprop("SpanningTree", "mode", [1, "MSTP"])
-        @endcode
+        """Set switchpp property.
+
+        Args:
+            table(str):  Name of table where necessary parameter is stored
+            param(str):  Name of necessary parameter
+            values(list):  List on necessary set parameters
+            dst(str):  Querry destination. E.g. nb, system, onsps
+
+        Raises:
+            xmlrpclib.Fault
+
+        Returns:
+            int:  Set operation status (int or xmlrpclib.Fault exception)
+
+        Notes:
+            This is just wrapper for xmlrpc nb call.
+
+        Examples::
+
+            switch_instance.setprop("Ports", "adminMode", [10, "Up"])
+            env.switch[1].setprop("SpanningTree", "mode", [1, "MSTP"])
+
         """
         return getattr(self.xmlproxy, "%s.%s.set.%s" % (dst, table, param))(*values)
 
     def setprop_row(self, table, values, dst="nb"):
-        """
-        @brief  Add row to switchpp table.
-        @param table:  Name of table
-        @type  table:  str
-        @param values:  List on necessary addRow parameters
-        @type  values:  list
-        @param dst:  Querry destination. E.g. nb, system, onsps
-        @type  dst:  str
-        @raise:  xmlrpclib.Fault:
-        @rtype:  int
-        @return:  addRow operation status (int or xmlrpclib.Fault exception)
-        @note  This is just wrapper for xmlrpc nb call.
-        @par Example:
-        @code
-        switch_instance.setprop_row("Vlans", [7, "TestVlan"])
-        port_id = 1
-        vlan_id = 7
-        env.switch[1].setprop_row("Ports2Vlans", [port_id, vlan_id, "Tagged"])
-        @endcode
+        """Add row to switchpp table.
+
+        Args:
+            table(str):  Name of table
+            values(list):  List on necessary addRow parameters
+            dst(str):  Querry destination. E.g. nb, system, onsps
+
+        Raises:
+            xmlrpclib.Fault
+
+        Returns:
+            int:  addRow operation status (int or xmlrpclib.Fault exception)
+
+        Notes:
+            This is just wrapper for xmlrpc nb call.
+
+        Examples::
+
+            switch_instance.setprop_row("Vlans", [7, "TestVlan"])
+            port_id = 1
+            vlan_id = 7
+            env.switch[1].setprop_row("Ports2Vlans", [port_id, vlan_id, "Tagged"])
+
         """
         return getattr(self.xmlproxy, "%s.%s.addRow" % (dst, table))(*values)
 
     def unsetprop(self, table, param, values, dst="nb"):
-        """
-        @brief  Unset switchpp property.
-        @param table:  Name of table where necessary parameter is stored
-        @type  table:  str
-        @param param:  Name of necessary parameter
-        @type  param:  str
-        @param values:  List on necessary set parameters
-        @type  values:  list
-        @param dst:  Query destination. E.g. nb, system, onsps
-        @type  dst:  str
-        @raise  xmlrpclib.Fault:
-        @rtype:  int
-        @return:  Unset operation status (int or xmlrpclib.Fault exception)
-        @note  This is just wrapper for xmlrpc nb call.
-        @par Example:
-        @code
-        switch_instance.setprop("Ports", "adminMode", [10, "Up"])
-        env.switch[1].unsetprop("SpanningTree", "mode", [1, "MSTP"])
-        @endcode
+        """Unset switchpp property.
+
+        Args:
+            table(str):  Name of table where necessary parameter is stored
+            param(str):  Name of necessary parameter
+            values(list):  List on necessary set parameters
+            dst(str):  Query destination. E.g. nb, system, onsps
+
+        Raises:
+            xmlrpclib.Fault
+
+        Returns:
+            int:  Unset operation status (int or xmlrpclib.Fault exception)
+
+        Notes:
+            This is just wrapper for xmlrpc nb call.
+
+        Examples::
+
+            switch_instance.setprop("Ports", "adminMode", [10, "Up"])
+            env.switch[1].unsetprop("SpanningTree", "mode", [1, "MSTP"])
+
         """
         return getattr(self.xmlproxy, "%s.%s.unset.%s" % (dst, table, param))(*values)
 
     def delprop_row(self, table, row_id, dst="nb"):
-        """
-        @brief  Delete row from switchpp table.
-        @param table:  Name of table
-        @type  table:  str
-        @param row_id:  Row ID in switch table
-        @type  row_id:  int
-        @param dst:  Querry destination. E.g. nb, system, onsps
-        @type  dst:  str
-        @raise  xmlrpclib.Fault:
-        @rtype:  int
-        @return:  delRow operation status (int or xmlrpclib.Fault exception)
-        @note  This is just wrapper for xmlrpc nb call.
-        @par Example:
-        @code
-        switch_instance.delprop_row("Vlans", 8)
-        port_id = 1
-        vlan_id = 7
-        env.switch[1].delprop_row("Ports2Vlans", 4)
-        @endcode
+        """Delete row from switchpp table.
+
+        Args:
+            table(str):  Name of table
+            row_id(int):  Row ID in switch table
+            dst(str):  Querry destination. E.g. nb, system, onsps
+
+        Raises:
+            xmlrpclib.Fault
+
+        Returns:
+            int:  delRow operation status (int or xmlrpclib.Fault exception)
+
+        Notes:
+            This is just wrapper for xmlrpc nb call.
+
+        Examples::
+
+            switch_instance.delprop_row("Vlans", 8)
+            port_id = 1
+            vlan_id = 7
+            env.switch[1].delprop_row("Ports2Vlans", 4)
+
         """
         return getattr(self.xmlproxy, "%s.%s.delRow" % (dst, table))(row_id)
 
     def findprop(self, table, values, dst="nb"):
-        """
-        @brief  Find switchpp property id.
-        @param table:  Name of table where necessary parameter is stored
-        @type  table:  str
-        @param values:  List on necessary find parameters
-        @type  values:  list
-        @param dst:  Querry destination. E.g. nb, system, onsps
-        @type  dst:  str
-        @raise  xmlrpclib.Fault:
-        @rtype:  int
-        @return:  Query reply (row id).
-        @note  This is just wrapper for xmlrpc nb call.
-        @par Example:
-        @code
-        switch_instance.findprop("Vlans", [7, ])
-        env.switch[1].findprop("Applications", [1, 1, 'ONSNameServer'])
-        @endcode
+        """Find switchpp property id.
+
+        Args:
+            table(str):  Name of table where necessary parameter is stored
+            values(list):  List on necessary find parameters
+            dst(str):  Querry destination. E.g. nb, system, onsps
+
+        Raises:
+            xmlrpclib.Fault
+
+        Returns:
+            int:  Query reply (row id).
+
+        Notes:
+            This is just wrapper for xmlrpc nb call.
+
+        Examples::
+
+            switch_instance.findprop("Vlans", [7, ])
+            env.switch[1].findprop("Applications", [1, 1, 'ONSNameServer'])
+
         """
         return getattr(self.xmlproxy, "%s.%s.find" % (dst, table))(*values)
 
     def existsprop(self, table, values, dst="nb"):
-        """
-        @brief  Check switchpp property existence.
-        @param table:  Name of table where necessary parameter is stored
-        @type  table:  str
-        @param values:  List on necessary find parameters
-        @type  values:  str
-        @param dst:  Querry destination. E.g. nb, system, onsps
-        @type  dst:  str
-        @rtype:  bool
-        @return:  Query reply.
-        @note  This is just wrapper for xmlrpc nb call.
-        @par Example:
-        @code
-        switch_instance.existsprop("StaticARP", ["10.10.10.10", 0])
-        @endcode
+        """Check switchpp property existence.
+
+        Args:
+            table(str):  Name of table where necessary parameter is stored
+            values(str):  List on necessary find parameters
+            dst(str):  Querry destination. E.g. nb, system, onsps
+
+        Returns:
+            bool:  Query reply.
+
+        Notes:
+            This is just wrapper for xmlrpc nb call.
+
+        Examples::
+
+            switch_instance.existsprop("StaticARP", ["10.10.10.10", 0])
+
         """
         return getattr(self.xmlproxy, "%s.%s.exists" % (dst, table))(*values)
 
     def multicall(self, calls_list):
-        """
-        @brief  Execute switchpp multicall
-        @param calls_list:  List of dictionaries for necessary XML-RPC calls
-        @type  calls_list:  list(dict)
-        @raise  SwitchException:  incorrect parameters
-        @return:  List of executed operations statuses and return values
-        @note  This is just wrapper for xmlrpc system call.
-        @par Example:
-        @code
-        env.switch[1].multicall([{'methodName': 'nb.Vlans.addRow', 'params': [(10, 'Vlan_10'), (20, 'Vlan_20'), (30, 'Vlan_30'), (40, 'Vlan_40'), ]}, ])
-        env.switch[1].multicall([{'methodName': 'nb.Vlans.addRow', 'params': [(100, 'Vlan_100'), ]},
-                                 {'methodName': 'nb.Ports2Vlans.addRow', 'params': [(1, 100, "Untagged"), ]},
-                                 {'methodName': 'nb.Ports.set.pvid', 'params': [(1, 100), ]}])
-        env.switch[1].multicall([{'methodName': 'nb.Ports.get.operationalStatus', 'params': [(1, ), (2, ), (3, ), (4, ), (5, )]}, ])
-        @endcode
+        """Execute switchpp multicall.
+
+        Args:
+            calls_list(list(dict)):  List of dictionaries for necessary XML-RPC calls
+
+        Raises:
+            SwitchException:  incorrect parameters
+
+        Returns:
+            List of executed operations statuses and return values
+
+        Notes:
+            This is just wrapper for xmlrpc system call.
+
+        Examples::
+
+            env.switch[1].multicall([{'methodName': 'nb.Vlans.addRow', 'params': [(10, 'Vlan_10'), (20, 'Vlan_20'), (30, 'Vlan_30'), (40, 'Vlan_40'), ]}, ])
+            env.switch[1].multicall([{'methodName': 'nb.Vlans.addRow', 'params': [(100, 'Vlan_100'), ]},
+                                     {'methodName': 'nb.Ports2Vlans.addRow', 'params': [(1, 100, "Untagged"), ]},
+                                     {'methodName': 'nb.Ports.set.pvid', 'params': [(1, 100), ]}])
+            env.switch[1].multicall([{'methodName': 'nb.Ports.get.operationalStatus', 'params': [(1, ), (2, ), (3, ), (4, ), (5, )]}, ])
+
         """
         multicalls_list = []
         for row in calls_list:
@@ -377,19 +422,21 @@ class SwitchONSGeneralMixin(object):
         return multicalls_list
 
     def set_app_log_level(self, loglevel="Notice"):
-        """
-        @brief  Set application log level for switch
-        @param  loglevel:  value of set log level
-        @type  loglevel:  str
+        """Set application log level for switch.
+
+        Args:
+            loglevel(str):  value of set log level
+
         """
         for i in self.ui.get_table_applications():
             self.ui.configure_application(i['name'], loglevel)
 
     def check_app_table(self):
-        """
-        @brief  Check if Application table contains all expected items in admin Up state.
-        @rtype:  bool
-        @return  True or False
+        """Check if Application table contains all expected items in admin Up state.
+
+        Returns:
+            bool:  True or False
+
         """
         # TODO update application list
         expapp_list = {'ONSCoreServer',
@@ -439,11 +486,14 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
         return SwitchONSGeneralMixin._get_port_for_probe(self)
 
     def start(self, wait_on=True):
-        """
-        @brief  Power on switch or perform power cycle if it is already On.
-        @param wait_on:  Check if switch boot successfully
-        @type  wait_on:  bool
-        @raise  SwitchException:  unknown device status
+        """Power on switch or perform power cycle if it is already On.
+
+        Args:
+            wait_on(bool):  Check if switch boot successfully
+
+        Raises:
+            SwitchException:  unknown device status
+
         """
         self.class_logger.info("Starting Real switch device %s(%s) ..." % (self.name, self.ipaddr))
         self.class_logger.debug("Checking device status on powerboard...")
@@ -513,9 +563,10 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
         self.speed_preconfig()
 
     def clearconfig(self):
-        """
-        @brief  Perform clearConfig query on switch using telnet.
-                And try to configure management interface.
+        """Perform clearConfig query on switch using telnet.
+
+        And try to configure management interface.
+
         """
         # If serial is disabled using default clearconfig function.
         if not self._use_serial:
@@ -554,8 +605,8 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
             self.close_serial()
 
     def exec_netboot(self):
-        """
-        @brief  Method to execute netboot on device start
+        """Method to execute netboot on device start.
+
         """
         trm = pexpect.spawn('telnet %s %d' % (self.config["portserv_host"], self.config["portserv_port"]))
         trm.expect_exact('Hit a key to start the shell...', 150)
@@ -566,8 +617,8 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
         trm.kill(0)
 
     def open_sshtun(self):
-        """
-        @brief  Establish ssh tunnel.
+        """Establish ssh tunnel.
+
         """
         if self.sshtun is None:
             self.class_logger.debug("Creating sshtun instance ...")
@@ -582,16 +633,16 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
                                         ("127.0.0.1", self.local_xmlrpc_port), timeout=180)
 
     def close_sstun(self):
-        """
-        @brief  Close ssh tunnel.
+        """Close ssh tunnel.
+
         """
         if self.sshtun is not None and self.sshtun.check():
             self.class_logger.debug("Closing ssh tunnel ...")
             self.sshtun.close()
 
     def get_env_prop(self, param):
-        """
-        @brief  Read properties from all devices.
+        """Read properties from all devices.
+
         """
         if getattr(getattr(self, "rag", None), "role", "") == "slave":
             return "Slave_%s" % param
@@ -601,26 +652,24 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
             return self.instance_prop[param]
 
     def get_processes(self, tc_name, skip_prcheck=None):
-        """
-        @brief  Procedure of getting processes on switch.
-        @param  tc_name:  test case name
-        @type  tc_name:  str
-        @param  skip_prcheck:  list of processes to skip PID verification
-        @type  skip_prcheck:  list[str]
+        """Procedure of getting processes on switch.
+
+        Args:
+            tc_name(str):  test case name
+            skip_prcheck(list[str]):  list of processes to skip PID verification
+
         """
         return self.supervisorctl(tc_name, cmd="status", ssh=self.ssh, skip_prcheck=skip_prcheck)
 
     def supervisorctl(self, tc_name, cmd="status", ssh=None, skip_prcheck=None):
-        """
-        @brief  Procedure of calling supervisorctl tool on switch.
-        @param  tc_name:  test case name
-        @type  tc_name:  str
-        @param  cmd:  supervisorctl command
-        @type  cmd:  str
-        @param  ssh:  ssh object
-        @type  ssh:  CLISSH
-        @param  skip_prcheck:  list of processes to skip PID verification
-        @type  skip_prcheck:  list[str]
+        """Procedure of calling supervisorctl tool on switch.
+
+        Args:
+            tc_name(str):  test case name
+            cmd(str):  supervisorctl command
+            ssh(CLISSH):  ssh object
+            skip_prcheck(list[str]):  list of processes to skip PID verification
+
         """
         self.class_logger.debug("Supervisor procedure of getting processes is on.")
         p2pid = {}
@@ -644,11 +693,14 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
         return p2pid
 
     def check_mgmt_iface(self):
-        """
-        @brief  Check if management interface is configured on switch.
-        @raise  SwitchException:  error on command execution
-        @rtype:  bool
-        @return:  True or False.
+        """Check if management interface is configured on switch.
+
+        Raises:
+            SwitchException:  error on command execution
+
+        Returns:
+            bool:  True or False
+
         """
         self.class_logger.debug("Check if management interface is configured.")
         command = "ip addr show dev %s | grep 'inet ' --color=never" % self.mgmt_iface
@@ -674,9 +726,11 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
             return False
 
     def setup_mgmt_iface(self):
-        """
-        @brief  Configure management interface on switch.
-        @raise  SwitchException:  error on command execution, timeout exceeded
+        """Configure management interface on switch.
+
+        Raises:
+            SwitchException:  error on command execution, timeout exceeded
+
         """
 
         self.class_logger.debug("Configure management interface %s." % self.mgmt_iface)
@@ -727,11 +781,14 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
             raise SwitchException(message)
 
     def rm_configdb(self, close_serial=True):
-        """
-        @brief  Remove configuration database.
-        @param close_serial:  Close telnet session in the end.
-        @type  close_serial:  bool
-        @return:  None
+        """Remove configuration database.
+
+        Args:
+            close_serial(bool):  Close telnet session in the end.
+
+        Returns:
+            None
+
         """
         self.get_serial(timeout=15, with_login=True, wait_login=1)
         self.class_logger.info("Removing configuration data base of %s(%s)." % (self.name, self.ipaddr))
@@ -746,8 +803,8 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
         self.db_corruption = False
 
     def console_clear_config(self):
-        """
-        @brief  Clear device configuration using console connection
+        """Clear device configuration using console connection
+
         """
         cmd = [
             "from xmlrpclib import ServerProxy", "rc = -1",
@@ -770,12 +827,12 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
                 pytest.fail(message)
 
     def forced_clearconfig(self, wait_on=False, timeout=60):
-        """
-        @brief  Remove DB and restart necessary processes.
-        @param wait_on:  Wait untill necessary apps are in run state after processes restart.
-        @type  wait_on:  bool
-        @param timeout:  Time to wait untill necessary apps are in run state.
-        @type  timeout:  int
+        """Remove DB and restart necessary processes.
+
+        Args:
+            wait_on(bool):  Wait untill necessary apps are in run state after processes restart.
+            timeout(int):  Time to wait until necessary apps are in run state.
+
         """
         # Removing configuration data base.
         self.rm_configdb(close_serial=False)
@@ -793,19 +850,21 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
 
 
 class SwitchSimulated(SwitchONSGeneralMixin, SwitchGeneral):
-    """
-    @brief  Simulated Switch in LXC containers class.
+    """Simulated Switch in LXC containers class.
+
     """
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize SwitchSimulated class
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
-        @raise  SwitchException:  incorrect switch path
+        """Initialize SwitchSimulated class.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
+        Raises:
+            SwitchException:  incorrect switch path
+
         """
         self.build_path = environment.get_absolute_build_path(opts.build_path)
         if self.build_path is None:
@@ -837,10 +896,11 @@ class SwitchSimulated(SwitchONSGeneralMixin, SwitchGeneral):
         return SwitchONSGeneralMixin._get_port_for_probe(self)
 
     def start(self, wait_on=True):
-        """
-        @brief  Create and launch LXC container with switchpp.
-        @param  wait_on:  Indicates if wait for device status
-        @type  wait_on:  bool
+        """Create and launch LXC container with switchpp.
+
+        Args:
+            wait_on(bool):  Indicates if wait for device status
+
         """
         self.class_logger.info("Starting LXC for switch with ip:%s port:%s..." % (self.ipaddr, self.port))
 
@@ -877,8 +937,8 @@ class SwitchSimulated(SwitchONSGeneralMixin, SwitchGeneral):
         return self.xmlproxy
 
     def stop(self):
-        """
-        @brief  Terminate LXC container.
+        """Terminate LXC container.
+
         """
         lxc_id = str(int(self.port) - 8080)
         process = Popen(["lxc-stop", "-n", lxc_id], stdout=PIPE, close_fds=True)
@@ -904,33 +964,35 @@ class SwitchSimulated(SwitchONSGeneralMixin, SwitchGeneral):
         return True
 
     def restart(self, wait_on=True, mode='powercycle'):
-        """
-        @brief  Restart LXC container.
-        @param  wait_on:  Indicates if wait for device status
-        @type  wait_on:  bool
-        @param  mode:  restart mode. powercycle|ui
-        @type  mode:  bool
+        """Restart LXC container.
+
+        Args:
+            wait_on(bool):  Indicates if wait for device status
+            mode(bool):  restart mode. powercycle|ui
+
         """
         self.stop()
         return self.start(wait_on)
         self.ui.connect()
 
     def rm_configdb(self):
-        """
-        @brief  Remove configuration database.
-        @raise  SwitchException:  not implemented
+        """Remove configuration database.
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         # TODO implement this for Simulated switch
         message = "This methods is not implemented for Simulated switch"
         raise SwitchException(message)
 
     def get_processes(self, tc_name, skip_prcheck=None):
-        """
-        @brief  Gets procecces-to-PID dictionary.
-        @param  tc_name:  test case name
-        @type  tc_name:  str
-        @param  skip_prcheck:  list of processes to skip PID verification
-        @type  skip_prcheck:  list[str]
+        """Gets procecces-to-PID dictionary.
+
+        Args:
+            tc_name(str):  test case name
+            skip_prcheck(list[str]):  list of processes to skip PID verification
+
         """
         p2pid = {}
         fpath = self.build_path + "/bin"
@@ -950,10 +1012,11 @@ class SwitchSimulated(SwitchONSGeneralMixin, SwitchGeneral):
         return p2pid
 
     def execute_ssh_command(self, command):
-        """
-        @brief  Executes command on switch.
-        @param  command:  ssh command to execute
-        @type  command:  str
+        """Executes command on switch.
+
+        Args:
+            command(str):  ssh command to execute
+
         """
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -973,14 +1036,13 @@ class SwitchSimulated(SwitchONSGeneralMixin, SwitchGeneral):
         return data
 
     def _read_command_output(self, stdout, stderr, ret_mode):
-        """
-        @brief  Read result of not-interactive command execution.
-        @param  stdout:  StdOut info
-        @type  stdout:  str
-        @param  stderr:  StdErr info
-        @type  stderr:  str
-        @param  ret_mode:  return mode. both|stderr|stdout
-        @type  ret_mode:  str
+        """Read result of not-interactive command execution.
+
+        Args:
+            stdout(str):  StdOut info
+            stderr(str):  StdErr info
+            ret_mode(str):  return mode. both|stderr|stdout
+
         """
         if ret_mode.lower() == 'both':
             return stdout.read(), stderr.read()

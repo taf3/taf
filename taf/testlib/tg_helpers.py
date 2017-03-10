@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``tg_helpers.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`TGHelperMixin class for mixin for tg object`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  tg_helpers.py
-
-@summary  TGHelperMixin class for mixin for tg object.
 """
 import re
 import time
@@ -29,8 +29,8 @@ from . import loggers
 
 
 class TGHelperMixin(object):
-    """
-    @brief  Mixin class for switch.tg
+    """Mixin class for switch.tg
+
     """
 
     # Create logger for the class
@@ -39,35 +39,31 @@ class TGHelperMixin(object):
     def emulate_isis_neighbor_on_port(self, tg_port, mac_address=None, system_id=None, mtu=None,
                                       ipv4_address=None, ipv6_address=None, hostname=None,
                                       isis_emul_hosts=1, ipgap=1, wait_for_packets=10):
-        """
-        @brief  Emutation of IS-IS router on specified TG's port
-        @param  tg_port: Name of TG port for emulation
-        @type  tg_port: str
-        @param  mac_address: Source MAC address for IS-IS PDUs
-        @type  mac_address: str
-        @param  system_id: System ID for IS-IS PDUs in format "xxxx.xxxx.xxxx"
-        @type  system_id: str
-        @param  ipv4_address: IPv4 address to announce as management IPv4 address
-        @type  ipv4_address: str
-        @param  ipv6_address: IPv6 address for announcement
-        @type  ipv6_address: str
-        @param  hostname: Hostname for announcement
-        @type  hostname: str
-        @param  isis_emul_hosts: number of ISIS Hosts to emulate
-        @type  isis_emul_hosts: int
-        @param  ipgap: rate of ISIS LSP ID's packets to emulate
-        @type  ipgap: int
-        @param  wait_for_packets: Time in seconds for sniffing packets
-        @type  wait_for_packets: int
-        @return  IS-IS neighbor parameters that are propagated in IS-IS packets
-                 e.g. MAC address or area ID.
-        @rtype  dict
-        @note  The second IS-IS neighbor emulation on other port leads to link state changes
-               and updates (LSPs) sent to already existing neighbors. LSPs require confirmations.
-               The correct way seems to be running an interactive sniffer in separate thread
-               and confirm every received LSP by an appropriate PSNP/CSNP. But current IXIA TAF
-               implementation doesn't support threading, so for now, in terms of compatibility, this
-               approach isn't implemented.
+        """Emulation of IS-IS router on specified TG's port.
+
+        Args:
+            tg_port(str): Name of TG port for emulation
+            mac_address(str): Source MAC address for IS-IS PDUs
+            system_id(str): System ID for IS-IS PDUs in format "xxxx.xxxx.xxxx"
+            ipv4_address(str): IPv4 address to announce as management IPv4 address
+            ipv6_address(str): IPv6 address for announcement
+            hostname(str): Hostname for announcement
+            isis_emul_hosts(int): number of ISIS Hosts to emulate
+            ipgap(int): rate of ISIS LSP ID's packets to emulate
+            wait_for_packets(int): Time in seconds for sniffing packets
+
+        Returns:
+            dict: IS-IS neighbor parameters that are propagated in IS-IS packets
+                  e.g. MAC address or area ID.
+
+        Notes:
+            The second IS-IS neighbor emulation on other port leads to link state changes
+            and updates (LSPs) sent to already existing neighbors. LSPs require confirmations.
+            The correct way seems to be running an interactive sniffer in separate thread
+            and confirm every received LSP by an appropriate PSNP/CSNP. But current IXIA TAF
+            implementation doesn't support threading, so for now, in terms of compatibility, this
+            approach isn't implemented.
+
         """
         MAX_ISISLSP_NEIGHBOR_TLV = 22  # max number of neighbor entries in LSP packet
 
@@ -236,31 +232,29 @@ class TGHelperMixin(object):
 
     def isis_packets_sending(self, env, tg_port, switch_id_port, mac_address=None, ipgap=1.0,
                              isis_nodes_cnt=5, mtu=1500):
-        """
-        @brief  Emutation of IS-IS DCRP node on specified TG's port
-        @param  env: environment data
-        @type  env:
-        @param  tg_port: Name of TG port for emulation
-        @type  tg_port: str
-        @param  switch_id_port: Switch id and port id to set port UP
-        @type  switch_id_port: tuple(str, str)
-        @param  mac_address: Source MAC address for IS-IS PDUs
-        @type  mac_address: str
-        @param  ipgap: rate of ISIS LSP ID's packets to emulate
-        @type  ipgap: int
-        @param  isis_nodes_cnt: Number of ISIS DCRP nodes to emulate
-        @type  isis_nodes_cnt: int
-        @param  mtu: MTU of
-        @type  mtu: int
-        @return  IS-IS neighbor parameters that are propagated in IS-IS packets
-                 e.g. MAC address or area ID.
-        @rtype  dict
-        @note  The second IS-IS neighbor emulation on other port leads to link state changes
-               and updates (LSPs) sent to already existing neighbors. LSPs require confirmations.
-               The correct way seems to be running an interactive sniffer in separate thread
-               and confirm every received LSP by an appropriate PSNP/CSNP. But current IXIA TAF
-               implementation doesn't support threading, so for now, in terms of compatibility, this
-               approach isn't implemented.
+        """Emulation of IS-IS DCRP node on specified TG's port.
+
+        Args:
+            env(Environment): environment data
+            tg_port(str): Name of TG port for emulation
+            switch_id_port(tuple(str, str)): Switch id and port id to set port UP
+            mac_address(str): Source MAC address for IS-IS PDUs
+            ipgap(int): rate of ISIS LSP ID's packets to emulate
+            isis_nodes_cnt(int): Number of ISIS DCRP nodes to emulate
+            mtu(int): MTU of
+
+        Returns:
+            dict: IS-IS neighbor parameters that are propagated in IS-IS packets
+                  e.g. MAC address or area ID.
+
+        Notes:
+            The second IS-IS neighbor emulation on other port leads to link state changes
+            and updates (LSPs) sent to already existing neighbors. LSPs require confirmations.
+            The correct way seems to be running an interactive sniffer in separate thread
+            and confirm every received LSP by an appropriate PSNP/CSNP. But current IXIA TAF
+            implementation doesn't support threading, so for now, in terms of compatibility, this
+            approach isn't implemented.
+
         """
         cmd = "match -f 5555 -p 30001 get_rules table"
         sw_neigh = {}
@@ -297,8 +291,8 @@ class TGHelperMixin(object):
         return sw_neigh
 
     def table_9_test_preparation(self, env, tg_port, sw_port, packet_num, ipgap, offset=0, arp_packet=None):
-        """
-        @brief Prepare ports, packets for table 9 related tests
+        """Prepare ports, packets for table 9 related tests.
+
         """
         # Configure ARP packet and stream
         if arp_packet:
@@ -390,8 +384,8 @@ class TGHelperMixin(object):
         return sw_t9
 
     def check_traffic(self, env, packets, ports, tg_indexes, rate=10, bi_dir=True, time_run=30):
-        """
-        @brief  Send traffic: packet_1, packet_2 between port_1 and port_2, with tg indexes: ix_1, ix_2
+        """Send traffic: packet_1, packet_2 between port_1 and port_2, with tg indexes: ix_1, ix_2.
+
         """
         packet_1, packet_2 = packets
         port_1, port_2 = ports

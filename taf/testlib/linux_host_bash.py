@@ -1,22 +1,23 @@
+# Copyright (c) 2015 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``linux_host_bash.py``
+
+`Linux Host UI wrappers Implementation`
+
 """
-@copyright Copyright (c) 2015 - 2017, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  linux_host_bash.py
-
-@summary  Linux Host UI wrappers Implementation
-"""
 import re
 import json
 import time
@@ -65,8 +66,8 @@ STAT_MAP = {
 
 
 class LinuxHostBash(LinuxHostInterface):
-    """
-    @description  Class with UiOnpssShell wrappers
+    """Class with UiOnpssShell wrappers.
+
     """
     # cpu_port is a onpss_shell ONP specific number, it is
     # an index into self.port_map based on the portid
@@ -79,11 +80,11 @@ class LinuxHostBash(LinuxHostInterface):
     SSH_NO_EXIT_STATUS = -1
 
     def __init__(self, host):
-        """
+        """Initialize UiOnpssShell class.
 
-        @brief  Initialize UiOnpssShell class
-        @param  host:  Switch instance
-        @type  host:  SwitchGeneral
+        Args:
+            host(SwitchGeneral):  Switch instance
+
         """
         super().__init__()
         self.host = host
@@ -130,8 +131,8 @@ class LinuxHostBash(LinuxHostInterface):
                                 if x.get('name') == 'ntp'), None)
 
     def reinit(self):
-        """
-        @brief  Re-initialize class attributes
+        """Re-initialize class attributes.
+
         """
         # Clear 'fake' Vlans table
         self.vlans = [{"vlanId": 1, "name": "VLAN-1"}]
@@ -144,8 +145,8 @@ class LinuxHostBash(LinuxHostInterface):
         self.default_fdb = self.get_table_fdb(table='static')
 
     def connect(self):
-        """
-        @brief  Attempts to create a ssh session to the switch
+        """Attempts to create a ssh session to the switch.
+
         """
         self.host.ssh.login()
         self.host.ssh.open_shell()
@@ -153,8 +154,8 @@ class LinuxHostBash(LinuxHostInterface):
         # in case we need to restart it
 
     def disconnect(self):
-        """
-        @brief  Disconnects the ssh session from the switch
+        """Disconnects the ssh session from the switch.
+
         """
         try:
             if self.host.ssh:
@@ -163,35 +164,43 @@ class LinuxHostBash(LinuxHostInterface):
             raise UIException(err)
 
     def start_switchd(self):
-        """
-        @brief  Restarts the switchd instance of the switch
+        """Restarts the switchd instance of the switch.
+
         """
         # Re-initialize class attributes
         self.reinit()
 
     def restart(self):
-        """
-        @brief  Restarts the switch via command line 'reboot' command.
+        """Restarts the switch via command line 'reboot' command.
+
         """
         self.cli_send_command('reboot', expected_rcs={self.SSH_NO_EXIT_STATUS})  # pylint: disable=no-member
         time.sleep(2)
         self.disconnect()
 
     def _return_user_mode(self, results):
-        """
-        @brief  Maintained for abstraction compatibility.
+        """Maintained for abstraction compatibility.
+
         Method that returns to user mode of a switch.
-        @param  results:  list of command execution results
-        @type  results:  list
+
+        Args:
+            results(list):  list of command execution results
+
         """
         pass
 
     def generate_port_name(self, port):
-        """
-        @brief  Attempts to translate port in the port_map
-        @type  port: int | str
-        @raise  UIException
-        @rtype: int | str
+        """Attempts to translate port in the port_map.
+
+        Args:
+            port(int | str): port in the port_map
+
+        Raises:
+            UIException
+
+        Returns:
+            int | str
+
         """
         try:
             port_name = self.port_map[port]
@@ -201,8 +210,8 @@ class LinuxHostBash(LinuxHostInterface):
         return port_name
 
     def generate_port_name_mapping(self):
-        """
-        @brief  Returns the device name (e.g. sw0p1), given a port number and vice versa.
+        """Returns the device name (e.g. sw0p1), given a port number and vice versa.
+
         """
         try:
             _ports = self.get_table_ports(all_params=False)
@@ -224,22 +233,23 @@ class LinuxHostBash(LinuxHostInterface):
 
     def cli_set(self, commands, timeout=None, split_lines=True, expected_rcs=frozenset({0}),
                 multicall_treshold=MULTICALL_THRESHOLD):
-        """
-        @brief  Sends a list of commands.
-                Will halt on exception from cli_send_command.
-        @param  commands:  list of commands to be executed
-        @type  commands:  list[list[str]]
-        @param  timeout:  command execution timeout
-        @type  timeout:  int
-        @param  split_lines:  split command execution results by lines or not
-        @type  split_lines:  bool
-        @param  expected_rcs:  expected return code
-        @type  expected_rcs:  int | set | list | frozenset
-        @param  multicall_treshold: minimum number of commands to be executed using multicall
-        @type  multicall_treshold: int
-        @rtype:  list[list[tuple(str | list, str, int)]]
-        @return: list of execution statuses for each command
-        @raises UICmdException: when rc not in expected_rcs
+        """Sends a list of commands.
+
+        Will halt on exception from cli_send_command.
+
+        Args:
+            commands(list[list[str]]):  list of commands to be executed
+            timeout(int):  command execution timeout
+            split_lines(bool):  split command execution results by lines or not
+            expected_rcs(int | set | list | frozenset):  expected return code
+            multicall_treshold(int): minimum number of commands to be executed using multicall
+
+        Returns:
+            list[list[tuple(str | list, str, int)]]: list of execution statuses for each command
+
+        Raises:
+            UICmdException: when rc not in expected_rcs
+
         """
         if len(commands) > multicall_treshold:
             # convert
@@ -256,17 +266,19 @@ class LinuxHostBash(LinuxHostInterface):
         return results
 
     def cli_send_command(self, command, timeout=None, expected_rcs=frozenset({0})):
-        """
-        @brief  Sends a single bash command
-        @param  command:  command to be executed
-        @type  command:  str
-        @param  timeout:  command execution timeout
-        @type  timeout:  int
-        @param  expected_rcs:  expected return code
-        @type  expected_rcs:  int | set | list | frozenset
-        @raise  UIException:  unexpected return code
-        @rtype tuple(str, str, int) | CmdStatus
-        @return  Returns CmdStatus namedtuple of stdout, stderr, return code
+        """Sends a single bash command.
+
+        Args:
+            command(str):  command to be executed
+            timeout(int):  command execution timeout
+            expected_rcs(int | set | list | frozenset):  expected return code
+
+        Raises:
+            UIException:  unexpected return code
+
+        Returns:
+            tuple(str, str, int) | CmdStatus: Returns CmdStatus namedtuple of stdout, stderr, return code
+
         """
         if self.command_prefix:
             command = self.command_prefix + command
@@ -281,16 +293,19 @@ class LinuxHostBash(LinuxHostInterface):
         return cmd_status
 
     def cli_multicall(self, commands, timeout=None, expected_rcs=frozenset({0})):
-        """
-        @brief  Sends a list of commands
-        @param  commands:  list of commands to be executed
-        @type  commands:  list[str]
-        @param  timeout:  command execution timeout
-        @type  timeout:  int
-        @param  expected_rcs:  expected return code
-        @type  expected_rcs:  int | set | list | frozenset
-        @rtype:  list[tuple(str, tuple(str, str, int))]
-        @raises UICmdException: when rc not in expected_rcs
+        """Sends a list of commands.
+
+        Args:
+            commands(list[str]):  list of commands to be executed
+            timeout(int):  command execution timeout
+            expected_rcs(int | set | list | frozenset):  expected return code
+
+        Returns:
+            list[tuple(str, tuple(str, str, int))]
+
+        Raises:
+            UICmdException: when rc not in expected_rcs
+
         """
         if timeout is None:
             # The default clissh timeout was 10 seconds, now 60 seconds
@@ -318,20 +333,18 @@ class LinuxHostBash(LinuxHostInterface):
 
     def cli_get_all(self, commands, timeout=None, split_lines=True, expected_rcs=frozenset({0}),
                     multicall_treshold=MULTICALL_THRESHOLD):
-        """
-        @brief  Sends a list of commands, will return [''] if exception
-        @param  commands:  list of commands to be executed
-        @type  commands:  list[list[str]
-        @param  timeout:  command execution timeout
-        @type  timeout:  int
-        @param  split_lines:  split command execution results by lines or not
-        @type  split_lines:  bool
-        @param  expected_rcs:  expected return code
-        @type  expected_rcs:  int | set | list | frozenset
-        @param  multicall_treshold: minimum number of commands to be executed using multicall
-        @type  multicall_treshold: int
-        @rtype:  list[list[str]]
-        @return:  list of outputs for each command
+        """Sends a list of commands, will return [''] if exception.
+
+        Args:
+            commands(list[list[str]):  list of commands to be executed
+            timeout(int):  command execution timeout
+            split_lines(bool):  split command execution results by lines or not
+            expected_rcs(int | set | list | frozenset):  expected return code
+            multicall_treshold(int): minimum number of commands to be executed using multicall
+
+        Returns:
+            list[list[str]]:  list of outputs for each command
+
         """
         if len(commands) > multicall_treshold:
             # convert
@@ -357,13 +370,15 @@ class LinuxHostBash(LinuxHostInterface):
         return results
 
     def process_table_data(self, data, table_keys_mapping):
-        """
-        @brief  Returns dictionary of items, given a table of elements.
-        @param  data:  Command execution return data
-        @type  data:  list[str]
-        @param  table_keys_mapping:  User column name to output column name mapping
-        @type  table_keys_mapping:  dict
-        @rtype:  dict
+        """Returns dictionary of items, given a table of elements.
+
+        Args:
+            data(list[str]):  Command execution return data
+            table_keys_mapping(dict):  User column name to output column name mapping
+
+        Returns:
+            dict
+
         """
         table = []
         for row in data:
@@ -378,32 +393,38 @@ class LinuxHostBash(LinuxHostInterface):
 
 # Clear Config
     def clear_config(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::clear_config()
+        """Clear device configuration.
+
         """
         # WORKAROUND: restart switchd
         self.start_switchd()
         self.generate_port_name_mapping()
 
     def save_config(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::save_config()
-        @raise  SwitchException:  not implemented
+        """Save device configuration.
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def restore_config(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::restore_config()
-        @raise  SwitchException:  not implemented
+        """Restore device configuration.
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
 # Application Check
     def check_device_state(self):
-        """
-        @brief  Attempts to connect to the shell retries number of times
-        @raise  SwitchException:  device is not ready
+        """Attempts to connect to the shell retries number of times.
+
+        Raises:
+            SwitchException:  device is not ready
+
         """
         # time.sleep(15)
 
@@ -422,8 +443,8 @@ class LinuxHostBash(LinuxHostInterface):
 
 # Platform
     def get_table_platform(self):
-        """
-        @copydoc testlib::ui_wrapper::UiInterface::get_table_platform()
+        """Get 'Platform' table.
+
         """
         # Note: No central area to pull stats; this is for display only
         return [{"ethernetSwitchType": "Fulcrum Switch",
@@ -445,31 +466,35 @@ class LinuxHostBash(LinuxHostInterface):
 
 # /proc/meminfo
     def get_proc_mem_info(self):
-        """
-        @brief  Get proc mem info
-        @rtype:  dict
-        @return:  Returns /proc/meminfo dictionary
+        """Get proc mem info.
+
+        Returns:
+            dict:  Returns /proc/meminfo dictionary
+
         """
         output = self.cli_send_command(command='cat /proc/meminfo').stdout
         return dict(re.findall(r'(.*):\s+(\d+)', output))
 
     def get_cpu_cores(self):
-        """
-            @brief  Return number of CPU cores.
-            @rtype:  int
-            @return:  Number of cpu cores
+        """Return number of CPU cores.
+
+        Returns:
+            int:  Number of cpu cores
+
         """
         command = 'nproc'
         output = self.cli_send_command(command=command).stdout
         return int(output)
 
     def is_process_active(self, process_name):
-        """
-            @brief  Check if process active or not
-            @param  process_name:  name of process
-            @type  process_name:  str
-            @rtype:  bool
-            @return:  bool
+        """Check if process active or not.
+
+        Args:
+            process_name(str):  name of process
+
+        Returns:
+            bool: True or False
+
         """
         command = 'pgrep {}'.format(process_name)
         try:
@@ -481,12 +506,14 @@ class LinuxHostBash(LinuxHostInterface):
 
 # Get current date
     def get_current_date(self, date_format='+%Y-%m-%d %T'):
-        """
-        @brief  Returns current date on device
-        @param date_format: Date format to be returned
-        @type date_format: str
-        @rtype:  str
-        @return:  Current date on device
+        """Returns current date on device.
+
+        Args:
+            date_format(str): Date format to be returned
+
+        Returns:
+            str:  Current date on device
+
         """
         try:
             cur_date = self.cli_send_command("date '{}'".format(date_format)).stdout.strip()
@@ -498,16 +525,33 @@ class LinuxHostBash(LinuxHostInterface):
 # Syslog configuration
     def create_syslog(self, syslog_proto, syslog_ip, syslog_port,
                       syslog_localport, syslog_transport, syslog_facility, syslog_severity):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::create_syslog()
-        @raise  SwitchException:  not implemented
+        """Configure Syslog settings.
+
+        Args:
+            syslog_proto(str):  syslog host protocol Udp | Tcp
+            syslog_ip(str):  syslog host IP address
+            syslog_port(int):  syslog host port
+            syslog_localport(int):  syslog host local port
+            syslog_transport(str):  syslog host transport
+            syslog_facility(int):  syslog host facility
+            syslog_severity(str):  syslog host severity
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         pass
 
     def logs_add_message(self, level, message):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::logs_add_message()
-        @raise  SwitchException:  not implemented
+        """Add message into device logs.
+
+        Args:
+            level(str):  log severity
+            message(str):  log message
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         level_map = {"Notice": "user.notice"}
         # if not found in map, default to original string
@@ -515,19 +559,24 @@ class LinuxHostBash(LinuxHostInterface):
 
 # Temperature information
     def get_temperature(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_temperature()
+        """Get temperature from Sensors table.
+
+        Returns:
+            dict:  CPU temperature information (Sensors table)
+
         """
         return []
 
 # System information
     def get_memory(self, mem_type='usedMemory'):
-        """
-        @brief  Returns free cached/buffered memory from switch
-        @param  mem_type:  memory type
-        @type  mem_type:  str
-        @rtype:  float
-        @return:  memory size
+        """Returns free cached/buffered memory from switch.
+
+        Args:
+            mem_type(str):  memory type
+
+        Returns:
+            float: memory size
+
         """
         show_command = [['free']]
         _table = self.cli_get_all(show_command)
@@ -544,10 +593,11 @@ class LinuxHostBash(LinuxHostInterface):
         return mem
 
     def get_cpu(self):
-        """
-        @brief  Returns cpu utilization from switch
-        @rtype:  float
-        @return:  cpu utilization from switch
+        """Returns cpu utilization from switch.
+
+        Returns:
+            float:  cpu utilization from switch
+
         """
         commands = [['top -bn 1']]
         res_list = self.cli_get_all(commands)
@@ -566,16 +616,16 @@ class LinuxHostBash(LinuxHostInterface):
 
 # Ports configuration
     def set_all_ports_admin_disabled(self):
-        """
-        @brief  Disables all ports in port_map on switch.
+        """Disables all ports in port_map on switch.
+
         """
         ports_table = self.get_table_ports()
         ports = [x['portId'] for x in ports_table if x["portId"] not in self.host.mgmt_ports]
         self.modify_ports(ports, adminMode="Down")
 
     def wait_all_ports_admin_disabled(self):
-        """
-        @brief  Checks if all the ports are set to down
+        """Checks if all the ports are set to down.
+
         """
         def _retry(ports_list):
             start_time = time.time()
@@ -612,17 +662,18 @@ class LinuxHostBash(LinuxHostInterface):
                 pytest.fail("Not all ports are in down state: %s" % up_ports)
 
     def get_port_configuration(self, port, **kwargs):
-        """
-        @brief  Returns attribute value (int) for given port
-        @param  port:  port ID
-        @type  port:  int | str
-        @param  expected_rcs:  expected return code
-        @type  expected_rcs:  int | set | list | frozenset
-        @param  kwargs:  Possible parameters: "getPortAttr", "getPortStats"
-        @type  kwargs:  dict
-        @rtype:  int | str
-        @raise:  AccessError
-        @return:  port attribute value
+        """Returns attribute value (int) for given port.
+
+        Args:
+            port(int | str):  port ID
+            kwargs(dict):  Possible parameters: "getPortAttr", "getPortStats"
+
+        Returns:
+            int | str: port attribute value
+
+        Raises:
+            AccessError
+
         """
         port_name = self.generate_port_name(port=port)
         if 'getPortAttr' in kwargs:
@@ -648,15 +699,16 @@ class LinuxHostBash(LinuxHostInterface):
             return attr_val
 
     def get_port_configuration_snapshot(self, port, stats='attributes', skip_list=frozenset({0})):
-        """
-        @brief  Get a list of port attributes and their values
-        @param  port:  port id
-        @type  port:  int
-        @param  stats:  stats to retrieve (attributes only currently)
-        @type  stats: str
-        @param  skip_list:  names to skip
-        @type  skip_list:  list | set
-        @rtype:  dict
+        """Get a list of port attributes and their values.
+
+        Args:
+            port(int):  port id
+            stats(str):  stats to retrieve (attributes only currently)
+            skip_list(list | set):  names to skip
+
+        Returns:
+            dict
+
         """
         port_name = self.generate_port_name(port=port)
 
@@ -680,16 +732,19 @@ class LinuxHostBash(LinuxHostInterface):
             port=port, getPortAttr=r) for r in attribute_list_filtered}
 
     def modify_ports(self, ports, expected_rcs=frozenset({0}), **kwargs):
-        """
-        @brief  Modifies settings on a list of ports
-        @param  ports:  list of port IDs
-        @type  ports:  list[int | str]
-        @param  expected_rcs:  expected return code
-        @type  expected_rcs:  int | list | set | frozenset
-        @param  kwargs:  Possible parameters
-        @type  kwargs:  dict
-        @raise:  BoundaryError | AccessError
-        @return:  None
+        """Modifies settings on a list of ports.
+
+        Args:
+            ports(list[int | str]):  list of port IDs
+            expected_rcs(int | list | set | frozenset):  expected return code
+            kwargs(dict):  Possible parameters
+
+        Raises:
+            BoundaryError | AccessError
+
+        Returns:
+            None
+
         """
         commands = []
         for port_id in ports:
@@ -801,12 +856,14 @@ class LinuxHostBash(LinuxHostInterface):
 
     @classmethod
     def parse_table_ports(cls, ports_table):
-        """
-        @brief  Returns list of dictionary of port properties.
-        @param  ports_table:  port information
-        @type  ports_table:  list[str]
-        @rtype:  dict
-        @return:  port properties
+        """Returns list of dictionary of port properties.
+
+        Args:
+            ports_table(list[str]):  port information
+
+        Returns:
+            dict:  port properties
+
         """
         # Compile regular expression for validating output
         for row in ports_table:
@@ -838,17 +895,19 @@ class LinuxHostBash(LinuxHostInterface):
             yield _row
 
     def get_table_ports(self, ports=None, all_params=False, ip_addr=False):
-        """
-        @brief  Returns the table ports dictionary
-        @param  ports:  list of port IDs
-        @type  ports:  list[int] | None
-        @param  all_params:  get additional port properties
-        @type  all_params:  bool
-        @param  ip_addr:  Get IP address
-        @type  ip_addr:  bool
-        @raise  SwitchException:  No switch ports found
-        @rtype:  list[dict]
-        @return:  ports table
+        """Returns the table ports dictionary.
+
+        Args:
+            ports(list[int] | None):  list of port IDs
+            all_params(bool):  get additional port properties
+            ip_addr(bool):  Get IP address
+
+        Raises:
+            SwitchException:  No switch ports found
+
+        Returns:
+            list[dict]:  ports table
+
         """
         # We must default to --details since we can't change the function signature
         # without breaking compatibility with other UIs
@@ -933,15 +992,15 @@ class LinuxHostBash(LinuxHostInterface):
 
 # Flow Control configuration (pause frames)
     def _configure_fc_mode(self, ports=None, tx_mode='normal', traffic_class=255):
-        """
-        @brief  Determines 802.3x pause frame format used.
+        """Determines 802.3x pause frame format used.
+
         Maps priorities to traffic classes.
-        @param  ports:  list of port ids
-        @type  ports:  list[int]
-        @param  tx_mode:  transmit mode (normal or class based)
-        @type  tx_mode:  str
-        @param traffic_class: traffic class bitmask
-        @type  traffic_class:  int
+
+        Args:
+            ports(list[int]):  list of port ids
+            tx_mode(str):  transmit mode (normal or class based)
+            traffic_class(int): traffic class bitmask
+
         """
         if tx_mode == 'normal':
             # Enable legacy pause mode
@@ -955,55 +1014,56 @@ class LinuxHostBash(LinuxHostInterface):
                               attrVal=traffic_class)
 
     def _disable_rx_fc(self, ports=None):
-        """
-        @brief  Disables receive of 802.3x pause frames.
-        @param  ports:  list of port ids
-        @type  ports:  list[int]
+        """Disables receive of 802.3x pause frames.
+
+        Args:
+            ports(list[int]):  list of port ids
+
         """
         # Disable rx pause on all TCs/Queues
         self.modify_ports(ports, setPortAttr="rx_class_pause", attrVal=0)
 
     def _enable_rx_fc(self, ports=None, tc=1):
-        """
-        @brief  Enables receive of 802.3x pause frames.
-        @param  ports:  list of port ids
-        @type  ports:  list[int]
-        @param  tc:  traffic class
-        @type  tc:  int
+        """Enables receive of 802.3x pause frames.
+
+        Args:
+            ports(list[int]):  list of port ids
+            tc(int):  traffic class
+
         """
         # Enable rx pause on TC/Queue 0
         self.modify_ports(ports, setPortAttr="rx_class_pause", attrVal=tc)
 
     def _disable_tx_fc(self, ports=None):
-        """
-        @brief  Disables transmit of 802.3x pause frames per port.
-        @param  ports:  list of port ids
-        @type  ports:  list[int]
+        """Disables transmit of 802.3x pause frames per port.
+
+        Args:
+            ports(list[int]):  list of port ids
+
         """
         # Disable tx pause frame generation
         self.modify_ports(ports, setPortAttr="smp_lossless_pause",
                           attrVal=self.host.hw.smp_lossless_pause.min)
 
     def _enable_tx_fc(self, ports=None):
-        """
-        @brief  Enables transmit of 802.3x pause frames per port.
-        @param  ports:  list of port ids
-        @type  ports:  list[int]
+        """Enables transmit of 802.3x pause frames per port.
+
+        Args:
+            ports(list[int]):  list of port ids
+
         """
         self.modify_ports(ports, setPortAttr="smp_lossless_pause",
                           attrVal=self.host.hw.smp_lossless_pause.max)
 
     def set_flow_control_type(self, ports=None, control_type=None, tx_mode='normal', tc=None):
-        """
-        @brief  Sets the flow control type
-        @param  ports:  list of port ids
-        @type  ports:  list[int]
-        @param  control_type:  flow control type
-        @type  control_type:  str
-        @param  tx_mode:  transmit mode (normal or class based)
-        @type  tx_mode:  str
-        @param  tc:  traffic class
-        @type  tc:  int
+        """Sets the flow control type.
+
+        Args:
+            ports(list[int]):  list of port ids
+            control_type(str):  flow control type
+            tx_mode(str):  transmit mode (normal or class based)
+            tc(int):  traffic class
+
         """
         if tc is None:
             tc_2_bitmask_convert = 1
@@ -1029,8 +1089,8 @@ class LinuxHostBash(LinuxHostInterface):
 
 # Vlan configuration
     def create_vlans(self, vlans=None):
-        """
-        @brief  Add vlans to the 'fake' Vlans table
+        """Add vlans to the 'fake' Vlans table.
+
         """
 
         # NOS does not support creating a VLAN in a VLAN database. WW42'14
@@ -1038,8 +1098,8 @@ class LinuxHostBash(LinuxHostInterface):
             self.vlans.append({"vlanId": v, "name": "VLAN-{}".format(v)})
 
     def delete_vlans(self, vlans=None):
-        """
-        @brief  Remove vlans from the 'fake' Vlans table
+        """Remove vlans from the 'fake' Vlans table.
+
         """
 
         # NOS does not support deleting a VLAN in a VLAN database. WW42'14
@@ -1051,8 +1111,8 @@ class LinuxHostBash(LinuxHostInterface):
                 pass
 
     def get_table_vlans(self):
-        """
-        @brief  Returns the 'fake' Vlans table
+        """Returns the 'fake' Vlans table.
+
         """
 
         # NOS does not support getting a VLAN database. WW42'14
@@ -1063,18 +1123,17 @@ class LinuxHostBash(LinuxHostInterface):
     @classmethod
     def _generate_bridge_vlan_commands(
             cls, command, ports, vlans, tagged=''):
-        """
-        @brief  Generate Bridge VLAN commands.
-        @param  command:  Bridge VLAN command
-        @type  command:  str
-        @param  ports:  list of port IDs
-        @type  ports:  list[str]
-        @param  vlans:  list of VLAN IDs
-        @type  vlans:  list[int]
-        @param  tagged:  port tagging attribute
-        @type  tagged:  str
-        @rtype:  list[str]
-        @return:  list of Bridge VLAN commands
+        """Generate Bridge VLAN commands.
+
+        Args:
+            command(str):  Bridge VLAN command
+            ports(list[str]):  list of port IDs
+            vlans(list[int]):  list of VLAN IDs
+            tagged(str):  port tagging attribute
+
+        Returns:
+            list[str]:  list of Bridge VLAN commands
+
         """
         return [
             cls.BRIDGE_VLAN_COMMAND_STRING.format(
@@ -1082,15 +1141,16 @@ class LinuxHostBash(LinuxHostInterface):
             for vlan in vlans for port in ports]
 
     def create_vlan_ports(self, ports=None, vlans=None, tagged='Tagged'):
-        """
-        @brief  Creates VLANs on ports using tagged, untagged, or pvid
-        @param  ports:  list of port IDs
-        @type  ports:  list[int] | set(int)
-        @param  vlans:  list of VLAN IDs
-        @type  vlans:  list[int] | set(int)
-        @param  tagged:  port tagging attribute
-        @type  tagged:  str
-        @raise  ValueError:  invalid tagged type
+        """Creates VLANs on ports using tagged, untagged, or pvid.
+
+        Args:
+            ports(list[int] | set(int)):  list of port IDs
+            vlans(list[int] | set(int)):  list of VLAN IDs
+            tagged(str):  port tagging attribute
+
+        Raises:
+            ValueError:  invalid tagged type
+
         """
         valid_tagged_args = {'tagged', 'untagged', 'pvid', 'pvid tagged', 'pvid untagged'}
         tagged = tagged.lower()
@@ -1110,12 +1170,12 @@ class LinuxHostBash(LinuxHostInterface):
                 raise ValueError('Invalid argument for tagged type, {0}.'.format(tagged))
 
     def delete_vlan_ports(self, ports=None, vlans=None):
-        """
-        @brief  Removes vlans from ports
-        @param  ports:  list of port IDs
-        @type  ports:  list[int]
-        @param  vlans:  list of VLAN IDs
-        @type  vlans:  list[int]
+        """Removes vlans from ports.
+
+        Args:
+            ports(list[int]):  list of port IDs
+            vlans(list[int]):  list of VLAN IDs
+
         """
         if not (ports is None or vlans is None):
             port_names = [self.port_map[p] for p in ports]
@@ -1128,15 +1188,14 @@ class LinuxHostBash(LinuxHostInterface):
                     self.cli_send_command(command=c)
 
     def modify_vlan_ports(self, ports=None, vlans=None, tagged='tagged'):
-        """
-        @brief  Changes vlan classification. Since no modify method exists in NOS,
+        """Changes vlan classification. Since no modify method exists in NOS,
         we need to delete the origin entry and re-add.
-        @param  ports:  list of port IDs
-        @type  ports:  list[int]
-        @param  vlans:  list of VLAN IDs
-        @type  vlans:  list[int]
-        @param  tagged:  port tagging attribute
-        @type  tagged:  str
+
+        Args:
+            ports(list[int]):  list of port IDs
+            vlans(list[int]):  list of VLAN IDs
+            tagged(str):  port tagging attribute
+
         """
         if not (ports is None or vlans is None):
             # Convert to set as finding membership in set is much faster than list
@@ -1152,13 +1211,15 @@ class LinuxHostBash(LinuxHostInterface):
             self.create_vlan_ports(ports=ports, vlans=vlans, tagged=tagged)
 
     def parse_table_vlan(self, vlan_table):
-        """
-        @brief  Parses the vlan table. This needs to be a loop because previous the table
+        """Parses the vlan table. This needs to be a loop because previous the table
         is built based on previous entries.
-        @param  vlan_table:  List of vlan raw output
-        @type  vlan_table:  list[str] | iter()
-        @return  A dictionary containing the portId, vlanId, and tagged state for each vlan
-        @rtype:  iter()
+
+        Args:
+            vlan_table(list[str] | iter()):  List of vlan raw output
+
+        Returns:
+            iter():  A dictionary containing the portId, vlanId, and tagged state for each vlan
+
         """
         for row in vlan_table:
             match = re.search(
@@ -1179,9 +1240,11 @@ class LinuxHostBash(LinuxHostInterface):
                 yield row
 
     def get_table_ports2vlans(self):
-        """
-        @brief  Gets the ports to vlan table
-        @rtype:  list[dict]
+        """Gets the ports to vlan table.
+
+        Returns:
+            list[dict]
+
         """
         vlan_output = self.cli_send_command('bridge vlan show').stdout.splitlines()
 
@@ -1192,14 +1255,15 @@ class LinuxHostBash(LinuxHostInterface):
 
     @staticmethod
     def row_with_header(header, data):
-        """
-        @brief  Returns dictionary per row of values for 'ip show stats'.
-        @param  header:  output header
-        @type  header:  str
-        @param  data:  output data
-        @type  data:  str
-        @rtype:  dict
-        @return:  dictionary per row of values for 'ip show stats'
+        """Returns dictionary per row of values for 'ip show stats'.
+
+        Args:
+            header(str):  output header
+            data(str):  output data
+
+        Returns:
+            dict:  dictionary per row of values for 'ip show stats'
+
         """
         prefix, columns = header.strip().split(':')
         column_names = ["{0}:{1}".format(prefix, h) for h in columns.split()]
@@ -1209,12 +1273,14 @@ class LinuxHostBash(LinuxHostInterface):
 
     @classmethod
     def parse_ip_show_stats(cls, input_lines):
-        """
-        @brief  Returns list of IP statistics.
-        @param  input_lines:  command output
-        @type  input_lines:  list[str]
-        @rtype:  dict
-        @return:  list of IP statistics
+        """Returns list of IP statistics.
+
+        Args:
+            input_lines(list[str]):  command output
+
+        Returns:
+            dict:  list of IP statistics
+
         """
         table = {}
         for n, row in enumerate(input_lines):
@@ -1225,14 +1291,15 @@ class LinuxHostBash(LinuxHostInterface):
 
 # Statistics configuration
     def get_table_basic_statistics(self, port, stat_name=None):
-        """
-        @brief  Returns a list of basic statistics found in /sys/class/net/
-        @param  port:  Port ID
-        @type  port:  int
-        @param  stat_name:  Statistics name
-        @type  stat_name:  str
-        @rtype:  dict | int
-        @return:  Statistics table or specific statistics value
+        """Returns a list of basic statistics found in /sys/class/net/.
+
+        Args:
+            port(int):  Port ID
+            stat_name(str):  Statistics name
+
+        Returns:
+            dict | int:  Statistics table or specific statistics value
+
         """
         cli_keys = ["collisions", "multicast", "rx_bytes", "rx_compressed",
                     "rx_dropped", "rx_errors", "rx_fifo_errors",
@@ -1255,11 +1322,14 @@ class LinuxHostBash(LinuxHostInterface):
             return stat_table[stat_name]
 
     def map_stat_name(self, generic_name):
-        """
-        @brief  Returns actual counter name
-        @param  generic_name:  counter Name
-        @type  generic_name:   str
-        @rtype:  str
+        """Returns actual counter name.
+
+        Args:
+            generic_name(str):  counter Name
+
+        Returns:
+            str
+
         """
         return STAT_MAP.get(generic_name, generic_name)
 
@@ -1270,15 +1340,18 @@ class LinuxHostBash(LinuxHostInterface):
         return {k.strip(): int(v.strip()) for k, v in splits}
 
     def get_table_statistics(self, port=None, stat_name=None):
-        """
-        @brief  Returns port statistics via ethtool -S command
-        @param  port:  Port ID
-        @type  port:  int
-        @param  stat_name:  Statistics name
-        @type  stat_name:  str
-        @raise  KeyError:  invalid port ID
-        @rtype:  dict | str
-        @return:  Statistics table or specific statistics value
+        """Returns port statistics via ethtool -S command.
+
+        Args:
+            port(int):  Port ID
+            stat_name(str):  Statistics name
+
+        Raises:
+            KeyError:  invalid port ID
+
+        Returns:
+            dict | str: Statistics table or specific statistics value
+
         """
         dev = self.generate_port_name(port=port)
         stat_name = self.map_stat_name(stat_name)
@@ -1300,28 +1373,36 @@ class LinuxHostBash(LinuxHostInterface):
             return formatted_table[stat_name]
 
     def clear_statistics(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::clear_statistics()
+        """Clear Statistics.
+
+        Returns:
+            None
+
+        Examples:
+
+            env.switch[1].ui.clear_statistics()
+
         """
         pass
 
 # DHCP Configurations
     def get_table_dhcp_config(self, file_name="/etc/dhcp/dhcpd.conf",
                               options=None):
-        """
-        @brief  Gets configuration from file
-        @param file_name:  File name
-        @type  file_name:  str
-        @param options:  Name of options to get
-        @type  options:  str
-        @rtype:  dict
-        @return:  DHCP configuration
-        @steps
+        """Gets configuration from file.
+
+        Args:
+            file_name(str):  File name
+            options(str):  Name of options to get
+
+        Returns:
+            dict:  DHCP configuration
+
+        Steps::
+
             -# Using sftp client open the config file in read only mode
             -# Store the configurations in dictionary format
-            -# Return the entire dictionary or a particular key's value based on
-               the options provided
-        @endsteps
+            -# Return the entire dictionary or a particular key's value based on the options provided
+
         """
         dhcp_table_keys = ["ddns-update-style", "default-lease-time",
                            "max-lease-time", "option subnet-mask",
@@ -1343,67 +1424,79 @@ class LinuxHostBash(LinuxHostInterface):
             return dhcp_config_table
 
     def create_dhcp_config_file(self, lines, file_name="/etc/dhcp/dhcpd.conf"):
-        """
-        @brief  Writes configuration required to file
-        @param lines:  Configuration
-        @type  lines:  str
-        @param file_name:  File name
-        @type  file_name:  str
-        @return:  None
-        @steps
+        """Writes configuration required to file.
+
+        Args:
+            lines(str):  Configuration
+            file_name(str):  File name
+
+        Returns:
+            None
+
+        Steps::
+
             -# Using sftp client open the config file in write mode
             -# Write the minimum configuration required by DHCP Server to the file
-        @endsteps
+
         """
         with self.host.ssh.client.open_sftp() as sftp_client:
             with sftp_client.open(file_name, 'w') as remote_file:
                 remote_file.writelines(lines)
 
     def modify_dhcp_status(self, ps_name="dhcpd", operation="start"):
-        """
-        @brief  Changes DHCP status
-        @param ps_name:  Service name
-        @type  ps_name:  str
-        @param operation:  Operations "start" | "stop"
-        @type  operation:  str
-        @rtype:  str
-        @return:  Result of execution
-        @steps
+        """Changes DHCP status.
+
+        Args:
+            ps_name(str):  Service name
+            operation(str):  Operations "start" | "stop"
+
+        Returns:
+            str:  Result of execution
+
+        Steps::
+
             -# Execute the command to start/stop the "dhcpd" service
             -# Return the result
-        @endsteps
+
         """
         command = ([["systemctl {1} {0}".format(ps_name, operation)]])
         result = self.cli_get_all(command)
         return result
 
     def create_dhcp_client_lease(self, file_name="/var/lib/dhcpd/dhcpd.leases"):
-        """
-        @brief  Creates a lease file via SFTP
-        @param file_name:  File name
-        @type  file_name:  str
-        @return:  None
-        @steps
+        """Creates a lease file via SFTP.
+
+        Args:
+            file_name(str):  File name
+
+        Returns:
+            None
+
+        Steps::
+
             -# Create a lease file when DHCP Server is started
-        @endsteps
+
         """
         with self.host.ssh.client.open_sftp() as sftp_client:
             with sftp_client.open(file_name, 'w'):
                 pass
 
     def get_table_dhcp_client_lease(self, file_name="/var/lib/dhcpd/dhcpd.leases"):
-        """
-        @brief  Gets data from a lease file
-        @param file_name:  File name
-        @type  file_name:  str
-        @rtype:  dict
-        @return:  dictionary or a particular key's value based on the options provided
-        @steps
+        """Gets data from a lease file
+
+        Args:
+            file_name(str):  File name
+
+        Returns:
+            dict:  dictionary or a particular key's value based on the options provided
+
+        Steps::
+
             -# Using sftp client open the config file in read only mode
             -# Store the configurations in dictionary format
             -# Return the entire dictionary or a particular key's value based on
                the options provided
-        @endsteps
+
         """
         with self.host.ssh.client.open_sftp() as sftp_client:
             with sftp_client.open(file_name, 'r') as remote_file:
@@ -1419,16 +1512,19 @@ class LinuxHostBash(LinuxHostInterface):
         return client_lease_table
 
     def get_dhcp_status(self, ps_name="dhcpd"):
-        """
-        @brief  Gets DHCP status
-        @param ps_name:  Service name
-        @type  ps_name:  str
-        @rtype:  str
-        @return:  Values 'active'|'unknown'
-        @steps
+        """Gets DHCP status.
+
+        Args:
+            ps_name(str):  Service name
+
+        Returns:
+            str:  Values 'active'|'unknown'
+
+        Steps::
+
             -# Execute the command to get the status of "dhcpd" service
             -# Return the result
-        @endsteps
+
         """
         # use systemctl is-active, it returns 'active' or 'unknown'
         command = "systemctl is-active {0}".format(ps_name)
@@ -1440,30 +1536,37 @@ class LinuxHostBash(LinuxHostInterface):
         return out.strip() == "active"
 
     def get_table_dhcp_server_ip_list(self, pool=None):
-        """
-        @brief  Gets configured range of ip address
-        @param pool:  "range"
-        @type  pool:  str
-        @rtype:  list
-        @return:  Range of ip address
-        @steps
+        """Gets configured range of ip address.
+
+        Args:
+            pool(str):  "range"
+
+        Returns:
+            list:  Range of ip address
+
+        Steps::
+
             -# From server configuration file get the range
             -# Return the list
-        @endsteps
+
         """
         if pool == "range":
             range_list = self.get_table_dhcp_config(options="range").split()
             return range_list
 
     def get_dhcp_client_lease_time(self, ports=None):
-        """
-        @brief  Returns the lease time configured for the interfaces, will raise
-                exception on any error
-        @param  ports:  List of port ids which denotes the switch interfaces
-        @type  ports:  list[int]
-        @raise:  SwitchException:  no switch ports found
-        @rtype:  dict
-        @return:  Dictionary with port id as key and lease time as value
+        """Returns the lease time configured for the interfaces, will raise
+            exception on any error
+
+        Args:
+            ports(list[int]):  List of port ids which denotes the switch interfaces
+
+        Raises:
+            SwitchException:  no switch ports found
+
+        Returns:
+            dict:  Dictionary with port id as key and lease time as value
+
         """
         try:
             result = {}
@@ -1478,15 +1581,18 @@ class LinuxHostBash(LinuxHostInterface):
 
 # Bridge Info configuration
     def get_table_bridge_info(self, param=None, port=None):
-        """
-        @brief  Retrieves switch properties organized under ONS 1.x
-        @param  param:  parameter name
-        @type  param:  str
-        @param  port:  port ID
-        @type  port:  int
-        @raise  KeyError | UIException:  port/management port info required
-        @rtype:  str | int
-        @return:  switch properties
+        """Retrieves switch properties organized under ONS 1.x.
+
+        Args:
+            param(str):  parameter name
+            port(int):  port ID
+
+        Raises:
+            KeyError | UIException:  port/management port info required
+
+        Returns:
+            str | int:  switch properties
+
         """
         cli_keys = {'operationalStatus': 'operstate',
                     'maxFrameSize': 'mtu',
@@ -1528,9 +1634,11 @@ class LinuxHostBash(LinuxHostInterface):
             return [port_row]
 
     def modify_bridge_info(self, **kwargs):
-        """
-        @brief  Used for mac aging time, maintained for ONS 1.x compatibility
-        @raise  KeyError:  cpu port is not defined
+        """Used for mac aging time, maintained for ONS 1.x compatibility.
+
+        Raises:
+            KeyError:  cpu port is not defined
+
         """
         port_name = self.generate_port_name(port=self.cpu_port)
         try:
@@ -1543,18 +1651,20 @@ class LinuxHostBash(LinuxHostInterface):
 
 # LAG configuration
     def create_lag(self, lag=None, key=0, lag_type='Static', hash_mode='None'):
-        """
-        @brief  Creates a lag group
-        @param  lag:  lag ID|name
-        @type  lag:  str|int
-        @param  key:  lag key
-        @type  key:  int
-        @param  lag_type:  lag type. Static | Dynamic
-        @type  lag_type:  str
-        @param  hash_mode:  lag hash mode
-        @type  hash_mode:  str
-        @raise  ExistsError
-        @rtype:  None
+        """Creates a lag group.
+
+        Args:
+            lag(str|int):  lag ID|name
+            key(int):  lag key
+            lag_type(str):  lag type. Static | Dynamic
+            hash_mode(str):  lag hash mode
+
+        Raises:
+            ExistsError
+
+        Returns:
+            None
+
         """
         if lag_type == 'Static' and lag:
             command = 'teamd -d -t {0}'.format(lag)
@@ -1586,11 +1696,20 @@ class LinuxHostBash(LinuxHostInterface):
         self.cli_send_command('ip link set {0} up'.format(lag))
 
     def create_lag_ports(self, ports, lag, lag_mode='Passive', timeout='Long'):
-        """
-        @brief  Set port to a LAG.
-        @rtype  ports: list[int]
-        @rtype  lag: int | str
-        @raise:  NotExistsError | AccessError
+        """Set port to a LAG.
+
+        Args:
+            ports( list[int]):  list of ports to be added into LAG
+            lag(int):  LAG Id
+            lag_mode(str): mode of lag
+            timeout(str): LAG timeout
+
+        Returns:
+            int | str: lag
+
+        Raises:
+            NotExistsError | AccessError
+
         """
         # Need to set port to admin down before joining
         self.modify_ports(ports=ports, adminMode='Down')
@@ -1633,12 +1752,17 @@ class LinuxHostBash(LinuxHostInterface):
         self.generate_port_name_mapping()
 
     def delete_lags(self, lags=None):
-        """
-        @brief  Delete lag groups
-        @param  lags:  list of lag IDs
-        @type lags:  iter() | str | list[str|int]
-        @raise:  NotExistsError
-        @rtype:  None
+        """Delete lag groups.
+
+        Args:
+            lags(iter() | str | list[str|int]):  list of lag IDs
+
+        Raises:
+            NotExistsError
+
+        Returns:
+            None
+
         """
         if lags is not None:
             if isinstance(lags, str):
@@ -1660,12 +1784,17 @@ class LinuxHostBash(LinuxHostInterface):
         self.generate_port_name_mapping()
 
     def delete_lag_ports(self, ports):
-        """
-        @brief  Deletes ports from a lag
-        @type  ports:  list[int]
-        @type  lag:  str|int
-        @raise  UIException:
-        @rtype:  None
+        """Deletes ports from a lag.
+
+        Args:
+            ports( list[int]):  list of ports to be added into LAG
+
+        Raises:
+            UIException
+
+        Returns:
+            None
+
         """
         command_list = ['ip link set {0} nomaster'.format(port) for port in ports]
 
@@ -1675,12 +1804,16 @@ class LinuxHostBash(LinuxHostInterface):
 
     @classmethod
     def parse_row_lag(cls, row):
-        """
-        @brief  Yield lag group information.
-                Will convert lagId to int for
-                ONS 1.x compatibility.
-        @type  row:  dict
-        @rtype:  dict
+        """Yield lag group information.
+
+         Will convert lagId to int for ONS 1.x compatibility.
+
+        Args:
+            row(dict):  dictionary
+
+        Returns:
+            dict
+
         """
         if 'team' not in row['name']:
             lag_name = 'lag' + str(row['name'])
@@ -1709,10 +1842,14 @@ class LinuxHostBash(LinuxHostInterface):
         return _row
 
     def get_table_lags(self):
-        """
-        @brief  Get lag group information.
-        Note: we can also use networkctl lag command
-        @rtype:  list[dict]
+        """Get lag group information.
+
+        Notes:
+            We can also use networkctl lag command
+
+        Returns:
+            list[dict]
+
         """
         table_ports = self.get_table_ports()
         table_lags = (r for r in table_ports if r['type'] == 'LAG')
@@ -1726,16 +1863,37 @@ class LinuxHostBash(LinuxHostInterface):
         return table_lags
 
     def modify_lags(self, lag, key=None, lag_type=None, hash_mode=None):
-        """
-        @copydoc testlib::ui_wrapper::UiInterface::modify_lags()
-        @raise  SwitchException:  not implemented
+        """Modify LagsAdmin table.
+
+        Args:
+            lag(int):  LAG id
+            key(int):  LAG key
+            lag_type(str):  LAG type (Static or Dynamic)
+            hash_mode():  LAG hash mode
+
+        Returns:
+            None
+
+        Examples:
+
+            env.switch[1].ui.modify_lags(lag=3800, lag_type="Static")
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_link_aggregation(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_link_aggregation()
-        @rtype:  list[dict]
+        """Get LinkAggregation table.
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_link_aggregation()
+
         """
         lacp_enable = "Disabled"
         if self.get_port_configuration(port=self.cpu_port, getPortAttr="lag_mode") == 1:
@@ -1759,59 +1917,143 @@ class LinuxHostBash(LinuxHostInterface):
 
     def configure_arp(self, garp=None, refresh_period=None, delay=None, secure_mode=None,
                       age_time=None, attemptes=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::configure_arp()
-        @raise  SwitchException:  not implemented
+        """Configure ARPConfig table.
+
+        Args:
+            garp(str):  AcceptGARP value. 'True'|'False'
+            refresh_period(int):  RefreshPeriod value
+            delay(int):  RequestDelay value
+            secure_mode(str):  SecureMode value. 'True'|'False'
+            age_time(int):  AgeTime value
+            attemptes(int):  NumAttempts value
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_arp(garp='Enabled')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def create_arp(self, ip, mac, port):
-        """
-        @brief  Create StaticARP record
-        @param ip:  ARP ip address
-        @type  ip:  str
-        @param mac:  ARP mac address
-        @type  mac:  str
-        @param port:  port id
-        @type  port:  int
-        @return:  None
+        """Create StaticARP record.
+
+        Args:
+            ip(str):  ARP ip address
+            mac(str):  ARP mac address
+            port(int):  port id
+
+        Returns:
+            None
+
         """
         port_name = self.port_map[port]
         command = 'ip neigh add {0} lladdr {1} dev {2} nud perm'.format(ip, mac, port_name)
         self.cli_send_command(command=command)
 
     def delete_arp(self, ip, network, mode='arp'):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::delete_arp()
-        @raise  SwitchException:  not implemented
+        """Delete ARP record.
+
+        Args:
+            ip(str):  ARP ip address
+            network(str):  RouteInterface network
+            mode(str):  'arp' or 'ipv6 neigbor'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_arp('10.0.5.102', '10.0.5.101/24')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_arp(self, mode='arp'):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_arp()
-        @raise  SwitchException:  not implemented
+        """Get ARP table.
+
+        Args:
+            mode(str):  'arp' or 'ipv6 neigbor'
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_arp()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def create_static_route(self, ip, nexthop, network, distance=-1, mode='ip'):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::create_static_route()
-        @raise  SwitchException:  not implemented
+        """Create StaticRoute record.
+
+        Args:
+            ip(str):  Route IP network
+            nexthop(str):  Nexthop IP address
+            network(str):  RouteInterface network
+            distance(int):  Route distance
+            mode(str):  'ip' or 'ipv6'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_static_route('20.20.20.0/24', '10.0.5.102', '10.0.5.101/24')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def delete_static_route(self, network):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::delete_static_route()
-        @raise  SwitchException:  not implemented
+        """Delete StaticRoute record.
+
+        Args:
+            network(str):  RouteInterface network
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_static_route('10.0.5.101/24')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_static_route(self, mode='ip'):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_static_route()
-        @raise  SwitchException:  not implemented
+        """Get StaticRoute table.
+
+        Args:
+            mode(str):  'ip' or 'ipv6'
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_static_route()
+
+        Raises:
+            SwitchException:  not implemented
+;
         """
         raise SwitchException("Not implemented")
 
@@ -1820,22 +2062,18 @@ class LinuxHostBash(LinuxHostInterface):
                                        max_table_entries, match_field_type_pairs,
                                        actions):
 
-        """
-        @brief  create a sub-table of tcam using the method defined in maa.py
-        @param  source_id:  the source id in the tcam table.
-        @type  source_id:  int
-        @param  table_id:  a given table id.
-                           If switchd running, table id starts from 5
-                           If matchd is running, table id starts from 4
-        @type  table_id:  int
-        @param  table_name:  a given table name.
-        @type  table_name:  str
-        @param  max_table_entries:  maximum number of rules can be set.
-        @type  max_table_entries:  int
-        @param  match_field_type_pairs:  list of given match field with match type
-        @type  match_field_type_pairs:  list[tuple(str, str)]
-        @param  actions:  list of actions for configurable matches
-        @type  actions:  list[str]
+        """Create a sub-table of tcam using the method defined in maa.py.
+
+        Args:
+            source_id(int):  the source id in the tcam table.
+            table_id(int):  a given table id.
+                            If switchd running, table id starts from 5
+                            If matchd is running, table id starts from 4
+            table_name(str):  a given table name.
+            max_table_entries(int):  maximum number of rules can be set.
+            match_field_type_pairs(list[tuple(str, str)]):  list of given match field with match type
+            actions(list[str]):  list of actions for configurable matches
+
         """
         self.maa.create_maa_tcam_subtable(source_id, table_id, table_name,
                                           max_table_entries, match_field_type_pairs,
@@ -1843,20 +2081,16 @@ class LinuxHostBash(LinuxHostInterface):
 
     def create_match_api_rule(self, prio_id, handle_id, table_id,
                               match_field_value_mask_list, action, action_value=None):
-        """
-        @brief set a rule into the table using the method defined in maa.py
-        @param  prio_id:  Higher id has a higher priority.
-        @type  prio_id:  int
-        @param  handle_id:  handle for match.
-        @type  handle_id:  int
-        @param  table_id:  the source table id where match to be set.
-        @type  table_id:  int
-        @param  match_field_value_mask_list:  field with match field, value and mask.
-        @type  match_field_value_mask_list:  list[tuple(str, str, str)]
-        @param  action:  given action for source table
-        @type  action:  str
-        @param  action_value:  action value for a specified action
-        @type  action_value:  int
+        """Set a rule into the table using the method defined in maa.py
+
+        Args:
+            prio_id(int):  Higher id has a higher priority.
+            handle_id(int):  handle for match.
+            table_id(int):  the source table id where match to be set.
+            match_field_value_mask_list(list[tuple(str, str, str)]):  field with match field, value and mask.
+            action(str):  given action for source table
+            action_value(int):  action value for a specified action
+
         """
         self.maa.create_maa_rule(prio_id,
                                  handle_id, table_id,
@@ -1865,44 +2099,48 @@ class LinuxHostBash(LinuxHostInterface):
                                  action_value)
 
     def get_table_match_api(self, table_id=None):
-        """
-        @brief  Lists the match api tables using the method defined in maa.py
-        @param  table_id:  table ID
-        @type  table_id:  int
-        @rtype:  list[dict]
+        """Lists the match api tables using the method defined in maa.py
+
+        Args:
+            table_id(int):  table ID
+
+        Returns:
+            list[dict]
+
         """
         return self.maa.get_maa_table(table_id)
 
     def get_rules_match_api(self, table_id, handle_id=None):
-        """
-        @brief  Lists the match api rules of the table using the method defined in maa.py
-        @params  table_id:  table ID (mandatory parameter)
-        @type  table_id:  int
-        @params  handle_id:  optional parameter
-        @type  handle_id:   int
-        @rtype:  list[dict]
+        """Lists the match api rules of the table using the method defined in maa.py.
+
+        Args:
+            table_id(int):  table ID (mandatory parameter)
+            handle_id(int):  optional parameter
+
+        Returns:
+            list[dict]
+
         """
         return self.maa.get_maa_rules(table_id, handle_id)
 
     def delete_match_api_rule(self, handle_id, table_id):
-        """
-        @brief delete a match from the table using the method defined in maa.py
-        @param  handle_id:  handle for match.[MANDATORY]
-        @type  handle_id:  int
-        @param  table_id:  the source table id where match to be set.[MANDATORY]
-        @type  table_id:  int
+        """Delete a match from the table using the method defined in maa.py.
+
+        Args:
+            handle_id(int):  handle for match.[MANDATORY]
+            table_id(int):  the source table id where match to be set.[MANDATORY]
+
         """
         self.maa.delete_maa_rule(handle_id, table_id)
 
     def delete_match_api_tcam_subtable(self, source_id, table_id=0, table_name=None):
-        """
-        @brief  Destroy a sub-table of tcam using the method defined in maa.py
-        @param  source_id:  the source id in the tcam table.[MANDATORY]
-        @type  source_id:  int
-        @param  table_id:  a given table id.[MANDATORY if table_name not specified]
-        @type  table_id:  int
-        @param  table_name:  a given table name.[MANDATORY if table_id not specified]
-        @type  table_name:  str
+        """Destroy a sub-table of tcam using the method defined in maa.py.
+
+        Args:
+            source_id(int):  the source id in the tcam table.[MANDATORY]
+            table_id(int):  a given table id.[MANDATORY if table_name not specified]
+            table_name(str):  a given table name.[MANDATORY if table_id not specified]
+
         """
         self.maa.delete_maa_tcam_subtable(source_id,
                                           table_id,
@@ -1910,121 +2148,335 @@ class LinuxHostBash(LinuxHostInterface):
 
 # OVS configuration
     def create_ovs_bridge(self, bridge_name):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::create_ovs_bridge()
-        @raise  SwitchException:  not implemented
+        """Create OvsBridges record.
+
+        Args:
+            bridge_name(str):  OVS bridge name
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ovs_bridge('spp0')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_ovs_bridges(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_ovs_bridges()
-        @raise  SwitchException:  not implemented
+        """Get OvsBridges table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries))
+
+        Examples::
+
+            env.switch[1].ui.get_table_ovs_bridges()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def delete_ovs_bridge(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::delete_ovs_bridge()
-        @raise  SwitchException:  not implemented
+        """Delete OVS Bridge.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_ovs_bridge()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def create_ovs_port(self, port, bridge_name):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::create_ovs_port()
-        @raise  SwitchException:  not implemented
+        """Create OvsPorts record.
+
+        Args:
+            port(int):  port Id
+            bridge_name(str):  OVS bridge name
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ovs_port(1, 'spp0')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_ovs_ports(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_ovs_ports()
-        @raise  SwitchException:  not implemented
+        """Get OvsPorts table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries))
+
+        Examples::
+
+            env.switch[1].ui.get_table_ovs_ports()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_ovs_rules(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_ovs_rules()
-        @raise  SwitchException:  not implemented
+        """Get OvsFlowRules table.
+
+        Returns:
+            list[dict]: table (list of dictionaries))
+
+        Examples::
+
+            env.switch[1].ui.get_table_ovs_rules()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def create_ovs_bridge_controller(self, bridge_name, controller):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::create_ovs_bridge_controller()
-        @raise  SwitchException:  not implemented
+        """Create OvsControllers record.
+
+        Args:
+            bridge_name(str):  OVS bridge name
+            controller(str):  controller address
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ovs_bridge_controller("spp0", "tcp:127.0.0.1:6633")
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_ovs_controllers(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_ovs_controllers()
-        @raise  SwitchException:  not implemented
+        """Get OvsControllers table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries))
+
+        Examples::
+
+            env.switch[1].ui.get_table_ovs_controllers()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def create_ovs_flow_rules(self, bridge_id, table_id, flow_id, priority, enabled):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::create_ovs_flow_rules()
-        @raise  SwitchException:  not implemented
+        """Create OvsFlowRules table.
+
+        Args:
+            bridge_id(int):  OVS bridge ID
+            table_id(int):  Table ID
+            flow_id(int):  Flow ID
+            priority(int):  Rule priority
+            enabled(str):  Rule status
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ovs_flow_rules(0, 0, 1, 2000, "Enabled")
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def delete_ovs_flow_rules(self, bridge_id, table_id, flow_id, priority):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::delete_ovs_flow_rules()
-        @raise  SwitchException:  not implemented
+        """Delete row from OvsFlowRules table.
+
+        Args:
+            bridge_id(int):  OVS bridge ID
+            table_id(int):  Table ID
+            flow_id(int):  Flow ID
+            priority(int):  Rule priority
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_ovs_flow_rules(bridgeId, tableId, flowId, priority)
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def configure_ovs_resources(self, **kwargs):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::configure_ovs_resources()
-        @raise  SwitchException:  not implemented
+        """Configure OvsResources table.
+
+        Args:
+            **kwargs(dict): parameters to be configured:
+                            "controllerRateLimit";
+                            "vlansLimit";
+                            "untaggedVlan";
+                            "rulesLimit".
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_ovs_resources(rulesLimit=2000)
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_ovs_flow_actions(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_ovs_flow_actions()
-        @raise  SwitchException:  not implemented
+        """Get OvsFlowActions table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries))
+
+        Examples::
+
+            env.switch[1].ui.get_table_ovs_flow_actions()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def create_ovs_flow_actions(self, bridge_id, table_id, flow_id, action, param, priority=2000):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::create_ovs_flow_actions()
-        @raise  SwitchException:  not implemented
+        """Add row to OvsFlowActions table.
+
+        Args:
+            bridge_id(int):  OVS bridge ID
+            table_id(int):  Table ID
+            flow_id(int):  Flow ID
+            priority(int):  Rule priority
+            action(str):  Action name
+            param(str):  Action parameter
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ovs_flow_actions(0, 0, 1, 'Output', '25')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def delete_ovs_flow_actions(self, bridge_id, table_id, flow_id, action, priority=2000):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::delete_ovs_flow_actions()
-        @raise  SwitchException:  not implemented
+        """Delete row from OvsFlowActions table.
+
+        Args:
+            bridge_id(int):  OVS bridge ID
+            table_id(int):  Table ID
+            flow_id(int):  Flow ID
+            priority(int):  Rule priority
+            action(str):  Action name
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_ovs_flow_actions(0, 0, 1, 'Output')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_ovs_flow_qualifiers(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_ovs_flow_qualifiers()
-        @raise  SwitchException:  not implemented
+        """Get OvsFlowQualifiers table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_ovs_flow_qualifiers()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def create_ovs_flow_qualifiers(self, bridge_id, table_id, flow_id, field, data, priority=2000):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::create_ovs_flow_qualifiers
-        @raise  SwitchException:  not implemented
+        """Add row to OvsFlowQualifiers table.
+
+        Args:
+            bridge_id(int):  OVS bridge ID
+            table_id(int):  Table ID
+            flow_id(int):  Flow ID
+            priority(int):  Rule priority
+            field(str):  Expression name
+            data(str):  Expression data
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ovs_flow_qualifiers(0, 0, i, 'EthSrc', '00:00:00:00:00:01')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def delete_ovs_flow_qualifiers(self, bridge_id, table_id, flow_id, field, priority=2000):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::delete_ovs_flow_qualifiers
-        @raise  SwitchException:  not implemented
+        """Delete row from OvsFlowQualifiers table.
+
+        Args:
+            bridge_id(int):  OVS bridge ID
+            table_id(int):  Table ID
+            flow_id(int):  Flow ID
+            priority(int):  Rule priority
+            field(str):  Expression name
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_ovs_flow_qualifiers(bridgeId, tableId, flowId, field)
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
@@ -2034,9 +2486,28 @@ class LinuxHostBash(LinuxHostInterface):
         self.lldp.clear_settings()
 
     def configure_global_lldp_parameters(self, **kwargs):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::configure_global_lldp_parameters()
-        @raise  SwitchException:  not implemented
+        """Configure global LLDP parameters.
+
+        Args:
+            **kwargs(dict):  parameters to be modified:
+                             'messageFastTx';
+                             'messageTxHoldMultiplier';
+                             'messageTxInterval';
+                             'reinitDelay';
+                             'txCreditMax';
+                             'txFastInit';
+                             'locChassisIdSubtype'.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_global_lldp_parameters(messageTxInterval=5)
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
@@ -2046,9 +2517,28 @@ class LinuxHostBash(LinuxHostInterface):
                         'Disabled': "disabled"}
 
     def configure_lldp_ports(self, ports, **kwargs):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::configure_lldp_ports()
-        @raise  SwitchException:  not implemented
+        """Configure LldpPorts records.
+
+        Args:
+            ports(list[int]):  list of ports
+            **kwargs(dict):  parameters to be modified:
+                             'adminStatus';
+                             'tlvManAddrTxEnable';
+                             'tlvPortDescTxEnable';
+                             'tlvSysCapTxEnable';
+                             'tlvSysDescTxEnable';
+                             'tlvSysNameTxEnable'.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_lldp_ports([1, 2], adminStatus='Disabled')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         cli_keys = {
             'adminStatus': self.LLDP_ADMINSTATUS,
@@ -2078,30 +2568,78 @@ class LinuxHostBash(LinuxHostInterface):
                     self.lldp.set_enable_tx(port_name, cli_keys[param], enable_tx)
 
     def get_table_lldp(self, param=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_lldp()
+        """Get Lldp table.
+
+        Args:
+            param(str):  parameter name (optional)
+
+        Returns:
+            list[dict]|int|str: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_lldp()
+
         """
         # TODO: something with global settings which may not be supported yet
         raise SwitchException("Not implemented")
 
     def get_table_lldp_ports(self, port=None, param=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_lldp_ports()
-        @raise  SwitchException:  not implemented
+        """Get LldpPorts table.
+
+        Args:
+            port(int):  port Id (optional)
+            param(str):  parameter name (optional)
+
+        Returns:
+            list[dict]|int|str:  table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_lldp_ports(1)
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_lldp_ports_stats(self, port=None, param=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_lldp_ports_stats()
-        @raise  SwitchException:  not implemented
+        """Get LldpPorts table statistics.
+
+        Args:
+            port(int):  port Id (optional)
+            param(str):  parameter name (optional)
+
+        Returns:
+            list[dict]|int|str: table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_lldp_ports_stats(1)
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_lldp_remotes(self, port=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_lldp_remotes()
-        @raise  SwitchException:  not implemented
+        """Get LldpRemotes table.
+
+        Args:
+            port(int):  port Id (optional)
+
+        Returns:
+            list[dict]: table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_lldp_remotes(1)
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         if port is not None:
             port_names = [self.port_map[port]]
@@ -2131,9 +2669,18 @@ class LinuxHostBash(LinuxHostInterface):
         return _table
 
     def get_table_remotes_mgmt_addresses(self, port=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_remotes_mgmt_addresses()
-        @rtype: list[dict]
+        """Get LldpRemotesMgmtAddresses table.
+
+        Args:
+            port(int):  port Id (optional)
+
+        Returns:
+            list[dict]: table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_remotes_mgmt_addresses(1)
+
         """
         if port is not None:
             port_names = [self.port_map[port]]
@@ -2153,8 +2700,18 @@ class LinuxHostBash(LinuxHostInterface):
         return _table
 
     def disable_lldp_on_device_ports(self, ports=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::disable_lldp_on_device_ports()
+        """Disable Lldp on device ports (if port=None Lldp should be disabled on all ports).
+
+        Args:
+            ports(list[int]):  list of ports
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.disable_lldp_on_device_ports()
+
         """
         if ports is None:
             port_names = list(self.port_map.values())
@@ -2171,120 +2728,294 @@ class LinuxHostBash(LinuxHostInterface):
 
 # DCBX configuration
     def set_dcb_admin_mode(self, ports, mode='Enabled'):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::set_dcb_admin_mode()
-        @raise  SwitchException:  not implemented
+        """Enable/Disable DCB on ports.
+
+        Args:
+            ports(list[int]):  list of ports
+            mode(str):  "Enabled" or 'Disabled'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.set_dcb_admin_mode([1, 2], "Enabled")
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def enable_dcbx_tlv_transmission(self, ports, dcbx_tlvs="all", mode="Enabled"):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::enable_dcbx_tlv_transmission()
-        @raise  SwitchException:  not implemented
+        """Enable/Disable the transmission of all Type-Length-Value messages.
+
+        Args:
+            ports(list[int]):  list of ports
+            dcbx_tlvs(str):  TLV message types
+            mode(str):  "Enabled" or 'Disabled'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.enable_dcbx_tlv_transmission([1, 2], dcbx_tlvs="all", mode="Enabled")
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_dcbx_ports(self, port=None, param=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_dcbx_ports()
-        @raise  SwitchException:  not implemented
+        """Get DcbxPorts table.
+
+        Args:
+            port(int):  port Id (optional)
+            param(str):  parameter name (optional)
+
+        Returns:
+            list[dict]:  table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_dcbx_ports()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_dcbx_app_maps(self, table_type="Admin", port=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_dcbx_app_maps()
-        @raise  SwitchException:  not implemented
+        """Get DcbxAppMaps* table
+
+        Args:
+            table_type(str):  "Admin", "Local" or "Remote"
+            port(int):  port Id (optional)
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_dcbx_app_maps("Admin", 1)
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def configure_application_priority_rules(self, ports, app_prio_rules):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::configure_application_priority_rules()
-        @raise  SwitchException:  not implemented
+        """Configure Application Priority rules.
+
+        Args:
+            ports(list[int]):  list of ports
+            app_prio_rules(list[dict]):  list of rules dictionaries
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_application_priority_rules([1, 2], [{"selector": 1, "protocol": 2, "priority":1}, ])
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def configure_dcbx_ets(self, ports, **kwargs):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::configure_dcbx_ets()
-        @raise  SwitchException:  not implemented
+        """Configure DCBx ETS Conf/Reco parameter for ports list.
+
+        Args:
+            ports(list[int]):  list of ports
+            **kwargs(dict):  parameters to be modified:
+                             "willing";
+                             "cbs";
+                             "maxTCs";
+                             "confBandwidth";
+                             "confPriorityAssignment";
+                             "confAlgorithm";
+                             "recoBandwidth";
+                             "recoPriorityAssignment";
+                             "recoAlgorithm".
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_dcbx_ets([1, 2], confBandwidth=100)
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def configure_dcbx_cn(self, ports, **kwargs):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::configure_dcbx_cn()
-        @raise  SwitchException:  not implemented
+        """Configure DCBx CN parameter for the ports list.
+
+        Args:
+            ports(list[int]):  list of ports
+            **kwargs(dict):  parameters to be modified:
+                             "cnpvSupported";
+                             "cnpvReady".
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_dcbx_cn([1, 2], cnpvSupported='Enabled')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def configure_dcbx_pfc(self, ports, **kwargs):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::configure_dcbx_pfc()
-        @raise  SwitchException:  not implemented
+        """Configure DCBx PFC parameter for the ports list.
+
+        Args:
+            ports(list[int]):  list of ports
+            **kwargs(dict):  parameters to be modified:
+                             "mbc";
+                             "enabled";
+                             "willing".
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_dcbx_pfc([1, 2])
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def configure_dcbx_app(self, ports, **kwargs):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::configure_dcbx_app()
-        @raise  SwitchException:  not implemented
+        """Configure DCBx APP parameter for the ports list.
+
+        Args:
+            ports(list[int]):  list of ports
+            **kwargs(dict):  parameters to be modified:
+                             "willing".
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_dcbx_app([1, 2])
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_dcbx_remotes(self, port=None, param=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_dcbx_remotes()
-        @raise  SwitchException:  not implemented
+        """Get DcbxRemotes* table.
+
+         Args:
+             port(int):  port Id (optional)
+             param(str):  parameter name (optional)
+
+         Returns:
+             list[dict]|int|str: table (list of dictionaries) or value
+
+         Examples::
+
+             env.switch[1].ui.get_table_dcbx_remotes(1)
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_dcbx_pfc(self, table_type="Local", port=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_dcbx_pfc()
-        @raise  SwitchException:  not implemented
+        """Get DcbxRemotes* table.
+
+        Args:
+            port(int):  port Id (optional)
+            table_type(str):  Table types "Admin"| "Local"| "Remote"
+
+        Returns:
+            list[dict]|int|str:  table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_dcbx_pfc()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
 # UFD configuration
 
     def get_table_ufd_config(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_ufd_config()
-        @raise  SwitchException:  not implemented
+        """Get UFDConfig table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_ufd_config()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def restart_networkd_service(self):
-        """
-        @brief  Restarting systemd-networkd process
-        @rtype:  bool
-        @return:  True if result is none otherwise false
-        @raise UiCmdException: when restart fails
+        """Restarting systemd-networkd process.
+
+        Returns:
+            bool:  True if result is none otherwise false
+
+        Raises:
+            UiCmdException: when restart fails
+
         """
         return self.networkd.restart()
 
     def clear_networkd_settings(self):
-        """
-        @brief  Clear networkd settings
-        @raise UiCmdException: when restart fails
+        """Clear networkd settings.
+
+        Raises:
+            UiCmdException: when restart fails
 
         """
         self.networkd.clear_settings()
 
     def get_ufd_networkctl_status(self, ports):
-        """
-        @brief  Checking networkctl status
-        @param  ports:  ports to check networkctl status
-        @type  ports:  list[int]
-        @return:  Returns Port Status as Dictionary format for list of Ports with attribute
-                  as key and attribute value as value
-                  If Uplink port -> Returns Values for Keys {'Carrier Bound By', 'Link File',
-                  'Driver', 'MTU', 'Network File', 'State', 'Address', 'Type'}
-                  If Downlink port-> Returns Values for Keys {'Carrier Bound To', 'Link File',
-                  'Driver', 'MTU', 'Network File', 'State', 'Address', 'Type'}
-        @rtype:  dict
+        """Checking networkctl status.
+
+        Args:
+            ports(list[int]):  ports to check networkctl status
+
+        Returns:
+            dict:  Returns Port Status as Dictionary format for list of Ports with attribute
+                   as key and attribute value as value
+                   If Uplink port -> Returns Values for Keys {'Carrier Bound By', 'Link File',
+                   'Driver', 'MTU', 'Network File', 'State', 'Address', 'Type'}
+                   If Downlink port-> Returns Values for Keys {'Carrier Bound To', 'Link File',
+                   'Driver', 'MTU', 'Network File', 'State', 'Address', 'Type'}
+
         """
         network_dict = {}
         for port in ports:
@@ -2295,12 +3026,14 @@ class LinuxHostBash(LinuxHostInterface):
         return network_dict
 
     def _parse_networkctl(self, res):
-        """
-        @brief  Parsing networkctl status output.
-        @param  res:  command output
-        @type  res:  str
-        @return: Returns networkctl status in dictionary format
-        @rtype: dict
+        """Parsing networkctl status output.
+
+        Args:
+            res(str):  command output
+
+        Returns:
+            dict: Returns networkctl status in dictionary format
+
         """
         result = res.splitlines()
         stripped = (line.strip() for line in result)
@@ -2333,56 +3066,123 @@ class LinuxHostBash(LinuxHostInterface):
 # DHCP Relay configuration
 
     def create_dhcp_relay(self, iface_name='global', server_ip=None, fwd_iface_name=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::create_dhcp_relay()
-        @raise  SwitchException:  not implemented
+        """Configure DhcpRelayAdmin or DhcpRelayV6Admin table.
+
+        Args:
+            iface_name(str):  VLAN inteface name
+            server_ip(str):  DHCP Server IP address
+            fwd_iface_name(str):  VLAN forward interface name (for IPv6 config only)
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_dhcp_relay(iface_name='global', server_ip='10.10.0.2')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_dhcp_relay(self, dhcp_relay_ipv6=False):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_dhcp_relay()
-        @raise  SwitchException:  not implemented
+        """Return DhcpRelayAdmin or DhcpRelayV6Admin table
+
+        Args:
+            dhcp_relay_ipv6(bool):  is IPv6 config defined
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.get_table_dhcp_relay(dhcp_relay_ipv6=False)
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
 # VxLAN configuration
 
     def configure_tunneling_global(self, **kwargs):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::configure_tunneling_global()
-        @raise  SwitchException:  not implemented
+        """Configure TunnelingGlobalAdmin table.
+
+        Args:
+            **kwargs(dict):  parameters to be modified:
+                             "vnTag";
+                             "vxlanInnerVlanProcessing";
+                             "mode",
+                             "vxlanDestUDPPort".
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_tunneling_global()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def create_tunnels(self, tunnel_id=None, destination_ip=None, vrf=0, encap_type=None):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::create_tunnels()
-        @raise  SwitchException:  not implemented
+        """Configure TunnelsAdmin table.
+
+        Args:
+            tunnel_id(int):  Tunnel ID
+            destination_ip(str):  Destination IP address
+            vrf(int):  Tunnel VRF
+            encap_type(str):  Tunnel encapsulation type
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_tunnels(tunnel_id=records_count, destination_ip=ip_list, encap_type='VXLAN')
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
     def get_table_tunnels_admin(self):
-        """
-        @copydoc  testlib::ui_wrapper::UiInterface::get_table_tunnels_admin()
-        @raise  SwitchException:  not implemented
+        """Return TunnelsAdmin table.
+
+        Returns:
+            list[dict]:  table
+
+        Examples::
+
+            env.switch[1].ui.get_table_tunnels_admin()
+
+        Raises:
+            SwitchException:  not implemented
+
         """
         raise SwitchException("Not implemented")
 
 # ICMP Ping configuration
     def icmp_ping_request(self, ip_addr, ip_version, options="",
                           timeout=None, expected_rcs=frozenset({0})):
-        """
-        @brief  execute ping command
-        @param  ip_addr:  the destination ip address to be pinged
-        @type  ip_addr:  str
-        @param  ip_version:  user specified ip address version
-        @type  ip_version: int
-        @param  options:  options for the ping command
-        @type  options:  str
-        @type  timeout:  int
-        @type  expected_rcs:  int | set | list | frozenset
-        @rtype:  str
+        """Execute ping command.
+
+        Args:
+            ip_addr(str):  the destination ip address to be pinged
+            ip_version(int):  user specified ip address version
+            options(str):  options for the ping command
+            timeout(int):  command execution timeout
+            expected_rcs(int | set | list | frozenset):  expected results
+
+        Returns:
+            str
+
         """
         ping_cmd_map = {4: 'ping', 6: 'ping6'}
         ping = ping_cmd_map[ip_version]
@@ -2398,10 +3198,14 @@ class LinuxHostBash(LinuxHostInterface):
 
     @classmethod
     def parse_icmp_ping_result(cls, ping_output):
-        """
-        @brief  parses the output of ping command
-        @type  ping_output:  str
-        @rtype:  dict
+        """Parses the output of ping command.
+
+        Args:
+            ping_output(str): output of ping command
+
+        Returns:
+            dict
+
         """
         pattern = re.compile(r'\((?P<ip_addr>.+?)\)\s'
                              r'(from (?P<source_ip>.*?) (?P<mgmt_interface>.*?):\s)?'
@@ -2427,18 +3231,18 @@ class LinuxHostBash(LinuxHostInterface):
 
     def get_icmp_ping_result(self, ip_addr, ip_version, options="",
                              timeout=None, expected_rcs=frozenset({0})):
-        """
-        @brief  return parsed result of ping command
-        @param  ip_addr:  the destination ip address to be pinged
-        @type  ip_addr:  str
-        @param  ip_version:  user specified ip address version
-        @type  ip_version: int
-        @param  options:  options for the ping command
-        @type  options:  str
-        @type  timeout:  int
-        @type  expected_rcs:  int | set | list | frozenset
-        @return:  a dictionary containing various statistics related to a ping command
-        @rtype:  dict
+        """Return parsed result of ping command.
+
+        Args:
+            ip_addr(str):  the destination ip address to be pinged
+            ip_version(int):  user specified ip address version
+            options(str):  options for the ping command
+            timeout(int):  command execution timeout
+            expected_rcs(int | set | list | frozenset):  expected results
+
+        Returns:
+            dict:  a dictionary containing various statistics related to a ping command
+
         """
         icmp_args = [ip_addr, ip_version]
         icmp_kwargs = {
@@ -2451,25 +3255,29 @@ class LinuxHostBash(LinuxHostInterface):
 
 # iputils version
     def iputils_version(self, options=""):
-        """
-        @brief  Verify the versions of ping and ping6 in the iputils package.
-        @type  options:  str
-        @rtype:  str
+        """Verify the versions of ping and ping6 in the iputils package.
+
+        Args:
+            options(str):  options for the ping command
+
+        Returns:
+            str
+
         """
         cmd = ('rpm {0} iputils'.format(options))
         result = self.cli_send_command(command=cmd).stdout
         return result
 
     def create_invalid_ports(self, ports=None, num=1):
-        """
+        """Creates port name if port id is passed say [Swop100, if 100 is passed as port id]
 
-        @brief creates port name if port id is passed say [Swop100, if 100 is passed as port id]
         Else creates port name with a value incremented to 10 to existing length of ports
         Ex[sw0p34 , currently sw0p24 is last port]
-        @param ports: list of port_ids to generate port_names for
-        @type ports: iter()
-        @param num: generate num new invalid ports
-        @type num: int
+
+        Args:
+            ports(iter()): list of port_ids to generate port_names for
+            num(int): generate num new invalid ports
+
         """
         port_name = self.port_map.get(1, 'sw0p1')[:-1]
         if ports is not None:
@@ -2484,10 +3292,11 @@ class LinuxHostBash(LinuxHostInterface):
 
 # NTP update
     def ntp_update(self):
-        """
-        @brief  Update date and time stamp using NTP server.
-        @return:  status of operation (bool) or None if ntp_server not set
-        @rtype:  bool | None
+        """Update date and time stamp using NTP server.
+
+        Args:
+            bool | None:  status of operation (bool) or None if ntp_server not set
+
         """
         status = None
         if self.ntp_server is not None:
@@ -2496,35 +3305,47 @@ class LinuxHostBash(LinuxHostInterface):
 
 # Netns functionality
     def create_namespace(self, name):
-        """
-        @copydoc  testlib::linux_host_interface::LinuxHostInterface::create_namespace()
+        """Create network namespace.
+
+        Args:
+            name(str): netns name
+
         """
         cmd = ("ip netns add {}".format(name))
         self.cli_send_command(command=cmd)
 
     def enter_namespace(self, name):
-        """
-        @copydoc  testlib::linux_host_interface::LinuxHostInterface::enter_namespace()
+        """Add netns prefix to the command.
+
+        Args:
+            name(str): netns name
+
         """
         self.command_prefix = "ip netns exec {} ".format(name)
 
     def exit_namespace(self):
-        """
-        @copydoc  testlib::linux_host_interface::LinuxHostInterface::exit_namespace()
+        """Remove netns prefix from the command.
+
         """
         self.command_prefix = ""
 
     def delete_namespace(self, name):
-        """
-        @copydoc  testlib::linux_host_interface::LinuxHostInterface::delete_namespace()
+        """Delete network namespace.
+
+        Args:
+            name(str): netns name
+
         """
         cmd = ("ip netns delete {}".format(name))
         self.cli_send_command(command=cmd)
 
 # Work with files and folder
     def create_folder(self, name, options=None, command=None, **kwargs):
-        """
-        @copydoc  testlib::linux_host_interface::LinuxHostInterface::create_folder()
+        """Create folder.
+
+        Args:
+            name(str): folder name
+
         """
         cmd = mkdir_cmd.CmdMkdir(name=name, **kwargs)
         if options:
@@ -2538,25 +3359,27 @@ class LinuxHostBash(LinuxHostInterface):
             self.cli_send_command(command='mkdir {}'.format(str(cmd)))
 
     def delete_folder(self, name):
-        """
-        @copydoc  testlib::linux_host_interface::LinuxHostInterface::delete_folder()
+        """Delete folder.
+
+        Args:
+            name(str): folder name
+
         """
         cmd = ("rm -rf {}".format(name))
         self.cli_send_command(command=cmd)
 
 
 class InvalidPortContext(object):
-    """
-    @description  Class to create a invalid por
+    """Class to create a invalid port.
+
     """
     def __init__(self, ui, ports):
-        """"
+        """"Initialize Invalidport class.
 
-        @brief intialize Invalidport class
-        @param  ui:  instance of switch
-        @type  ui:  UiOnpssShell
-        @param  ports:  port id of invalid port
-        @type  ports:  iter()
+        Args:
+            ui(UiOnpssShell):  instance of switch
+            ports(iter()):  port id of invalid port
+
         """
         super(InvalidPortContext, self).__init__()
         self.ports = ports
@@ -2564,16 +3387,18 @@ class InvalidPortContext(object):
 
     def __enter__(self):
         """
-        @return: list of ports
-        @rtype: list
+
+        Returns:
+            list: list of ports
+
         """
         self.ui.port_map.update(self.ports)
         # just return the port list
         return list(self.ports.keys())
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """
-        @brief deletes invalid port created
+        """Deletes invalid port created.
+
         """
         for key in self.ports:
             self.ui.port_map.pop(key)

@@ -1,22 +1,22 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+"""``dev_linux_host.py``
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+`Linux host device related functionality`
 
-@file  dev_linux_host.py
-
-@summary  Linux host device related functionality.
 """
 
 import re
@@ -50,6 +50,7 @@ class NICHelper(object):
     @staticmethod
     def NICS_IF_NO_MGMT(nic):
         """TODO
+
         """
         pass
 
@@ -62,8 +63,8 @@ class NICHelper(object):
 
 
 def autologin(function):
-    """
-    @brief  Decorator: performs login for self.ssh object.
+    """Decorator: performs login for self.ssh object.
+
     """
     def wrapper(*args, **kwargs):
         logout = False
@@ -81,8 +82,8 @@ def autologin(function):
 
 
 def autoshell(function):
-    """
-    @brief  Decorator: performs login and opens shell for self.ssh object.
+    """Decorator: performs login and opens shell for self.ssh object.
+
     """
     def wrapper(*args, **kwargs):
         logout = False
@@ -102,8 +103,8 @@ def autoshell(function):
 
 
 class GenericLinuxHost(entry_template.GenericEntry):
-    """
-    @description  Generic Linux host pattern class.
+    """Generic Linux host pattern class.
+
     """
 
     class_logger = loggers.ClassLogger()
@@ -118,12 +119,12 @@ class GenericLinuxHost(entry_template.GenericEntry):
     DEFAULT_SERVER_WAIT_ON_TIMEOUT = 90
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize GenericLinuxHost class
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
+        """Initialize GenericLinuxHost class.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
         """
         super(GenericLinuxHost, self).__init__(config, opts)
         self.name = config['name'] if "name" in config else "noname"
@@ -176,10 +177,11 @@ class GenericLinuxHost(entry_template.GenericEntry):
         self.mgmt_iface = row.group('name')
 
     def connect_port(self, port_id):
-        """
-        @brief  Emulate port connection via setting adminMode into Up state
-        @param  port_id:  Port number
-        @type  port_id:  int | str
+        """Emulate port connection via setting adminMode into Up state.
+
+        Args:
+            port_id(int | str):  Port number
+
         """
         # Set initial ports speed
         self.speed_preconfig()
@@ -195,17 +197,19 @@ class GenericLinuxHost(entry_template.GenericEntry):
             self.ui.modify_ports([port_id], adminMode="Up")
 
     def exec_cmd(self, command, check_root=True):
-        """
-        @brief  Exec shell command with root privileges and print warning message in case StdErr isn't empty.
+        """Exec shell command with root privileges and print warning message in case StdErr isn't empty.
 
-        @param command:  Command to be executed
-        @param check_root:  Flag indicates root privileges
-        @return  Returns CmdStatus namedtuple of stdout, stderr, return code
-        @rtype: tuple(str, str, int) | CmdStatus
-        @par Example:
-        @code
-        env.lhost[1].ssh.exec_cmd('sudo brctl addbr br0')
-        @endcode
+        Args:
+            command(str):  Command to be executed
+            check_root(bool):  Flag indicates root privileges
+
+        Returns:
+            tuple(str, str, int) | CmdStatus:  Returns CmdStatus namedtuple of stdout, stderr, return code
+
+        Examples::
+
+            env.lhost[1].ssh.exec_cmd('sudo brctl addbr br0')
+
         """
         if check_root and self.ssh_user != "root":
             # requires password less sudo config
@@ -215,25 +219,25 @@ class GenericLinuxHost(entry_template.GenericEntry):
 
     # @autologin
     def ifconfig(self, mode=None, ports=None, ipaddr=None, ip6addr=None, mac=None):
-        """
-        @brief  Assign an address to a network interface and/or configure network interface parameters.
-        @param  mode:  Flag 'up/down' activates/deactivates the specified network interface, flag 'stats' displays tx/rx statistic of the given interface
-        @type  mode:  str
-        @param  ports:  Specific interface name parameter
-        @type  ports:  list
-        @param  ipaddr:  IPv4 address to be assigned to the specific interface
-        @type  ipaddr:  list
-        @param  ip6addr:  IPv6 address to be assigned to the specific interface
-        @type  ip6addr:  list
-        @param  mac:  Set the hardware address on the interface
-        @type  mac:  list
-        @raise  ArgumentError:  ports value is None, mode is not in {"up", "down"}, length of ports, ipaddr, ip6addr or mac not equal if set
-        @rtype:  dict
-        @return:  if mode='stats', return interface statistic
-        @par Example:
-        @code
-        env.tg[1].ifconfig("up", ports=[ports[("tg1", "lh1")][1]], ipaddr=["193.160.0.1/24"], ip6addr=["1000:160::2/64"], mac=["00:12:14:00:10:13"])
-        @endcode
+        """Assign an address to a network interface and/or configure network interface parameters.
+
+        Args:
+            mode(str):  Flag 'up/down' activates/deactivates the specified network interface, flag 'stats' displays tx/rx statistic of the given interface
+            ports(list):  Specific interface name parameter
+            ipaddr(list):  IPv4 address to be assigned to the specific interface
+            ip6addr(list):  IPv6 address to be assigned to the specific interface
+            mac(list):  Set the hardware address on the interface
+
+        Raises:
+            ArgumentError:  ports value is None, mode is not in {"up", "down"}, length of ports, ipaddr, ip6addr or mac not equal if set
+
+        Returns:
+            dict:  if mode='stats', return interface statistic
+
+        Examples::
+
+            env.tg[1].ifconfig("up", ports=[ports[("tg1", "lh1")][1]], ipaddr=["193.160.0.1/24"], ip6addr=["1000:160::2/64"], mac=["00:12:14:00:10:13"])
+
         """
         # Validate that params list corresponds with ports list.
         def validate_params(var, name):
@@ -296,34 +300,30 @@ class GenericLinuxHost(entry_template.GenericEntry):
     @autologin
     def routes(self, mode=None, netwrk=None, netwrk6=None, ports=None, next_hop=None,
                next_hop6=None, option=None, metric=None, prefixtoroute=None, lo=None):
-        """
-        @brief  Assign routes to specific hosts or networks via an interface after it has been configured with the ifconfig utility
-        @param  mode:  Flag 'up/down' change state of the interface to up or down.
-        @type  mode:  str
-        @param  netwrk:  List of v4 routes to be assigned on the device.
-        @type  netwrk:  list
-        @param  netwrk6:  List of v6 routes to be assigned on the device.
-        @type  netwrk6:  list
-        @param  ports:  List of Port ID
-        @type  ports:  list
-        @param  next_hop:  List of v4 nexthop router parameters
-        @type  next_hop:  list
-        @param  next_hop6:  List of v6 nexthop router parameters
-        @type  next_hop6:  list
-        @param  option:  Flag indicates to validate params
-        @type  option:  bool
-        @param  metric:  Allow to configure metric
-        @type  metric:  bool
-        @param  prefixtoroute:  Prefixtoroute value
-        @type  prefixtoroute:  str
-        @param  lo:  IPv4 local address
-        @type  lo:  str
-        @raise  Exception:  mode is not in {"up", "down"}
-        @return:  None
-        @par Example:
-        @code
-        env.tg[1].routes(netwrk6=["default"], next_hop6=["1000:160::1"])
-        @endcode
+        """Assign routes to specific hosts or networks via an interface after it has been configured with the ifconfig utility.
+
+        Args
+            mode(str):  Flag 'up/down' change state of the interface to up or down.
+            netwrk(list):  List of v4 routes to be assigned on the device.
+            netwrk6(list):  List of v6 routes to be assigned on the device.
+            ports(list):  List of Port ID
+            next_hop(list):  List of v4 nexthop router parameters
+            next_hop6(list):  List of v6 nexthop router parameters
+            option(bool):  Flag indicates to validate params
+            metric(bool):  Allow to configure metric
+            prefixtoroute(str):  Prefixtoroute value
+            lo(str):  IPv4 local address
+
+        Raises:
+            Exception:  mode is not in {"up", "down"}
+
+        Returns:
+            None
+
+        Examples::
+
+            env.tg[1].routes(netwrk6=["default"], next_hop6=["1000:160::1"])
+
         """
         # Validate that params list corresponds with ports list.
         def validate_params(var, var_2, name, name_2):
@@ -394,16 +394,21 @@ class GenericLinuxHost(entry_template.GenericEntry):
 
     @autologin
     def ipforward(self, version=None):
-        """
-        @brief  Enabling ipv4 and ipv6 forwarding
-        @param version:  List of v4/v6 versions
-        @type  version:  list
-        @raise  Exception:  incorrect IP version
-        @return:  None
-        @par Example:
-        @code
-        env.tg[1].ipforward(version=["-4", "-6"])
-        @endcode
+        """Enabling ipv4 and ipv6 forwarding.
+
+        Args:
+            version(list):  List of v4/v6 versions
+
+        Raises:
+            Exception:  incorrect IP version
+
+        Returns:
+            None
+
+        Examples::
+
+            env.tg[1].ipforward(version=["-4", "-6"])
+
         """
         allowed_versions = ["-4", "-6"]
         if version is None:
@@ -424,40 +429,41 @@ class GenericLinuxHost(entry_template.GenericEntry):
 
     @autologin
     def brctl(self, mode="add", ports=None, brname=None, stp=None, stp_cfg=None):
-        """
-        @brief  Create/delete/configure bridge interface.
-        @param mode:  Allowed values: add, cfg, del, stpstat, macs
-                add - allow to create new instance of the eth bridge
-                cfg - allow to change previously set specific configurations
-                del - allow to delete the instance of the ethernet bridges
-                delif - allow to delete interface from bridge
-                stpstat - allow to show current interfaces stp status
-                macs - allow to show a list of a learned MAC address for the bridge
-        @type  mode:  str
-        @param ports:  List of interfaces
-        @type  ports:  list
-        @param brname:  Name of the instance of the ethernet bridges
-        @type  brname:  str
-        @param stp: Flag  'up/down' enable/disable stp on the bridges
-        @type  stp:  str
-        @param stp_cfg:  Dictionary of settings,
-                keys:   'bprio' - bridge priority parameter
-                        'pathcost' - list of tupples with ports and pathcosts(to be assigned on the port) values
-                        'hello' - set bridge's the hello time
-                        'maxage' - set bridge's maximum message age
-                        'fwdelay' - set bridge's forward delay
-                        'pprio' - lists of tuples with ports and port priorities(to be assigned on the port) value
-        @type  stp_cfg:  str
-        @raise  Exception:  brname is None, unknown mode.
-        @rtype:  str
-        @return:  bridge name if mode='add', or stp bridge status if mode='stpstat'
-        @par Example:
-        @code
-        env.tg[1].brctl("add", ports=[p1, p2], stp=True, stp_cfg={"bprio": 1000, "pathcost": [(p1, 10), (p2, 100)], "hello":300, "maxage":10,
-        "fwdelay":30, "pprio":[(p1, 10)]})
-        env.tg[1].brctl("stpstat", brname=br0)
-        env.tg[1].brctl("delif", ports=[p2], brname=br0)
-        @endcode
+        """Create/delete/configure bridge interface.
+
+        Args:
+            mode(str):  Allowed values: add, cfg, del, stpstat, macs
+                        - add - allow to create new instance of the eth bridge
+                        - cfg - allow to change previously set specific configurations
+                        - del - allow to delete the instance of the ethernet bridges
+                        - delif - allow to delete interface from bridge
+                        - stpstat - allow to show current interfaces stp status
+                        - macs - allow to show a list of a learned MAC address for the bridge
+            ports(list):  List of interfaces
+            brname(str):  Name of the instance of the ethernet bridges
+            stp(str): Flag  'up/down' enable/disable stp on the bridges
+            stp_cfg(str):  Dictionary of settings,
+                           keys:
+                           - 'bprio' - bridge priority parameter
+                           - 'pathcost' - list of tupples with ports and pathcosts(to be assigned on the port) values
+                           - 'hello' - set bridge's the hello time
+                           - 'maxage' - set bridge's maximum message age
+                           - 'fwdelay' - set bridge's forward delay
+                           - 'pprio' - lists of tuples with ports and port priorities(to be assigned on the port) value
+
+        Raises:
+            Exception:  brname is None, unknown mode.
+
+        Returns:
+            str:  bridge name if mode='add', or stp bridge status if mode='stpstat'
+
+        Examples::
+
+            env.tg[1].brctl("add", ports=[p1, p2], stp=True, stp_cfg={"bprio": 1000, "pathcost": [(p1, 10), (p2, 100)], "hello":300, "maxage":10,
+            "fwdelay":30, "pprio":[(p1, 10)]})
+            env.tg[1].brctl("stpstat", brname=br0)
+            env.tg[1].brctl("delif", ports=[p2], brname=br0)
+
         """
         def stp_cfg_processing():
             for key in stp_cfg:
@@ -596,16 +602,18 @@ class GenericLinuxHost(entry_template.GenericEntry):
 
     @autologin
     def getmac(self, port):
-        """
-        @brief  Return port's MAC address.
-        @param port:  Traffic generator's port
-        @type  port:  str/tuple for Ixia
-        @rtype:  str
-        @return:  Mac address of the device
-        @par Example:
-        @code
-        stp_env.tg[4].getmac(ports[("tg4", "tg3")][1])
-        @endcode
+        """Return port's MAC address.
+
+        Args:
+            port(str/tuple for Ixia):  Traffic generator's porta
+
+        Returns:
+            str:  Mac address of the device
+
+        Examples::
+
+            stp_env.tg[4].getmac(ports[("tg4", "tg3")][1])
+
         """
         command = "ip link show {0}".format(port)
         so = self.exec_cmd(command).stdout
@@ -618,10 +626,14 @@ class GenericLinuxHost(entry_template.GenericEntry):
 
     @autologin
     def enable_8021q(self):
-        """
-        @brief  Check and enable VLANs if system supports 802.1q.
-        @raise  Exception:  unsupported 802.1q feature
-        @note  Method searchs 8021q kernel module and tries to load them.
+        """Check and enable VLANs if system supports 802.1q.
+
+        Raises:
+            Exception:  unsupported 802.1q feature
+
+        Notes:
+            Method searchs 8021q kernel module and tries to load them.
+
         """
         # Check if system supports 8021q
         so = self.ssh.exec_command("modprobe -l | grep 8021q").stdout
@@ -641,22 +653,24 @@ class GenericLinuxHost(entry_template.GenericEntry):
 
     @autologin
     def vconfig(self, mode, port, vlan):
-        """
-        @brief  Perform VLAN configuration.
-        @param mode:  Flag add/rem allow to create/remove vlan-devices
-        @type  mode:  str
-        @param port:  Name of the ethernet card that hosts the VLAN
-        @type  port:  str
-        @param vlan:  Vlan-device which represents the virtual lan on the physical lan
-        @type  vlan:  int
-        @raise  Exception:  mode not in {"add", "rem"}, port is already in vlan
-        @rtype:  str
-        @return:  Vlan-device value in format 'port.vlan'
-        @par Example:
-        @code
-        env.tg[1].vconfig("add", port=ports[("tg1", "tg2")][1], vlan=3)
-        env.tg[1].vconfig("rem", port=ports[("tg1", "tg2")][1], vlan=3)
-        @endcode
+        """Perform VLAN configuration.
+
+        Args:
+            mode(str):  Flag add/rem allow to create/remove vlan-devices
+            port(str):  Name of the ethernet card that hosts the VLAN
+            vlan(int):  Vlan-device which represents the virtual lan on the physical lan
+
+        Raises:
+            Exception:  mode not in {"add", "rem"}, port is already in vlan
+
+        Returns:
+            str:  Vlan-device value in format 'port.vlan'
+
+        Examples::
+
+            env.tg[1].vconfig("add", port=ports[("tg1", "tg2")][1], vlan=3)
+            env.tg[1].vconfig("rem", port=ports[("tg1", "tg2")][1], vlan=3)
+
         """
         if not self.vlan_enabled:
             self.enable_8021q()
@@ -684,15 +698,16 @@ class GenericLinuxHost(entry_template.GenericEntry):
 
     @autologin
     def ethtool(self, port, mode, **kwargs):
-        """
-        @brief  Perform ethtool configuration.
-        @param  port:  Name of the interface
-        @type  port:  str
-        @param  mode:  Flag allows to configure interface ('generic')
-        @type  mode:  str
-        @param  kwargs:  Interface configuration key/value pairs
-        @type  kwargs:  dict
-        @raise  Exception:  mode is not "generic"
+        """Perform ethtool configuration.
+
+        Args:
+            port(str):  Name of the interface
+            mode(str):  Flag allows to configure interface ('generic')
+            kwargs(dict):  Interface configuration key/value pairs
+
+        Raises:
+            Exception:  mode is not "generic"
+
         """
         if mode in "generic":
             args = " ".join(["{0} {1}".format(*i) for i in list(kwargs.items())])
@@ -704,13 +719,17 @@ class GenericLinuxHost(entry_template.GenericEntry):
 
     def _get_nics(self, force_check=False):
         """Returns list of detected network adapterrs in the system
-        Note: Order of the adapters is very important. It should be according to how the
-        networks are defined when VM is created. Proper order is in self.os_networks
 
-        @param force_check: force re-reading nics
-        @type force_check: bool
-        @return: list of nics
-        @rtype: list
+        Notes:
+            Order of the adapters is very important. It should be according to how the
+            networks are defined when VM is created. Proper order is in self.os_networks
+
+        Args:
+            force_check(bool): force re-reading nics
+
+        Returns:
+            list: list of nics
+
         """
         if self.nics is None or force_check:
             detected_nics = self.ui.get_table_ports(ip_addr=True)
@@ -744,13 +763,19 @@ class GenericLinuxHost(entry_template.GenericEntry):
         return self.map_nics_if(f=f, mapper=mapper, force_check=force_check)
 
     def get(self, init_start=False, retry_count=1):
-        """
-        @brief  Get or start linux host instance.
-        @param init_start:  Perform switch start operation or not
-        @type  init_start:  bool
-        @param retry_count:  Number of retries to start(restart) linux host
-        @type  retry_count:  int
-        @return None or raise an exception.
+        """Get or start linux host instance.
+
+        Args:
+            init_start(bool):  Perform switch start operation or not
+            retry_count(int):  Number of retries to start(restart) linux host
+
+        Returns:
+            None or raise an exception.
+
+        Notes:
+            Also self.opts.fail_ctrl attribute affects logic of this method.
+            fail_ctrl is set in py.test command line options (read py.test --help for more information).
+
         """
         # If fail_ctrl != "restart", restart retries won't be performed
         # as restart is not implemented for lhosts, retries makes no sense.
@@ -780,13 +805,17 @@ class GenericLinuxHost(entry_template.GenericEntry):
             pytest.fail(message)
 
     def waiton(self, timeout=DEFAULT_SERVER_WAIT_ON_TIMEOUT):
-        """
-        @brief  Wait until device is fully operational.
-        @param  timeout:  Wait timeout
-        @type  timeout:  int
-        @raise  SwitchException:  device doesn't response
-        @rtype:  dict
-        @return  Status dictionary from probe method or raise an exception.
+        """Wait until device is fully operational.
+
+        Args:
+            timeout(int):  Wait timeout
+
+        Raises:
+            SwitchException:  device doesn't response
+
+        Returns:
+            dict:  Status dictionary from probe method or raise an exception.
+
         """
         status = None
         message = "Waiting until device {0}({1}) is up.".format(self.name, self.ipaddr)
@@ -823,10 +852,11 @@ class GenericLinuxHost(entry_template.GenericEntry):
         return status
 
     def probe(self):
-        """
-        @brief  Probe linux host with UI call.
-        @rtype:  dict
-        @return:  Dictionary (_object) with switchpp status parameters or raise an exception.
+        """Probe linux host with UI call.
+
+        Returns:
+            dict:  Dictionary (_object) with switchpp status parameters or raise an exception.
+
         """
         _object = {
             'isup': False,
@@ -846,10 +876,11 @@ class GenericLinuxHost(entry_template.GenericEntry):
         return _object
 
     def start(self, wait_on=True):
-        """
-        @brief  Mandatory method for environment specific classes.
-        @param  wait_on:  Wait for device is loaded
-        @type  wait_on:  bool
+        """Mandatory method for environment specific classes.
+
+        Args:
+            wait_on(bool):  Wait for device is loaded
+
         """
         # Optionally put power board information here for restart
         if wait_on:
@@ -858,10 +889,11 @@ class GenericLinuxHost(entry_template.GenericEntry):
         self._set_mgmt_interface(self.config['ipaddr'])
 
     def stop(self, with_cleanup=True):
-        """
-        @brief  Mandatory method for environment specific classes.
-        @param  with_cleanup:  Flag to perform cleanup
-        @type  with_cleanup:  bool
+        """Mandatory method for environment specific classes.
+
+        Args:
+            with_cleanup(bool):  Flag to perform cleanup
+
         """
         if not self.status:
             self.class_logger.info(
@@ -871,8 +903,8 @@ class GenericLinuxHost(entry_template.GenericEntry):
                 self.cleanup()
 
     def cleanup(self):
-        """
-        @brief  Remove created configuration.
+        """Remove created configuration.
+
         """
         if self.bridges:
             for brname in self.bridges[:]:
@@ -892,31 +924,34 @@ class GenericLinuxHost(entry_template.GenericEntry):
         self.ui.clear_config()
 
     def restart(self, wait_on=True):
-        """
-        @brief  Mandatory method for environment specific classes.
-        @param  wait_on:  Wait for device is loaded
-        @type  wait_on:  bool
+        """Mandatory method for environment specific classes.
+
+        Args:
+            wait_on(bool):  Wait for device is loaded
+
         """
         pass
 
     def create(self):
-        """
-        @brief  Start linux host or get running one.
+        """Start linux host or get running one.
 
-        @note  This is mandatory method for all environment classes.
-               Also self.opts.get_only attribute affects logic of this method.
-               get_only is set in py.test command line options (read py.test --help for more information).
+        Notes:
+            This is mandatory method for all environment classes.
+            Also self.opts.get_only attribute affects logic of this method.
+            get_only is set in py.test command line options (read py.test --help for more information).
+
         """
         init_start = not self.opts.get_only
         return self.get(init_start=init_start)
 
     def destroy(self):
-        """
-        @brief  Stop or release linux host.
+        """Stop or release linux host.
 
-        @note  This is mandatory method for all environment classes.
-               Also self.opts.leave_on and get_only  attributes affect logic of this method.
-               leave_on and get_only are set in py.test command line options (read py.test --help for more information).
+        Notes:
+            This is mandatory method for all environment classes.
+            Also self.opts.leave_on and get_only  attributes affect logic of this method.
+            leave_on and get_only are set in py.test command line options (read py.test --help for more information).
+
         """
         if not self.status:
             self.class_logger.info(
@@ -928,31 +963,35 @@ class GenericLinuxHost(entry_template.GenericEntry):
         self.sanitize()
 
     def sanitize(self):
-        """
-        @brief  Perform any necessary operations to leave environment in normal state.
+        """Perform any necessary operations to leave environment in normal state.
+
         """
         pass
 
     def check(self):
-        """
-        @brief  Mandatory method for environment specific classes.
+        """Mandatory method for environment specific classes.
+
         """
         pass
 
     def _get_port_for_probe(self):
-        """
-        @brief  Get port ID.
-        @rtype:  int
-        @return:  ssh tunnel ports ID
+        """Get port ID.
+
+        Returns:
+            int:  ssh tunnel ports ID
+
         """
         return int(self.ssh_port)
 
     def _get_speed_ports(self):
-        """
-        @brief  Get slave and master ports from config.
-        @rtype:  list
-        @return:  List of ports (slave and master) used in real config
-        @note  This function check if master port should be split into slave ports.
+        """Get slave and master ports from config.
+
+        Returns:
+            list:  List of ports (slave and master) used in real config
+
+        Notes:
+            This function check if master port should be split into slave ports.
+
         """
         speed_ports = self.config.get("port_list", [])
         ports_map = self.config.get("ports_map", [])
@@ -966,15 +1005,16 @@ class GenericLinuxHost(entry_template.GenericEntry):
         return ports, speed_ports, ports_map
 
     def speed_preconfig(self, wait_for_ports=False):
-        """
-        @brief  Function for ports speed preconfiguration
-        @param wait_for_ports:  wait for Ports table changes size
-        @type  wait_for_ports:  int
+        """Function for ports speed preconfiguration.
+
+        Args:
+            wait_for_ports(int):  wait for Ports table changes size
+
         """
 
         def _normalize_port_list(ports_list):
-            """
-            @brief  Get list of Master ports.
+            """Get list of Master ports.
+
             """
             master_ports = set()
             ports = set()
@@ -987,8 +1027,8 @@ class GenericLinuxHost(entry_template.GenericEntry):
             return list(chain(master_ports, ports))
 
         def _get_master_port(port):
-            """
-            @brief  Get Master port.
+            """Get Master port.
+
             """
             try:
                 return next(r for r, s in self.ports_map if port in s)
@@ -1009,12 +1049,12 @@ class GenericLinuxHost(entry_template.GenericEntry):
                 self.setup_ports_speed_configuration(ports, speed)
 
     def setup_ports_speed_configuration(self, ports=None, speed=10000):
-        """
-        @brief  Configure ports speed.
-        @param  ports:  list of ports to set speed value
-        @type  ports:  list[int]
-        @param  speed:  speed value
-        @type  speed:  int
+        """Configure ports speed.
+
+        Args:
+            ports(list[int]):  list of ports to set speed value
+            speed(int):  speed value
+
         """
         if ports is not None:
             self.class_logger.debug("Performing ports speed configuration on real switch.")
@@ -1038,19 +1078,19 @@ class GenericLinuxHost(entry_template.GenericEntry):
 
 
 class IpNetworkNamespace(GenericLinuxHost):
-    """
-    @brief  Namespace simulated class
+    """Namespace simulated class.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize IpNetworkNamespace class
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
+        """Initialize IpNetworkNamespace class.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
         """
         self.class_logger.info("Init namespace started.")
         super(IpNetworkNamespace, self).__init__(config, opts)
@@ -1069,11 +1109,14 @@ class IpNetworkNamespace(GenericLinuxHost):
         self.mgmt_if = "veth{0}".format(self.id)
 
     def start(self, wait_on=True):
-        """
-        @brief  Method for network namespace create
-        @param  wait_on:  Wait for device is loaded
-        @type  wait_on:  bool
-        @raise  Exception:  error on namespace creating
+        """Method for network namespace create.
+
+        Args:
+            wait_on(bool):  Wait for device is loaded
+
+        Raises:
+            Exception:  error on namespace creating
+
         """
         command = "ip netns list"
         so, _, rc = self.ssh.native_cmd(command)
@@ -1095,12 +1138,12 @@ class IpNetworkNamespace(GenericLinuxHost):
         self.status = True
 
     def stop(self, with_cleanup=True, del_mgmt_br=False):
-        """
-        @brief  Method for namespace restore
-        @param  with_cleanup:  Flag to perform cleanup
-        @type  with_cleanup:  bool
-        @param  del_mgmt_br:  Flag to delete management bridge
-        @type  del_mgmt_br:  bool
+        """Method for namespace restore.
+
+        Args:
+            with_cleanup(bool):  Flag to perform cleanup
+            del_mgmt_br(bool):  Flag to delete management bridge
+
         """
         if self.opts.get_only or self.opts.leave_on:
             # Skipping stop in case get_only or leave_on
@@ -1122,8 +1165,8 @@ class IpNetworkNamespace(GenericLinuxHost):
         self.status = False
 
     def check_mgmt_bridge(self):
-        """
-        @brief  Check if mgmt bridge is created.
+        """Check if mgmt bridge is created.
+
         """
         command = "ifconfig " + self.mgmt_br
         so, _, _ = self.ssh.native_cmd(command)
@@ -1133,9 +1176,11 @@ class IpNetworkNamespace(GenericLinuxHost):
             return False
 
     def add_mgmt_bridge(self):
-        """
-        @brief  Create mgmt bridge on host.
-        @raise  Exception:  error on bridge creating
+        """Create mgmt bridge on host.
+
+        Raises:
+            Exception:  error on bridge creating
+
         """
         so, se, rc = None, None, "0"
         if not self.check_mgmt_bridge():
@@ -1151,9 +1196,11 @@ class IpNetworkNamespace(GenericLinuxHost):
             self.ssh.native_cmd(command)
 
     def del_mgmt_bridge(self):
-        """
-        @brief  Delete mgmt bridge on host.
-        @raise  Exception:  error on bridge deleting
+        """Delete mgmt bridge on host.
+
+        Raises:
+            Exception:  error on bridge deleting
+
         """
         if self.check_mgmt_bridge():
             command = "ifconfig {0} down".format(self.mgmt_br)
@@ -1167,9 +1214,11 @@ class IpNetworkNamespace(GenericLinuxHost):
             raise Exception(message)
 
     def add_mgmt_iface(self):
-        """
-        @brief  Create management iface and add it to host level bridge.
-        @raise  Exception:  error on creating management interface
+        """Create management iface and add it to host level bridge.
+
+        Raises:
+            Exception:  error on creating management interface
+
         """
         command = "ip link add {0} type veth peer name {0} netns {1}".format(self.mgmt_if, self.name)
         so, se, rc = self.ssh.native_cmd(command)
@@ -1183,9 +1232,11 @@ class IpNetworkNamespace(GenericLinuxHost):
             self.ssh.exec_command("ifconfig {0} {1} up".format(self.mgmt_if, self.ipaddr))
 
     def del_mgmt_iface(self):
-        """
-        @brief  Delete management iface and add it to host level bridge.
-        @raise  Exception:  error on deleting management interface
+        """Delete management iface and add it to host level bridge.
+
+        Raises:
+            Exception:  error on deleting management interface
+
         """
         command = "ip link delete {0}".format(self.mgmt_if)
         so, se, rc = self.ssh.native_cmd(command)
@@ -1195,23 +1246,25 @@ class IpNetworkNamespace(GenericLinuxHost):
             raise Exception(message)
 
     def create(self):
-        """
-        @brief  Start Linux host or get running one.
+        """Start Linux host or get running one.
 
-        @note  This is mandatory method for all environment classes.
-               Also self.opts.get_only attribute affects logic of this method.
-               get_only is set in py.test command line options (read py.test --help for more information).
+        Notes:
+             This is mandatory method for all environment classes.
+             Also self.opts.get_only attribute affects logic of this method.
+             get_only is set in py.test command line options (read py.test --help for more information).
+
         """
         if not self.opts.get_only:
             return self.start()
 
     def destroy(self):
-        """
-        @brief  Stop or release Linux host.
+        """Stop or release Linux host.
 
-        @note  This is mandatory method for all environment classes.
-               Also self.opts.leave_on and get_only  attributes affect logic of this method.
-               leave_on and get_only are set in py.test command line options (read py.test --help for more information).
+        Notes:
+            This is mandatory method for all environment classes.
+            Also self.opts.leave_on and get_only  attributes affect logic of this method.
+            leave_on and get_only are set in py.test command line options (read py.test --help for more information).
+
         """
         if not self.status:
             self.class_logger.info(
@@ -1223,8 +1276,8 @@ class IpNetworkNamespace(GenericLinuxHost):
         self.sanitize()
 
     def sanitize(self):
-        """
-        @brief  Perform any necessary operations to leave environment in normal state.
+        """Perform any necessary operations to leave environment in normal state.
+
         """
         pass
 

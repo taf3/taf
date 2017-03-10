@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2017, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``tg_generators.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`This module contains collection of TG related generators`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file tg_generators.py
-
-@summary  This module contains collection of TG related generators.
 """
 
 import random
@@ -23,22 +23,22 @@ import ipaddress as ipaddr
 
 
 class BaseGenerator(object):
-    """
-    @description  Base generator used for creating field values generators
+    """Base generator used for creating field values generators.
+
     """
 
     def __init__(self, start_value, end_value, increment, count):
-        """
-        @brief  Initialize BaseGenerator class
-        @param  start_value:  Generator's start value
-        @type  start_value:  int, str
-        @param  end_value:  Generator's start value
-        @type  end_value:  int, str
-        @param  increment:  Generator's step value
-        @type  increment:  int
-        @param  count:  Generator's count value
-        @type  count:  int
-        @raise  ValueError:  start_value is mandatory
+        """Initialize BaseGenerator class.
+
+        Args:
+            start_value(int, str):  Generator's start value
+            end_value(int, str):  Generator's start value
+            increment(int):  Generator's step value
+            count(int):  Generator's count value
+
+        Raises:
+            ValueError:  start_value is mandatory
+
         """
         if start_value is None:
             raise ValueError("start_value has to be set.")
@@ -50,32 +50,31 @@ class BaseGenerator(object):
         self.iterator = 1
 
     def __iter__(self):
-        """
-        @brief  Return iterator object
+        """Return iterator object.
+
         """
         return self
 
     def __next__(self):
-        """
-        @brief  Return next item from container
+        """Return next item from container.
+
         """
         return self
 
 
 class PypackerMacGenerator(BaseGenerator):
-    """
-    @description  Iteration class for list of MAC addresses generation
-    @param start_value:  initial MAC value
-    @type start_value:  str
-    @param increment:  incrementation step
-    @type increment:  int
-    @param count:  number of iteration steps
-    @type count:  int
+    """Iteration class for list of MAC addresses generation.
+
+    Args:
+        start_value(str):  initial MAC value
+        increment(int):  incrementation step
+        count(int):  number of iteration steps
+
     """
 
     def __next__(self):
-        """
-        @brief  Get next generated MAC address.
+        """Get next generated MAC address.
+
         """
         current = self.value
         if self.iterator >= self.count and self.count != 0:
@@ -97,19 +96,18 @@ class PypackerMacGenerator(BaseGenerator):
 
 
 class PypackerIPGenerator(BaseGenerator):
-    """
-    @description  Iteration class for list of IP addresses generation
-    @param start_value:  initial IP value
-    @type start_value:  str
-    @param increment:  incrementation step
-    @type increment:  int
-    @param count:  number of iteration steps
-    @type count:  int
+    """Iteration class for list of IP addresses generation.
+
+    Args:
+        start_value(str):  initial IP value
+        increment(int):  incrementation step
+        count(int):  number of iteration steps
+
     """
 
     def __next__(self):
-        """
-        @brief  Get next generated IP address.
+        """Get next generated IP address.
+
         """
         current = self.value
         if self.iterator >= self.count and self.count != 0:
@@ -134,19 +132,18 @@ class PypackerIPGenerator(BaseGenerator):
 
 
 class PypackerTCPOrUDPGenerator(BaseGenerator):
-    """
-    @brief  Iteration class for list of UDP/TCP addresses generation
-    @param start_value:  initial UDP/TCP value
-    @type start_value:  str
-    @param increment:  incrementation step
-    @type increment:  int
-    @param count:  number of iteration steps
-    @type count:  int
+    """Iteration class for list of UDP/TCP addresses generation.
+
+    Args:
+        start_value(str):  initial UDP/TCP value
+        increment(int):  incrementation step
+        count(int):  number of iteration steps
+
     """
 
     def __next__(self):
-        """
-        @brief  Get next generated UDP address.
+        """Get next generated UDP address.
+
         """
         current = self.value
         if self.iterator >= self.count and self.count != 0:
@@ -165,35 +162,35 @@ class PypackerTCPOrUDPGenerator(BaseGenerator):
 
 
 class PypackerRandomPayloadGenerator(BaseGenerator):
-    """
-    @description  Iteration class for random payload generation
-    @param start_value:  initial payload value
-    @type start_value:  str
-    @param end_value:  maximum payload value
-    @type end_value:  str
+    """Iteration class for random payload generation.
+
+    Args:
+        start_value(str):  initial payload value
+        end_value(str):  maximum payload value
+
     """
 
     def __next__(self):
+        """Get next generated payload value.
+
         """
-        @brief  Get next generated payload value.
-        """
+ 
         return random.randint(self.start_value, self.end_value)
 
 
 class PypackerIncrementPayloadGenerator(BaseGenerator):
-    """
-    @description  Iteration class for incremented payload generation
-    @param start_value:  initial payload value
-    @type start_value:  str
-    @param end_value:  maximum payload value
-    @type end_value:  str
-    @param increment:  incrementation step
-    @type increment:  int
+    """Iteration class for incremented payload generation.
+
+    Args:
+        start_value(str):  initial payload value
+        end_value(str):  maximum payload value
+        increment(int):  incrementation step
+
     """
 
     def __next__(self):
-        """
-        @brief  Get next generated payload value.
+        """Get next generated payload value.
+
         """
         current = self.value
         if self.value == self.end_value:
@@ -204,19 +201,18 @@ class PypackerIncrementPayloadGenerator(BaseGenerator):
 
 
 class PypackerVlanGenerator(BaseGenerator):
-    """
-    @description  Iteration class for list of VLANs generation
-    @param start_value:  initial Vlan value
-    @type start_value:  str
-    @param increment:  incrementation step
-    @type increment:  int
-    @param count:  number of iteration steps
-    @type count:  int
+    """Iteration class for list of VLANs generation.
+
+    Args:
+        start_value(str):  initial Vlan value
+        increment(int):  incrementation step
+        count(int):  number of iteration steps
+
     """
 
     def __next__(self):
-        """
-        @brief  Get next generated VLAN.
+        """Get next generated VLAN.
+
         """
         current = self.value
         if self.iterator >= self.count and self.count != 0:
@@ -235,19 +231,18 @@ class PypackerVlanGenerator(BaseGenerator):
 
 
 class PypackerTypeGenerator(BaseGenerator):
-    """
-    @description  Iteration class for list of types generation
-    @param start_value:  initial Ether.type value
-    @type start_value:  str
-    @param increment:  incrementation step
-    @type increment:  int
-    @param count:  number of iteration steps
-    @type count:  int
+    """Iteration class for list of types generation.
+
+    Args:
+        start_value(str):  initial Ether.type value
+        increment(int):  incrementation step
+        count(int):  number of iteration steps
+
     """
 
     def __next__(self):
-        """
-        @brief  Get next type generation value.
+        """Get next type generation value.
+
         """
         current = self.value
         if self.iterator >= self.count and self.count != 0:
@@ -266,19 +261,18 @@ class PypackerTypeGenerator(BaseGenerator):
 
 
 class PypackerProtocolGenerator(BaseGenerator):
-    """
-    @description  Iteration class for list of protocols generation
-    @param start_value:  initial protocol value
-    @type start_value:  str
-    @param increment:  incrementation step
-    @type increment:  int
-    @param count:  number of iteration steps
-    @type count:  int
+    """Iteration class for list of protocols generation.
+
+    Args:
+        start_value(str):  initial protocol value
+        increment(int):  incrementation step
+        count(int):  number of iteration steps
+
     """
 
     def __next__(self):
-        """
-        @brief  Get next generated protocol value.
+        """Get next generated protocol value.
+
         """
         current = self.value
         if self.iterator >= self.count and self.count != 0:
@@ -297,19 +291,18 @@ class PypackerProtocolGenerator(BaseGenerator):
 
 
 class PypackerIPv6Generator(BaseGenerator):
-    """
-    @description  Iteration class for list of IPv6 addresses generation
-    @param start_value:  initial IPv6 value
-    @type start_value:  str
-    @param increment:  incrementation step
-    @type increment:  int
-    @param count:  number of iteration steps
-    @type count:  int
+    """Iteration class for list of IPv6 addresses generation.
+
+    Args:
+        start_value(str):  initial IPv6 value
+        increment(int):  incrementation step
+        count(int):  number of iteration steps
+
     """
 
     def __next__(self):
-        """
-        @brief  Get next generated IPv6 address.
+        """Get next generated IPv6 address.
+
         """
         current = self.value
         if self.iterator >= self.count and self.count != 0:
@@ -340,19 +333,18 @@ class PypackerIPv6Generator(BaseGenerator):
 
 
 class PypackerFlowLabelGenerator(BaseGenerator):
-    """
-    @description  Iteration class for list of Flow Label generation
-    @param start_value:  initial Flow value
-    @type start_value:  str
-    @param increment:  incrementation step
-    @type increment:  int
-    @param count:  number of iteration steps
-    @type count:  int
+    """Iteration class for list of Flow Label generation.
+
+    Args:
+        start_value(str):  initial Flow value
+        increment(int):  incrementation step
+        count(int):  number of iteration steps
+
     """
 
     def __next__(self):
-        """
-        @brief  Get next generated Flow Label value.
+        """Get next generated Flow Label value.
+
         """
         current = self.value
         if self.iterator >= self.count and self.count != 0:
@@ -371,19 +363,18 @@ class PypackerFlowLabelGenerator(BaseGenerator):
 
 
 class PypackerLspIdGenerator(BaseGenerator):
-    """
-    @description  Iteration class for list of LSP IDs one byte generation
-    @param start_value:  initial LSP ID value
-    @type start_value:  str
-    @param increment:  incrementation step
-    @type increment:  int
-    @param count:  number of iteration steps
-    @type count:  int
+    """Iteration class for list of LSP IDs one byte generation.
+
+    Args:
+        start_value(str):  initial LSP ID value
+        increment(int):  incrementation step
+        count(int):  number of iteration steps
+
     """
 
     def __next__(self):
-        """
-        @brief  Get next generated MAC address.
+        """Get next generated MAC address.
+
         """
         current = self.value
         if self.iterator >= self.count and self.count != 0:

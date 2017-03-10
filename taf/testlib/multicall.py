@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2014 - 2016, Intel Corporation.
+# Copyright (c) 2014 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``multcall.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Implement simple python command line based RPC`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  multcall.py
-
-@summary  Implement simple python command line based RPC
 """
 
 import base64
@@ -49,28 +48,29 @@ FOOTER = [
 
 
 def decode(payload_str):
-    """
-    Decode base64 encoded bz2 compress network payload
+    """Decode base64 encoded bz2 compress network payload
 
-    @param payload_str: base64 encoded bz2 compressed byte stream
-    @type payload_str: str
-    @return: original byte-stream
-    @rtype: str
+    Args:
+        payload_str(str): base64 encoded bz2 compressed byte stream
+
+    Returns:
+        str: original byte-stream
+
     """
     return bz2.decompress(base64.urlsafe_b64decode(payload_str.encode('utf-8')).decode('utf-8'))
 
 
 def encode(payload):
-    """
-    Encode a string for tranmission over the network using base64 encoding of the
-    bz2 compressed string.
+    """Encode a string for tranmission over the network using base64 encoding of the bz2 compressed string.
 
     We bz2 compress because we can and also to counteract the inefficiency of the base64 encoding.
 
-    @param payload: string we want to transmit over the wire
-    @type payload: str
-    @return: base64 encoded, bz2 compressed string
-    @rtype: str
+    Args:
+        payload(str): string we want to transmit over the wire
+
+    Returns:
+        str: base64 encoded, bz2 compressed string
+
     """
     return base64.urlsafe_b64encode(bz2.compress(payload.encode('utf-8'))).decode('utf-8')
 
@@ -79,23 +79,20 @@ PAYLOAD_CUTOFF = 1024 * 96
 
 
 def bisect_if_too_large(cmd_list, payload_generator, max_size=PAYLOAD_CUTOFF):
-    """
-    Check the compressed payload lenght, if it is larger than the max CLI length (usually 127K)
+    """Check the compressed payload lenght, if it is larger than the max CLI length (usually 127K)
     we bisect until we get under the limit.
-
 
     If an individual cmd is greater than the max_size then we will return the original list
     since we can't split a single command.
 
+    Args:
+        cmd_list(list): list of commands to split based on encoded payload size
+        payload_generator(function): function that generates the payload
+        max_size(int): maximun network payload size
 
-    @param cmd_list: list of commands to split based on encoded payload size
-    @type cmd_list: list
-    @param payload_generator: function that generates the payload
-    @type payload_generator: function
-    @param max_size: maximun network payload size
-    @type max_size: int
-    @return: iterator over all generator payloads for all the split cmd_list chunks
-    @rtype: iter(str)
+    Returns:
+        iter(str): iterator over all generator payloads for all the split cmd_list chunks
+
     """
     # Originally we attempted to check the size as we go and send a batch once we reached the
     # limit, but this was grossly inaccurate because the bz2 compression works better the larger
@@ -115,8 +112,8 @@ def bisect_if_too_large(cmd_list, payload_generator, max_size=PAYLOAD_CUTOFF):
 
 
 def generate_calls(cmd_list, parallel_limit=None, remote_module_template=remote_multicall_template):
-    """
-    Generate a sequence of simple command line python RPC
+    """Generate a sequence of simple command line python RPC
+
     Take the supplied python module, get the source and then
     insert the command list as a base64 encoded bz2 compressed json
 
@@ -125,17 +122,15 @@ def generate_calls(cmd_list, parallel_limit=None, remote_module_template=remote_
     We know the base64, bz2 encoding is safe and compact, so just re-use that.
 
     The template uses a line like this, the raw triple-quoted string will be replaced
-    with the encoded template
+    with the encoded template::
 
-    cmd_list = json.loads(bz2.decompress(base64.urlsafe_b64decode(r\"\"\"{}\"\"\")))
+        cmd_list = json.loads(bz2.decompress(base64.urlsafe_b64decode(r\"\"\"{}\"\"\")))
 
-    @param cmd_list:
-    @type cmd_list: iter(str)
-    @param parallel_limit: mamximum number of parallel commands, None for automatic setting
-    based on number of remote cpus
-    @type parallel_limit: int
-    @param remote_module_template: python module used as template for remote python module
-    @type remote_module_template: module
+    Args:
+        cmd_list(iter(str)): list of command
+        parallel_limit(int): maximum number of parallel commands, None for automatic setting based on number of remote cpus
+        remote_module_template(module): python module used as template for remote python module
+
     """
     # this is only true if cmd_list is consumed
     if iter(cmd_list) is iter(cmd_list):
@@ -155,8 +150,7 @@ def gen_payload(runner, parallel_limit, cmd_list):
 
 
 def _ssh_cli_test():
-    """
-    Private function to test RPC on the command line with ssh
+    """Private function to test RPC on the command line with ssh.
 
     """
     # this gets the source from a loaded module
@@ -189,10 +183,10 @@ def _ssh_cli_test():
 
 def _test_env_var_size():
     # max seems to be 1024 * 127
-    """
-    Private function to verify the maximum command line payload size.
+    """Private function to verify the maximum command line payload size.
 
     This should be smatter and bisect, but it doesn't
+
     """
     for f in range(256, 100, -1):
         payload = 'a' * 1024 * f

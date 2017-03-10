@@ -1,57 +1,67 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``BGP.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+``IxNetwork BGP protocol emulation functionality``
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Note:
+    TCL procedures::
 
-@file  BGP.py
+        ::ixia::emulation_bgp_config
+        ::ixia::emulation_bgp_control
+        ::ixia::emulation_bgp_info
+        ::ixia::emulation_bgp_route_config
 
-@summary  IxNetwork BGP protocol emulation functionality.
 
-@note
-TCL procedures:
-::ixia::emulation_bgp_config
-::ixia::emulation_bgp_control
-::ixia::emulation_bgp_info
-::ixia::emulation_bgp_route_config
 """
 
 import copy
 
 
 class BGP(object):
-    """
-    @description  IxNet BGP configuration wrapper
+    """IxNet BGP configuration wrapper.
+
     """
 
     def __init__(self, ixia):
-        """
-        @brief  BGP class initialization
-        @param ixia:  Ixia traffic generator
-        @type  ixia:  IxiaHLTMixin
+        """BGP class initialization.
+
+        Args:
+            ixia(IxiaHLTMixin):  Ixia traffic generator
+
         """
         self.ixia = ixia
         self.bgp_dict = {}
 
     def configure_neighbour(self, port, *args, **kwargs):
-        """
-        @brief  Configure BGP neighbors
-        @param port:  TG port in format tuple(chassisID, cardId, portId)
-        @type  port:  tuple(int)
-        @raise  AssertionError:  error in executing tcl code
-        @rtype:  dict
-        @return: Neighbour handler names
-        @note:  See description of keyword arguments in ixia_bgp_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_bgp_api.tcl
+        """Configure BGP neighbors.
+
+        Args:
+            port(tuple(int)):  TG port in format tuple(chassisID, cardId, portId)
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            dict: Neighbour handler names
+
+        Note:
+            See description of keyword arguments in ixia_bgp_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_bgp_api.tcl
+
         """
         kwargs['port_handle'] = "/".join(map(str, port))
         self.ixia.ixia_emulation_bgp_config(*args, **kwargs)
@@ -81,12 +91,19 @@ class BGP(object):
         return self.bgp_dict[port]['n_handler'].copy()
 
     def control(self, *args, **kwargs):
-        """
-        @brief  Turning BGP on/off, enabling statistics.
-        @raise  AssertionError:  error in executing tcl code
-        @return:  None
-        @note:  See description of keyword arguments in ixia_bgp_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_bgp_api.tcl
+        """Turning BGP on/off, enabling statistics.
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            None
+
+        Note:
+            See description of keyword arguments in ixia_bgp_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_bgp_api.tcl
+
         """
         if "port" in kwargs:
             kwargs['port_handle'] = "/".join(map(str, kwargs.pop("port")))
@@ -96,13 +113,19 @@ class BGP(object):
         assert self.ixia.check_return_code() == ""
 
     def emulation_bgp_info(self, *args, **kwargs):
-        """
-        @brief  Command to retrieve BGP statistics
-        @raise  AssertionError:  error in executing tcl code
-        @rtype:  dict
-        @return:  BGP statistics
-        @note:  See description of keyword arguments in ixia_bgp_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_bgp_api.tcl
+        """Command to retrieve BGP statistics.
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            dict: BGP statistics
+
+        Note:
+            See description of keyword arguments in ixia_bgp_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_bgp_api.tcl
+
         """
         if 'neighbour_keys' in kwargs:
             is_neighbour_handler = True
@@ -143,13 +166,19 @@ class BGP(object):
             return copy.deepcopy(the_port)
 
     def configure_route(self, *args, **kwargs):
-        """
-        @brief  Create a route range associated with neighbor
-        @raise  AssertionError:  error in executing tcl code
-        @rtype:  dict
-        @return:  Route handler names
-        @note:  See description of keyword arguments in ixia_bgp_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_bgp_api.tcl
+        """Create a route range associated with neighbor.
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            dict: Route handler names
+
+        Note:
+            See description of keyword arguments in ixia_bgp_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_bgp_api.tcl
+
         """
         if "neighbor" in kwargs:
             kwargs['handle'] = "$" + kwargs.pop("neighbor")

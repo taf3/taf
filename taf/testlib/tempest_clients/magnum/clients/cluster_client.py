@@ -12,6 +12,10 @@
 #
 # Based on OpenStack Magnum (https://github.com/openstack/magnum.git)
 
+"""``cluster_client.py``
+
+"""
+
 from oslo_log import log as logging
 from tempest.lib import exceptions
 
@@ -22,16 +26,22 @@ from testlib.tempest_clients.magnum.common.utils import wait_for_condition
 
 
 class ClusterClient(client.MagnumClient):
-    """Encapsulates REST calls and maps JSON to/from models"""
+    """Encapsulates REST calls and maps JSON to/from models.
+
+    """
 
     LOG = logging.getLogger(__name__)
 
     @classmethod
     def clusters_uri(cls, filters=None):
-        """Construct clusters uri with optional filters
+        """Construct clusters uri with optional filters.
 
-        :param filters: Optional k:v dict that's converted to url query
-        :returns: url string
+        Args:
+            filters: Optional k:v dict that's converted to url query
+
+        Returns:
+            url string
+
         """
 
         url = "/clusters"
@@ -41,45 +51,61 @@ class ClusterClient(client.MagnumClient):
 
     @classmethod
     def cluster_uri(cls, cluster_id):
-        """Construct cluster uri
+        """Construct cluster uri.
 
-        :param cluster_id: cluster uuid or name
-        :returns: url string
+        Args:
+            cluster_id: cluster uuid or name
+
+        Returns:
+            url string
+
         """
 
         return "{0}/{1}".format(cls.clusters_uri(), cluster_id)
 
     def list_clusters(self, filters=None, **kwargs):
-        """Makes GET /clusters request and returns ClusterCollection
+        """Makes GET /clusters request and returns ClusterCollection.
 
-        Abstracts REST call to return all clusters
+        Abstracts REST call to return all clusters.
 
-        :param filters: Optional k:v dict that's converted to url query
-        :returns: response object and ClusterCollection object
+        Args:
+            filters: Optional k:v dict that's converted to url query
+
+        Returns:
+            Response object and ClusterCollection object
+
         """
 
         resp, body = self.get(self.clusters_uri(filters), **kwargs)
         return self.deserialize(resp, body, cluster_model.ClusterCollection)
 
     def get_cluster(self, cluster_id, **kwargs):
-        """Makes GET /cluster request and returns ClusterEntity
+        """Makes GET /cluster request and returns ClusterEntity.
 
-        Abstracts REST call to return a single cluster based on uuid or name
+        Abstracts REST call to return a single cluster based on uuid or name.
 
-        :param cluster_id: cluster uuid or name
-        :returns: response object and ClusterCollection object
+        Args:
+            cluster_id: cluster uuid or name
+
+        Returns:
+            Response object and ClusterCollection object
+
         """
 
         resp, body = self.get(self.cluster_uri(cluster_id))
         return self.deserialize(resp, body, cluster_model.ClusterEntity)
 
     def post_cluster(self, model, **kwargs):
-        """Makes POST /cluster request and returns ClusterIdEntity
+        """Makes POST /cluster request and returns ClusterIdEntity.
 
-        Abstracts REST call to create new cluster
+        Abstracts REST call to create new cluster.
 
-        :param model: ClusterEntity
-        :returns: response object and ClusterIdEntity object
+        Args:
+            model: ClusterEntity
+
+        Returns:
+            Response object and ClusterIdEntity object
+
         """
 
         resp, body = self.post(
@@ -92,9 +118,13 @@ class ClusterClient(client.MagnumClient):
 
         Abstracts REST call to update cluster attributes
 
-        :param cluster_id: UUID of cluster
-        :param clusterpatch_listmodel: ClusterPatchCollection
-        :returns: response object and ClusterIdEntity object
+        Args:
+            cluster_id: UUID of cluster
+            clusterpatch_listmodel: ClusterPatchCollection
+
+        Returns:
+            Response object and ClusterIdEntity object
+
         """
 
         resp, body = self.patch(
@@ -107,8 +137,12 @@ class ClusterClient(client.MagnumClient):
 
         Abstracts REST call to delete cluster based on uuid or name
 
-        :param cluster_id: UUID or name of cluster
-        :returns: response object
+        Args:
+            cluster_id: UUID or name of cluster
+
+        Returns:
+            Response object
+
         """
 
         return self.delete(self.cluster_uri(cluster_id), **kwargs)

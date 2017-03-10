@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``testenv.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Environment verifying functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  testenv.py
-
-@summary  Environment verifying functionality
 """
 
 
@@ -27,15 +26,16 @@ from . import loggers
 
 
 def get_env_prop(env):
-    """
-    @brief  Read properties from all devices.
-    @param  env:  Environment instance
-    @type  env:  Environment
+    """Read properties from all devices.
+
+    Args:
+        env(Environment):  Environment instance
+
     """
 
     def get_param(param):
-        """
-        @brief  Get single param
+        """Get single param.
+
         """
         return "_".join(
             {str(switch.get_env_prop(param)) for switch in getattr(env, "switch", {}).values()})
@@ -50,8 +50,8 @@ def get_env_prop(env):
 
 
 def setup_teardown(function):
-    """
-    @brief  Setup/Teardown decorator
+    """Setup/Teardown decorator.
+
     """
     def wrapper(*args, **kwargs):
         args[0]._setup()
@@ -62,16 +62,17 @@ def setup_teardown(function):
 
 
 class TestLinks(object):
-    """
-    @description  Links verification class.
+    """Links verification class.
+
     """
     class_logger = loggers.ClassLogger()
 
     def __init__(self, env):
-        """
-        @brief  Initialize TestLinks class
-        @param  env:  Environment instance
-        @type  env:  Environment
+        """Initialize TestLinks class.
+
+        Args:
+            env(Environment):  Environment instance
+
         """
         self.env = env
         self.class_logger.info("Links verification enabled.")
@@ -83,8 +84,8 @@ class TestLinks(object):
         self.set_ports_admin_enabled = helpers.set_ports_admin_enabled
 
     def _setup(self):
-        """
-        @brief  Prepare env for test_links
+        """Prepare env for test_links.
+
         """
         self.class_logger.info("Links verification setup.")
         # Clean up tg objects before tests in case use sanity_check_only before
@@ -129,20 +130,22 @@ class TestLinks(object):
                 self.class_logger.debug("Current retry counts: %s" % (retry_current, ))
 
     def _teardown(self):
-        """
-        @brief  Check procedure on teardown
+        """Check procedure on teardown.
+
         """
         self.class_logger.info("Links verification teardown.")
         self.env.check()
 
     def _check_tg_links(self, ports, sw):
-        """
-        @brief  This function verifies links between Traffic Generator and Device.
-        @param  ports:  Ports dictionary in format {("sw1", "tg1"):{1: 25, 2: 26}}
-        @type  ports:  dict
-        @param  sw:  Device acronym, e.g."sw1"
-        @type  sw:  str
-        @note  Verification based on STP packet "portid" field contents.
+        """This function verifies links between Traffic Generator and Device.
+
+        Args:
+            ports(dict):  Ports dictionary in format {("sw1", "tg1"):{1: 25, 2: 26}}
+            sw(str):  Device acronym, e.g."sw1"
+
+        Notes:
+            Verification based on STP packet "portid" field contents.
+
         """
         self.class_logger.debug("Analyzing links for device %s" % (sw, ))
 
@@ -187,19 +190,21 @@ class TestLinks(object):
                 pytest.softexit("No data for port!", self.env)
 
     def _check_sw_links(self, ports, sw1, sw2, check_method="direct"):
-        """
-        @brief  This function verifies links between Devices.
-        @param  ports:  Ports dictionary in format {("sw1", "tg1"):{1: 25, 2: 26}}
-        @type  ports:  dict
-        @param  sw1:  Device acronym, e.g."sw1"
-        @type  sw1:  str
-        @param  sw2:  Device acronym, e.g."sw2"
-        @type  sw2:  str
-        @param  check_method:  Validation type. direct|indirect
-        @type  check_method:  str
-        @raise  ValueError:  unknown check_method value
-        @note  Verification based on operational state change as a response to admin disable/enable on the other end of the link.
-               (applicable only for real devices)
+        """This function verifies links between Devices.
+
+        Args:
+            ports(dict):  Ports dictionary in format {("sw1", "tg1"):{1: 25, 2: 26}}
+            sw1(str):  Device acronym, e.g."sw1"
+            sw2(str):  Device acronym, e.g."sw2"
+            check_method(str):  Validation type. direct|indirect
+
+        Raises:
+            ValueError:  unknown check_method value
+
+        Notes:
+            Verification based on operational state change as a response to admin disable/enable on the other end of the link.
+            (applicable only for real devices)
+
         """
         self.class_logger.info("Verify link between switches {0} and {1}".format(sw1, sw2))
         sw1_id = int(sw1[2:])
@@ -289,16 +294,16 @@ class TestLinks(object):
 
     @setup_teardown
     def test_links_simplified5(self):
-        """
-        @brief  "simplified" (5-links) setup:
+        """ "simplified" (5-links) setup:
+
         """
         ports = self.env.get_ports(links=[['tg1', 'sw1', 5], ])
         self._check_tg_links(ports, "sw1")
 
     @setup_teardown
     def test_links_simplified4(self):
-        """
-        @brief  "simplified" 5-links setup:
+        """ "simplified" 5-links setup:
+
         """
         ports = self.env.get_ports(links=[['tg1', 'sw1', 4], ])
         time.sleep(15)
@@ -306,8 +311,8 @@ class TestLinks(object):
 
     @setup_teardown
     def test_links_simplified3(self):
-        """
-        @brief  "simplified" 3-links setup:
+        """ "simplified" 3-links setup:
+
         """
         ports = self.env.get_ports(links=[['tg1', 'sw1', 3], ])
         time.sleep(15)
@@ -315,8 +320,8 @@ class TestLinks(object):
 
     @setup_teardown
     def test_links_simplified2(self):
-        """
-        @brief  "simplified" 2-links setup:
+        """ "simplified" 2-links setup:
+
         """
         ports = self.env.get_ports(links=[['tg1', 'sw1', 2], ])
         time.sleep(15)
@@ -324,8 +329,8 @@ class TestLinks(object):
 
     @setup_teardown
     def test_links_golden(self):
-        """
-        @brief  std "golden" setup:
+        """std "golden" setup:
+
         """
         ports = self.env.get_ports([['tg1', 'sw1', 5], ['tg1', 'sw2', 4], ['tg1', 'sw3', 3],
                                     ['sw1', 'sw2', 9], ['sw1', 'sw3', 4], ['sw2', 'sw3', 4]])
@@ -341,8 +346,8 @@ class TestLinks(object):
 
     @setup_teardown
     def test_links_diamond(self):
-        """
-        @brief  std "diamond" setup:
+        """std "diamond" setup:
+
         """
         ports = self.env.get_ports([['tg1', 'sw1', 3], ['tg1', 'sw2', 2], ['tg1', 'sw3', 2], ['tg1', 'sw4', 2],
                                     ['sw1', 'sw2', 2], ['sw1', 'sw3', 2], ['sw1', 'sw4', 1],
@@ -362,8 +367,8 @@ class TestLinks(object):
 
     @setup_teardown
     def test_links_mixed(self):
-        """
-        @brief  "mixed" setup:
+        """ "mixed" setup:
+
         """
         ports = self.env.get_ports(links=[['tg1', 'sw1', 2], ['tg1', 'sw2', 1], ['tg1', 'sw3', 1],
                                           ['sw1', 'sw2', 1], ['sw1', 'sw3', 1], ['sw2', 'sw3', 2]])

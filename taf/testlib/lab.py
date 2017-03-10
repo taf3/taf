@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``lab.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`General lab functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  lab.py
-
-@summary  general lab functionality.
 """
 
 from . import clitelnet
@@ -24,17 +24,18 @@ from .custom_exceptions import SwitchException
 
 
 class GeneralPortServer(clitelnet.TelnetCMD):
-    """
-    @description  General functionality for console connection
+    """General functionality for console connection.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def initial_config(self, config):
-        """
-        @brief  Performs initial configuration
-        @param  config:  Configuration information.
-        @type  config:  dict
+        """Performs initial configuration.
+
+        Args:
+            config(dict):  Configuration information.
+
         """
         self.config = config
         self.sw_user = config["telnet_user"]
@@ -49,32 +50,34 @@ class GeneralPortServer(clitelnet.TelnetCMD):
         self.name = config.get('name', 'noname')
 
     def telnet_connect(self, timeout=45, with_login=None, wait_login=0):
-        """
-        @brief  Perform telnet connection to the device
-        @param  timeout:  time out to wait connection
-        @type  timeout:  int
-        @param  with_login:  Perform login procedure or not.
-                             If param isn't set try automatically determine login necessity. (True|False|None)
-        @type  with_login:  bool
-        @param  wait_login:  time to wait login before sending <Enter>.
-                             <Enter> is necessary if login is already appiered.
-        @type  wait_login:  int
-        @raise  NotImplementedError:  not implemented
+        """Perform telnet connection to the device.
+
+        Args:
+            timeout(int):  time out to wait connection
+            with_login(bool):  Perform login procedure or not.
+                               If param isn't set try automatically determine login necessity. (True|False|None)
+            wait_login(int):  time to wait login before sending <Enter>.
+                              <Enter> is necessary if login is already appeared.
+
+        Raises:
+            NotImplementedError:  not implemented
+
         """
         raise NotImplementedError
 
     def get_serial(self, timeout=90, with_login=None, wait_login=0):
-        """
-        @brief  Connect to switch via serial.
-        @param  timeout:  time out to wait connection
-        @type  timeout:  int
-        @param  with_login:  Perform login procedure or not.
-                             If param isn't set try automatically determine login necessity. (True|False|None)
-        @type  with_login:  bool
-        @param  wait_login:  time to wait login before sending <Enter>.
-                             <Enter> is necessary if login is already appiered.
-        @type  wait_login:  int
-        @note  Create(or check) class attribute telnet with active telnet connection to switch and do login.
+        """Connect to switch via serial.
+
+        Args:
+            timeout(int):  time out to wait connection
+            with_login(bool):  Perform login procedure or not.
+                               If param isn't set try automatically determine login necessity. (True|False|None)
+            wait_login(int):  time to wait login before sending <Enter>.
+                              <Enter> is necessary if login is already appiered.
+
+        Notes:
+            Create(or check) class attribute telnet with active telnet connection to switch and do login.
+
         """
         self.class_logger.debug("Establishing telnet connection to switch...")
 
@@ -89,8 +92,8 @@ class GeneralPortServer(clitelnet.TelnetCMD):
         self.class_logger.debug("Telnet connection to switch is established.")
 
     def close_serial(self):
-        """
-        @brief  Close telnet connection to switch.
+        """Close telnet connection to switch.
+
         """
         self.class_logger.debug("Closing telnet connection...")
         self.exit(wait_close=False)
@@ -98,20 +101,32 @@ class GeneralPortServer(clitelnet.TelnetCMD):
 
 
 class ConsoleServer(GeneralPortServer):
-    """
-    @description  Class responsible for console connection
+    """Class responsible for console connection.
+
     """
 
     def telnet_connect(self, timeout=45, with_login=None, wait_login=0):
-        """
-        @copydoc  GeneralPortServer::telnet_connect()
+        """Perform telnet connection to the device.
+
+        Args:
+            timeout(int):  time out to wait connection
+            with_login(bool):  Perform login procedure or not.
+                               If param isn't set try automatically determine login necessity. (True|False|None)
+            wait_login(int):  time to wait login before sending <Enter>.
+                              <Enter> is necessary if login is already appeared.
+
+        Raises:
+            NotImplementedError:  not implemented
+
         """
         raise NotImplementedError
 
     def __new__(cls, config):
-        """
-        @brief  Get PortServer class related to console type
-        @raise  SwitchException:  unsupported console type
+        """Get PortServer class related to console type.
+
+        Raises:
+            SwitchException:  unsupported console type
+
         """
         console_type = config.get("console_type", "portserver")
         try:
@@ -122,8 +137,8 @@ class ConsoleServer(GeneralPortServer):
 
 
 class KVMServer(ConsoleServer):
-    """
-    @description  KVM functionality
+    """KVM functionality.
+
     """
 
     def __init__(self, config):
@@ -134,8 +149,18 @@ class KVMServer(ConsoleServer):
                                         login_prompt="Username:")
 
     def telnet_connect(self, timeout=45, with_login=None, wait_login=0):
-        """
-        @copydoc  GeneralPortServer::telnet_connect()
+        """Perform telnet connection to the device.
+
+        Args:
+            timeout(int):  time out to wait connection
+            with_login(bool):  Perform login procedure or not.
+                               If param isn't set try automatically determine login necessity. (True|False|None)
+            wait_login(int):  time to wait login before sending <Enter>.
+                              <Enter> is necessary if login is already appeared.
+
+        Raises:
+            NotImplementedError:  not implemented
+
         """
         self.class_logger.debug("Performing telnet connection to switch ...")
         output = self.connect(with_login=True)
@@ -143,11 +168,14 @@ class KVMServer(ConsoleServer):
         self.kvm_connect(output)
 
     def kvm_connect(self, output):
-        """
-        @brief  Perform connection via KVM
-        @param  output:  KVM output
-        @type  output:  list[str]
-        @raise  SwitchException:  error on connection
+        """Perform connection via KVM.
+
+        Args:
+            output(list[str]):  KVM output
+
+        Raises:
+            SwitchException:  error on connection
+
         """
         self.class_logger.debug("Output: %s" % (output, ))
         kvm_number = None
@@ -173,8 +201,8 @@ class KVMServer(ConsoleServer):
 
 
 class PortServer(ConsoleServer):
-    """
-    @description  PortServer functionality
+    """PortServer functionality.
+
     """
 
     def __init__(self, config):
@@ -187,10 +215,14 @@ class PortServer(ConsoleServer):
                                          login_prompt=self.sw_loginprompt, exit_cmd="exit")
 
     def release_serial(self):
-        """
-        @brief  Release serial port on port server.
-        @raise  SwitchException:  error on terminating
-        @note  This method kill tty on power server.
+        """Release serial port on port server.
+
+        Raises:
+            SwitchException:  error on terminating
+
+        Notes:
+            This method kill tty on power server.
+
         """
         self.class_logger.debug("Killing tty for assurance on port server...")
         port_server = clitelnet.TelnetCMD(host=self.ps_host, username=self.ps_user,
@@ -207,8 +239,18 @@ class PortServer(ConsoleServer):
         del port_server
 
     def telnet_connect(self, timeout=45, with_login=None, wait_login=0):
-        """
-        @copydoc  GeneralPortServer::telnet_connect()
+        """Perform telnet connection to the device.
+
+        Args:
+            timeout(int):  time out to wait connection
+            with_login(bool):  Perform login procedure or not.
+                               If param isn't set try automatically determine login necessity. (True|False|None)
+            wait_login(int):  time to wait login before sending <Enter>.
+                              <Enter> is necessary if login is already appeared.
+
+        Raises:
+            NotImplementedError:  not implemented
+
         """
         self.release_serial()
         self.class_logger.debug("Performing telnet connection to switch ...")

@@ -1,19 +1,18 @@
-"""
-@copyright Copyright (c) 2015 - 2016, Intel Corporation.
+# Copyright (c) 2015 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  lldp.py
+"""``lldp.py``
 
 """
 
@@ -34,13 +33,13 @@ class Tlv(object):
         # chain all the tlvs together
         """
 
+        Args:
+            tlvs(list): list tlvs
+            predicate(function): predicate function
 
-        @param tlvs: list tlvs
-        @type tlvs: list
-        @param predicate: predicate function
-        @type predicate: function
-        @return:
-        @rtype: list
+        Returns:
+            list
+
         """
         return next(val for t, val in tlvs if predicate(t))
 
@@ -48,10 +47,12 @@ class Tlv(object):
     def get_local_port_tlv_row(tlv):
         """
 
-        @param tlv: list or dict of the port TLV
-        @type tlv: list
-        @return: remMan style dict
-        @rtype: dict
+        Args:
+            tlv(list): list or dict of the port TLV
+
+        Returns:
+            dict: remMan style dict
+
         """
         row = {}
         # have to use elif because of endswith substring matching
@@ -94,10 +95,12 @@ class Tlv(object):
     def get_local_chassis_tlv_row(tlv):
         """
 
-        @param tlv: list or dict of the chassis TLV
-        @type tlv: list
-        @return: row style dict
-        @rtype: dict
+        Args:
+            tlv(list): list or dict of the chassis TLV
+
+        Returns:
+            dict: row style dict
+
         """
         row = {}
         for subtype, value in tlv:
@@ -139,10 +142,12 @@ class Tlv(object):
     def get_local_cap_tlv_row(tlv):
         """
 
-        @param tlv: list or dict of the port TLV
-        @type tlv: list
-        @return: row style dict
-        @rtype: dict
+        Args:
+            tlv(list): list or dict of the port TLV
+
+        Returns:
+            dict: row style dict
+
         """
         row = {}
         # have to use elif because of endswith substring matching
@@ -159,10 +164,12 @@ class Tlv(object):
     def get_port_tlv_row(tlv):
         """
 
-        @param tlv: list or dict of the port TLV
-        @type tlv: list
-        @return: row style dict
-        @rtype: dict
+        Args:
+            tlv(list): list or dict of the port TLV
+
+        Returns:
+            dict: row style dict
+
         """
         row = {}
         # have to use elif because of endswith substring matching
@@ -205,10 +212,12 @@ class Tlv(object):
     def get_sys_cap_tlv_row(tlv):
         """
 
-        @param tlv: list or dict of the port TLV
-        @type tlv: list
-        @return: row style dict
-        @rtype: dict
+        Args:
+            tlv(list): list or dict of the port TLV
+
+        Returns:
+            dict: row style dict
+
         """
         row = {}
         # have to use elif because of endswith substring matching
@@ -225,10 +234,12 @@ class Tlv(object):
     def get_chassis_tlv_row(tlv):
         """
 
-        @param tlv: list or dict of the chassis TLV
-        @type tlv: list
-        @return: remMan style dict
-        @rtype: dict
+        Args:
+            tlv(list): list or dict of the chassis TLV
+
+        Returns:
+            dict: remMan style dict
+
         """
         row = {}
         for subtype, value in tlv:
@@ -270,10 +281,12 @@ class Tlv(object):
     def get_mgmt_row(tlv):
         """
 
-        @param tlv: list or dict of the mgmt TLV sub-tlvs
-        @type tlv: list
-        @return: remMan style dict
-        @rtype: dict
+        Args:
+            tlv(list): list or dict of the mgmt TLV sub-tlvs
+
+        Returns:
+            dict: remMan style dict
+
         """
         row = {
             # default '' for OID because it might not be present
@@ -314,6 +327,3 @@ class Tlv(object):
                 row['remManAddrIfSubtype'] = None
                 row['remManAddrIfId'] = int(value)
         return row
-
-
-

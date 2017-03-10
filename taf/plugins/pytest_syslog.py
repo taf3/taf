@@ -18,8 +18,9 @@
 
 Note:
     For correct functioning syslog should be properly configured, e.g.
-      1) On device should be configured hostname seacliff9.
-      2) The following lines should be added to syslog config::
+
+      1. On device should be configured hostname seacliff9.
+      2. The following lines should be added to syslog config::
 
           # This is criteria for seacliff messages
           if $hostname contains 'seacliff9' then /var/log/switches/seacliff09.log
@@ -93,6 +94,7 @@ class SyslogNotifier(object):
     """Send syslog messages.
 
     """
+
     def setup_logger(self, session):
         """Setup logger for each device.
 

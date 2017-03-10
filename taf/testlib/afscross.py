@@ -1,23 +1,23 @@
-#! /usr/bin/env python
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``afscross.py``
+
+`xconnect-specific functionality`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  afscross.py
-
-@summary xconnect-specific functionality.
-"""
 import argparse
 
 from . import afs
@@ -27,21 +27,20 @@ from .dev_basecross import GenericXConnectMixin
 
 
 class AFS(GenericXConnectMixin):
-    """
-    @description  Basic interact with ASF
+    """Basic interact with ASF.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config, opts, env):
-        """
-        @brief  Reading/updating config, initialize afs object instance.
-        @param  config:  Configuration
-        @type  config:  dict
-        @param  opts:  Options
-        @type  opts:  OptionParser
-        @param  env:  Environment object
-        @type  env:  Environment
+        """Reading/updating config, initialize afs object instance.
+
+        Args:
+            config(dict):  Configuration
+            opts(OptionParser):  Options
+            env(Environment):  Environment object
+
         """
         self.class_logger.debug("Create AFS object.")
         self.opts = opts
@@ -71,61 +70,65 @@ class AFS(GenericXConnectMixin):
         self.afs = afs.AFS(self.config)
 
     def cross_connect(self, conn_list):
-        """
-        @brief  Make connections between switches
-        @param  conn_list:  List of connections in format: [[sw1, port1, sw2, port2], ... ]
-        @type  conn_list:  list[list[int]]
-        @par Example:
-        @code
-        cross_connect([[0, 1, 1, 1], [0, 2, 1, 2]])
-        @endcode
+        """Make connections between switches.
+
+        Args:
+            conn_list(list[list[int]]):  List of connections in format: [[sw1, port1, sw2, port2], ... ]
+
+        Examples::
+
+            cross_connect([[0, 1, 1, 1], [0, 2, 1, 2]])
+
         """
         for connection in conn_list:
             self.afs.xconnect(connection)
         self.afs.clear_connection_pool()
 
     def cross_disconnect(self, disconn_list):
-        """
-        @brief  Destroy connections between switches
-        @param  disconn_list:  List of connections in format: [[sw1, port1, sw2, port2], ... ]
-        @type  disconn_list:  list[list[int]]
-        @par Example:
-        @code
-        cross_disconnect([[0, 1, 1, 1], [0, 2, 1, 2]])
-        @endcode
+        """Destroy connections between switches.
+
+        Args:
+            disconn_list(list[list[int]]):  List of connections in format: [[sw1, port1, sw2, port2], ... ]
+
+        Examples::
+
+            cross_disconnect([[0, 1, 1, 1], [0, 2, 1, 2]])
+
         """
         for connection in disconn_list:
             self.afs.xdisconnect(connection)
         self.afs.clear_connection_pool()
 
     def cross_clear(self):
-        """
-        @brief  Clear all connections between switches. (Not supporter for AFS environment)
-        @raise  CrossException:  not supported method
+        """Clear all connections between switches. (Not supporter for AFS environment).
+
+        Raises:
+            CrossException:  not supported method
+
         """
         message = "cross_clear method is supported only on virtual environment"
         self.class_logger.error(message)
         raise CrossException(message)
 
     def start(self):
-        """
-        @brief  Obligatory class for entry_type = cross
+        """Obligatory class for entry_type = cross.
+
         """
         # Run check() to verify that connection to AFS is OK.
         self.check()
         self.afs.clear_connection_pool()
 
     def stop(self):
-        """
-        @brief  Obligatory class for entry_type = cross
+        """Obligatory class for entry_type = cross.
+
         """
         # self.class_logger.debug("Destroy AFS object.")
         # self.connection_pool.disconnect_all()
         self.afs.__del__()
 
     def check(self):
-        """
-        @brief  Obligatory class for entry_type = cross
+        """Obligatory class for entry_type = cross.
+
         """
         # Get system information to verify that connection to AFS is OK.
         self.afs.get_sys_info()
@@ -138,9 +141,11 @@ if __name__ == "__main__":
     from .common3 import Environment
 
     def parse_options():
-        """
-        @brief  Parsing env and cross options
-        @raise  CrossException:  setup option is obligatory
+        """Parsing env and cross options.
+
+        Raises:
+            CrossException:  setup option is obligatory
+
         """
         parser = argparse.ArgumentParser()
         parser.add_argument("--env", action="store", default=None, dest="env",
@@ -159,8 +164,8 @@ if __name__ == "__main__":
         return options
 
     def main():
-        """
-        @brief  Main work of standalone connections
+        """Main work of standalone connections.
+
         """
         options = parse_options()
         env = Environment(options)

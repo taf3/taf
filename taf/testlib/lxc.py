@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``lxc.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`LXC-specific functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  lxc.py
-
-@summary LXC-specific functionality.
 """
 
 import os
@@ -36,8 +35,8 @@ mod_logger = loggers.module_logger(name=__name__)
 
 
 def mkdir_p(path):
-    """
-    @brief  Create dir and pass exception if one already exists.
+    """Create dir and pass exception if one already exists.
+
     """
     try:
         os.makedirs(path)
@@ -49,28 +48,26 @@ def mkdir_p(path):
 
 
 class Lxc(object):
-    """
-    @description  Base class to work with Linux containers
+    """Base class to work with Linux containers.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, lxc_ip=None, lxc_iface=None, vlab_ip=None, switch_bin_path=None, switch_id=None, switch_port=8081):
-        """
-        @brief  Init method for container
-        @param  lxc_ip:  IP of the container
-        @type  lxc_ip:  str
-        @param  lxc_iface:  Network interface for container
-        @type  lxc_iface:  str
-        @param  vlab_ip:  real ip of the local vlab
-        @type  vlab_ip:  str
-        @param  switch_bin_path:  path to switchpp binary
-        @type  switch_bin_path:  str
-        @param  switch_id:  simswitch id
-        @type  switch_id:  str
-        @param  switch_port:  switchpp xmlrpc port
-        @type  switch_port:  int
-        @return:  None
+        """Init method for container.
+
+        Args:
+            lxc_ip(str):  IP of the container
+            lxc_iface(str):  Network interface for container
+            vlab_ip(str):  real ip of the local vlab
+            switch_bin_path(str):  path to switchpp binary
+            switch_id(str):  simswitch id
+            switch_port(int):  switchpp xmlrpc port
+
+        Returns:
+            None
+
         """
         self.topbuilddir = os.path.realpath(os.curdir)
         self.lxc_id = int(switch_port) - 8080
@@ -83,13 +80,15 @@ class Lxc(object):
         self.switch_id = switch_id or (int(switch_port) - 8080)
 
     def start(self, stdout=None, stderr=None):
-        """
-        @brief  Starts container
-        @param  stdout:  Output file
-        @param  stdout:  str
-        @param  stderr:  Error file
-        @param  stderr:  str
-        @return:  None
+        """Starts container.
+
+        Args:
+            stdout(str):  Output file
+            stderr(str):  Error file
+
+        Returns:
+            None
+
         """
         mkdir_p(os.path.join(os.sep, "var", "run", "quagga"))
         mkdir_p(os.path.join(os.sep, "var", "run", "ovs"))
@@ -149,9 +148,11 @@ class Lxc(object):
         process.wait()
 
     def stop(self):
-        """
-        @brief  Stops container
-        @return:  None
+        """Stops container.
+
+        Returns:
+            None
+
         """
         process = Popen(['lxc-stop', '-n', '%s' % (self.build_name, )], stdout=PIPE, close_fds=True)
         process.wait()

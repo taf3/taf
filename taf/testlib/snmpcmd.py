@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``snmpcmd.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Module for SNMP specific functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  snmpcmd.py
-
-@summary  Module for SNMP specific functionality.
 """
 
 import re
@@ -31,24 +30,24 @@ from . import loggers
 
 
 class SNMPCmd(object):
-    """
-    @description  SNMP specific functionality class.
+    """`SNMP specific functionality class.
 
-    @param  config:  environment config
-    @type  config:  list[dict]
-    @param env_switches:  switches dictionary in format {switch_id: switch_object}
-    @type  env_switches:  dict
-    @param mib_dir:  MIB module name
-    @type  mib_dir:  str
+    Args:
+        config(list[dict]):  environment config
+        env_switches(dict):  switches dictionary in format {switch_id: switch_object}
+        mib_dir(str):  MIB module name
+
     """
     suite_logger = loggers.ClassLogger()
 
     def __init__(self, config, env_switches, mib_dir):
-        """
-        @brief  Initialize SNMPCmd class
-        @param  config:  environment config
-        @param  env_switches:  switches list
-        @param  mib_dir:  MIB directory
+        """Initialize SNMPCmd class
+
+        Args:
+            config(list[dict]):  environment config
+            env_switches(dict):  switches dictionary in format {switch_id: switch_object}
+            mib_dir(str):  MIB module name
+
         """
         self.switches = {}
         # get community info from config file:
@@ -96,18 +95,19 @@ class SNMPCmd(object):
                               'ipv6z': InetAddressIPv6z(), 'dns': InetAddressDNS()}
 
     def _find_and_load_mib(self, mibs_dict, sym_name):
-        """
-        @brief  Find MIB name and load it to MibBuilder.
-        @param  mibs_dict:  dictionary that contains MIBs.
-        @type  mibs_dict:  dict
-        @param  sym_name:  MIB symbol name
-        @type  sym_name:  str
-        @rtype:  str
-        @return:  Name of MIB in which symbol name is. 'None' if MIB's name wasn't found.
-        @par  Example:
-        @code
-        self._find_and_load_mib(helpers.MIBS_DICT, 'onsSwitchppControlRouteInterfaceMtu')
-        @endcode
+        """Find MIB name and load it to MibBuilder.
+
+        Args:
+            mibs_dict(dict):  dictionary that contains MIBs.
+            sym_name(str):  MIB symbol name
+
+        Returns:
+            str:  Name of MIB in which symbol name is. 'None' if MIB's name wasn't found.
+
+        Examples::
+
+            self._find_and_load_mib(helpers.MIBS_DICT, 'onsSwitchppControlRouteInterfaceMtu')
+
         """
 
         # searching MIB name for specified symbol name in specified MIBs dictionary
@@ -132,18 +132,19 @@ class SNMPCmd(object):
         return mod_name
 
     def _get_oid(self, mod_name, sym_name):
-        """
-        @brief  Getting values from source by SNMP.
-        @param  mod_name:  MIB module name.
-        @type  mod_name:  dict
-        @param  sym_name:  MIB symbol name
-        @type  sym_name:  str
-        @rtype:  list
-        @return:  List of MIBs oids.
-        @par  Example:
-        @code
-        self._get_oid('ons_stat', 'onsSnmpAgentStatisticsPortId', 'tests/ui/mibs/')
-        @endcode
+        """Getting values from source by SNMP.
+
+        Args:
+            mod_name(dict):  MIB module name.
+            sym_name(str):  MIB symbol name
+
+        Returns:
+            list:  List of MIBs oids.
+
+        Examples::
+
+            self._get_oid('ons_stat', 'onsSnmpAgentStatisticsPortId', 'tests/ui/mibs/')
+
         """
 
         mib_node, = self.mib_builder.importSymbols(mod_name, sym_name)[0:1]
@@ -153,18 +154,19 @@ class SNMPCmd(object):
         return listed_oid
 
     def _get_previous(self, mod_name, sym_name):
-        """
-        @brief  Getting OID and NodeName of previous SNMP element of sequence.
-        @param  mod_name:  MIB module name.
-        @type  mod_name:  dict
-        @param  sym_name:  MIB symbol name
-        @type  sym_name:  str
-        @rtype:  list
-        @return:  List with OID and symbol name of previous element.
-        @par  Example:
-        @code
-        self._get_previous('ONS-SWITCH-MIB', 'onsSwitchppControlBridgeInfoInbandIpNetMaskInetAddress')
-        @endcode
+        """Getting OID and NodeName of previous SNMP element of sequence.
+
+        Args:
+            mod_name(dict):  MIB module name.
+            sym_name(str):  MIB symbol name
+
+        Returns:
+            list:  List with OID and symbol name of previous element.
+
+        Examples::
+
+            self._get_previous('ONS-SWITCH-MIB', 'onsSwitchppControlBridgeInfoInbandIpNetMaskInetAddress')
+
         """
 
         mib_node, = self.mib_builder.importSymbols(mod_name, sym_name)[0:1]
@@ -179,23 +181,23 @@ class SNMPCmd(object):
         return list(oid), prev_names[-1]
 
     def _normalize_result(self, mod_name, sym_name, result, to_oid=False):
-        """
-        @brief  Normalize SNMP GET result according syntax from MIB.
-        @param  mod_name:  MIB module name.
-        @type  mod_name:  dict
-        @param  sym_name:  MIB symbol name
-        @type  sym_name:  str
-        @param result:  List with one SNMP GET result for all types except InetAddress,
-                for InetAddress - list with two elements ['InetAddress', 'InetAddressType'].
-        @type  result:  list
-        @param to_oid:  indicator of formatting given result for OID.
-        @type  to_oid:  bool
-        @rtype:  str, int
-        @return:  Normalized result according to syntax.
-        @par  Example:
-        @code
-        self._normalize_result('ONS-SWITCH-MIB', 'onsSwitchppControlBridgeInfoInbandIpNetMaskInetAddress', [OctetString(hexValue='ffffff00'), Integer(1)])
-        @endcode
+        """Normalize SNMP GET result according syntax from MIB.
+
+        Args:
+            mod_name(dict):  MIB module name.
+            sym_name(str):  MIB symbol name
+            result(list):  List with one SNMP GET result for all types except InetAddress,
+                           for InetAddress - list with two elements ['InetAddress', 'InetAddressType'].
+            to_oid(bool):  indicator of formatting given result for OID.
+
+        Returns:
+            str, int:  Normalized result according to syntax.
+
+        Examples::
+
+            self._normalize_result('ONS-SWITCH-MIB', 'onsSwitchppControlBridgeInfoInbandIpNetMaskInetAddress',
+                                   [OctetString(hexValue='ffffff00'), Integer(1)])
+
         """
 
         mib_node, = self.mib_builder.importSymbols(mod_name, sym_name)[0:1]
@@ -267,27 +269,26 @@ class SNMPCmd(object):
         return result
 
     def _snmp_get_call(self, switch_id, arguments, community, version, to_oid=False, poll_timeout=20):
-        """
-        @brief  Getting data from source via SNMP.
-        @param switch_id:  ID of switch to get SNMP call to.
-        @type  switch_id:  int
-        @param arguments:  SNMP call (SNMP symbol name, index). Index can have inserted calls.
-        @type  arguments:  list
-        @param community:  SNMP community to read.
-        @type  community:  str
-        @param version:  version of SNMP protocol to use.
-        @type  version:  str
-        @param to_oid:  indicator of returned result's OID format
-        @type  to_oid:  bool
-        @param poll_timeout:  timeout to appearing SNMP data.
-        @type  poll_timeout:  int
-        @rtype:  str, int
-        @return  Normalized received SNMP data.
-        @par  Example:
-        @code
-        self._snmp_get_call(1, ['onsSwitchppControlBridgeInfoInbandIpNetMaskInetAddress', "1"], "sppCommunity", "v2", False, 20)
-        self._snmp_get_call(1, ['onsSwitchppControlBridgeInfoInbandIpNetMaskInetAddress', ["1.{}.1", ["PortId", "1.2.3"]]], "sppCommunity", "v2", False, 20)
-        @endcode
+        """Getting data from source via SNMP.
+
+        Args:
+            switch_id(int):  ID of switch to get SNMP call to.
+            arguments(list):  SNMP call (SNMP symbol name, index). Index can have inserted calls.
+            community(str):  SNMP community to read.
+            version(str):  version of SNMP protocol to use.
+            to_oid(bool):  indicator of returned result's OID format
+            poll_timeout(int):  timeout to appearing SNMP data.
+
+        Returns:
+            str, int:  Normalized received SNMP data.
+
+        Examples::
+
+            self._snmp_get_call(1, ['onsSwitchppControlBridgeInfoInbandIpNetMaskInetAddress', "1"],
+                                    "sppCommunity", "v2", False, 20)
+            self._snmp_get_call(1, ['onsSwitchppControlBridgeInfoInbandIpNetMaskInetAddress', ["1.{}.1",
+                                    ["PortId", "1.2.3"]]], "sppCommunity", "v2", False, 20)
+
         """
 
         sym_name = arguments[0]
@@ -389,23 +390,23 @@ class SNMPCmd(object):
         return final_res
 
     def snmp_get(self, elements_list, community, version, poll_timeout=20):
-        """
-        @brief  Walking through list of element to get and calling self._snmp_call() method.
-        @param  elements_list:  List of (SNMP symbol name, index) pairs. Index can have inserted calls.
-        @type  elements_list: list
-        @param  community:  SNMP community to read.
-        @type  community:  str
-        @param  version:  version of SNMP protocol to use.
-        @type  version:  str
-        @param  poll_timeout:  timeout to appearing SNMP data.
-        @type  poll_timeout:  int
-        @rtype:  list
-        @return  List of SNMP-GET command results.
-        @par  Example:
-        @code
-        self._snmp_get([{"1":[["onsSnmpAgentStatisticsPortId", "1"]]}])
-        self._snmp_get([{"1":[["onsSnmpAgentStatisticsPortId", ["1.{}.3", ["onsSnmpAgentStatisticsPortKey", "2.4.5"]]]]}], "sppCommunity", "v2")
-        @endcode
+        """Walking through list of element to get and calling self._snmp_call() method.
+
+        Args:
+            elements_list(list):  List of (SNMP symbol name, index) pairs. Index can have inserted calls.
+            community(str):  SNMP community to read.
+            version(str):  version of SNMP protocol to use.
+            poll_timeout(int):  timeout to appearing SNMP data.
+
+        Returns:
+            list:  List of SNMP-GET command results.
+
+        Examples::
+
+            self._snmp_get([{"1":[["onsSnmpAgentStatisticsPortId", "1"]]}])
+            self._snmp_get([{"1":[["onsSnmpAgentStatisticsPortId", ["1.{}.3", ["onsSnmpAgentStatisticsPortKey", "2.4.5"]]]]}],
+                           "sppCommunity", "v2")
+
         """
 
         if not community:
@@ -426,20 +427,20 @@ class SNMPCmd(object):
         return result_list
 
     def snmp_set(self, elements_list, community, mib_dir=None):
-        """
-        @brief  Setting values by SNMP.
-        @param  elements_list:  List of (SNMP symbol name, index) pairs. Index can have inserted calls.
-        @type  elements_list: list
-        @param  community:  SNMP community to read.
-        @type  community:  str
-        @param  mib_dir:  MIB module name.
-        @type  mib_dir:  str
-        @rtype:  list
-        @return  List of SNMP-SET command results.
-        @par  Example:
-        @code
-        self._snmp_get(conf[test]['snmp_set'])
-        @endcode
+        """Setting values by SNMP.
+
+        Args:
+            elements_list(list):  List of (SNMP symbol name, index) pairs. Index can have inserted calls.
+            community(str):  SNMP community to read.
+            mib_dir(str):  MIB module name.
+
+        Returns:
+            list:  List of SNMP-SET command results.
+
+        Examples::
+
+            self._snmp_get(conf[test]['snmp_set'])
+
         """
         if not mib_dir:
             mib_dir = self.mib_dir
@@ -501,17 +502,17 @@ class SNMPCmd(object):
 
     @staticmethod
     def snmp_walk(community, host, port, oid):
-        """
-        @brief  Perform SNMP walk for submitted oid.
-        @param  community:  SNMP community to read.
-        @type  community:  str
-        @param  host:  SNMP host.
-        @type  host:  str
-        @param  port:  SNMP host port.
-        @type  port:  int
-        @param  oid:  SNMP OID.
-        @type  oid:  str
-        @raise  CustomException:
+        """Perform SNMP walk for submitted oid.
+
+        Args:
+            community(str):  SNMP community to read.
+            host(str):  SNMP host.
+            port(int):  SNMP host port.
+            oid(str):  SNMP OID.
+
+        Raises:
+            CustomException
+
         """
         from testlib.custom_exceptions import CustomException
 

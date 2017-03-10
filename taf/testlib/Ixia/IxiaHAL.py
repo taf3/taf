@@ -1,22 +1,23 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``IxiaHAL.py``
+
+`TAF Ixia traffic generator based on IxTclHal API`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  IxiaHAL.py
-
-@summary  TAF Ixia traffic generator based on IxTclHal API.
-"""
 import copy
 import codecs
 import os
@@ -33,8 +34,8 @@ import pypacker
 
 
 class IxiaHALMixin(object):
-    """
-    @description  IXIA interaction base class
+    """IXIA interaction base class.
+
     """
 
     class_logger = None
@@ -43,12 +44,12 @@ class IxiaHALMixin(object):
     DEFAULT_MAX_SNIFF_TIME = 3600
 
     def __init__(self, config, opts):
-        """
-        @brief  Initializes connection to IXIA
-        @param config:  Configuration information
-        @type  config:  dict
-        @param opts:  py.test config.option object which contains all py.test cli options
-        @type  opts:  OptionParser
+        """Initializes connection to IXIA.
+
+        Args:
+            config(dict):  Configuration information
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options
+
         """
         self.__opts = opts
         self.__config = config
@@ -73,26 +74,32 @@ class IxiaHALMixin(object):
             self.username = config['user']
 
     def _convert_iface(self, iface):
-        """
-        @brief  Convert representation of TG port from tuple to string
-        @param iface:  TG port in format tuple(chassisID, cardId, portId)
-        @type  iface:  tuple(int)
-        @rtype:  str
-        @return:  Representation of TG port in format {chassisID cardId portId}
+        """Convert representation of TG port from tuple to string.
+
+        Args:
+            iface(tuple(int)):  TG port in format tuple(chassisID, cardId, portId)
+
+        Returns:
+            str: Representation of TG port in format {chassisID cardId portId}
+
         """
         return "{" + " ".join([str(x) for x in iface]) + "}"
 
     def _init_tcl(self):
-        """
-        @brief  Initialize Tcl interpreter
-        @return:  None
+        """Initialize Tcl interpreter.
+
+        Returns:
+            None
+
         """
         self.Tcl = Tcl()
 
         def tcl_puts(*args):
-            """
-            @brief  Enables logging for tcl output
-            @return:  None
+            """Enables logging for tcl output.
+
+            Returns:
+                None
+
             """
             if len(args) >= 2:
                 stream = args[0]
@@ -115,31 +122,38 @@ class IxiaHALMixin(object):
         ixia_helpers.ixtclhal_import(self.Tcl)
 
     def tcl(self, cmd):
-        """
-        @brief  Log end execute tcl code
-        @param cmd:  Tcl command
-        @type  cmd:  str
-        @rtype:  str
-        @return:  Result of execution
+        """Log end execute tcl code.
+
+        Args:
+            cmd(str):  Tcl command
+
+        Returns:
+            str: Result of execution
+
         """
         self.class_logger.debug("Run tcl command: %s", cmd)
         return self.Tcl.eval(cmd)
 
     def _get_version(self):
-        """
-        @brief  Get Ixia version
-        @rtype:  str
-        @return:  Version of product
+        """Get Ixia version.
+
+        Returns:
+            str: Version of product
+
         """
         return self.tcl('version cget -productVersion')
 
     def connect(self):
-        """
-        @brief  Logs in to IXIA and takes ports ownership
-        @raise  AssertionError:  error in executing tcl code
-        @raise  Exception:  Connection error
-        @raise  RuntimeError:  Error on taking/clearing port ownership
-        @return:  None
+        """Logs in to IXIA and takes ports ownership.
+
+        Raises:
+            AssertionError:  error in executing tcl code
+            Exception:  Connection error
+            RuntimeError:  Error on taking/clearing port ownership
+
+        Returns:
+            None
+
         """
         try:
             if platform.system() == 'Linux':
@@ -209,10 +223,14 @@ class IxiaHALMixin(object):
     __connect = connect
 
     def _reset_ports(self):
-        """
-        @brief  Reset TG ports configuration
-        @raise  AssertionError:  error in executing tcl code
-        @return:  None
+        """Reset TG ports configuration.
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            None
+
         """
         for iface in self.ports:
             chassis, card, port = iface
@@ -224,12 +242,17 @@ class IxiaHALMixin(object):
             self.tcl('port write %s %s %s' % (chassis, card, port))
 
     def disconnect(self, mode='fast'):
-        """
-        @brief  Logs out from IXIA and clears ports ownership
-        @param mode:  Type of mode to execute
-        @type  mode:  str
-        @raise  AssertionError:  error in executing tcl code
-        @return:  None
+        """Logs out from IXIA and clears ports ownership.
+
+        Args:
+            mode(str):  Type of mode to execute
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            None
+
         """
         if self.ownership_state:
             for iface in self.owned_ifaces:
@@ -245,8 +268,17 @@ class IxiaHALMixin(object):
     __disconnect = disconnect
 
     def disconnect_port(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::disconnect_port()
+        """Simulate port link disconnecting (set it to admin down etc).
+
+        Args:
+            iface(str):  Interface to disconnect.
+
+        Raises:
+            NotImplementedError:  not implemented
+
+        Returns:
+            None or raise and exception.
+
         """
         chassis, card, port = iface
         self.class_logger.debug("Emulating disconnecting for port %s %s %s." % iface)
@@ -255,8 +287,17 @@ class IxiaHALMixin(object):
         self.tcl('port write %s %s %s' % (chassis, card, port))
 
     def connect_port(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::connect_port()
+        """Simulate port link connecting (set it to admin up etc).
+
+        Args:
+            iface(str):  Interface to connect.
+
+        Raises:
+            NotImplementedError:  not implemented
+
+        Returns:
+            None or raise and exception.
+
         """
         chassis, card, port = iface
         self.class_logger.debug("Emulating connecting for port %s %s %s." % iface)
@@ -265,8 +306,11 @@ class IxiaHALMixin(object):
         self.tcl('port write %s %s %s' % (chassis, card, port))
 
     def check(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::check()
+        """Check if TG object is alive and ready for processing.
+
+        Returns:
+            None or raise and exception.
+
         """
         try:
             self._get_version()
@@ -278,21 +322,41 @@ class IxiaHALMixin(object):
             self.__init__(self.__config, self.__opts)
 
     def create(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::create()
+        """Perform all necessary procedures to initialize TG device and prepare it for interaction.
+
+        Returns:
+            None or raise and exception.
+
+        Notes:
+            Method has to check --get_only option. Set of steps to configure TG device is related to particular TG type.
+
         """
         return self.__connect()
 
     def destroy(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::destroy()
+        """Perform all necessary procedures to uninitialize TG device.
+
+        Returns:
+            None or raise and exception.
+
+        Notes:
+            Method has to check --get_only and --leave_on options.
+            Set of steps to unconfigure TG device is related to particular TG type.
+            Method has to clear all connections and stop all captures and data streams.
+
         """
         self.cleanup(mode="fast")
         self.__disconnect()
 
     def cleanup(self, mode="complete"):
-        """
-        @copydoc testlib::tg_template::GenericTG::cleanup()
+        """This method should do Ixia ports cleanup (remove streams etc).
+
+        Args:
+            mode(str): "fast" or "complete". If mode == "fast", method does not clear streams on the port, but stops them (str).
+
+        Returns:
+            None or raise and exception.
+
         """
         # TODO: Add stop_sniff etc
         # TODO: Handle errors more gracefully
@@ -306,32 +370,37 @@ class IxiaHALMixin(object):
             self._reset_ports()
 
     def sanitize(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::sanitize()
+        """This method has to clear all stuff which can cause device inconsistent state after exit or unexpected exception.
+
+        Notes:
+            E.g. clear connections, stop threads. This method is called from pytest.softexit
+
         """
         self.__disconnect()
 
     def clear_streams(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::clear_streams()
+        """Stop and clear all traffic streams.
+
         """
         self.stream_ids = {}
         self._reset_ports()
 
     def _transmit_stream(self, chassis, card, port, ix_stream_id):
-        """
-        @brief  Transmit Ixia stream
-        @param chassis:  Chassis id
-        @type  chassis:  int
-        @param card:  Card id
-        @type  card:  int
-        @param port:  Port id
-        @type  port:  int
-        @param ix_stream_id:  Stream id
-        @type  ix_stream_id:  int
-        @raise  AssertionError:  error in executing tcl code
-        @raise  IxiaException:  Link is down
-        @return:  None
+        """Transmit Ixia stream.
+
+        Args:
+            chassis(int):  Chassis id
+            card(int):  Card id
+            port(int):  Port id
+            ix_stream_id(int):  Stream id
+
+        Raises:
+            AssertionError:  error in executing tcl code
+            IxiaException:  Link is down
+
+        Returns:
+            None
+
         """
         # Check Link State before sending stream.
         if self.tcl("set linkToCheck {{%s %s %s}}; ixCheckLinkState linkToCheck" % (chassis, card, port)) != "0":
@@ -355,17 +424,17 @@ class IxiaHALMixin(object):
                         {'chassis': chassis, 'card': card, 'port': port}) == "0"
 
     def _enable_stream(self, chassis, card, port, ix_stream_id):
-        """
-        @brief  Enable Ixia stream
-        @param chassis:  Chassis id
-        @type  chassis:  int
-        @param card:  Card id
-        @type  card:  int
-        @param port:  Port id
-        @type  port:  int
-        @param ix_stream_id:  Stream id
-        @type  ix_stream_id:  int
-        @return:  None
+        """Enable Ixia stream.
+
+        Args:
+            chassis(int):  Chassis id
+            card(int):  Card id
+            port(int):  Port id
+            ix_stream_id(int):  Stream id
+
+        Returns:
+            None
+
         """
         self.tcl("stream get %(chassis)s %(card)s %(port)s %(stream_id)s; \
                   stream config -enable true; \
@@ -374,17 +443,17 @@ class IxiaHALMixin(object):
                  {'chassis': chassis, 'card': card, 'port': port, 'stream_id': ix_stream_id}) == "0"
 
     def _disable_stream(self, chassis, card, port, ix_stream_id):
-        """
-        @brief  Disable Ixia stream
-        @param chassis:  Chassis id
-        @type  chassis:  int
-        @param card:  Card id
-        @type  card:  int
-        @param port:  Port id
-        @type  port:  int
-        @param ix_stream_id:  Stream id
-        @type  ix_stream_id:  int
-        @return:  None
+        """Disable Ixia stream.
+
+        Args:
+            chassis(int):  Chassis id
+            card(int):  Card id
+            port(int):  Port id
+            ix_stream_id(int):  Stream id
+
+        Returns:
+            None
+
         """
         self.tcl("stream get %(chassis)s %(card)s %(port)s %(stream_id)s; \
                   stream config -enable false; \
@@ -393,15 +462,18 @@ class IxiaHALMixin(object):
                  {'chassis': chassis, 'card': card, 'port': port, 'stream_id': ix_stream_id}) == "0"
 
     def _check_increment(self, increment, name):
-        """
-        @brief  Verify that representation of increment is correct
-        @param increment:  Increment in format tuple(step, count)
-        @type  increment:  tuple(int)
-        @param name:  Name of increment
-        @type  name:  str
-        @raise  TypeError:  Incorrect type of parameters
-        @rtype:  tuple
-        @return:  Step and count
+        """Verify that representation of increment is correct.
+
+        Args:
+            increment(tuple(int)):  Increment in format tuple(step, count)
+            name(str):  Name of increment
+
+        Raises:
+            TypeError:  Incorrect type of parameters.
+
+        Returns:
+            tuple: Step and count.
+
         """
         if not isinstance(increment, tuple):
             raise TypeError("%s must be a tuple." % name)
@@ -412,26 +484,21 @@ class IxiaHALMixin(object):
         return step, count
 
     def _set_ixia_udf_field(self, udf_id=1, initval='1', offset=24, bit_offset=0, counter_type='c32', step=1, count=1, continuous=False):
-        """
-        @brief  Setup Ixia stream UDF
-        @param udf_id:  UDF id
-        @type  udf_id:  int
-        @param initval:  Initial value
-        @type  initval:  str
-        @param offset:  offset value
-        @type  offset:  int
-        @param bit_offset:  bit_offset value
-        @type  bit_offset:  int
-        @param counter_type:  number of bits to increment
-        @type  counter_type:  str
-        @param step:  increment step
-        @type  step:  int
-        @param count:  increment count
-        @type  count:  int
-        @param continuous:  continuous increment
-        @type  continuous:  bool
-        @rtype:  list
-        @return:  Tcl commands
+        """Setup Ixia stream UDF.
+
+        Args:
+            udf_id(int):  UDF id
+            initval(str):  Initial value
+            offset(int):  offset value
+            bit_offset(int):  bit_offset value
+            counter_type(str):  number of bits to increment
+            step(int):  increment step
+            count(int):  increment count
+            continuous(bool):  continuous increment
+
+        Returns:
+            list: Tcl commands.
+
         """
         tcl_commands = []
         if udf_id > 5:
@@ -456,26 +523,21 @@ class IxiaHALMixin(object):
         return tcl_commands
 
     def _configure_vlan(self, payload, vlan_type, chassis, card, port, vlan_increment, in_vlan_increment, continuous):
-        """
-        @brief  Configure Dot1Q layer
-        @param payload:  Packet to analyze
-        @type  payload:  pypacker.Packet
-        @param vlan_type:  VLAN type
-        @type  vlan_type:  hex
-        @param chassis:  TG chassis id
-        @type  chassis:  int
-        @param card:  TG card id
-        @type  card:  int
-        @param port:  TG port id
-        @type  port:  int
-        @param vlan_increment:  VLAN increment parameters for tagged packet
-        @type  vlan_increment:  tuple
-        @param in_vlan_increment:  Inner vlan ID increment parameters for double tagged frames
-        @type  in_vlan_increment:  tuple
-        @param continuous:  Should stream be sent continuously or not
-        @type  continuous:  bool
-        @rtype:  tuple
-        @return:  Dot1Q payload, Tcl commands
+        """Configure Dot1Q layer.
+
+        Args:
+            payload(pypacker.Packet):  Packet to analyze
+            vlan_type(hex):  VLAN type
+            chassis(int):  TG chassis id
+            card(int):  TG card id
+            port(int):  TG port id
+            vlan_increment(tuple):  VLAN increment parameters for tagged packet
+            in_vlan_increment(tuple):  Inner vlan ID increment parameters for double tagged frames
+            continuous(bool):  Should stream be sent continuously or not
+
+        Returns:
+            tuple: Dot1Q payload, Tcl commands.
+
         """
         # TODO: Need to add processing QinQ and other VLAN fields
 
@@ -542,18 +604,17 @@ class IxiaHALMixin(object):
         return dot1, tcl_commands
 
     def _configure_ip(self, payload, chassis, card, port):
-        """
-        @brief  Configure IP layer
-        @param payload:  Packet to analyze
-        @type  payload:  pypacker.Packet
-        @param chassis:  TG chassis id
-        @type  chassis:  int
-        @param card:  TG card id
-        @type  card:  int
-        @param port:  TG port id
-        @type  port:  int
-        @rtype:  tuple
-        @return:  IP payload, Tcl commands
+        """Configure IP layer.
+
+        Args:
+            payload(pypacker.Packet):  Packet to analyze
+            chassis(int):  TG chassis id
+            card(int):  TG card id
+            port(int):  TG port id
+
+        Returns:
+            tuple: IP payload, Tcl commands.
+
         """
         tcl_commands = []
         tcl_commands.append("protocol config -name ipV4;")
@@ -656,18 +717,17 @@ class IxiaHALMixin(object):
         return payl, tcl_commands
 
     def _configure_arp(self, payload, chassis, card, port):
-        """
-        @brief  Configure ARP layer
-        @param payload:  Packet to analyze
-        @type  payload:  pypacker.Packet
-        @param chassis:  TG chassis id
-        @type  chassis:  int
-        @param card:  TG card id
-        @type  card:  int
-        @param port:  TG port id
-        @type  port:  int
-        @rtype:  tuple
-        @return:  ARP payload, Tcl commands
+        """Configure ARP layer.
+
+        Args:
+            payload(pypacker.Packet):  Packet to analyze
+            chassis(int):  TG chassis id
+            card(int):  TG card id
+            port(int):  TG port id
+
+        Returns:
+            tuple: ARP payload, Tcl commands.
+
         """
 
         tcl_commands = []
@@ -697,18 +757,17 @@ class IxiaHALMixin(object):
         return payl, tcl_commands
 
     def _configure_tcp(self, payload, chassis, card, port):
-        """
-        @brief  Configure TCP layer
-        @param payload:  Packet to analyze
-        @type  payload:  pypacker.Packet
-        @param chassis:  TG chassis id
-        @type  chassis:  int
-        @param card:  TG card id
-        @type  card:  int
-        @param port:  TG port id
-        @type  port:  int
-        @rtype:  tuple
-        @return:  TCP payload, Tcl commands
+        """Configure TCP layer.
+
+        Args:
+            payload(pypacker.Packet):  Packet to analyze
+            chassis(int):  TG chassis id
+            card(int):  TG card id
+            port(int):  TG port id
+
+        Returns:
+            tuple: TCP payload, Tcl commands.
+
         """
 
         tcl_commands = []
@@ -752,18 +811,17 @@ class IxiaHALMixin(object):
         return payl, tcl_commands
 
     def _configure_udp(self, payload, chassis, card, port):
-        """
-        @brief  Configure UDP layer
-        @param payload:  Packet to analyze
-        @type  payload:  pypacker.Packet
-        @param chassis:  TG chassis id
-        @type  chassis:  int
-        @param card:  TG card id
-        @type  card:  int
-        @param port:  TG port id
-        @type  port:  int
-        @rtype:  tuple
-        @return:  UDP payload, Tcl commands
+        """Configure UDP layer.
+
+        Args:
+            payload(pypacker.Packet):  Packet to analyze
+            chassis(int):  TG chassis id
+            card(int):  TG card id
+            port(int):  TG port id
+
+        Returns:
+            tuple: UDP payload, Tcl commands.
+
         """
 
         tcl_commands = []
@@ -780,18 +838,17 @@ class IxiaHALMixin(object):
         return payl, tcl_commands
 
     def _configure_igmp(self, payload, chassis, card, port):
-        """
-        @brief  Configure IGMP layer
-        @param payload:  Packet to analyze
-        @type  payload:  pypacker.Packet
-        @param chassis:  TG chassis id
-        @type  chassis:  int
-        @param card:  TG card id
-        @type  card:  int
-        @param port:  TG port id
-        @type  port:  int
-        @rtype:  tuple
-        @return:  IGMP payload, Tcl commands
+        """Configure IGMP layer.
+
+        Args:
+            payload(pypacker.Packet):  Packet to analyze
+            chassis(int):  TG chassis id
+            card(int):  TG card id
+            port(int):  TG port id
+
+        Returns:
+            tuple: IGMP payload, Tcl commands.
+
         """
 
         tcl_commands = []
@@ -823,18 +880,17 @@ class IxiaHALMixin(object):
         return payl, tcl_commands
 
     def _configure_icmp(self, payload, chassis, card, port):
-        """
-        @brief  Configure ICMP layer
-        @param payload:  Packet to analyze
-        @type  payload:  pypacker.Packet
-        @param chassis:  TG chassis id
-        @type  chassis:  int
-        @param card:  TG card id
-        @type  card:  int
-        @param port:  TG port id
-        @type  port:  int
-        @rtype:  tuple
-        @return:  ICMP payload, Tcl commands
+        """Configure ICMP layer.
+
+        Args:
+            payload(pypacker.Packet):  Packet to analyze
+            chassis(int):  TG chassis id
+            card(int):  TG card id
+            port(int):  TG port id
+
+        Returns:
+            tuple: ICMP payload, Tcl commands.
+
         """
         tcl_commands = []
         tcl_commands.append("icmp setDefault;")
@@ -886,78 +942,49 @@ class IxiaHALMixin(object):
                         arp_sip_increment, igmp_ip_increment, lldp_sa_increment, sudp_increment, dudp_increment, stcp_increment, dtcp_increment,
                         vlan_increment, continuous, required_size, eth_type_increment, dscp_increment, protocol_increment, sipv6_increment,
                         dipv6_increment, fl_increment, dhcp_si_increment, in_vlan_increment, tc_increment, nh_increment, isis_lspid_increment, chassis, card, port, force_errors):
-        """
-        @brief Set stream increments
-        @param packet:  Packet to analyze
-        @type  packet:  pypacker.Packet
-        @param sa_increment:  Source MAC increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
-        @type  sa_increment:  tuple
-        @param da_increment:  Destination MAC increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
-        @type  da_increment:  tuple
-        @param sip_increment:  Source IPv4 increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
-        @type  sip_increment:  tuple
-        @param dip_increment:  Destination IPv4 increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
-        @type  dip_increment:  tuple
-        @param arp_sa_increment:  Source MAC increment parameters for ARP packet. Tuple (<step>, <count>). Has to be used in pair with arp_sip_increment.
-        @type  arp_sa_increment:  tuple
-        @param arp_sip_increment:  Source IP increment parameters for ARP packet. Tuple (<step>, <count>). Has to be used in pair with arp_sa_increment.
-        @type  arp_sip_increment:  tuple
-        @param igmp_ip_increment:  Destination IP increment parameters for IGMP packet. Tuple (<step>, <count>).
-        @type  igmp_ip_increment:  tuple
-        @param lldp_sa_increment:  Source MAC increment parameters for LLDP packet. Tuple (<step>, <count>).
-        @type  lldp_sa_increment:  tuple
-        @param sudp_increment:  UDP source port increment parameters.
-        @type  sudp_increment:  tuple
-        @param dudp_increment:  UDP destination port increment parameters.
-        @type  dudp_increment:  tuple
-        @param stcp_increment:  source TCP address increment
-        @type  stcp_increment:  tuple
-        @param dtcp_increment:  destination TCP address increment
-        @type  dtcp_increment:  tuple
-        @param vlan_increment:  VLAN increment parameters for tagged packet. Tuple (<step>, <count>).
-        @type  vlan_increment:  tuple
-        @param continuous:  Should stream be sent continuously or not. Continuous streams have to be started using start_streams method.
-        @type  continuous:  bool
-        @param required_size:  Integer or tuple of parameters needed to be set when packet size should be incremented (int or tuple).
-                               Tuple examples: ('Increment', <step>, <min>, <max>), ('Random', <min>, <max>)
-        @param dscp_increment:  DSCP increment parameters.
-        @type  dscp_increment:  tuple
-        @param protocol_increment:  IP protocol incrementation..
-        @type  protocol_increment:  tuple
-        @param sipv6_increment:  Source IPv6 increment parameters.
-        @type  sipv6_increment:  tuple
-        @param dipv6_increment:  Destination IPv6 increment parameters.
-        @type  dipv6_increment:  tuple
-        @param fl_increment:  Flow label increment parameters.
-        @type  fl_increment:  tuple
-        @param dhcp_si_increment:  DHCP IP increment parameters.
-        @type  dhcp_si_increment:  tuple
-        @param in_vlan_increment:  Inner vlan ID increment parameters for double tagged frames. Tuple (<step>, <count>).
-        @type  in_vlan_increment:  tuple
-        @param tc_increment:  IPv6 traffic class increment parameters.
-        @type  tc_increment:  tuple
-        @param nh_increment:  Next header increment parameters.
-        @type  nh_increment:  tuple
-        @param eth_type_increment:  Ethernet frame type increment parameters.
-        @type  eth_type_increment:  tuple
-        @param isis_lspid_increment:  Dot3|LLC|ISIS_LSP LSP ID field increment parameters.
-        @type  isis_lspid_increment:  tuple
+        """Set stream increments.
 
-        @param chassis:  TG chassis id
-        @type  chassis:  int
-        @param card:  TG card id
-        @type  card:  int
-        @param port:  TG port id
-        @type  port:  int
-        @param force_errors:  Emulate Errors for configured stream
-                              Enum ("bad" /*streamErrorBadCRC,
-                                    "none" /*streamErrorNoCRC,
-                                    "dribble" /*streamErrorDribble,
-                                    "align" /*streamErrorAlignment)
-        @type  force_errors:  str
-        @rtype:  list
-        @return:  Tcl commands
-        @note:  For increments description see set_stream method()
+        Args:
+            packet(pypacker.Packet):  Packet to analyze
+            sa_increment(tuple):  Source MAC increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            da_increment(tuple):  Destination MAC increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            sip_increment(tuple):  Source IPv4 increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            dip_increment(tuple):  Destination IPv4 increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            arp_sa_increment(tuple):  Source MAC increment parameters for ARP packet. Tuple (<step>, <count>). Has to be used in pair with arp_sip_increment.
+            arp_sip_increment(tuple):  Source IP increment parameters for ARP packet. Tuple (<step>, <count>). Has to be used in pair with arp_sa_increment.
+            igmp_ip_increment(tuple):  Destination IP increment parameters for IGMP packet. Tuple (<step>, <count>).
+            lldp_sa_increment(tuple):  Source MAC increment parameters for LLDP packet. Tuple (<step>, <count>).
+            sudp_increment(tuple):  UDP source port increment parameters.
+            dudp_increment(tuple):  UDP destination port increment parameters.
+            stcp_increment(tuple):  source TCP address increment
+            dtcp_increment(tuple):  destination TCP address increment
+            vlan_increment(tuple):  VLAN increment parameters for tagged packet. Tuple (<step>, <count>).
+            continuous(bool):  Should stream be sent continuously or not. Continuous streams have to be started using start_streams method.
+            required_size (int or tuple):  Integer or tuple of parameters needed to be set when packet size should be incremented .
+                                           Tuple examples: ('Increment', <step>, <min>, <max>), ('Random', <min>, <max>)
+            dscp_increment(tuple):  DSCP increment parameters.
+            protocol_increment(tuple):  IP protocol incrementation..
+            sipv6_increment(tuple):  Source IPv6 increment parameters.
+            dipv6_increment(tuple):  Destination IPv6 increment parameters.
+            fl_increment(tuple):  Flow label increment parameters.
+            dhcp_si_increment(tuple):  DHCP IP increment parameters.
+            in_vlan_increment(tuple):  Inner vlan ID increment parameters for double tagged frames. Tuple (<step>, <count>).
+            tc_increment(tuple):  IPv6 traffic class increment parameters.
+            nh_increment(tuple):  Next header increment parameters.
+            eth_type_increment(tuple):  Ethernet frame type increment parameters.
+            isis_lspid_increment(tuple):  Dot3|LLC|ISIS_LSP LSP ID field increment parameters.
+            chassis(int):  TG chassis id
+            card(int):  TG card id
+            port(int):  TG port id
+            force_errors(str):  Emulate Errors for configured stream. Enum ("bad" /*streamErrorBadCRC, "none" /*streamErrorNoCRC,
+                                "dribble" /*streamErrorDribble, "align" /*streamErrorAlignment)
+
+        Returns:
+            list: Tcl commands.
+
+        Notes:
+            For increments description see set_stream method().
+
         """
         tcl_commands = []
         # Set source address increment
@@ -1418,14 +1445,62 @@ class IxiaHALMixin(object):
                          dtcp_increment, vlan_increment, continuous, required_size, iface, chassis, card, port, stream_id, eth_type_increment,
                          dscp_increment, protocol_increment, sipv6_increment, dipv6_increment, fl_increment, dhcp_si_increment,
                          in_vlan_increment, tc_increment, nh_increment, isis_lspid_increment, cont_burst, force_errors, udf_dependancies):
-        """
-        @copydoc testlib::tg_template::GenericTG::set_stream()
-        @param chassis:  TG chassis id
-        @type  chassis:  int
-        @param card:  TG card id
-        @type  card:  int
-        @param port:  TG port id
-        @type  port:  int
+        """Set traffic stream with specified parameters on specified TG port.
+
+        Args:
+            packet(pypacker.Packet):  Packet to analyze
+            count(int):  How many packets to send in a stream.
+            inter(int):  Interval between sending each packet.
+            rate(int):  Interface rate in percents.
+            continuous(bool):  Should stream be sent continuously or not. Continuous streams have to be started using start_streams method.
+            iface(str, tuple):  Interface to use for packet sending (type depends on particular tg ports type).
+            required_size(int, tuple):  Integer or tuple of parameters needed to be set when packet size should be incremented.
+                                        Tuple examples: ('Increment', <step>, <min>, <max>), ('Random', <min>, <max>)
+            sa_increment(tuple):  Source MAC increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            da_increment(tuple):  Destination MAC increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            sip_increment(tuple):  Source IPv4 increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            dip_increment(tuple):  Destination IPv4 increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            arp_sa_increment(tuple):  Source MAC increment parameters for ARP packet. Tuple (<step>, <count>). Has to be used in pair with arp_sip_increment.
+            arp_sip_increment(tuple):  Source IP increment parameters for ARP packet. Tuple (<step>, <count>). Has to be used in pair with arp_sa_increment.
+            igmp_ip_increment(tuple):  Destination IP increment parameters for IGMP packet. Tuple (<step>, <count>).
+            lldp_sa_increment(tuple):  Source MAC increment parameters for LLDP packet. Tuple (<step>, <count>).
+            vlan_increment(tuple):  VLAN increment parameters for tagged packet. Tuple (<step>, <count>).
+            sudp_increment(tuple):  UDP source port increment parameters.
+            dudp_increment(tuple):  UDP destination port increment parameters.
+            eth_type_increment(tuple):  Ethernet frame type increment parameters.
+            dscp_increment(tuple):  DSCP increment parameters.
+            protocol_increment(tuple):  IP protocol incrementation..
+            sipv6_increment(tuple):  Source IPv6 increment parameters.
+            dipv6_increment(tuple):  Destination IPv6 increment parameters.
+            fl_increment(tuple):  Flow label increment parameters.
+            dhcp_si_increment(tuple):  DHCP IP increment parameters.
+            in_vlan_increment(tuple):  Inner vlan ID increment parameters for double tagged frames. Tuple (<step>, <count>).
+            tc_increment(tuple):  IPv6 Traffic Class increment parameters.
+            nh_increment(tuple):  IPv6 Next Header increment parameters.
+
+            cont_burst(bool):  Should stream be sent as continuous burst or not. Continuous streams have to be started using start_streams method.
+            force_errors(str):  Emulate Errors for configured stream.
+                                Enum ("bad" /*streamErrorBadCRC, "none" /*streamErrorNoCRC, "dribble" /*streamErrorDribble, "align" /*streamErrorAlignment).
+            udf_dependancies(dict):  Set UDF dependencies in case one incerement is dependant from another.
+                                     Dictionary {<dependant_increment> : <initial_increment>}
+            chassis(int):  TG chassis id
+            card(int):  TG card id
+            port(int):  TG port id
+
+        Returns:
+            int: stream id
+
+        Notes:
+            It's not expected to configure a lot of incrementation options. Different traffic generator could have different limitations for these options.
+
+        Example::
+
+            stream_id_1 = tg.set_stream(pack_ip, count=100, iface=iface)
+            stream_id_2 = tg.set_stream(pack_ip, continuous=True, inter=0.1, iface=iface)
+            stream_id_3 = tg.set_stream(pack_ip_udp, count=5, protocol_increment=(3, 5), iface=iface)
+            stream_id_4 = tg.set_stream(pack_ip_udp, count=18, sip_increment=(3, 3), dip_increment=(3, 3), iface=iface,
+                                        udf_dependancies={'sip_increment': 'dip_increment'})
+
         """
         # Defining ix_stream_id
         iface_stream_ids = []
@@ -1518,14 +1593,15 @@ class IxiaHALMixin(object):
         return ix_stream_id
 
     def _set_udf_dependence(self, key, value):
-        """
-        @brief  Set UDF dependencies
-        @param key:  increment name, e.g "vlan_increment", "sipv6_increment"
-        @type  key:  str
-        @param value: increment name, e.g "vlan_increment", "sipv6_increment"
-        @type  value: str
-        @rtype:  list
-        @return:  Tcl commands
+        """Set UDF dependencies.
+
+        Args:
+            key(str):  increment name, e.g "vlan_increment", "sipv6_increment"
+            value(str): increment name, e.g "vlan_increment", "sipv6_increment"
+
+        Returns:
+            list: Tcl commands
+
         """
         tcl_commands = []
         udf_id = self.udf_dict[key.replace("_increment", "")]["udf_id"]
@@ -1543,12 +1619,68 @@ class IxiaHALMixin(object):
                    required_size=64, fragsize=None, build_packet=True, eth_type_increment=None, dscp_increment=None, protocol_increment=None,
                    sipv6_increment=None, dipv6_increment=None, fl_increment=None, dhcp_si_increment=None, in_vlan_increment=None,
                    tc_increment=None, nh_increment=None, isis_lspid_increment=None, cont_burst=False, force_errors=None, udf_dependancies=None):
-        """
-        @copydoc testlib::tg_template::GenericTG::set_stream()
-        @param stcp_increment:  source TCP address increment
-        @type  stcp_increment:  tuple
-        @param dtcp_increment:  destination TCP address increment
-        @type  dtcp_increment:  tuple
+        """Set traffic stream with specified parameters on specified TG port.
+
+        Args:
+            packet_def(tuple(dict{dict})):  Packet definition. Tuple of dictionaries of dictionaries in format:
+                                            ({layerX: {field1: value, field2: value}, {layerY: {field1:value, fieldN: value}})
+            count(int):  How many packets to send in a stream.
+            inter(int):  Interval between sending each packet.
+            rate(int):  Interface rate in percents.
+            continuous(bool):  Should stream be sent continuously or not. Continuous streams have to be started using start_streams method.
+            iface(str, tuple):  Interface to use for packet sending (type depends on particular tg ports type).
+            adjust_size(bool):  See description for _build_pypacker_packet function.
+            required_size(int, tuple):  Integer or tuple of parameters needed to be set when packet size should be incremented.
+                                        Tuple examples: ('Increment', <step>, <min>, <max>), ('Random', <min>, <max>)
+            fragsize(int):  Max size of packet's single frame
+            is_valid(bool):  Recalculate check sum and length for each packet layer
+                             (by default pypacker do this automatically in case length and check sum aren't set).
+                             This parameter has to be set True with all incrementation parameters.
+            build_packet(bool):  Build packet from definition or use already built pypacker packet.
+            sa_increment(tuple):  Source MAC increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            da_increment(tuple):  Destination MAC increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            sip_increment(tuple):  Source IPv4 increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            dip_increment(tuple):  Destination IPv4 increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            arp_sa_increment(tuple):  Source MAC increment parameters for ARP packet. Tuple (<step>, <count>). Has to be used in pair with arp_sip_increment.
+            arp_sip_increment(tuple):  Source IP increment parameters for ARP packet. Tuple (<step>, <count>). Has to be used in pair with arp_sa_increment.
+            igmp_ip_increment(tuple):  Destination IP increment parameters for IGMP packet. Tuple (<step>, <count>).
+            lldp_sa_increment(tuple):  Source MAC increment parameters for LLDP packet. Tuple (<step>, <count>).
+            vlan_increment(tuple):  VLAN increment parameters for tagged packet. Tuple (<step>, <count>).
+            sudp_increment(tuple):  UDP source port increment parameters.
+            dudp_increment(tuple):  UDP destination port increment parameters.
+            eth_type_increment(tuple):  Ethernet frame type increment parameters.
+            dscp_increment(tuple):  DSCP increment parameters.
+            protocol_increment(tuple):  IP protocol incrementation..
+            sipv6_increment(tuple):  Source IPv6 increment parameters.
+            dipv6_increment(tuple):  Destination IPv6 increment parameters.
+            fl_increment(tuple):  Flow label increment parameters.
+            dhcp_si_increment(tuple):  DHCP IP increment parameters.
+            in_vlan_increment(tuple):  Inner vlan ID increment parameters for double tagged frames. Tuple (<step>, <count>).
+            tc_increment(tuple):  IPv6 Traffic Class increment parameters.
+            nh_increment(tuple):  IPv6 Next Header increment parameters.
+
+            cont_burst(bool):  Should stream be sent as continuous burst or not. Continuous streams have to be started using start_streams method.
+            force_errors(str):  Emulate Errors for configured stream.
+                                Enum ("bad" /*streamErrorBadCRC, "none" /*streamErrorNoCRC, "dribble" /*streamErrorDribble, "align" /*streamErrorAlignment).
+            udf_dependancies(dict):  Set UDF dependencies in case one incerement is dependant from another.
+                                     Dictionary {<dependant_increment> : <initial_increment>}
+            stcp_increment(tuple):  source TCP address increment
+            dtcp_increment(tuple):  destination TCP address increment
+
+        Returns:
+            int: stream id
+
+        Notes:
+            It's not expected to configure a lot of incrementation options. Different traffic generator could have different limitations for these options.
+
+        Example::
+
+            stream_id_1 = tg.set_stream(pack_ip, count=100, iface=iface)
+            stream_id_2 = tg.set_stream(pack_ip, continuous=True, inter=0.1, iface=iface)
+            stream_id_3 = tg.set_stream(pack_ip_udp, count=5, protocol_increment=(3, 5), iface=iface)
+            stream_id_4 = tg.set_stream(pack_ip_udp, count=18, sip_increment=(3, 3), dip_increment=(3, 3), iface=iface,
+                                        udf_dependancies={'sip_increment': 'dip_increment'})
+
         """
         stream_id = max(self.stream_ids.keys()) + 1 if self.stream_ids else 1
         self.class_logger.debug("Stream ID is: %s" % (stream_id, ))
@@ -1598,8 +1730,14 @@ class IxiaHALMixin(object):
         return stream_id
 
     def send_stream(self, stream_id=None):
-        """
-        @copydoc testlib::tg_template::GenericTG::send_stream()
+        """Sends the stream created by 'set_stream' method.
+
+        Args:
+            stream_id(int):  ID of the stream to be send.
+
+        Returns:
+            float: timestamp.
+
         """
         def _send_ixia_stream(ix_stream_id, chassis, card, port, count):
             self.tcl("stream get %(chassis)s %(card)s %(port)s %(stream_id)s;" %
@@ -1646,8 +1784,14 @@ class IxiaHALMixin(object):
             _send_ixia_stream(ix_stream_id, chassis, card, port, self.stream_ids[stream_id]['count'])
 
     def start_streams(self, stream_list):
-        """
-        @copydoc testlib::tg_template::GenericTG::start_streams()
+        """Enable and start streams from the list simultaneously.
+
+        Args:
+            stream_list(list[int]):  List of stream IDs.
+
+        Returns:
+            None
+
         """
         self.class_logger.debug("Starting streams %s..." % stream_list)
 
@@ -1670,8 +1814,14 @@ class IxiaHALMixin(object):
 
 
     def stop_streams(self, stream_list=None):
-        """
-        @copydoc testlib::tg_template::GenericTG::stop_streams()
+        """ Disable streams from the list.
+
+        Args:
+            stream_list(list[int]):  Stream IDs to stop. In case stream_list is not set all running streams will be stopped.
+
+        Returns:
+            None
+
         """
         # If stream_list not defined then stop all streams
         if not stream_list:
@@ -1685,42 +1835,52 @@ class IxiaHALMixin(object):
                 self._disable_stream(chassis, card, port, ix_stream_id)
 
     def stop_all_streams(self):
-        """
-        @brief  Stop streams for all owned ports. ownedPortList variable creates on connect stage
-        @raise  AssertionError:  error in executing tcl code
-        @return:  None
+        """Stop streams for all owned ports. ownedPortList variable creates on connect stage.
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            None
+
         """
         assert self.tcl("ixStopTransmit ownedPortList") == "0"
 
     @staticmethod
     def _get_port_info(iface):
-        """
-        @brief  Simple helper which allows to get interface info split
-        @param iface: Which IXIA interface to use for packet sending (in format "{chassis_id card_id port_id}")
-        @type  iface:  str
-        @rtype:  list(str)
-        @return:  [chassis_id, card_id, port_id]
+        """Simple helper which allows to get interface info split.
+
+        Args:
+            iface(str): Which IXIA interface to use for packet sending (in format "{chassis_id card_id port_id}")
+
+        Returns:
+            list(str): [chassis_id, card_id, port_id]
+
         """
         return iface[1:-1].split(" ")
 
     @staticmethod
     def _get_port_to_string(iface):
-        """
-        @brief  Simple helper which allows to get string representation for interface
-        @param iface:  Which IXIA interface to use for packet sending (in format [chassis_id, card_id, port_id])
-        @type  iface:  list
-        @rtype:  str
-        @return:  "chassis_id/card_id/port_id"
+        """Simple helper which allows to get string representation for interface.
+
+        Args:
+            iface(list):  Which IXIA interface to use for packet sending (in format [chassis_id, card_id, port_id])
+
+        Returns:
+            str: "chassis_id/card_id/port_id"
+
         """
         return "/".join(map(str, iface))
 
     def _set_filter_params(self, layer):
-        """
-        @brief  Configures filter parameters for specified layer
-        @param layer:  Layer name
-        @type  layer:  str
-        @rtype:  str
-        @return:  Tcl command
+        """Configures filter parameters for specified layer.
+
+        Args:
+            layer(str):  Layer name.
+
+        Returns:
+            str: Tcl command.
+
         """
         def _set_user_pattern(ptrn_num, ptrn_cfg):
             _tcl_commands = ""
@@ -1743,8 +1903,27 @@ class IxiaHALMixin(object):
         return tcl_filter
 
     def start_sniff(self, ifaces, sniffing_time=None, packets_count=0, filter_layer=None, src_filter=None, dst_filter=None):
-        """
-        @copydoc testlib::tg_template::GenericTG::start_sniff()
+        """Starts sniffing on specified interfaces.
+
+        Args:
+            ifaces(list):  List of TG interfaces for capturing.
+            sniffing_time(int):  Time in seconds for sniffing.
+            packets_count(int):  Count of packets to sniff (no count limitation in case 0).
+            filter_layer(str):  Name of predefined sniffing filter criteria.
+            src_filter(str):  Sniff only packet with defined source MAC.
+            dst_filter(str):  Sniff only packet with defined destination MAC.
+
+        Returns:
+            None
+
+        Notes:
+            This method introduces additional 1.5 seconds timeout after capture enabling.
+            It's required by Ixia sniffer to wait until capturing is started.
+
+        Example::
+
+            env.tg[1].start_sniff(['eth0', ], filter_layer='IP', src_filter='00:00:00:01:01:01', dst_filter='00:00:00:22:22:22')
+
         """
         self.class_logger.debug("Starting capturing on ifaces: %s" % (ifaces, ))
         if filter_layer:
@@ -1839,8 +2018,17 @@ class IxiaHALMixin(object):
         time.sleep(1.5)
 
     def stop_sniff(self, ifaces, force=False, drop_packets=False, sniff_packet_count=1000):
-        """
-        @copydoc testlib::tg_template::GenericTG::stop_sniff()
+        """Stops sniffing on specified interfaces and returns captured data.
+
+        Args:
+            ifaces(list):  List of interfaces where capturing has to be stopped.
+            force(bool):  Stop capturing even if time or packet count criteria isn't achieved.
+            drop_packets(bool):  Don't return sniffed data (used in case you need just read statistics).
+            sniff_packet_count(int):  Default number of packets to return (used to avoid test hanging in case storm).
+
+        Returns:
+            dict: Dictionary where key = interface name, value = list of sniffed packets.
+
         """
         def _stop_capture_on_port(iface):
             chassis, card, port = iface.split("/")
@@ -1972,8 +2160,14 @@ class IxiaHALMixin(object):
         return packet_dict
 
     def get_received_frames_count(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_received_frames_count()
+        """Read statistics - number of received valid frames.
+
+        Args:
+            iface(str):  Interface name.
+
+        Returns:
+            int: Number of received frames.
+
         """
         chassis, card, port = iface
 
@@ -1984,8 +2178,14 @@ class IxiaHALMixin(object):
         return int(result)
 
     def get_filtered_frames_count(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_filtered_frames_count()
+        """Read statistics - number of received frames which fit filter criteria.
+
+        Args:
+            iface(str):  Interface name.
+
+        Returns:
+            int: Number of filtered frames.
+
         """
         chassis, card, port = iface
 
@@ -1996,8 +2196,14 @@ class IxiaHALMixin(object):
         return int(result)
 
     def get_uds_3_frames_count(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_uds_3_frames_count()
+        """Read statistics - number of non-filtered received frames (valid and invalid).
+
+        Args:
+            iface(str):  Interface name.
+
+        Returns:
+            int: Number of received frames
+
         """
         chassis, card, port = iface
 
@@ -2008,8 +2214,14 @@ class IxiaHALMixin(object):
         return int(result)
 
     def get_sent_frames_count(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_sent_frames_count()
+        """Read statistics - number of sent frames.
+
+        Args:
+            iface(str):  Interface name.
+
+        Returns:
+            int: Number of sent frames.
+
         """
         chassis, card, port = iface
 
@@ -2020,8 +2232,14 @@ class IxiaHALMixin(object):
         return int(result)
 
     def clear_statistics(self, sniff_port_list):
-        """
-        @copydoc testlib::tg_template::GenericTG::clear_statistics()
+        """Clear statistics - number of frames.
+
+        Args:
+            sniff_port_list(list):  List of interface names.
+
+        Returns:
+            None
+
         """
         tcl_port_list = str(sniff_port_list).replace("(", "{").replace(")", "}").replace("[", "{").replace("]", "}").replace("'", "").replace(",", "")
         assert self.tcl("set rxPortIdList %s;\
@@ -2031,8 +2249,15 @@ class IxiaHALMixin(object):
                         (tcl_port_list, )) == "0"
 
     def set_flow_control(self, iface, mode):
-        """
-        @copydoc testlib::tg_template::GenericTG::set_flow_control()
+        """Enable/Disable flow control on the port.
+
+        Args:
+            iface(str):  Interface name.
+            mode(bool):  True/False.
+
+        Returns:
+            None
+
         """
         chassis, card, port = iface
         self.tcl("port config -flowControl $::%s" % (str(mode).lower(), ))
@@ -2040,8 +2265,15 @@ class IxiaHALMixin(object):
         assert self.tcl("port write %s %s %s" % (chassis, card, port)) == "0"
 
     def set_qos_stat_type(self, iface, ptype):
-        """
-        @copydoc testlib::tg_template::GenericTG::set_qos_stat_type()
+        """Set the QoS counters to look for priority bits for given packets type.
+
+        Args:
+            iface(str):  Interface name.
+            ptype(str):  Priority type: VLAN/IP.
+
+        Returns:
+            None
+
         """
         if ptype == "VLAN":
             _ptype = "vlan"
@@ -2062,8 +2294,15 @@ class IxiaHALMixin(object):
         assert self.tcl("qos write %s %s %s" % (chassis, card, port)) == "0"
 
     def get_qos_frames_count(self, iface, prio):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_qos_frames_count()
+        """Get captured QoS frames count.
+
+        Args:
+            iface(str):  Interface name.
+            prio(int):  Priority.
+
+        Returns:
+            int: captured QoS frames count.
+
         """
         chassis, card, port = iface
 
@@ -2075,8 +2314,14 @@ class IxiaHALMixin(object):
         return int(result)
 
     def get_port_txrate(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_port_txrate()
+        """Return port transmission rate.
+
+        Args:
+            iface(str):  Interface name.
+
+        Returns:
+            int: Frames per second.
+
         """
         chassis, card, port = iface
 
@@ -2088,8 +2333,14 @@ class IxiaHALMixin(object):
         return int(result)
 
     def get_port_rxrate(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_port_rxrate()
+        """Return port receiving rate.
+
+        Args:
+            iface(str):  Interface name.
+
+        Returns:
+            int: Frames per second.
+
         """
         chassis, card, port = iface
 
@@ -2101,7 +2352,16 @@ class IxiaHALMixin(object):
         return int(result)
 
     def get_port_qos_rxrate(self, iface, qos):
-        """@copydoc testlib::tg_template::GenericTG::get_port_qos_rxrate()"""
+        """Return port receiving rate for specific qos.
+
+        Args:
+            iface(str):  Interface name.
+            qos(int):  Qos value.
+
+        Returns:
+            int: Frames per second (int)
+
+        """
         chassis, card, port = iface
 
         tcl_cmd = []

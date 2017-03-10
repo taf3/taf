@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2015 - 2016, Intel Corporation.
+# Copyright (c) 2015 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``ui_dcrp_shell.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`DCRP Shell UI specific functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  ui_dcrp_shell.py
-
-@summary  DCRP Shell UI specific functionality.
 """
 
 import re
@@ -38,9 +38,10 @@ ISIS_PASSWORD = "ustack"
 
 
 def in_parallel(func):
-    """
-    @brief  Decorator function. Runs decorated function in parallel for all nodes.
-            Decorated function must receive named parameter 'instance'.
+    """Decorator function. Runs decorated function in parallel for all nodes.
+
+    Decorated function must receive named parameter 'instance'.
+
     """
     def wrapper(*args, **kwargs):
         # Check if first parameter is UiDcrpShell instance
@@ -62,19 +63,22 @@ def in_parallel(func):
 
 
 class UiDcrpShell(UiHelperMixin):
-    """
-    @description  UI class for DCRP domain.
-    @note  When UiInterface class from ui_wrapper has abstraction methods,
-           this class should also inherit from it.
+    """UI class for DCRP domain.
+
+    Notes:
+        When UiInterface class from ui_wrapper has abstraction methods,
+        this class should also inherit from it.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, dcrp_domain):
-        """
-        @brief  Initiate UiDcrpShell class
-        @param  dcrp_domain: DCRP Domain instance
-        @type  dcrp_domain: SwitchDcrpDomain instance
+        """Initiate UiDcrpShell class.
+
+        Args:
+            dcrp_domain(SwitchDcrpDomain instance): DCRP Domain instance
+
         """
         self.switch = dcrp_domain
 
@@ -96,12 +100,14 @@ class UiDcrpShell(UiHelperMixin):
         self.cpu_ports = {node.id: node.ui.cpu_port for node in self.switch.node.values()}
 
     def __getattr__(self, item):
-        """
-        @brief  Override all not implemented in this class UI methods' calls by
-                calling them on all UI instances in parallel.
-        @param  item: Name of called and not found in class item.
-        @type  item: str
-        @raise  AttributeError: error if UIs don't have called method.
+        """Override all not implemented in this class UI methods' calls by calling them on all UI instances in parallel.
+
+        Args:
+            item(str): Name of called and not found in class item.
+
+        Raises:
+            AttributeError: error if UIs don't have called method.
+
         """
         if self.ui_id_map and hasattr(self.ui_dict[1], item) \
                 and callable(getattr(self.ui_dict[1], item)):
@@ -112,8 +118,8 @@ class UiDcrpShell(UiHelperMixin):
 
 # Platform
     def get_table_platform(self):
-        """
-        @copydoc testlib::ui_wrapper::UiInterface::get_table_platform()
+        """Get 'Platform' table.
+
         """
         # Get unique values for fields from all nodes
         switchpp_version = set([ui.switch.get_env_prop('switchppVersion')
@@ -142,17 +148,18 @@ class UiDcrpShell(UiHelperMixin):
                  "serialNumber": "NA"}]
 
     def get_table_ports(self, ports=None, all_params=False, ip_addr=False):
-        """
-        @brief  Wrapper for get_table_ports UI method.
-        @param  ports: List of ports or None. Ports should be in format "node_id port_id".
-                      Example: ["0013 10", "0014 20"]
-        @type  ports: list[str]
-        @param  all_params:  get additional port properties
-        @type  all_params:  bool
-        @param  ip_addr:  Get IP address
-        @type  ip_addr:  bool
-        """
+        """Wrapper for get_table_ports UI method.
 
+        Args:
+            ports(list[str]): List of ports or None. Ports should be in format "node_id port_id".
+                              Example::
+
+                                  ["0013 10", "0014 20"]
+
+            all_params(bool):  get additional port properties
+            ip_addr(bool):  Get IP address
+
+        """
         ports = ports if ports else self.ports
         ports_map = self.get_ports_map(ports)
 
@@ -169,15 +176,16 @@ class UiDcrpShell(UiHelperMixin):
 
     @staticmethod
     def get_ports_map(ports_list):
-        """
-        @brief  Convert list of ports from format ["0013 10", "0013 13", "0014 15", "0015 15"]
-                to {"0013": [10, 13], "0014": [15], "0015": [15]]
-        @param  ports_list: List of port to be converted in format ["5555 1", "7777 2"]
-        @type  ports_list: list[str]
-        @return  Dictionary with node IDs as keys and lists of port IDs as values
-        @rtype  dict
-        """
+        """Convert list of ports from format ["0013 10", "0013 13", "0014 15", "0015 15"]
+        to {"0013": [10, 13], "0014": [15], "0015": [15]]
 
+        Args:
+            ports_list(list[str]): List of port to be converted in format ["5555 1", "7777 2"]
+
+        Returns:
+            dict: Dictionary with node IDs as keys and lists of port IDs as values
+
+        """
         ports_map = {}
         for port in ports_list:
             node_id, port_id = port.split(" ")[0:2]
@@ -197,13 +205,16 @@ class UiDcrpShell(UiHelperMixin):
         return ports_map
 
     def modify_ports(self, ports, expected_rcs=frozenset({0}), **kwargs):
-        """
-        @brief  Wrapper for modify_ports UI method.
-        @param  ports: List of ports or None. Ports should be in format "node_id port_id".
-                       Example: ["0013 10", "0014 20"]
-        @type  ports: list[str]
-        @param  expected_rcs:  expected return code
-        @type  expected_rcs:  int | list | set | frozenset
+        """Wrapper for modify_ports UI method.
+
+        Args:
+            ports(list[str]): List of ports or None. Ports should be in format "node_id port_id".
+                              Examples::
+
+                                  ["0013 10", "0014 20"]
+
+            expected_rcs(int | list | set | frozenset):  expected return code
+
         """
         ports_map = self.get_ports_map(ports)
 
@@ -212,21 +223,25 @@ class UiDcrpShell(UiHelperMixin):
             ui_instance.modify_ports(node_ports, expected_rcs=expected_rcs, **kwargs)
 
     def wait_for_port_value_to_change(self, ports, port_parameter, value, interval=1, timeout=30):
-        """
-        @brief  Wrapper for waiting for port value to be changed.
-        @param  ports: List of ports or None. Ports should be in format "node_id port_id".
-                       Example: ["0013 10", "0014 20"]
-        @type  ports: list[str]
-        @param  port_parameter: Parameter name to be checked
-        @type  port_parameter: str
-        @param  value: Parameter value to be checked
-        @type  value: int | str
-        @param  interval: How often parameter should be checked (seconds)
-        @type  interval: int
-        @param  timeout: Time for checking value
-        @type  timeout: int
-        @raise: StandardError
-        @rtype: none
+        """Wrapper for waiting for port value to be changed.
+
+        Args:
+            ports(list[str]): List of ports or None. Ports should be in format "node_id port_id".
+                              Examples::
+
+                                  ["0013 10", "0014 20"]
+
+            port_parameter(str): Parameter name to be checked
+            value(int | str): Parameter value to be checked
+            interval(int): How often parameter should be checked (seconds)
+            timeout(int): Time for checking value
+
+        Raises:
+            StandardError
+
+        Returns:
+            None
+
         """
         ports_map = self.get_ports_map(ports)
         for node_id, node_ports in ports_map.items():
@@ -235,17 +250,20 @@ class UiDcrpShell(UiHelperMixin):
                                                       value=value, interval=interval, timeout=timeout)
 
     def create_vlan_ports(self, ports=None, vlans=None, tagged='Tagged'):
-        """
-        @brief  Wrapper for create_vlan_ports UI method.
-                Method also adds VLAN to CPU and mesh ports.
-        @param  ports: List of ports or None. Ports should be in format "node_id port_id".
-                       Example: ["0013 10", "0014 20"]
-                       Mandatory parameter.
-        @param  vlans:  list of VLAN IDs. Mandatory parameter.
-        @type  vlans:  list[int] | set(int)
-        @param  tagged:  port tagging attribute
-        @type  tagged:  str
-        @raise  UIException: Error if not all mandatory parameters are specified.
+        """Wrapper for create_vlan_ports UI method. Method also adds VLAN to CPU and mesh ports.
+
+        Args:
+            ports(list[str]): List of ports or None. Ports should be in format "node_id port_id".
+                              Examples::
+
+                                  ["0013 10", "0014 20"]  # Mandatory parameter.
+
+            vlans(list[int] | set(int)):  list of VLAN IDs. Mandatory parameter.
+            tagged(str):  port tagging attribute
+
+        Raises:
+            UIException: Error if not all mandatory parameters are specified.
+
         """
         if not ports or not vlans:
             raise UIException("Ports and vlans are mandatory parameters.")
@@ -264,8 +282,8 @@ class UiDcrpShell(UiHelperMixin):
 
     @in_parallel
     def set_all_ports_admin_disabled(self, instance=None):
-        """
-        @brief  Disables all ports in port_map on all nodes.
+        """Disables all ports in port_map on all nodes.
+
         """
         ports_table = instance.get_table_ports()
 
@@ -282,8 +300,8 @@ class UiDcrpShell(UiHelperMixin):
 
     @in_parallel
     def wait_all_ports_admin_disabled(self, instance=None):
-        """
-        @brief  Checks if all the ports on all nodes are set to down
+        """Checks if all the ports on all nodes are set to down.
+
         """
         def _retry(ports_list):
             start_time = time.time()
@@ -326,15 +344,15 @@ class UiDcrpShell(UiHelperMixin):
                 pytest.fail("Not all ports are in down state: %s" % up_ports)
 
     def check_dcrpd_service(self, instance=None, services=None):
-        """
-        @brief  Check status of DCRP services on the specified node
-        @param  instance: UI instance to restart DCRP services with
-        @type  instance: UI instance
-        @param  services: List of services' names
-        @type  services: list[str]
-        @rtype:  dict
-        @return:  Dictionary with service names as keys
-                  and bool status as values
+        """Check status of DCRP services on the specified node.
+
+        Args:
+            instance(UI instance): UI instance to restart DCRP services with
+            services(list[str]): List of services' names
+
+        Returns:
+            dict:  Dictionary with service names as keys and bool status as values
+
         """
         if instance:
             services = services if services else self.dcrp_service_list
@@ -349,16 +367,14 @@ class UiDcrpShell(UiHelperMixin):
 
     @in_parallel
     def stop_dcrpd_service(self, instance=None):
-        """
-        @brief  Stop DCRP services on specified nodes.
-        @param  instance: UI instance to restart DCRP services with
-        @type  instance: UI instance
-        @param  services: List of services' names
-        @type  services: list[str]
-        @param  force: Forced killing service. If services isn't stopped for the first time
-                       it will be automatically forced stopped.
-        @type force: bool
-        @raise  UIException: Error if not all services on at least one node are stopped
+        """Stop DCRP services on specified nodes.
+
+        Args:
+            instance(UI instance): UI instance to restart DCRP services with
+
+        Raises:
+            UIException: Error if not all services on at least one node are stopped
+
         """
         if instance:
             instance.dcrpd.stop()
@@ -367,16 +383,17 @@ class UiDcrpShell(UiHelperMixin):
 
     @in_parallel
     def start_dcrpd_service(self, instance=None, restart=False, wait_on=True):
-        """
-        @brief  Start DCRP services on specified nodes.
-        @param  instance: UI instance to restart DCRP services with
-        @type  instance: UI instance
-        @param  restart: Should method restart already launched services or not
-        @type  restart: bool
-        @param  wait_on: Wait for services started or not
-        @type  wait_on: bool
-        @raise  UIException: Error if not all services on at least one node are started
-                             or if no flag "restart" and at least one service is already launched
+        """Start DCRP services on specified nodes.
+
+        Args:
+            instance(UI instance): UI instance to restart DCRP services with
+            restart(bool): Should method restart already launched services or not
+            wait_on(bool): Wait for services started or not
+
+        Raises:
+            UIException: Error if not all services on at least one node are started
+                         or if no flag "restart" and at least one service is already launched
+
         """
         if not instance:
             raise UIException("UI instance isn't specified.")
@@ -391,21 +408,23 @@ class UiDcrpShell(UiHelperMixin):
             self.wait_on_dcrpd_service(instance=instance)
 
     def restart_dcrpd_service(self):
-        """
-        @brief  Wrapper for self.start_dcrpd_service method with True "restart" parameter
-        @param  instance: UI instance to restart DCRP services with
-        @type  instance: UI instance
+        """Wrapper for self.start_dcrpd_service method with True "restart" parameter.
+
         """
         self.start_dcrpd_service(restart=True)
 
     def _get_ui_instance(self, node_id):
-        """
-        @brief  Get UI instance of specified node
-        @param  node_id: ID of node for getting it's UI instance
-        @type  node_id: int | str
-        @raise  UIException: Error if wrong node_id was given
-        @rtype:  Device UI instance
-        @return:  UI instance of the given node
+        """Get UI instance of specified node.
+
+        Args:
+            node_id(int | str): ID of node for getting it's UI instance
+
+        Raises:
+            UIException: Error if wrong node_id was given
+
+        Returns:
+            Device UI instance:  UI instance of the given node
+
         """
         if isinstance(node_id, int) and node_id in self.ui_dict:
             ui_instance = self.ui_dict[node_id]
@@ -417,21 +436,19 @@ class UiDcrpShell(UiHelperMixin):
         return ui_instance
 
     def configure_dcrpd(self, node_id, mesh_ports=None, cpu_mac_address=None, file_name=None):
-        """
-        @brief  Configure mesh ports for using by DCRP services.
-                Edit DCRP service configuration file ("/etc/dcrpd.conf" by default)
-                by adding given ports as mesh ports. Set given MAC address for given ports
-                and bring them UP.
-        @param  node_id: node ID for configuring on
-        @type  node_id: int | str
-        @param  mesh_ports: Dictionary with mesh port names as keys and dictionary with
-                            additional parameters, such as port MAC address, as values.
-        @type  mesh_ports: dict[dict]
-        @param  cpu_mac_address: MAC address to be set to CPU port. Format: "FF:FF:FF:FF:FF:FF"
-        @type  cpu_mac_address: str
-        @param  file_name: DCRP configuration file name.
-                           If omitted self.dcrp_conf_file will be used.
-        @type  file_name: str
+        """Configure mesh ports for using by DCRP services.
+
+        Edit DCRP service configuration file ("/etc/dcrpd.conf" by default)
+        by adding given ports as mesh ports. Set given MAC address for given ports and bring them UP.
+
+        Args:
+            node_id(int | str): node ID for configuring on
+            mesh_ports(dict[dict]): Dictionary with mesh port names as keys and dictionary with
+                                    additional parameters, such as port MAC address, as values.
+            cpu_mac_address(str): MAC address to be set to CPU port. Format: "FF:FF:FF:FF:FF:FF"
+            file_name(str): DCRP configuration file name.
+                            If omitted self.dcrp_conf_file will be used.
+
         """
         file_name = file_name if file_name else self.dcrp_conf_file
         ui_instance = self._get_ui_instance(node_id)
@@ -467,20 +484,22 @@ class UiDcrpShell(UiHelperMixin):
             ui_instance.modify_ports([port_id, ], macAddress=port_mac_address)
 
     def configure_mlag(self, uplink_port, lag_mac, team_name=None, file_name=None):
-        """
-        @brief  Configure DCRP MLAG on specified node.
-                Edit DCRP service configuration file ("/etc/dcrpd.conf" by default)
-                by adding given port(s) as uplink ports. Set given MAC address as lag mac address.
-        @param  uplink_port: List of ports to configure them as uplink ports.
-                             Ports should be in format "node_id port_id".
-                             Example: ["0013 10", "0014 20"]
-        @type  uplink_port: list[str]
-        @param  lag_mac: MAC address to configure as MLAG MAC address. Same for each node
-        @type  lag_mac: str
-        @param  team_name: MLAG interface name, skip if None
-        @type  team_name: str
-        @param  file_name: DCRP configuration file name. If omitted self.dcrp_conf_file is used.
-        @type  file_name: str
+        """Configure DCRP MLAG on specified node.
+
+        Edit DCRP service configuration file ("/etc/dcrpd.conf" by default)
+        by adding given port(s) as uplink ports. Set given MAC address as lag mac address.
+
+        Args:
+            uplink_port(list[str]): List of ports to configure them as uplink ports.
+                                    Ports should be in format "node_id port_id".
+                                    Examples::
+
+                                        ["0013 10", "0014 20"]
+
+            lag_mac(str): MAC address to configure as MLAG MAC address. Same for each node
+            team_name(str): MLAG interface name, skip if None
+            file_name(str): DCRP configuration file name. If omitted self.dcrp_conf_file is used.
+
         """
         file_name = file_name if file_name else self.dcrp_conf_file
 
@@ -503,18 +522,15 @@ class UiDcrpShell(UiHelperMixin):
             self.update_remote_config(node_id, params, file_name)
 
     def update_remote_config(self, node_id, parameters, file_name, clean=False):
-        """
-        @brief  Edit or add parameters in remote configuration file
-                which contains "key = value" pairs.
-        @param  node_id: node ID for configuring on
-        @type  node_id: int | str
-        @param  parameters: Dictionary with key: value pair for editing or adding
-                            to remote configuration file
-        @type  dict
-        @param  file_name: Full name (path + name) of remote configuration file
-        @type  str
-        @param  clean: Empty configuration file before editing.
-        @type  bool
+        """Edit or add parameters in remote configuration file which contains "key = value" pairs.
+
+        Args:
+            node_id(int | str): node ID for configuring on
+            parameters(dict): Dictionary with key: value pair for editing or adding
+                              to remote configuration file
+            file_name(str): Full name (path + name) of remote configuration file
+            clean(bool): Empty configuration file before editing.
+
         """
         ui_instance = self._get_ui_instance(node_id)
 
@@ -546,14 +562,13 @@ class UiDcrpShell(UiHelperMixin):
             raise UIException(message)
 
     def wait_on_dcrpd_service(self, instance=None, services=None, timeout=45):
-        """
-        @brief  Wait for DCRP services are launched.
-        @param  instance: UI instance to wait DCRP services on
-        @type  instance: UI instance
-        @param  services: List of services' names
-        @type  services: list[str]
-        @param  timeout: Timeout for waiting
-        @type  timeout: int
+        """Wait for DCRP services are launched.
+
+        Args:
+            instance(UI instance): UI instance to wait DCRP services on
+            services(list[str]): List of services' names
+            timeout(int): Timeout for waiting
+
         """
         if not instance:
             raise UIException("Failure: timeout on loading DCRP services, node id {}.".format(
@@ -576,10 +591,11 @@ class UiDcrpShell(UiHelperMixin):
 
     @in_parallel
     def check_isis_nodes_discovery(self, instance=None):
-        """
-        @brief  Check whether all nodes discovered each other with ISIS
-        @return  True if all nodes discovered each other and False if not
-        @rtype  bool
+        """Check whether all nodes discovered each other with ISIS.
+
+        Returns:
+            bool: True if all nodes discovered each other and False if not
+
         """
         if instance:
             # Create list of all nodes' MAC addresses
@@ -607,13 +623,15 @@ class UiDcrpShell(UiHelperMixin):
 
     @staticmethod
     def parse_isis_table_topology(topology_table):
-        """
-        @brief  Parse 'show isis topology' table
-        @param  topology_table:  List of 'show isis topology' raw output
-        @type  topology_table:  list[str] | iter()
-        @return A dictionary containing the vertex, type, metric, next_hop, interface and
-                parent values for each destination node
-        @rtype:  iter()
+        """Parse 'show isis topology' table.
+
+        Args:
+            topology_table(list[str] | iter()):  List of 'show isis topology' raw output
+
+        Returns:
+            iter(): A dictionary containing the vertex, type, metric, next_hop, interface and
+                    parent values for each destination node
+
         """
         for row in topology_table:
             match = re.search(
@@ -643,13 +661,14 @@ class UiDcrpShell(UiHelperMixin):
 
     @staticmethod
     def parse_isis_table_neighbor(neighbor_table):
-        """
-        @brief  Parse 'show isis neighbor' table
-        @param  neighbor_table:  List of 'show isis neighbor' raw output
-        @type  neighbor_table:  list[str] | iter()
-        @return A dictionary containing the system_id, interface, level, state, hold_time, snpa
-                of each neighbor.
-        @rtype:  iter()
+        """Parse 'show isis neighbor' table.
+
+        Args:
+            neighbor_table(list[str] | iter()):  List of 'show isis neighbor' raw output
+
+        Returns:
+            iter(): A dictionary containing the system_id, interface, level, state, hold_time, snpa of each neighbor.
+
         """
         for row in neighbor_table:
             match = re.search(
@@ -662,10 +681,11 @@ class UiDcrpShell(UiHelperMixin):
 
     @in_parallel
     def get_isis_topology(self, instance=None):
-        """
-        @brief Get IS-IS topology table
-        @return  List of dictionary with keys: vertex, type, metric, next_hop, interface, parent
-        @rtype  list[dict]
+        """Get IS-IS topology table.
+
+        Returns:
+            list[dict]: List of dictionary with keys: vertex, type, metric, next_hop, interface, parent
+
         """
         if instance:
             try:
@@ -683,10 +703,11 @@ class UiDcrpShell(UiHelperMixin):
 
     @in_parallel
     def get_isis_neighbors(self, instance=None):
-        """
-        @brief Get IS-IS neighbor table
-        @return  List of dictionary with keys: system_id, interface, level, state, hold_time, snpa
-        @rtype  list[dict]
+        """Get IS-IS neighbor table.
+
+        Returns:
+            list[dict]:  List of dictionary with keys: system_id, interface, level, state, hold_time, snpa
+
         """
         if instance:
             try:
@@ -702,10 +723,11 @@ class UiDcrpShell(UiHelperMixin):
 
     @in_parallel
     def get_node_hostname(self, instance=None):
-        """
-        @brief Get node's hostname
-        @return  Hostname of node.
-        @rtype  str
+        """Get node's hostname.
+
+        Returns:
+            str:  Hostname of node.
+
         """
         if instance:
             try:
@@ -720,17 +742,17 @@ class UiDcrpShell(UiHelperMixin):
 
     @staticmethod
     def get_tg_ports_of_node(env, node_id, links_count=1):
-        """
-        @brief Get tg ports connected to specified node
-        @param  env:  Environment
-        @type  env:  object
-        @param  node_id:  Node id. E.g.: '4615'
-        @type  node_id:  str
-        @param links_count: Required links count for specific node
-        @type links_count: int
-        @return  TG instances and related tg/switch ports connected between each other. E.g.:
-                {'tg': {1: <dev_obj1>, 2: <dev_obj1>}, 'tg_ports': {1: (1,6,5), 2:(1,6,6)}, 'sw_ports':  {1: 13, 2: 21}}
-        @rtype  dict
+        """Get tg ports connected to specified node.
+
+        Args:
+            env(object):  Environment
+            node_id(str):  Node id. E.g.: '4615'
+            links_count(int): Required links count for specific node
+
+        Returns:
+            dict:  TG instances and related tg/switch ports connected between each other.
+                   E.g.: `'tg': {1: <dev_obj1>, 2: <dev_obj1>}, 'tg_ports': {1: (1,6,5), 2:(1,6,6)}, 'sw_ports':  {1: 13, 2: 21}}`
+
         """
         ports = env.get_ports()
         res = {'tg_obj': {}, 'tg_ports': {}, 'sw_ports':{}}
@@ -749,8 +771,8 @@ class UiDcrpShell(UiHelperMixin):
 
     @in_parallel
     def set_age_time_out(self, instance=None, age_time=3600):
-        """
-        @brief  Set age time out value on all nodes.
+        """Set age time out value on all nodes.
+
         """
         # Modify values
         instance.modify_bridge_info(agingTime=age_time)
@@ -761,8 +783,8 @@ class UiDcrpShell(UiHelperMixin):
 
     @in_parallel
     def get_macs(self, instance=None):
-        """
-        @brief  Set age time out value on all nodes.
+        """Set age time out value on all nodes.
+
         """
         # Get MAC addresses from HW rule#9
         out = instance.cli_send_command("match -f 5555 -p 30001 get_rules table 9").stdout

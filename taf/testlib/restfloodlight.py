@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``restfloodlight.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Functionality related to RestFloodlight OVS controller`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  restfloodlight.py
-
-@summary  Functionality related to RestFloodlight OVS controller.
 """
 
 import http.client
@@ -24,67 +23,72 @@ import json
 
 
 class RestFloodlightController(object):
-    """
-    @description  RestFloodlight OVS controller.
+    """RestFloodlight OVS controller.
+
     """
 
     def __init__(self, ip, port):
-        """
-        @brief  Initialize RestFloodlightController class
-        @param  ip:  Controller IP address
-        @type  ip:  str
-        @param  port:  Controller port
-        @type  port:  int
+        """Initialize RestFloodlightController class.
+
+        Args:
+            ip(str):  Controller IP address
+            port(int):  Controller port
+
         """
         self.controller_ip = ip
         self.controller_port = port
         self.reply = True
 
     def probe(self, timeout=10):
-        """
-        @brief  Method for probing Floodlight Controller
-        @param  timeout:  timeout
-        @type  timeout:  int
+        """Method for probing Floodlight Controller.
+
+        Args:
+            timeout(int):  timeout
+
         """
         path = '/wm/core/memory/json'
         ret = self.rest_call({}, 'GET', path, timeout)
         return json.loads(ret[2])
 
     def get_dpid(self, timeout=10):
-        """
-        @brief  Method for getting Switch dpid from Floodlight Controller
-        @param  timeout:  timeout
-        @type  timeout:  int
-        @rtype:  str
-        @return:  Switch dpid
+        """Method for getting Switch dpid from Floodlight Controller.
+
+        Args:
+            timeout(int):  timeout
+
+        Returns:
+            str:  Switch dpid
+
         """
         path = '/wm/core/controller/switches/json'
         ret = self.rest_call({}, 'GET', path, timeout)
         return json.loads(ret[2])[0]['dpid']
 
     def get_multiple_dpids(self, timeout=10):
-        """
-        @brief  Method for getting Switches dpids in complex setup via Floodlight Controller
-        @param timeout:  timeout
-        @type  timeout:  int
-        @rtype:  list
-        @return:  Switches dpids
+        """Method for getting Switches dpids in complex setup via Floodlight Controller.
+
+        Args:
+            timeout(int):  timeout
+
+        Returns:
+            list:  Switches dpids
+
         """
         path = '/wm/core/controller/switches/json'
         ret = self.rest_call({}, 'GET', path, timeout)
         return json.loads(ret[2])
 
     def get_stats(self, switch_id, stat_type, timeout=30):
-        """
-        @brief  Method for getting OVS statistics from Switch via Floodlight Controller
-        @param  switch_id:  Switch ID
-        @type  switch_id:  str
-        @param  stat_type:  Statistics type
-        @type  stat_type:  str
-        @param  timeout:  reply waiting timeout
-        @type  timeout:  int
-        @rtype:  list
-        @return:  Switch statistics
+        """Method for getting OVS statistics from Switch via Floodlight Controller.
+
+        Args:
+            switch_id(str):  Switch ID
+            stat_type(str):  Statistics type
+            timeout(int):  reply waiting timeout
+
+        Returns:
+            list:  Switch statistics
+
         """
         s_type = ''
         if stat_type == "aggstats":
@@ -106,41 +110,36 @@ class RestFloodlightController(object):
         return json.loads(ret[2])
 
     def get_features(self, switch_id, command, reply=True, timeout=30):
-        """
-        @brief  Method for getting OVS Switch features via Floodlight Controller
-        @param  switch_id:  Switch ID
-        @type  switch_id:  str
-        @param  command:  command: "features_request"
-        @type  switch_id:  str
-        @param  reply:  wait for reply
-        @type  reply:  bool
-        @param  timeout:  reply waiting timeout
-        @type  timeout:  int
-        @rtype:  list
-        @return:  Switch features statistics
+        """Method for getting OVS Switch features via Floodlight Controller.
+
+        Args:
+            switch_id(str):  Switch ID
+            command(str):  command: "features_request"
+            reply(bool):  wait for reply
+            timeout(int):  reply waiting timeout
+
+        Returns:
+            list:  Switch features statistics
+
         """
         features = self.get_stats(switch_id, "features")
         return features
 
     def flow_add(self, switch_id, command_string, name, wildcards=None, priority=32768, reply=False, timeout=30):
-        """
-        @brief  Method for adding flows via Floodlight Controller
-        @param  switch_id:  Switch ID
-        @type  switch_id:  str
-        @param  command_string:  command string, e.g. flow qualifiers and actions, delimited with space
-        @type  command_string:  str
-        @param  name:  Flow name
-        @type  name:  str
-        @param  wildcards:  Flow wildcards
-        @type  wildcards:  str
-        @param  priority:  Flow priority
-        @type  priority:  int
-        @param  reply:  specifies wait for reply or not
-        @type  reply:  bool
-        @param  timeout:  reply waiting timeout
-        @type  timeout:  int
-        @rtype:  bool
-        @return:  True if flow added
+        """Method for adding flows via Floodlight Controller.
+
+        Args:
+            switch_id(str):  Switch ID
+            command_string(str):  command string, e.g. flow qualifiers and actions, delimited with space
+            name(str):  Flow name
+            wildcards(str):  Flow wildcards
+            priority(int):  Flow priority
+            reply(bool):  specifies wait for reply or not
+            timeout(int):  reply waiting timeout
+
+        Returns:
+            bool:  True if flow added
+
         """
         path = '/wm/staticflowentrypusher/json'
         cmd = dict()
@@ -252,16 +251,16 @@ class RestFloodlightController(object):
             self.rest_call(cmd, 'POST', path, timeout)
 
     def flow_delete(self, command, name, timeout=30):
-        """
-        @brief  Method for deleting flows via Floodlight Controller
-        @param  command:  command, e.g "flow_delete"
-        @type  command:  str
-        @param  name:  Flow name
-        @type  name:  str
-        @param  timeout:  reply waiting timeout
-        @type  timeout:  int
-        @rtype:  bool
-        @return:  True if flow deleted
+        """Method for deleting flows via Floodlight Controller.
+
+        Args:
+            command(str):  command, e.g "flow_delete"
+            name(str):  Flow name
+            timeout(int):  reply waiting timeout
+
+        Returns:
+            bool:  True if flow deleted
+
         """
         path = '/wm/staticflowentrypusher/json'
         if command == "flow_delete":
@@ -269,32 +268,32 @@ class RestFloodlightController(object):
             return ret[0] == 200
 
     def clear(self, switch_id, timeout=10):
-        """
-        @brief  Method for clearing all flows from switch
-        @param  switch_id:  Switch ID
-        @type  switch_id:  str
-        @param  timeout:  reply waiting timeout
-        @type  timeout:  int
-        @rtype:  bool
-        @return:  True if flows cleared
+        """Method for clearing all flows from switch.
+
+        Args:
+            switch_id(str):  Switch ID
+            timeout(int):  reply waiting timeout
+
+        Returns:
+            bool:  True if flows cleared
+
         """
         path = '/wm/staticflowentrypusher/clear/%s/json' % (switch_id, )
         ret = self.rest_call({}, "GET", path, timeout)
         return ret[0] == 200
 
     def rest_call(self, data, action, path, timeout=10):
-        """
-        @brief  Method for executing call via Floodlight REST API
-        @param  data:  Rest data
-        @type  data:  dict
-        @param  action:  Action name
-        @type  action:  str
-        @param  path:  REST path
-        @type  path:  str
-        @param timeout:  timeout
-        @type  timeout:  int
-        @rtype:  tuple
-        @return:  response.status, response.reason, response.read()
+        """Method for executing call via Floodlight REST API.
+
+        Args:
+            data(dict):  Rest data
+            action(str):  Action name
+            path(str):  REST path
+            timeout(int):  timeout
+
+        Returns:
+            tuple:  response.status, response.reason, response.read()
+
         """
         headers = {
             'Content-type': 'application/json',

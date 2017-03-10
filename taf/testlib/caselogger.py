@@ -1,39 +1,40 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``caselogger.py``
+
+`Caselogger functionality`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  caselogger.py
-
-@summary  Caselogger functionality.
-"""
 import re
 import time
 from . import clissh
 
 
 class CaseLogger(object):
-    """
-    @description  Base class for switch caselogger functionality
+    """Base class for switch caselogger functionality.
+
     """
 
     def __init__(self, sw, logger):
-        """
-        @brief  Initialize CaseLogger instance
-        @param  sw:  Switch instance
-        @type  sw:  SwitchGeneral
-        @param  logger:  Logger instance
-        @type  logger:  ClassLogger
+        """Initialize CaseLogger instance.
+
+        Args:
+            sw(SwitchGeneral):  Switch instance
+            logger(ClassLogger):  Logger instance
+
         """
         self.sw = sw
         self.logger = logger
@@ -53,8 +54,8 @@ class CaseLogger(object):
         self.close_ssh = False
 
     def switch_connect(self):
-        """
-        @brief  Open ssh connection to the switch
+        """Open ssh connection to the switch.
+
         """
         if not self.sw.ssh.check_shell():
             self.sw.ssh.login()
@@ -62,21 +63,20 @@ class CaseLogger(object):
             self.close_ssh = True
 
     def switch_disconnect(self):
-        """
-        @brief  Close ssh connection to the switch
+        """Close ssh connection to the switch.
+
         """
         if self.close_ssh:
             self.sw.ssh.close()
 
     def get_test_case_logs(self, test_name, timestamp, logtype):
-        """
-        @brief  Get test case logs
-        @param  test_name:  Test case name
-        @type  test_name:  str
-        @param  timestamp:  Test case timestamp
-        @type  timestamp:  int
-        @param  logtype:  Logs type to store (Single, All)
-        @type  logtype:  str
+        """Get test case logs.
+
+        Args:
+            test_name(str):  Test case name
+            timestamp(int):  Test case timestamp
+            logtype(str):  Logs type to store (Single, All)
+
         """
         if self.sw.status:
 
@@ -124,10 +124,11 @@ class CaseLogger(object):
             self.switch_disconnect()
 
     def get_core_logs(self, suite_name):
-        """
-        @brief  Get test suite core logs
-        @param  suite_name:  Test suite name
-        @type  suite_name:  str
+        """Get test suite core logs.
+
+        Args:
+            suite_name(str):  Test suite name
+
         """
         if self.sw.status:
             self.switch_connect()

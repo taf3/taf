@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``ui_wrapper.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`XMLRPC UI wrappers`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  ui_wrapper.py
-
-@summary  XMLRPC UI wrappers.
 """
 
 from abc import abstractmethod
@@ -26,295 +26,310 @@ class UiInterface(object):
     # disable this for now so we can instantiate subclasses without
     # all the abstract methods defined.  Re-enable once implemented
     # __metaclass__ = ABCMeta
-    """
-    @description  Abstract class to store UI wrapper interface methods
+    """Abstract class to store UI wrapper interface methods.
+
     """
 
     @abstractmethod
     def connect(self):
-        """
-        @brief  Mandatory method for UI wrapper connection.
+        """Mandatory method for UI wrapper connection.
+
         """
         pass
 
     @abstractmethod
     def disconnect(self):
-        """
-        @brief  Mandatory method for UI wrapper disconnection.
+        """Mandatory method for UI wrapper disconnection.
+
         """
         pass
 
     @abstractmethod
     def restart(self):
-        """
-        @brief  Perform device reboot via User Interface.
+        """Perform device reboot via User Interface.
+
         """
         pass
 
 # Clear Config
     @abstractmethod
     def clear_config(self):
-        """
-        @brief  Clear device configuration
+        """Clear device configuration.
+
         """
         pass
 
     @abstractmethod
     def save_config(self):
-        """
-        @brief  Save device configuration
+        """Save device configuration.
+
         """
         pass
 
     @abstractmethod
     def restore_config(self):
-        """
-        @brief  Restore device configuration
+        """Restore device configuration.
+
         """
         pass
 
 # Application Check
     @abstractmethod
     def check_device_state(self):
-        """
-        @brief  Attempts to connect to the shell retries number of times
+        """Attempts to connect to the shell retries number of times.
+
         """
 
 # Platform
     @abstractmethod
     def get_table_platform(self):
-        """
-        @brief  Get 'Platform' table
+        """Get 'Platform' table.
+
         """
         pass
 
 # Syslog configuration
     @abstractmethod
     def create_syslog(self, syslog_proto, syslog_ip, syslog_port, syslog_localport, syslog_transport, syslog_facility, syslog_severity):
-        """
-        @brief  Configure Syslog settings
-        @param  syslog_proto:  syslog host protocol Udp | Tcp
-        @type  syslog_proto:  str
-        @param  syslog_ip:  syslog host IP address
-        @type  syslog_ip:  str
-        @param  syslog_port:  syslog host port
-        @type  syslog_port:  int
-        @param  syslog_localport:  syslog host local port
-        @type  syslog_localport:  int
-        @param  syslog_transport:  syslog host transport
-        @type  syslog_transport:  str
-        @param  syslog_facility:  syslog host facility
-        @type  syslog_facility:  int
-        @param  syslog_severity:  syslog host severity
-        @type  syslog_severity:  str
+        """Configure Syslog settings.
+
+        Args:
+            syslog_proto(str):  syslog host protocol Udp | Tcp
+            syslog_ip(str):  syslog host IP address
+            syslog_port(int):  syslog host port
+            syslog_localport(int):  syslog host local port
+            syslog_transport(str):  syslog host transport
+            syslog_facility(int):  syslog host facility
+            syslog_severity(str):  syslog host severity
+
         """
         pass
 
     @abstractmethod
     def logs_add_message(self, level, message):
-        """
-        @brief  Add message into device logs
-        @param  level:  log severity
-        @type  level:  str
-        @param  message:  log message
-        @type  message:  str
+        """Add message into device logs.
+
+        Args:
+            level(str):  log severity
+            message(str):  log message
+
         """
         pass
 
 # Temperature information
     @abstractmethod
     def get_temperature(self):
-        """
-        @brief  Get temperature from Sensors table
-        @rtype:  dict
-        @return:  CPU temperature information (Sensors table)
+        """Get temperature from Sensors table.
+
+        Returns:
+            dict:  CPU temperature information (Sensors table)
+
         """
         pass
 
 # System information
     @abstractmethod
     def get_memory(self, mem_type='usedMemory'):
-        """
-        @brief  Returns free cached/buffered memory from switch
-        @param  mem_type:  memory type
-        @type  mem_type:  str
-        @rtype:  float
-        @return:  memory size
+        """Returns free cached/buffered memory from switch.
+
+        Args:
+            mem_type(str):  memory type
+
+        Returns:
+            float::  memory size
+
         """
         pass
 
     @abstractmethod
     def get_cpu(self):
-        """
-        @brief  Returns cpu utilization from switch
-        @rtype:  float
-        @return:  cpu utilization from switch
+        """Returns cpu utilization from switch.
+
+        Returns:
+            float:  cpu utilization from switch
+
         """
         pass
 
 # Applications configuration
     @abstractmethod
     def get_table_applications(self):
-        """
-        @brief  Get 'Applications' table
-        @rtype:  list[dict]
-        @return:  'Applications' table
+        """Get 'Applications' table.
+
+        Returns:
+            list[dict]: 'Applications' table
+
         """
         pass
 
     @abstractmethod
     def configure_application(self, application, loglevel):
-        """
-        @brief  Set application loglevel
-        @param  application:  Application Name.
-        @type  application:  str
-        @param  loglevel:  Application loglevel.
-        @type  loglevel:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_application('L1PortControlApp', 'Debug')
-        @endcode
+        """Set application loglevel.
+
+        Args:
+            application(str):  Application Name.
+            loglevel(str):  Application loglevel.
+
+        Returns:
+            None
+
+        Example::
+
+            env.switch[1].ui.configure_application('L1PortControlApp', 'Debug')
+
         """
         pass
 
 # STP configuration
     @abstractmethod
     def configure_spanning_tree(self, **kwargs):
-        """
-        @brief  Configure 'SpanningTree' table
-        @param  kwargs:  Possible parameters from 'SpanningTree' table to configure:
-                             "enable" - globally enable STP;
-                             "mode" - set STP mode. RSTP|MSTP|STP;
-                             "maxAge" - set maxAge value;
-                             "forwardDelay" - set forwardDelay value;
-                             "bridgePriority" - set bridgePriority value;
-                             "bpduGuard" - set bpduGuard value;
-                             "forceVersion" - set forceVersion value;
-                             "mstpciName" - set mstpciName value.
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_spanning_tree(mode='MSTP')
-        @endcode
+        """Configure 'SpanningTree' table.
+
+        Args:
+            kwargs(dict):  Possible parameters from 'SpanningTree' table to configure:
+                           "enable" - globally enable STP;
+                           "mode" - set STP mode. RSTP|MSTP|STP;
+                           "maxAge" - set maxAge value;
+                           "forwardDelay" - set forwardDelay value;
+                           "bridgePriority" - set bridgePriority value;
+                           "bpduGuard" - set bpduGuard value;
+                           "forceVersion" - set forceVersion value;
+                           "mstpciName" - set mstpciName value.
+
+        Returns:
+            None
+
+        Example::
+
+            env.switch[1].ui.configure_spanning_tree(mode='MSTP')
+
         """
         pass
 
     @abstractmethod
     def create_stp_instance(self, instance, priority):
-        """
-        @brief  Create new STP instance in 'STPInstances' table
-        @param  instance:  Instance number.
-        @type  instance:  int
-        @param  priority:  Instance priority.
-        @type  priority:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_stp_instance(instance=3, priority=2)
-        @endcode
+        """Create new STP instance in 'STPInstances' table.
+
+        Args:
+            instance(int):  Instance number.
+            priority(int):  Instance priority.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_stp_instance(instance=3, priority=2)
+
         """
         pass
 
     @abstractmethod
     def configure_stp_instance(self, instance, **kwargs):
-        """
-        @brief  Configure existing STP instance
-        @param  instance:  Instance number.
-        @type  instance:  int
-        @param  kwargs:  Possible parameters to configure:
+        """Configure existing STP instance.
+
+        Args:
+            instance(int):  Instance number.
+            **kwargs(dict):  Possible parameters to configure.
                              "priority" - change instance priority;
                              "vlan" - assign instance to the existed vlan.
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_stp_instance(instance=3, priority=2) - change instance priority
-        env.switch[1].ui.configure_stp_instance(instance=3, vlan=10) - assign instance to the existed vlan
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_stp_instance(instance=3, priority=2)  # change instance priority
+            env.switch[1].ui.configure_stp_instance(instance=3, vlan=10)  # assign instance to the existed vlan
+
         """
         pass
 
     @abstractmethod
     def get_table_spanning_tree(self):
-        """
-        @brief  Get 'SpanningTree' table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_spanning_tree()
-        @endcode
+        """Get 'SpanningTree' table.
+
+        Returns:
+            list(dict): table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_spanning_tree()
+
         """
         pass
 
     @abstractmethod
     def get_table_spanning_tree_mst(self):
-        """
-        @brief  Get 'STPInstances' table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_spanning_tree_mst()
-        @endcode
+        """Get 'STPInstances' table
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_spanning_tree_mst()
+
         """
         pass
 
     @abstractmethod
     def get_table_mstp_ports(self, ports=None, instance=None):
-        """
-        @brief  Get 'MSTPPorts' table
-        @param ports:  list of ports.
-        @type  ports:  list
-        @param instance:  Instance number.
-        @type  instance:  int
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @note  Return all table or information about particular ports and STP instance.
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_mstp_ports()
-        env.switch[1].ui.get_table_mstp_ports([1, 2])
-        env.switch[1].ui.get_table_mstp_ports([1, 2], instance=3)
-        @endcode
+        """Get 'MSTPPorts' table.
+
+        Notes:
+            Return all table or information about particular ports and STP instance.
+
+        Args:
+            ports(list):  list of ports.
+            instance(int):  Instance number(int).
+
+        Returns:
+            list(dict): table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_mstp_ports()
+            env.switch[1].ui.get_table_mstp_ports([1, 2])
+            env.switch[1].ui.get_table_mstp_ports([1, 2], instance=3)
+
         """
         pass
 
     @abstractmethod
     def modify_mstp_ports(self, ports, instance=0, **kwargs):
-        """
-        @brief  Modify records in 'MSTPPorts' table
-        @param ports:  list of ports.
-        @type  ports:  list
-        @param instance:  Instance number.
-        @type  instance:  int
-        @param  kwargs:  Parameters to be modified. Parameters names should be the same as in XMLRPC nb.MSTPPorts.set.* calls:
-                             "adminState" - change adminState;
-                             "portFast" - set portFast value;
-                             "rootGuard" - set rootGuard value;
-                             "bpduGuard" - set bpduGuard value;
-                             "autoEdgePort" - set autoEdgePort value;
-                             "adminPointToPointMAC" - set adminPointToPointMAC value;
-                             "externalCost" - set externalCost value;
-                             "internalCost" - set internalCost value.
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.modify_mstp_ports([1, 2], instance=3, adminState='Enabled')
-        @endcode
+        """Modify records in 'MSTPPorts' table.
+
+        Args:
+            ports(list):  list of ports.
+            instance(int):  Instance number.
+            **kwargs(dict): Parameters to be modified. Parameters names should be the same as in XMLRPC nb.MSTPPorts.set.* calls
+                            "adminState" - change adminState;
+                            "portFast" - set portFast value;
+                            "rootGuard" - set rootGuard value;
+                            "bpduGuard" - set bpduGuard value;
+                            "autoEdgePort" - set autoEdgePort value;
+                            "adminPointToPointMAC" - set adminPointToPointMAC value;
+                            "externalCost" - set externalCost value;
+                            "internalCost" - set internalCost value.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.modify_mstp_ports([1, 2], instance=3, adminState='Enabled')
+
         """
         pass
 
     @abstractmethod
     def modify_rstp_ports(self, ports, **kwargs):
-        """
-        @brief  Modify records in 'RSTPPorts' table
-        @param ports:  list of ports.
-        @type  ports:  list
-        @param  kwargs:  Parameters to be modified. Parameters names should be the same as in XMLRPC nb.RSTPPorts.set.* calls:
+        """Modify records in 'RSTPPorts' table.
+
+        Args:
+            ports(list):  list of ports.
+            **kwargs(dict):  Parameters to be modified. Parameters names should be the same as in XMLRPC nb.RSTPPorts.set.* calls
                              "adminState" - change adminState;
                              "portFast" - set portFast value;
                              "rootGuard" - set rootGuard value;
@@ -322,446 +337,496 @@ class UiInterface(object):
                              "autoEdgePort" - set autoEdgePort value;
                              "adminPointToPointMAC" - set adminPointToPointMAC value;
                              "cost" - set cost value.
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.modify_rstp_ports([1, 2], adminState='Enabled')
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.modify_rstp_ports([1, 2], adminState='Enabled')
+
         """
         pass
 
     @abstractmethod
     def get_table_rstp_ports(self, ports=None):
-        """
-        @brief  Get 'MSTPPorts' table
-        @param  ports:  list of ports.
-        @type  ports:  list
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @note  Return all table or information about particular ports.
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_rstp_ports()
-        env.switch[1].ui.get_table_rstp_ports([1, 2])
-        @endcode
+        """Get 'RSTPPorts' table.
+
+        Notes:
+            Return all table or information about particular ports.
+
+        Args:
+            ports(list):  list of ports.
+
+        Returns:
+            list(dict): table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_rstp_ports()
+            env.switch[1].ui.get_table_rstp_ports([1, 2])
+
         """
         pass
 
 # Ports configuration
     @abstractmethod
     def set_all_ports_admin_disabled(self):
-        """
-        @brief  Set all ports into admin Down state
-        @return:  None
-        @note  This method is used in helpers.set_all_ports_admin_disabled() for all functional test case.
+        """Set all ports into admin Down state.
+
+        Notes:
+            This method is used in helpers.set_all_ports_admin_disabled() for all functional test case.
+
+        Returns:
+            None
+
         """
         pass
 
     @abstractmethod
     def wait_all_ports_admin_disabled(self):
-        """
-        @brief  Wait for all ports into admin Down state
-        @return:  None
-        @note  This method is used in helpers.set_all_ports_admin_disabled() for all functional test case.
+        """Wait for all ports into admin Down state.
+
+        Notes:
+            This method is used in helpers.set_all_ports_admin_disabled() for all functional test case.
+
+        Returns:
+            None
+
         """
         pass
 
     @abstractmethod
     def modify_ports(self, ports, **kwargs):
-        """
-        @brief  Modify records in 'Ports' table
-        @param ports:  list of port IDs.
-        @type  ports:  list
-        @param  kwargs:  Parameters to be modified. Parameters names should be the same as in XMLRPC nb.Ports.set.* calls:
-                         "pvid" - set pvid value;
-                         "pvpt" - set pvpt value;
-                         "adminMode" - set adminMode value;
-                         "ingressFiltering" - set ingressFiltering value;
-                         "maxFrameSize" - set maxFrameSize value;
-                         "discardMode" - set discardMode value;
-                         "cutThrough" - set cutThrough value;
-                         "flowControl" - set flowControl value;
-                         "speed" - set speed value;
-                         "learnMode" - set learnMode value.
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.modify_ports([1, 2], adminMode='Down')
-        @endcode
+        """Modify records in 'Ports' table.
+
+        Args:
+            ports(list(int)):  list of ports.
+            **kwargs(dict): Parameters to be modified. Parameters names should be the same as in XMLRPC nb.Ports.set.* calls:
+                            "pvid" - set pvid value;
+                            "pvpt" - set pvpt value;
+                            "adminMode" - set adminMode value;
+                            "ingressFiltering" - set ingressFiltering value;
+                            "maxFrameSize" - set maxFrameSize value;
+                            "discardMode" - set discardMode value;
+                            "cutThrough" - set cutThrough value;
+                            "flowControl" - set flowControl value;
+                            "speed" - set speed value;
+                            "learnMode" - set learnMode value.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.modify_ports([1, 2], adminMode='Down')
+
         """
         pass
 
     @abstractmethod
     def get_table_ports(self, ports=None, all_params=False):
-        """
-        @brief  Get 'Ports' table
-        @param ports:  list of port IDs.
-        @type  ports:  list
-        @param  all_params:  get additional port properties
-        @type  all_params:  bool
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @note  Return all table or information about particular ports.
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ports()
-        env.switch[1].ui.get_table_ports([1, 2])
-        @endcode
+        """Get 'Ports' table.
+
+        Args:
+            ports(list):  list of port IDs.
+            all_params(bool):  get additional port properties
+
+        Returns:
+            list(dict): table (list of dictionaries)
+
+        Notes:
+            Return all table or information about particular ports.
+
+        Examples::
+
+            env.switch[1].ui.get_table_ports()
+            env.switch[1].ui.get_table_ports([1, 2])
+
         """
         pass
 
 # Flow Confrol configuration
     @abstractmethod
     def set_flow_control_type(self, ports=None, control_type=None):
-        """
-        @brief Enable/disable sending/accepting pause frames
-        @param ports: list of port IDs
-        @type ports: list
-        @param control_type: 'Rx', 'Tx', 'RxTx' and 'None'
-        @type: string
-        @return: None
-        @par Example:
-        @code
-        env.switch[1].ui.set_flow_control([1, 2], 'RxTx')
-        @endcode
+        """Enable/disable sending/accepting pause frames
+
+        Args:
+            ports(list): list of port IDs
+            control_type(str): 'Rx', 'Tx', 'RxTx' and 'None'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.set_flow_control([1, 2], 'RxTx')
+
         """
         pass
 
 # Ustack configuration
     @abstractmethod
     def start_ustack_with_given_mesh_ports(self, mesh_ports=tuple(), dbglevel=0):
-        """
-        @brief  Start ustack with given mesh ports on command line
-        @param mesh_ports:  List of mesh ports given by command line user
-        @type mesh_ports:  list
-        @param  dbglevel:  dbglevel value
-        @type  dbglevel:  int
-        @return: success or failure report
-        @code
-        env.switch[1].ui.start_ustack_with_given_mesh_ports('sw0p1,sw0p2')
-        @endcode
+        """Start ustack with given mesh ports on command line.
+
+        Args:
+            mesh_ports(list):  List of mesh ports given by command line user
+            dbglevel(int):  dbglevel value
+
+        Returns:
+            Success or failure report.
+
+        Examples::
+
+            env.switch[1].ui.start_ustack_with_given_mesh_ports('sw0p1,sw0p2')
+
         """
         pass
 
 # Vlan configuration
     @abstractmethod
     def create_vlans(self, vlans=None):
-        """
-        @brief  Create new Vlans
-        @param  vlans:  list of vlans to be created.
-        @type  vlans:  list[int]
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_vlans([2, 3])
-        @endcode
+        """Create new Vlans
+
+        Args:
+            vlans(list[int]):  list of vlans to be created.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_vlans([2, 3])
+
         """
         pass
 
     @abstractmethod
     def delete_vlans(self, vlans=None):
-        """
-        @brief  Delete existing Vlans
-        @param vlans:  list of vlans to be deleted.
-        @type  vlans:  list[int]
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_vlans([2, 3])
-        @endcode
+        """Delete existing Vlans.
+
+        Args:
+            vlans(list[int]):  list of vlans to be deleted.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_vlans([2, 3])
+
         """
         pass
 
     @abstractmethod
     def get_table_vlans(self):
-        """
-        @brief  Get 'Vlans' table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_vlans()
-        @endcode
+        """Get 'Vlans' table.
+
+        Returns:
+            list(dict): table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_vlans()
+
         """
         pass
 
     @abstractmethod
     def create_vlan_ports(self, ports=None, vlans=None, tagged='Tagged'):
-        """
-        @brief  Create new Ports2Vlans records
-        @param  ports:  list of ports to be added to Vlans.
-        @type  ports:  list[int]
-        @param  vlans:  list of vlans.
-        @type  vlans:  list[int]
-        @param  tagged:  information about ports tagging state.
-        @type  tagged:  str
-        @return:  None
-        @par Example:
-        @code
-        Port 1 will be added into the vlans 3 and 4 as Untagged and port 2 will be added into the vlans 3 and 4 as Untagged
-        env.switch[1].ui.create_vlan_ports([1, 2], [3, 4], 'Untagged')
-        @endcode
+        """Create new Ports2Vlans records.
+
+        Args:
+            ports(list[int]):  list of ports to be added to Vlans.
+            vlans(list[int] | set(int)):  list of vlans.
+            tagged(str):  information about ports tagging state.
+
+        Returns:
+            None
+
+        Examples::
+
+            Port 1 will be added into the vlans 3 and 4 as Untagged and port 2 will be added into the vlans 3 and 4 as Untagged
+            env.switch[1].ui.create_vlan_ports([1, 2], [3, 4], 'Untagged')
+
         """
         pass
 
     @abstractmethod
     def delete_vlan_ports(self, ports=None, vlans=None):
-        """
-        @brief  Delete Vlan from port
-        @param ports:  list of ports.
-        @type  ports:  list[int]
-        @param vlans:  list of vlans.
-        @type  vlans:  list[int]
-        @return:  None
-        @par Example:
-        @code
-        Ports 1 and 2 will be removed from the vlan 3:
-        env.switch[1].ui.delete_vlan_ports([1, 2], [3, ])
-        @endcode
+        """Delete Ports2Vlans records.
+
+        Args:
+            ports(list[int]):  list of ports to be added to Vlans.
+            vlans(list[int]):  list of vlans.
+
+        Returns:
+            None
+
+        Examples::
+
+            Ports 1 and 2 will be removed from the vlan 3:
+            env.switch[1].ui.delete_vlan_ports([1, 2], [3, ])
+
         """
         pass
 
     @abstractmethod
     def modify_vlan_ports(self, ports=None, vlans=None, tagged='Tagged'):
-        """
-        @brief  Modify Ports2Vlans records
-        @param ports:  list of ports.
-        @type ports:  list[int]
-        @param vlans:  list of vlans.
-        @type vlans:  list[int]
-        @param tagged:  information about ports tagging state.
-        @type tagged:  str
-        @return:  None
-        @par Example:
-        @code
-        Port 1 will be modified in the vlans 3 and 4 as Tagged
-        env.switch[1].ui.create_vlan_ports([1, ], [3, 4], 'Tagged')
-        @endcode
+        """Modify Ports2Vlans records.
+
+        Args:
+            ports(list):  list of ports to be added to Vlans.
+            vlans(list[int] | set(int)):  list of vlans.
+            tagged(str):  information about ports tagging state.
+
+         Returns:
+            None
+
+        Examples::
+
+            Port 1 will be modified in the vlans 3 and 4 as Tagged
+            env.switch[1].ui.create_vlan_ports([1, ], [3, 4], 'Tagged')
+
         """
         pass
 
     @abstractmethod
     def get_table_ports2vlans(self):
-        """
-        @brief  Get 'Ports2Vlans' table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ports2vlans()
-        @endcode
+        """Get 'Ports2Vlans' table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_ports2vlans()
+
         """
         pass
 
 # ACL configuration
     @abstractmethod
     def create_acl_name(self, acl_name=None):
-        """
-        @brief  Create ACL name
-        @param acl_name:  ACL name to be created
-        @type  acl_name:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_acl_name('Test-1')
-        @endcode
+        """Create ACL name.
+
+        Args:
+            acl_name(str):  ACL name to be created
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_acl_name('Test-1')
+
         """
         pass
 
     @abstractmethod
     def add_acl_rule_to_acl(self, acl_name=None, rule_id='', action=None, conditions=None):
-        """
-        @brief  Add rule to ACL
-        @param acl_name:  ACL name where rule is added to.
-        @type  acl_name:  str
-        @param rule_id:  Rule Id used for adding.
-        @type  rule_id:  str|int
-        @param action:  ACL Action
-        @type  action:  list[str]
-        @param conditions:  List of ACL conditions
-        @type  conditions:  list[list[str]]
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.add_acl_rule_to_acl(acl_name='Test-1',
-                                             rule_id=1,
-                                             action=['forward', '1'],
-                                             conditions=[['ip-source',
-                                                         '192.168.10.10',
-                                                         '255.255.255.255']])
-        @endcode
+        """Add rule to ACL.
+
+        Args:
+            acl_name(str):  ACL name where rule is added to.
+            rule_id(str|int):  Rule Id used for adding.
+            action(list[str]):  ACL Action
+            conditions(list[list[str]]):  List of ACL conditions
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.add_acl_rule_to_acl(acl_name='Test-1',
+                                                 rule_id=1,
+                                                 action=['forward', '1'],
+                                                 conditions=[['ip-source',
+                                                             '192.168.10.10',
+                                                             '255.255.255.255']])
+
         """
         pass
 
     @abstractmethod
     def bind_acl_to_ports(self, acl_name=None, ports=None):
-        """
-        @brief  Bind ACL to ports
-        @param acl_name:  ACL name
-        @type  acl_name:  str
-        @param ports:  list of ports where ACL will be bound.
-        @type  ports:  list[int]
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.bind_acl_to_ports(acl_name='Test-1', ports=[1, 2, 3])
-        @endcode
+        """Bind ACL to ports.
+
+        Args:
+            acl_name(str):  ACL name
+            ports(list[int]):  list of ports where ACL will be bound.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.bind_acl_to_ports(acl_name='Test-1', ports=[1, 2, 3])
+
         """
         pass
 
     @abstractmethod
     def unbind_acl(self, acl_name=None):
-        """
-        @brief  Unbind ACL
-        @param acl_name:  ACL name
-        @type  acl_name:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.unbind_acl('Test-1')
-        @endcode
+        """Unbind ACL.
+
+        Args:
+            acl_name(str):  ACL name
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.unbind_acl('Test-1')
+
         """
         pass
 
     @abstractmethod
     def create_acl(self, ports=None, expressions=None, actions=None, rules=None, acl_name='Test-ACL'):
-        """
-        @brief  Create ACLs
-        @param ports:  list of ports where ACLs will be created.
-        @type  ports:  list[int]
-        @param expressions:  list of ACL expressions.
-        @type  expressions:  list[list]
-        @param actions:  list of ACL actions.
-        @type  actions:  list[list]
-        @param rules:  list of ACL rules.
-        @type  rules:  list[list]
-        @param acl_name:  ACL name to which add rules
-        @type  acl_name:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_acl(ports=[1, 2], expressions=[[1, 'SrcMac', 'FF:FF:FF:FF:FF:FF', '00:00:00:11:11:11'], ],
-                                    actions=[[1, 'Drop', ''], ], [[1, 1, 1, 'Ingress', 'Enabled', 0], ])
-        @endcode
+        """Create ACLs.
+
+        Args:
+            ports(list[int]):  list of ports where ACLs will be created.
+            expressions(list[list]):  list of ACL expressions.
+            actions(list[list]):  list of ACL actions.
+            rules(list[list]):  list of ACL rules.
+            acl_name(str):  ACL name to which add rules
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_acl(ports=[1, 2], expressions=[[1, 'SrcMac', 'FF:FF:FF:FF:FF:FF', '00:00:00:11:11:11'], ],
+                                        actions=[[1, 'Drop', ''], ], [[1, 1, 1, 'Ingress', 'Enabled', 0], ])
+
         """
         pass
 
     @abstractmethod
     def delete_acl(self, ports=None, expression_ids=None, action_ids=None, rule_ids=None, acl_name=None):
-        """
-        @brief  Delete ACLs
-        @param ports:  list of ports where ACLs will be deleted (mandatory).
-        @type  ports:  list[int]
-        @param expression_ids:  list of ACL expression IDs to be deleted (optional).
-        @type  expression_ids:  list[int]
-        @param action_ids:  list of ACL action IDs to be deleted (optional).
-        @type  action_ids:  list[int]
-        @param rule_ids:  list of ACL rule IDs to be deleted (optional).
-        @type  rule_ids:  list[int]
-        @param acl_name:  ACL name
-        @type  acl_name:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_acl(ports=[1, 2], rule_ids=[1, 2])
-        @endcode
+        """Delete ACLs.
+
+        Args:
+            ports(list[int]):  list of ports where ACLs will be deleted (mandatory).
+            expression_ids(list[int]):  list of ACL expression IDs to be deleted (optional).
+            action_ids( list[int]):  list of ACL action IDs to be deleted (optional).
+            rule_ids(list[int]):  list of ACL rule IDs to be deleted (optional).
+            acl_name(str):  ACL name
+
+        Returns:
+            None
+
+        Example::
+
+            env.switch[1].ui.delete_acl(ports=[1, 2], rule_ids=[1, 2])
+
         """
         pass
 
     @abstractmethod
     def get_table_acl(self, table=None, acl_name=None):
-        """
-        @brief  Get ACL table
-        @param table:  ACL table name to be returned. ACLStatistics|ACLExpressions|ACLActions
-        @type  table:  str
-        @param acl_name:  ACL name
-        @type  acl_name:  str
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_acl('ACLStatistics')
-        @endcode
+        """Get ACL table.
+
+        Args:
+            table(str):  ACL table name to be returned. ACLStatistics|ACLExpressions|ACLActions
+            acl_name(str):  ACL name
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_acl('ACLStatistics')
+
         """
         pass
 
     @abstractmethod
     def get_acl_names(self):
-        """
-        @brief  Get ACL names
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_acl_names()
-        @endcode
+        """Get ACL names.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_acl_names()
+
         """
         pass
 
 # FDB configuration
     @abstractmethod
     def create_static_macs(self, port=None, vlans=None, macs=None):
-        """
-        @brief  Create static FDB records
-        @param port:  port where static Fbds will be created (mandatory).
-        @type  port:  int
-        @param vlans:  list of vlans where static Fbds will be created (mandatory).
-        @type  vlans:  list[int]
-        @param macs:  list of MACs to be added (mandatory).
-        @type  macs:  list[str]
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_static_macs(10, [1, 2], ['00:00:00:11:11:11', ])
-        @endcode
+        """Create static FDB records.
+
+        Args:
+            port(int):  port where static Fbds will be created (mandatory).
+            vlans( list[int]):  list of vlans where static Fbds will be created (mandatory).
+            macs(list[str]):  list of MACs to be added (mandatory).
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_static_macs(10, [1, 2], ['00:00:00:11:11:11', ])
+
         """
         pass
 
     @abstractmethod
     def delete_static_mac(self, port=None, vlan=None, mac=None):
-        """
-        @brief  Delete static FDB records
-        @param port:  port where static Fbds will be deleted.
-        @type  port:  int
-        @param vlan:  list of vlans where static Fbds will be deleted (mandatory).
-        @type  vlan:  list[int]
-        @param mac:  list of MACs to be deleted (mandatory).
-        @type  mac:  list[str]
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_static_mac([1, 2], ['00:00:00:11:11:11', ])
-        @endcode
+        """Delete static FDB records.
+
+        Args:
+            port(int):  port where static Fbds will be deleted.
+            vlan(list[int]):  list of vlans where static Fbds will be deleted (mandatory).
+            mac(list[str]):  list of MACs to be deleted (mandatory).
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_static_mac([1, 2], ['00:00:00:11:11:11', ])
+
         """
         pass
 
     @abstractmethod
     def get_table_fdb(self, table='Fdb'):
-        """
-        @brief  Get Fbd table
-        @param table:  Fbd record type to be returned ('Fbd' or 'Static')
-        @type  table:  str
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_fdb()
-        env.switch[1].ui.get_table_fdb('Static')
-        @endcode
+        """Get Fbd table.
+
+        Args:
+            table(str):  Fbd record type to be returned ('Fbd' or 'Static')
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_fdb()
+            env.switch[1].ui.get_table_fdb('Static')
+
         """
         pass
 
     @abstractmethod
     def clear_table_fdb(self):
-        """
-        @brief  Clear Fdb table
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.clear_table_fdb()
-        @endcode
+        """Clear Fdb table.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.clear_table_fdb()
+
         """
         pass
 
@@ -769,351 +834,377 @@ class UiInterface(object):
 
     @abstractmethod
     def get_table_ports_qos_scheduling(self, port=None, param=None):
-        """
-        @brief  Get PortsQoS scheduling information
-        @param port:  port Id to get info about
-        @type  port:  int
-        @param param:  param name to get info about
-        @type  param:  str
-        @rtype:  list[dict] | str | int
-        @return  table (list of dictionaries) or dictionary or param value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ports_qos_scheduling(port=1, param='schedMode')
-        env.switch[1].ui.get_table_ports_qos_scheduling('Static')
-        @endcode
+        """Get PortsQoS scheduling information.
+
+        Args:
+            port(int):  port Id to get info about
+            param(str):  param name to get info about
+
+        Returns:
+            list[dict] | str | int: table (list of dictionaries) or dictionary or param value
+
+        Examples::
+
+            env.switch[1].ui.get_table_ports_qos_scheduling(port=1, param='schedMode')
+            env.switch[1].ui.get_table_ports_qos_scheduling('Static')
+
         """
         pass
 
     @abstractmethod
     def get_table_ports_dot1p2cos(self, port=None, rx_attr_flag=True):
-        """
-        @brief  Get PortsDot1p2CoS table
-        @param port:  port Id to get info about ('All' or port id)
-        @type  port:  str|int
-        @param rx_attr_flag:  whether get rx or tx attribute information
-        @type  rx_attr_flag:  bool
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ports_dot1p2cos(1)
-        env.switch[1].ui.get_table_ports_dot1p2cos('All')
-        @endcode
+        """Get PortsDot1p2CoS table.
+
+        Args:
+            port(str|int):  port Id to get info about ('All' or port id)
+            rx_attr_flag(bool):  whether get rx or tx attribute information
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_ports_dot1p2cos(1)
+            env.switch[1].ui.get_table_ports_dot1p2cos('All')
+
         """
         pass
 
     @abstractmethod
     def configure_cos_global(self, **kwargs):
-        """
-        @brief  Configure global mapping of ingress VLAN priority to CoS per port or per switch (PortsDot1p2CoS records)
-        @param  kwargs:  parameters to be modified
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_cos_global(dotp2CoS=6)
-        @endcode
+        """Configure global mapping of ingress VLAN priority to CoS per port or per switch (PortsDot1p2CoS records).
+
+        Args:
+            **kwargs(dict):  parameters to be modified
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_cos_global(dotp2CoS=6)
+
         """
         pass
 
     @abstractmethod
     def configure_dscp_to_cos_mapping_global(self, **kwargs):
-        """
-        @brief  Configure PortsDscp2CoS records
-        @param  kwargs:  parameters to be modified
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_dscp_to_cos_mapping_global(dscp0CoS=6)
-        @endcode
+        """Configure PortsDscp2CoS records.
+
+        Args:
+            *kwargs(dict):  parameters to be modified
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_dscp_to_cos_mapping_global(dscp0CoS=6)
+
         """
         pass
 
     @abstractmethod
     def get_table_ports_dscp2cos(self):
-        """
-        @brief  Get PortsDscp2CoS records
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ports_dscp2cos()
-        @endcode
+        """Get PortsDscp2CoS records.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_ports_dscp2cos()
+
         """
         pass
 
     @abstractmethod
     def configure_schedweight_to_cos_mapping(self, ports, **kwargs):
-        """
-        @brief  Configure schedweight to cos mapping
-        @param ports:  list of port Ids
-        @type  ports:  list[int]
-        @param  kwargs:  parameters to be modified
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_schedweight_to_cos_mapping(ports=[1,2], schedWeight0=35)
-        @endcode
+        """Configure schedweight to cos mapping.
+
+        Args:
+            ports(list[int]):  list of port Ids
+            **kwargs(dict):  parameters to be modified
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_schedweight_to_cos_mapping(ports=[1,2], schedWeight0=35)
+
         """
         pass
 
     @abstractmethod
     def configure_port_cos(self, ports=None, **kwargs):
-        """
-        @brief  Configure PortsQoS records
-        @param ports:  list of ports to be modified
-        @type  ports:  list[int]
-        @param  kwargs:  parameters to be modified
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_port_cos([1, ], trustMode='Dot1p')
-        @endcode
+        """Configure PortsQoS records.
+
+        Args:
+            ports(list[int]):  list of ports to be modified
+            **kwargs(dict):  parameters to be modified
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_port_cos([1, ], trustMode='Dot1p')
+
         """
         pass
 
     @abstractmethod
     def create_dot1p_to_cos_mapping(self, ports, rx_attr_flag=False, **kwargs):
-        """
-        @brief  Configure mapping of ingress VLAN priority to CoS per port or per switch (PortsDot1p2CoS mapping)
-        @param ports:  list of ports to be modified
-        @type  ports:  list[int]
-        @param  rx_attr_flag:  whether rx or tx attribute to be modified
-        @type rx_attr_flag: bool
-        @param  kwargs:  parameters to be modified
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_dot1p_to_cos_mapping([1, ], dotp7CoS=6)
-        @endcode
+        """Configure mapping of ingress VLAN priority to CoS per port or per switch (PortsDot1p2CoS mapping).
+
+        Args:
+            ports(list[int]):  list of ports to be modified
+            rx_attr_flag(bool):  whether rx or tx attribute to be modified
+            **kwargs(dict):  parameters to be modified
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_dot1p_to_cos_mapping([1, ], dotp7CoS=6)
+
         """
         pass
 
     @abstractmethod
     def modify_dot1p_to_cos_mapping(self, ports, rx_attr_flag=False, **kwargs):
-        """
-        @brief  Modify mapping of ingress VLAN priority to CoS per port or per switch (PortsDot1p2CoS mapping)
-        @param ports:  list of ports to be modified
-        @type  ports:  list[int]
-        @param  rx_attr_flag:  whether rx or tx attribute to be modified
-        @type rx_attr_flag: bool
-        @param  kwargs:  parameters to be modified
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.modify_dot1p_to_cos_mapping([1, ], dotp7CoS=6)
-        @endcode
+        """Modify mapping of ingress VLAN priority to CoS per port or per switch (PortsDot1p2CoS mapping).
+
+        Args:
+            ports(list[int]):  list of ports to be modified
+            rx_attr_flag(bool):  whether rx or tx attribute to be modified
+            **kwargs(dict):  parameters to be modified
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.modify_dot1p_to_cos_mapping([1, ], dotp7CoS=6)
+
         """
         pass
 
     @abstractmethod
     def clear_per_port_dot1p_cos_mapping(self, ports, rx_attr_flag=False, dot1p=None):
-        """
-        @brief  Clear PortsDot1p2CoS mapping
-        @param ports:  list of ports to be modified
-        @type  ports:  list[int]
-        @param rx_attr_flag:  whether to use rx attribute or tx attribute
-        @type rx_attr_flag: bool
-        @param dot1p:  list of Dot1p priority required to clear.
-        @type dot1p: list[int]
-        @par Example:
-        @code
-        env.switch[1].ui.clear_per_port_dot1p_cos_mapping(ports=[port1, ], dot1p=[6, ])
-        @endcode
+        """Clear PortsDot1p2CoS mapping.
+
+        Args:
+            ports(list[int]):  list of ports to be modified
+            rx_attr_flag(bool):  whether to use rx attribute or tx attribute
+            dot1p(list[int]):  list of Dot1p priority required to clear.
+
+        Examples::
+
+            env.switch[1].ui.clear_per_port_dot1p_cos_mapping(ports=[port1, ], dot1p=[6, ])
+
         """
         pass
 
 # Statistics configuration
     @abstractmethod
     def map_stat_name(self, generic_name):
-        """
-        @brief Get the UI specific stat name for given generic name
-        @param generic_name: generic statistic name
-        @type generic_name: str
-        @rtype: str
-        @return: UI specific stat name
+        """Get the UI specific stat name for given generic name.
+
+        Args:
+            generic_name(str): generic statistic name
+
+        Returns:
+            str: UI specific stat name
+
         """
         pass
 
     @abstractmethod
     def get_table_statistics(self, port=None, stat_name=None):
-        """
-        @brief  Get Statistics table
-        @param port:  port Id to get info about ('cpu' or port id) (optional)
-        @type  port:  str|int|None
-        @param stat_name:  name of statistics parameter (optional)
-        @type  stat_name:  str
-        @rtype:  list[dict]|int
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_statistics()
-        env.switch[1].ui.get_table_statistics(port=1)
-        env.switch[1].ui.get_table_statistics(port='cpu')
-        @endcode
+        """Get Statistics table.
+
+        Args:
+            port(str|int|None):  port Id to get info about ('cpu' or port id) (optional)
+            stat_name(str):  name of statistics parameter (optional)
+
+        Returns:
+            list[dict]|int:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_statistics()
+            env.switch[1].ui.get_table_statistics(port=1)
+            env.switch[1].ui.get_table_statistics(port='cpu')
+
         """
         pass
 
     @abstractmethod
     def clear_statistics(self):
-        """
-        @brief  Clear Statistics
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.clear_statistics()
-        @endcode
+        """Clear Statistics.
+
+        Returns:
+            None
+
+        Examples:
+
+            env.switch[1].ui.clear_statistics()
+
         """
         pass
 
 # Bridge Info configuration
     @abstractmethod
     def get_table_bridge_info(self, param=None, port=None):
-        """
-        @brief  Get Bridge Info table or specific parameter value in
-                Bridge Info table
-        @param param:  parameter name (optional)
-        @type  param:  str
-        @param port:  port ID (optional)
-        @type  port:  int
-        @rtype:  list[dict]|str|int
-        @return  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_bridge_info()
-        env.switch[1].ui.get_table_bridge_info('agingTime')
-        @endcode
+        """Get Bridge Info table or specific parameter value in Bridge Info table
+
+        Args:
+            param(str):  parameter name (optional)
+            port(int):  port ID (optional)
+
+        Returns:
+            list[dict]|str|int: table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_bridge_info()
+            env.switch[1].ui.get_table_bridge_info('agingTime')
+
         """
         pass
 
     @abstractmethod
     def modify_bridge_info(self, **kwargs):
-        """
-        @brief  Modify BridgeInfo table
-        @param  kwargs:  Parameters to be modified:
+        """Modify BridgeInfo table.
+
+        Args:
+            **kwargs(dict):  Parameters to be modified:
                              "agingTime" - set agingTime value;
                              "defaultVlanId" - set defaultVlanId value.
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.modify_bridge_info(agingTime=5)
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.modify_bridge_info(agingTime=5)
+
         """
         pass
 
 # LAG configuration
     @abstractmethod
     def create_lag(self, lag=None, key=None, lag_type='Static', hash_mode='None'):
-        """
-        @brief  Create LAG instance
-        @param lag:  LAG id
-        @type  lag:  int
-        @param key:  LAG key
-        @type  key:  int
-        @param lag_type:  LAG type. 'Static'|'Dynamic'
-        @type  lag_type:  str
-        @param hash_mode:  LAG hash type:
-                               'None'|'SrcMac'|'DstMac'|'SrcDstMac'|'SrcIp'|'DstIp'|
-                               'SrcDstIp'|'L4SrcPort'|'L4DstPort'|'L4SrcPort,L4DstPort'|
-                               'OuterVlanId'|'InnerVlanId'|'EtherType'|'OuterVlanPri'|
-                               'InnerVlanPri'|'Dscp'|'IpProtocol'|'DstIp,L4DstPort'|
-                               'SrcIp,L4SrcPort'|'SrcMac,OuterVlanId'|'DstMac,OuterVlanId'|
-                               'SrcIp,DstIp,L4SrcPort'|'DstIp,IpProtocol'|'SrcIp,IpProtocol'|'Ip6Flow'
-        @type  hash_mode:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_lag(3800, 1, 'Static', 'None')
-        @endcode
+        """Create LAG instance.
+
+        Args:
+            lag(int):  LAG id
+            key(int):  LAG key
+            lag_type(str):  LAG type. 'Static'|'Dynamic'
+            hash_mode(str):  LAG hash type:
+                             'None'|'SrcMac'|'DstMac'|'SrcDstMac'|'SrcIp'|'DstIp'|
+                             'SrcDstIp'|'L4SrcPort'|'L4DstPort'|'L4SrcPort,L4DstPort'|
+                             'OuterVlanId'|'InnerVlanId'|'EtherType'|'OuterVlanPri'|
+                             'InnerVlanPri'|'Dscp'|'IpProtocol'|'DstIp,L4DstPort'|
+                             'SrcIp,L4SrcPort'|'SrcMac,OuterVlanId'|'DstMac,OuterVlanId'|
+                             'SrcIp,DstIp,L4SrcPort'|'DstIp,IpProtocol'|'SrcIp,IpProtocol'|'Ip6Flow'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_lag(3800, 1, 'Static', 'None')
+
         """
         pass
 
     @abstractmethod
     def delete_lags(self, lags=None):
-        """
-        @brief  Delete LAG instance
-        @param lags:  list of LAG Ids
-        @type  lags:  list[int]
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_lags([3800, ])
-        @endcode
+        """Delete LAG instance.
+
+        Args:
+            lags(list[int]):  list of LAG Ids
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_lags([3800, ])
+
         """
         pass
 
     @abstractmethod
     def get_table_lags(self):
-        """
-        @brief  Get LagsAdmin table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_lags()
-        @endcode
+        """Get LagsAdmin table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_lags()
+
         """
         pass
 
     @abstractmethod
     def modify_lags(self, lag, key=None, lag_type=None, hash_mode=None):
-        """
-        @brief  Modify LagsAdmin table
-        @param lag:  LAG id
-        @type  lag:  int
-        @param key:  LAG key
-        @type  key:  int
-        @param lag_type:  LAG type (Static or Dynamic)
-        @type  lag_type:  str
-        @param hash_mode:  LAG hash mode
-        @type  hash_mode:  str
-        @return  None
-        @par Example:
-        @code
-        env.switch[1].ui.modify_lags(lag=3800, lag_type="Static")
-        @endcode
+        """Modify LagsAdmin table.
+
+        Args:
+            lag(int):  LAG id
+            key(int):  LAG key
+            lag_type(str):  LAG type (Static or Dynamic)
+            hash_mode():  LAG hash mode
+
+        Returns:
+            None
+
+        Examples:
+
+            env.switch[1].ui.modify_lags(lag=3800, lag_type="Static")
+
         """
         pass
 
     @abstractmethod
     def get_table_link_aggregation(self):
-        """
-        @brief  Get LinkAggregation table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_link_aggregation()
-        @endcode
+        """Get LinkAggregation table.
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_link_aggregation()
+
         """
         pass
 
     @abstractmethod
     def modify_link_aggregation(self, globalenable=None, collectormaxdelay=None, globalhashmode=None, priority=None, lacpenable=None):
-        """
-        @brief  Modify LinkAggregation table
-        @param globalenable:  globalEnable parameter value
-        @type  globalenable:  str
-        @param collectormaxdelay:  collectorMaxDelay parameter value
-        @type  collectormaxdelay:  int
-        @param globalhashmode:  globalHashMode parameter value
-        @type  globalhashmode:  str
-        @param priority:  priority parameter value
-        @type  priority:  int
-        @param lacpenable:  lacpEnable parameter value
-        @param  lacpenable:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.modify_link_aggregation(globalhashmode='SrcMac')
-        @endcode
+        """Modify LinkAggregation table.
+
+        Args:
+            globalenable(str):  globalEnable parameter value
+            collectormaxdelay(int):  collectorMaxDelay parameter value
+            globalhashmode(str):  globalHashMode parameter value
+            priority(int):  priority parameter value
+            lacpenable(str):  lacpEnable parameter value
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.modify_link_aggregation(globalhashmode='SrcMac')
+
         """
         pass
 
@@ -1121,76 +1212,66 @@ class UiInterface(object):
     def create_lag_ports(self, ports, lag, priority=1, key=None, aggregation='Multiple', lag_mode='Passive', timeout='Long', synchronization=False,
                          collecting=False, distributing=False, defaulting=False, expired=False, partner_system='00:00:00:00:00:00', partner_syspri=32768,
                          partner_number=1, partner_key=0, partner_pri=32768):
-        """
-        @brief  Add ports into created LAG
-        @param ports:  list of ports to be added into LAG
-        @type  ports:  list[int]
-        @param lag:  LAG Id
-        @type  lag:  int
-        @param priority:  LAG priority
-        @type  priority:  int
-        @param key:  LAG key
-        @type  key:  int
-        @param aggregation:  LAG aggregation
-        @type  aggregation:  str
-        @param lag_mode:  LAG mode
-        @type  lag_mode:  str
-        @param timeout:  LAG timeout
-        @type  timeout:  str
-        @param synchronization:  LAG synchronization
-        @type  synchronization:  bool
-        @param collecting:  LAG collecting
-        @type  collecting:  bool
-        @param distributing:  LAG distributing
-        @type  distributing:  bool
-        @param defaulting:  LAG defaulting
-        @type  defaulting:  bool
-        @param expired:  LAG expired
-        @type  expired:  bool
-        @param partner_system:  LAG partner system MAC address
-        @type  partner_system:  str
-        @param partner_syspri:  LAG partner system priority
-        @type  partner_syspri:  int
-        @param partner_number:  LAG partner number
-        @type  partner_number:  int
-        @param partner_key:  LAG partner key
-        @type  partner_key:  int
-        @param partner_pri:  LAG partner priority
-        @type  partner_pri:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_lag_ports([1, ], 3800, priority=1, key=5)
-        @endcode
+        """Add ports into created LAG.
+
+        Args:
+            ports( list[int]):  list of ports to be added into LAG
+            lag(int):  LAG Id
+            priority(int):  LAG priority
+            key(int):  LAG key
+            aggregation(str):  LAG aggregation
+            lag_mode(str):  LAG mode
+            timeout(str):  LAG timeout
+            synchronization(bool):  LAG synchronization
+            collecting(bool):  LAG collecting
+            distributing(bool):  LAG distributing
+            defaulting(bool):  LAG defaulting
+            expired(bool):  LAG expired
+            partner_system(str):  LAG partner system MAC address
+            partner_syspri(int):  LAG partner system priority
+            partner_number(int):  LAG partner number
+            partner_key(int):  LAG partner key
+            partner_pri(int):  LAG partner priority
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_lag_ports([1, ], 3800, priority=1, key=5)
+
         """
         pass
 
     @abstractmethod
     def delete_lag_ports(self, ports, lag):
-        """
-        @brief  Delete ports from created LAG
-        @param ports:  list of ports to be added into LAG
-        @type  ports:  list[int]
-        @param lag:  LAG Id
-        @type  lag:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_lag_ports([1, ], 3800)
-        @endcode
+        """Delete ports from created LAG.
+
+        Args:
+            ports(list[int]):  list of ports to be added into LAG
+            lag(int):  LAG Id
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_lag_ports([1, ], 3800)
+
         """
         pass
 
     @abstractmethod
     def get_table_ports2lag(self):
-        """
-        @brief  Get Ports2LagAdmin table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ports2lag()
-        @endcode
+        """Get Ports2LagAdmin table.
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_ports2lag()
+
         """
         pass
 
@@ -1198,1113 +1279,1158 @@ class UiInterface(object):
     def modify_ports2lag(self, port, lag, priority=None, key=None, aggregation=None, lag_mode=None, timeout=None, synchronization=None,
                          collecting=None, distributing=None, defaulting=None, expired=None, partner_system=None, partner_syspri=None,
                          partner_number=None, partner_key=None, partner_pri=None):
-        """
-        @brief  Modify Ports2LagAdmin table
-        @param port:  LAG port
-        @type  port:  int
-        @param lag:  LAG Id
-        @type  lag:  int
-        @param priority:  port priority
-        @type  priority:  int
-        @param key:  port key
-        @type  key:  int
-        @param aggregation:  port aggregation (multiple or individual)
-        @type  aggregation:  str
-        @param lag_mode:  LAG mode (Passive or Active)
-        @type  lag_mode:  str
-        @param timeout:  port timeout (Short or Long)
-        @type  timeout:  str
-        @param synchronization:  port synchronization (True or False)
-        @type  synchronization:  str
-        @param collecting:  port collecting (True or False)
-        @type  collecting:  str
-        @param distributing:  port distributing (True or False)
-        @type  distributing:  str
-        @param defaulting:  port defaulting state (True or False)
-        @type  defaulting:  str
-        @param expired:  port expired state (True or False)
-        @type  expired:  str
-        @param partner_system:  partner LAG MAC address
-        @type  partner_system:  str
-        @param partner_syspri:  partner LAG  priority
-        @type  partner_syspri:  int
-        @param partner_number:  partner port number
-        @type  partner_number:  int
-        @param partner_key:  partner port key
-        @type  partner_key:  int
-        @param partner_pri:  partner port priority
-        @type  partner_pri:  int
-        @return  None
-        @par Example:
-        @code
-        env.switch[1].ui.modify_ports2lag(1, 3800, priority=100)
-        @endcode
+        """Modify Ports2LagAdmin table.
+
+        Args:
+            port(int):  LAG port
+            lag(int):  LAG Id
+            priority(int):  port priority
+            key(int):  port key
+            aggregation(str):  port aggregation (multiple or individual)
+            lag_mode(str):  LAG mode (Passive or Active)
+            timeout(str):  port timeout (Short or Long)
+            synchronization(str):  port synchronization (True or False)
+            collecting(str):  port collecting (True or False)
+            distributing(str):  port distributing (True or False)
+            defaulting(str):  port defaulting state (True or False)
+            expired(str):  port expired state (True or False)
+            partner_system(str):  partner LAG MAC address
+            partner_syspri(int):  partner LAG  priority
+            partner_number(int):  partner port number
+            partner_key(int):  partner port key
+            partner_pri(int):  partner port priority
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.modify_ports2lag(1, 3800, priority=100)
+
         """
         pass
 
     @abstractmethod
     def get_table_lags_local(self, lag=None):
-        """
-        @brief  Get LagsLocal table
-        @param lag:  LAG Id
-        @type  lag:  int
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_lags_local()
-        env.switch[1].ui.get_table_lags_local(3800)
-        @endcode
+        """Get LagsLocal table.
+
+        Args:
+            lag(int):  LAG Id
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_lags_local()
+            env.switch[1].ui.get_table_lags_local(3800)
+
         """
         pass
 
     @abstractmethod
     def get_table_lags_local_ports(self, lag=None):
-        """
-        @brief  Get Ports2LagLocal table
-        @param lag:  LAG Id
-        @type  lag:  int
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_lags_local_ports()
-        env.switch[1].ui.get_table_lags_local_ports(3800)
-        @endcode
+        """Get Ports2LagLocal table.
+
+        Args:
+            lag(int):  LAG Id
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_lags_local_ports()
+            env.switch[1].ui.get_table_lags_local_ports(3800)
+
         """
         pass
 
     @abstractmethod
     def get_table_lags_remote(self, lag=None):
-        """
-        @brief  Get LagsRemote table
-        @param lag:  LAG Id
-        @type  lag:  int
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_lags_remote()
-        env.switch[1].ui.get_table_lags_remote(3800)
-        @endcode
+        """Get LagsRemote table.
+
+        Args:
+            lag(int):  LAG Id
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_lags_remote()
+            env.switch[1].ui.get_table_lags_remote(3800)
+
         """
         pass
 
     @abstractmethod
     def get_table_lags_remote_ports(self, lag=None):
-        """
-        @brief  Get Ports2LagRemote table
-        @param lag:  LAG Id
-        @type  lag:  int
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_lags_remote_ports()
-        env.switch[1].ui.get_table_lags_remote_ports(lag=3800)
-        @endcode
+        """Get Ports2LagRemote table.
+
+        Args:
+            lag(int):  LAG Id
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_lags_remote_ports()
+            env.switch[1].ui.get_table_lags_remote_ports(lag=3800)
+
         """
         pass
 
 # IGMP configuration
     @abstractmethod
     def configure_igmp_global(self, mode='Enabled', router_alert=None, unknown_igmp_behavior=None, query_interval=None, querier_robustness=None):
-        """
-        @brief  Modify IGMPSnoopingGlobalAdmin table
-        @param mode:  mode parameter value. 'Enabled'|'Disabled'
-        @type  mode:  str
-        @param router_alert:  routerAlertEnforced parameter value. 'Enabled'|'Disabled'
-        @type  router_alert:  str
-        @param unknown_igmp_behavior:  unknownIgmpBehavior parameter value. 'Broadcast'|'Drop'
-        @type  unknown_igmp_behavior:  str
-        @param query_interval:  queryInterval parameter value
-        @type  query_interval:  int
-        @param querier_robustness:  querierRobustness parameter value
-        @type  querier_robustness:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_igmp_global(mode='Enabled')
-        @endcode
+        """Modify IGMPSnoopingGlobalAdmin table.
+
+        Args:
+            mode(str):  mode parameter value. 'Enabled'|'Disabled'
+            router_alert(str):  routerAlertEnforced parameter value. 'Enabled'|'Disabled'
+            unknown_igmp_behavior(str):  unknownIgmpBehavior parameter value. 'Broadcast'|'Drop'
+            query_interval(int):  queryInterval parameter value
+            querier_robustness(int):  querierRobustness parameter value
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_igmp_global(mode='Enabled')
+
         """
         pass
 
     @abstractmethod
     def configure_igmp_per_ports(self, ports, mode='Enabled', router_port_mode=None):
-        """
-        @brief  Modify IGMPSnoopingPortsAdmin table
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param mode:  igmpEnabled parameter value. 'Enabled'|'Disabled'
-        @type  mode:  str
-        @param router_port_mode:  routerPortMode parameter value. 'Auto'|'Always'
-        @type  router_port_mode:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_igmp_per_ports([1, 2], mode='Enabled')
-        @endcode
+        """Modify IGMPSnoopingPortsAdmin table.
+
+        Args:
+            ports(list[int]):  list of ports
+            mode(str):  igmpEnabled parameter value. 'Enabled'|'Disabled'
+            router_port_mode(str):  routerPortMode parameter value. 'Auto'|'Always'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_igmp_per_ports([1, 2], mode='Enabled')
+
         """
         pass
 
     @abstractmethod
     def create_multicast(self, port, vlans, macs):
-        """
-        @brief  Create StaticL2Multicast record
-        @param port:  port Id
-        @type  port:  int
-        @param vlans:  list of vlans
-        @type  vlans:  list[int]
-        @param macs:  list of multicast MACs
-        @type  macs:  list[str]
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_multicast(10, [5, ], ['01:00:05:11:11:11', ])
-        @endcode
+        """Create StaticL2Multicast record.
+
+        Args:
+            port(int):  port Id
+            vlans(list[int]):  list of vlans
+            macs(list[str]):  list of multicast MACs
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_multicast(10, [5, ], ['01:00:05:11:11:11', ])
+
         """
         pass
 
     @abstractmethod
     def delete_multicast(self, port=None, vlan=None, mac=None):
-        """
-        @brief  Delete StaticL2Multicast record
-        @param port:  port Id
-        @type  port:  int
-        @param vlan:  vlan Id
-        @type  vlans:  int
-        @param mac:  multicast MAC
-        @type  mac:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_multicast(10, 5, '01:00:05:11:11:11')
-        @endcode
+        """Delete StaticL2Multicast record.
+
+        Args:
+            port(int):  port Id
+            vlan(int):  vlan Id
+            mac(str):  multicast MAC
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_multicast(10, 5, '01:00:05:11:11:11')
+
         """
         pass
 
     @abstractmethod
     def get_table_l2_multicast(self):
-        """
-        @brief  Get L2Multicast table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_l2_multicast()
-        @endcode
+        """Get L2Multicast table.
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_l2_multicast()
+
         """
         pass
 
     @abstractmethod
     def get_table_igmp_snooping_global_admin(self, param=None):
-        """
-        @brief  Get IGMPSnoopingGlobalAdmin table
-        @param param:  parameter name
-        @type  param:  str
-        @rtype:  list[dict]|int|str
-        @return  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_igmp_snooping_global_admin()
-        env.switch[1].ui.get_table_igmp_snooping_global_admin('queryInterval')
-        @endcode
+        """Get IGMPSnoopingGlobalAdmin table.
+
+        Args:
+            param(str):  parameter name
+
+        Returns:
+            list[dict]|int|str:  table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_igmp_snooping_global_admin()
+            env.switch[1].ui.get_table_igmp_snooping_global_admin('queryInterval')
+
         """
         pass
 
     @abstractmethod
     def get_table_igmp_snooping_port_oper(self, port, param=None):
-        """
-        @brief  Get IGMPSnoopingPortsOper table
-        @param port:  port Id
-        @type  port:  int
-        @param param:  parameter name
-        @type  param:  str
-        @rtype:  list[dict]|int|str
-        @return  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_igmp_snooping_port_oper()
-        env.switch[1].ui.get_table_igmp_snooping_port_oper('queryInterval')
-        @endcode
+        """Get IGMPSnoopingPortsOper table.
+
+        Args:
+            port(int):  port Id
+            param(str):  parameter name
+
+        Returns:
+            list[dict]|int|str: table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_igmp_snooping_port_oper()
+            env.switch[1].ui.get_table_igmp_snooping_port_oper('queryInterval')
+
         """
         pass
 
     @abstractmethod
     def clear_l2_multicast(self):
-        """
-        @brief  Clear L2Multicast table
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.clear_l2_multicast()
-        @endcode
+        """Clear L2Multicast table.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.clear_l2_multicast()
+
         """
         pass
 
 # L3 configuration
     @abstractmethod
     def configure_routing(self, routing='Enabled', ospf=None):
-        """
-        @brief  Configure L3 routing
-        @param routing:  enable L3 routing
-        @type  routing:  str
-        @param ospf:  enable OSPF. None|'Enabled'
-        @type  ospf:  str|None
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_routing(routing='Enabled', ospf='Enabled')
-        @endcode
+        """Configure L3 routing.
+
+        Args:
+            routing(str):  enable L3 routing
+            ospf(str|None):  enable OSPF. None|'Enabled'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_routing(routing='Enabled', ospf='Enabled')
+
         """
         pass
 
     @abstractmethod
     def create_route_interface(self, vlan, ip, ip_type='InterVlan', bandwidth=1000, mtu=1500, status='Enabled', vrf=0, mode='ip'):
-        """
-        @brief  Create Route Interface
-        @param vlan:  vlan Id
-        @type  vlan:  int
-        @param ip:  Route Interface network
-        @type  ip:  str
-        @param ip_type:  Route interface type
-        @type  ip_type:  str
-        @param bandwidth:  Route interface bandwidth
-        @type  bandwidth:  int
-        @param mtu:  Route interface mtu
-        @type  mtu:  int
-        @param status:  Route interface status
-        @type  status:  str
-        @param vrf:  Route interface vrf
-        @type  vrf:  int
-        @param mode:  'ip' or 'ipv6'
-        @type  mtu:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_route_interface(10, '10.0.5.101/24', 'InterVlan', 1000, 1500, 'Enabled, 0, 'ip')
-        env.switch[1].ui.create_route_interface(10, '2000::01/96', 'InterVlan', 1000, 1500, 'Enabled, 0, 'ipv6')
-        @endcode
+        """Create Route Interface.
+
+        Args:
+            vlan(int):  vlan Id
+            ip(str):  Route Interface network
+            ip_type(str):  Route interface type
+            bandwidth(int):  Route interface bandwidth
+            mtu(int):  Route interface mtu
+            status(str):  Route interface status
+            vrf(int):  Route interface vrf
+            mode(str):  'ip' or 'ipv6'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_route_interface(10, '10.0.5.101/24', 'InterVlan', 1000, 1500, 'Enabled, 0, 'ip')
+            env.switch[1].ui.create_route_interface(10, '2000::01/96', 'InterVlan', 1000, 1500, 'Enabled, 0, 'ipv6')
+
         """
         pass
 
     @abstractmethod
     def delete_route_interface(self, vlan, ip, bandwith=1000, mtu=1500, vrf=0, mode='ip'):
-        """
-        @brief  Delete Route Interface
-        @param vlan:  vlan Id
-        @type  vlan:  int
-        @param ip:  Route Interface network
-        @type  ip:  str
-        @param bandwith:  Route interface bandwidth
-        @type  bandwith:  int
-        @param mtu:  Route interface mtu
-        @type  mtu:  int
-        @param vrf:  Route interface vrf
-        @type  vrf:  int
-        @param mode:  'ip' or 'ipv6'
-        @type  mode:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_route_interface(10, '10.0.5.101/24', 1000, 1500, 0, 'ip')
-        env.switch[1].ui.create_route_interface(10, '2000::01/96', 1000, 1500, 0, 'ipv6')
-        @endcode
+        """Delete Route Interface.
+
+        Args:
+            vlan(int):  vlan Id
+            ip(str):  Route Interface network
+            bandwith(int):  Route interface bandwidth
+            mtu(int):  Route interface mtu
+            vrf(int):  Route interface vrf
+            mode(str):  'ip' or 'ipv6'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_route_interface(10, '10.0.5.101/24', 1000, 1500, 0, 'ip')
+            env.switch[1].ui.create_route_interface(10, '2000::01/96', 1000, 1500, 0, 'ipv6')
+
         """
         pass
 
     @abstractmethod
     def modify_route_interface(self, vlan, ip, **kwargs):
-        """
-        @brief  Modify Route Interface
-        @param vlan:  vlan Id
-        @type  vlan:  int
-        @param ip:  Route Interface network
-        @type  ip:  str
-        @param  kwargs:  parameters to be modified:
+        """Modify Route Interface.
+
+        Args:
+            vlan(int):  vlan Id
+            ip(str):  Route Interface network
+            **kwargs(dict):   parameters to be modified:
                              "adminMode" - set adminMode value.
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.modify_route_interface(10, '10.0.5.101/24', adminMode='Disabled')
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.modify_route_interface(10, '10.0.5.101/24', adminMode='Disabled')
+
         """
         pass
 
     @abstractmethod
     def get_table_route_interface(self):
-        """
-        @brief  Get RouteInterface table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_route_interface()
-        @endcode
+        """Get RouteInterface table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_route_interface()
+
         """
         pass
 
     @abstractmethod
     def get_table_route(self, mode='ip'):
-        """
-        @brief  Get Route table
-        @param mode:  'ip' or 'ipv6'
-        @type  mode:  str
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_route()
-        @endcode
+        """Get Route table.
+
+        Args:
+            mode(str):  'ip' or 'ipv6'
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_route()
+
         """
         pass
 
     @abstractmethod
     def configure_arp(self, garp=None, refresh_period=None, delay=None, secure_mode=None, age_time=None, attemptes=None, arp_len=None):
-        """
-        @brief  Configure ARPConfig table
-        @param garp:  AcceptGARP value. 'True'|'False'
-        @type  garp:  str
-        @param refresh_period:  RefreshPeriod value
-        @type  refresh_period:  int
-        @param delay:  RequestDelay value
-        @type  delay:  int
-        @param secure_mode:  SecureMode value. 'True'|'False'
-        @type  secure_mode:  str
-        @param age_time:  AgeTime value
-        @type  age_time:  int
-        @param attemptes:  NumAttempts value
-        @type  attemptes:  int
-        @param arp_len:  length value for ARP
-        @type  arp_len:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_arp(garp='Enabled')
-        @endcode
+        """Configure ARPConfig table.
+
+        Args:
+            garp(str):  AcceptGARP value. 'True'|'False'
+            refresh_period(int):  RefreshPeriod value
+            delay(int):  RequestDelay value
+            secure_mode(str):  SecureMode value. 'True'|'False'
+            age_time(int):  AgeTime value
+            attemptes(int):  NumAttempts value
+            arp_len(int):  length value for ARP
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_arp(garp='Enabled')
+
         """
         pass
 
     @abstractmethod
     def get_table_arp_config(self):
-        """
-        @brief  Get ARPConfig table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_arp_config()
-        @endcode
+        """Get ARPConfig table.
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_arp_config()
+
         """
         pass
 
     @abstractmethod
     def create_arp(self, ip, mac, network, mode='arp'):
-        """
-        @brief  Create StaticARP record
-        @param ip:  ARP ip address
-        @type  ip:  str
-        @param mac:  ARP mac address
-        @type  mac:  str
-        @param network:  RouteInterface network
-        @type  network:  str
-        @param mode:  'arp' or 'ipv6 neigbor'
-        @type  mode:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_arp('10.0.5.102', '00:00:22:22:22', '10.0.5.101/24')
-        @endcode
+        """Create StaticARP record.
+
+        Args:
+            ip(str):  ARP ip address
+            mac(str):  ARP mac address
+            network(str):  RouteInterface network
+            mode(str):  'arp' or 'ipv6 neigbor'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_arp('10.0.5.102', '00:00:22:22:22', '10.0.5.101/24')
+
         """
         pass
 
     @abstractmethod
     def delete_arp(self, ip, network, mode='arp'):
-        """
-        @brief  Delete ARP record
-        @param ip:  ARP ip address
-        @type  ip:  str
-        @param network:  RouteInterface network
-        @type  network:  str
-        @param mode:  'arp' or 'ipv6 neigbor'
-        @type  mode:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_arp('10.0.5.102', '10.0.5.101/24')
-        @endcode
+        """Delete ARP record.
+
+        Args:
+            ip(str):  ARP ip address
+            network(str):  RouteInterface network
+            mode(str):  'arp' or 'ipv6 neigbor'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_arp('10.0.5.102', '10.0.5.101/24')
+
         """
         pass
 
     @abstractmethod
     def get_table_arp(self, mode='arp'):
-        """
-        @brief  Get ARP table
-        @param mode:  'arp' or 'ipv6 neigbor'
-        @type  mode:  str
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_arp()
-        @endcode
+        """Get ARP table.
+
+        Args:
+            mode(str):  'arp' or 'ipv6 neigbor'
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_arp()
+
         """
         pass
 
     @abstractmethod
     def create_static_route(self, ip, nexthop, network, distance=-1, mode='ip'):
-        """
-        @brief  Create StaticRoute record
-        @param ip:  Route IP network
-        @type  ip:  str
-        @param nexthop:  Nexthop IP address
-        @type  nexthop:  str
-        @param network:  RouteInterface network
-        @type  network:  str
-        @param distance:  Route distance
-        @type  distance:  int
-        @param mode:  'ip' or 'ipv6'
-        @type  mode:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_static_route('20.20.20.0/24', '10.0.5.102', '10.0.5.101/24')
-        @endcode
+        """Create StaticRoute record.
+
+        Args:
+            ip(str):  Route IP network
+            nexthop(str):  Nexthop IP address
+            network(str):  RouteInterface network
+            distance(int):  Route distance
+            mode(str):  'ip' or 'ipv6'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_static_route('20.20.20.0/24', '10.0.5.102', '10.0.5.101/24')
+
         """
         pass
 
     @abstractmethod
     def delete_static_route(self, network):
-        """
-        @brief  Delete StaticRoute record
-        @param network:  RouteInterface network
-        @type  network:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_static_route('10.0.5.101/24')
-        @endcode
+        """Delete StaticRoute record.
+
+        Args:
+            network(str):  RouteInterface network
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_static_route('10.0.5.101/24')
+
         """
         pass
 
     @abstractmethod
     def get_table_static_route(self, mode='ip'):
-        """
-        @brief  Get StaticRoute table
-        @param mode:  'ip' or 'ipv6'
-        @type  mode:  str
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_static_route()
-        @endcode
+        """Get StaticRoute table.
+
+        Args:
+            mode(str):  'ip' or 'ipv6'
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_static_route()
+
         """
         pass
 
     @abstractmethod
     def configure_ospf_router(self, **kwargs):
-        """
-        @brief  Configure OSPFRouter table
-        @param  kwargs:  parameters to be modified:
+        """Configure OSPFRouter table.
+
+        Args:
+            **kwargs(dict):  parameters to be modified:
                              "logAdjacencyChanges" - set logAdjacencyChanges value;
                              "routerId" - set routerId value.
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_ospf_router(routerId='1.1.1.1')
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_ospf_router(routerId='1.1.1.1')
+
         """
         pass
 
     @abstractmethod
     def get_table_ospf_router(self):
-        """
-        @brief  Get OSPFRouter table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ospf_router()
-        @endcode
+        """Get OSPFRouter table.
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_ospf_router()
+
         """
         pass
 
     @abstractmethod
     def create_ospf_area(self, area, **kwargs):
-        """
-        @brief  Create OSPFAreas record
-        @param area:  Area Id to be created
-        @type  area:  int
-        @param  kwargs:  parameters to be added
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_ospf_area("0.0.0.0")
-        @endcode
+        """Create OSPFAreas record.
+
+        Args:
+            area(int):  Area Id to be created
+            **kwargs(dict):  parameters to be added
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ospf_area("0.0.0.0")
+
         """
         pass
 
     @abstractmethod
     def get_table_ospf_area(self):
-        """
-        @brief  Get OSPFAreas table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ospf_area()
-        @endcode
+        """Get OSPFAreas table.
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_ospf_area()
+
         """
         pass
 
     @abstractmethod
     def create_network_2_area(self, network, area, mode):
-        """
-        @brief  Create OSPFNetworks2Area record
-        @param network:  RouteInterface network
-        @type  network:  str
-        @param area:  Area Id
-        @type  area:  int
-        @param mode:  Area mode
-        @type  mode:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_network_2_area('10.0.5.101/24', "0.0.0.0", 'Disabled')
-        @endcode
+        """Create OSPFNetworks2Area record.
+
+        Args:
+            network(str):  RouteInterface network
+            area(int):  Area Id
+            mode(str):  Area mode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_network_2_area('10.0.5.101/24', "0.0.0.0", 'Disabled')
+
         """
         pass
 
     @abstractmethod
     def get_table_network_2_area(self):
-        """
-        @brief  Get OSPFNetworks2Area table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_network_2_area()
-        @endcode
+        """Get OSPFNetworks2Area table.
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_network_2_area()
+
         """
         pass
 
     @abstractmethod
     def create_area_ranges(self, area, range_ip, range_mask, substitute_ip, substitute_mask):
-        """
-        @brief  Create OSPFAreas2Ranges record
-        @param area:  Area Id
-        @type  area:  int
-        @param range_ip:  IP address
-        @type  range_ip:  str
-        @param range_mask:  mask
-        @type  range_mask:  str
-        @param substitute_ip:  IP address
-        @type  substitute_ip:  str
-        @param substitute_mask:  mask
-        @type  substitute_mask:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_area_ranges("0.0.0.0", "10.0.2.0", "255.255.255.0", "11.0.2.0", "255.255.255.0")
-        @endcode
+        """Create OSPFAreas2Ranges record.
+
+        Args:
+            area(int):  Area Id
+            range_ip(str):  IP address
+            range_mask(str):  mask
+            substitute_ip(str):  IP address
+            substitute_mask(str):  mask
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_area_ranges("0.0.0.0", "10.0.2.0", "255.255.255.0", "11.0.2.0", "255.255.255.0")
+
         """
         pass
 
     @abstractmethod
     def get_table_area_ranges(self):
-        """
-        @brief  Get OSPFAreas2Ranges table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_area_ranges()
-        @endcode
+        """Get OSPFAreas2Ranges table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_area_ranges()
+
         """
         pass
 
     @abstractmethod
     def create_route_redistribute(self, mode):
-        """
-        @brief  Create OSPFRouteRedistribute record
-        @param mode:  redistribute mode
-        @type  mode:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_route_redistribute("Static")
-        @endcode
+        """Create OSPFRouteRedistribute record.
+
+        Args:
+            mode(str):  redistribute mode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_route_redistribute("Static")
+
         """
         pass
 
     @abstractmethod
     def get_table_route_redistribute(self):
-        """
-        @brief  Get OSPFRouteRedistribute table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_route_redistribute()
-        @endcode
+        """Get OSPFRouteRedistribute table.
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_route_redistribute()
+
         """
         pass
 
     @abstractmethod
     def create_interface_md5_key(self, vlan, network, key_id, key):
-        """
-        @brief  Create OSPFInterfaceMD5Keys record
-        @param vlan:  Vlan Id
-        @type  vlan:  int
-        @param network:  Route Interface network
-        @type  network:  str
-        @param key_id:  key Id
-        @type  key_id:  int
-        @param key:  key
-        @type  key:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_interface_md5_key(10, "10.0.5.101/24", 1, "Key1")
-        @endcode
+        """Create OSPFInterfaceMD5Keys record.
+
+        Args:
+            vlan(int):  Vlan Id
+            network(str):  Route Interface network
+            key_id(int):  key Id
+            key(str):  key
+
+        Returns:
+            None
+
+        Example:
+
+            env.switch[1].ui.create_interface_md5_key(10, "10.0.5.101/24", 1, "Key1")
+
         """
         pass
 
     @abstractmethod
     def get_table_interface_authentication(self):
-        """
-        @brief  Get OSPFInterfaceMD5Keys table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_interface_authentication()
-        @endcode
+        """Get OSPFInterfaceMD5Keys table.
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_interface_authentication()
+
         """
         pass
 
     @abstractmethod
     def create_ospf_interface(self, vlan, network, dead_interval=40, hello_interval=5, network_type="Broadcast", hello_multiplier=3, minimal='Enabled',
                               priority=-1, retransmit_interval=-1):
-        """
-        @brief  Create OSPFInterface record
-        @param vlan:  Vlan Id
-        @type  vlan:  int
-        @param network:  Route Interface network
-        @type  network:  str
-        @param dead_interval:  dead interval
-        @type  dead_interval:  int
-        @param hello_interval:  hello interval
-        @type  hello_interval:  int
-        @param network_type:  network type
-        @type  network_type:  str
-        @param hello_multiplier:  hello multiplier
-        @type  hello_multiplier:  int
-        @param minimal:  minimal
-        @type  minimal:  str
-        @param priority:  priority
-        @type  priority:  int
-        @param retransmit_interval:  retransmit interval
-        @type  retransmit_interval:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_ospf_interface(vlan_id, "10.0.5.101/24", 40, 5, network_type='Broadcast', minimal='Enabled', priority=1, retransmit_interval=3)
-        @endcode
+        """Create OSPFInterface record.
+
+        Args:
+            vlan(int):  Vlan Id
+            network(str):  Route Interface network
+            dead_interval(int):  dead interval
+            hello_interval(int):  hello interval
+            network_type(str):  network type
+            hello_multiplier(int):  hello multiplier
+            minimal(str):  minimal
+            priority(int):  priority
+            retransmit_interval(int):  retransmit interval
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ospf_interface(vlan_id, "10.0.5.101/24", 40, 5, network_type='Broadcast', minimal='Enabled', priority=1, retransmit_interval=3)
+
         """
         pass
 
     @abstractmethod
     def get_table_ospf_interface(self):
-        """
-        @brief  Get OSPFInterface table
-        @rtype:  list[dict]
-        @return  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_interface_authentication()
-        @endcode
+        """Get OSPFInterface table.
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_interface_authentication()
+
         """
         pass
 
     @abstractmethod
     def create_area_virtual_link(self, area, link):
-        """
-        @brief  Create OSPFInterface record
-        @param area:  OSPF Area
-        @type  area:  str
-        @param link:  Virtual link IP
-        @type  link:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_area_virtual_link("0.0.0.0", "1.1.1.2")
-        @endcode
+        """Create OSPFInterface record.
+
+        Args:
+            area(str):  OSPF Area
+            link(str):  Virtual link IP
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_area_virtual_link("0.0.0.0", "1.1.1.2")
+
         """
         pass
 
 # BGP configuration
     @abstractmethod
     def configure_bgp_router(self, asn=65501, enabled='Enabled'):
-        """
-        @brief  Modify BGPRouter record
-        @param asn:  AS number
-        @type  asn:  int
-        @param enabled:  enabled status
-        @type  enabled:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_bgp_router(asn=65501, enabled='Enabled')
-        @endcode
+        """Modify BGPRouter record.
+
+        Args:
+            asn(int):  AS number
+            enabled(str):  enabled status
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_bgp_router(asn=65501, enabled='Enabled')
+
         """
         pass
 
     @abstractmethod
     def create_bgp_neighbor_2_as(self, asn, ip, remote_as):
-        """
-        @brief  Create BGPNeighbor2As record
-        @param asn:  AS number
-        @type  asn:  int
-        @param ip:  IP address
-        @type  ip:  str
-        @param remote_as:  Remote AS number
-        @type  remote_as:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_bgp_neighbor_2_as(65501, '10.0.5.102', 65502)
-        @endcode
+        """Create BGPNeighbor2As record.
+
+        Args:
+            asn(int):  AS number
+            ip(str):  IP address
+            remote_as(int):  Remote AS number
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_bgp_neighbor_2_as(65501, '10.0.5.102', 65502)
+
         """
         pass
 
     @abstractmethod
     def create_bgp_neighbor(self, asn=65501, ip='192.168.0.1'):
-        """
-        @brief  Create BGPNeighbor record
-        @param asn:  AS number
-        @type  asn:  int
-        @param ip:  IP address
-        @type  ip:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_bgp_neighbor(asn=65501, ip='192.168.0.1')
-        @endcode
+        """Create BGPNeighbor record.
+
+        Args:
+            asn(int):  AS number
+            ip(str):  IP address
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_bgp_neighbor(asn=65501, ip='192.168.0.1')
+
         """
         pass
 
     @abstractmethod
     def create_bgp_neighbor_connection(self, asn=65501, ip='192.168.0.1', port=179):
-        """
-        @brief  Create BGPNeighborConnection record
-        @param asn:  AS number
-        @type  asn:  int
-        @param ip:  IP address
-        @type  ip:  str
-        @param port:  connection port
-        @type  port:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_bgp_neighbor_connection(asn=65501, ip='192.168.0.1', port=179)
-        @endcode
+        """Create BGPNeighborConnection record.
+
+        Args:
+            asn(int):  AS number
+            ip(str):  IP address
+            port(int):  connection port
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_bgp_neighbor_connection(asn=65501, ip='192.168.0.1', port=179)
+
         """
         pass
 
     @abstractmethod
     def create_bgp_bgp(self, asn=65501, router_id="1.1.1.1"):
-        """
-        @brief  Create BGPBgp record
-        @param asn:  AS number
-        @type  asn:  int
-        @param router_id:  OSPF router Id
-        @type  router_id:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_bgp_bgp(asn=65501, router_id="1.1.1.1")
-        @endcode
+        """Create BGPBgp record.
+
+        Args:
+            asn(int):  AS number
+            router_id(int):  OSPF router Id
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_bgp_bgp(asn=65501, router_id="1.1.1.1")
+
         """
         pass
 
     @abstractmethod
     def create_bgp_peer_group(self, asn=65501, name="mypeergroup"):
-        """
-        @brief  Create BGPPeerGroups record
-        @param asn:  AS number
-        @type  asn:  int
-        @param name:  peer group name
-        @type  name:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_bgp_peer_group(65501, "test_name")
-        @endcode
+        """Create BGPPeerGroups record.
+
+        Args:
+            asn(int):  AS number
+            name(str):  peer group name
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_bgp_peer_group(65501, "test_name")
+
         """
         pass
 
     @abstractmethod
     def create_bgp_peer_group_member(self, asn=65501, name="mypeergroup", ip="12.1.0.2"):
-        """
-        @brief  Create BGPPeerGroupMembers record
-        @param asn:  AS number
-        @type  asn:  int
-        @param name:  peer group name
-        @type  name:  str
-        @param ip:  IP address
-        @type  ip:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_bgp_peer_group_member(65501, "test_name", "12.1.0.2")
-        @endcode
+        """Create BGPPeerGroupMembers record.
+
+        Args:
+            asn(int):  AS number
+            name(str):  peer group name
+            ip(str):  IP address
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_bgp_peer_group_member(65501, "test_name", "12.1.0.2")
+
         """
         pass
 
     @abstractmethod
     def create_bgp_redistribute(self, asn=65501, rtype="OSPF"):
-        """
-        @brief  Create BGPRedistribute record
-        @param asn:  AS number
-        @type  asn:  int
-        @param rtype:  redistribute type
-        @type  rtype:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_bgp_redistribute(65501, "OSPF")
-        @endcode
+        """Create BGPRedistribute record.
+
+        Args:
+            asn(int):  AS number
+            rtype(str):  redistribute type
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_bgp_redistribute(65501, "OSPF")
+
         """
         pass
 
     @abstractmethod
     def create_bgp_network(self, asn=65501, ip='10.0.0.0', mask='255.255.255.0', route_map='routeMap'):
-        """
-        @brief  Create BGPNetwork record
-        @param asn:  AS number
-        @type  asn:  int
-        @param ip:  IP address
-        @type  ip:  str
-        @param mask:  IP address mask
-        @type  mask:  str
-        @param route_map:  route map name
-        @type  route_map:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_bgp_network(asn=65501, ip='10.0.0.0', mask='255.255.255.0', route_map='routeMap')
-        @endcode
+        """Create BGPNetwork record.
+
+        Args:
+            asn(int):  AS number
+            ip(str):  IP address
+            mask(str):  IP address mask
+            route_map(str):  route map name
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_bgp_network(asn=65501, ip='10.0.0.0', mask='255.255.255.0', route_map='routeMap')
+
         """
         pass
 
     @abstractmethod
     def create_bgp_aggregate_address(self, asn=65501, ip='22.10.10.0', mask='255.255.255.0'):
-        """
-        @brief  Create BGPAggregateAddress record
-        @param asn:  AS number
-        @type  asn:  int
-        @param ip:  IP address
-        @type  ip:  str
-        @param mask:  IP address mask
-        @type  mask:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_bgp_aggregate_address(asn=65501, ip='10.0.0.0', mask='255.255.255.0')
-        @endcode
+        """Create BGPAggregateAddress record
+
+        Args:
+            asn(int):  AS number
+            ip(str):  IP address
+            mask(str):  IP address mask
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_bgp_aggregate_address(asn=65501, ip='10.0.0.0', mask='255.255.255.0')
+
         """
         pass
 
     @abstractmethod
     def create_bgp_confederation_peers(self, asn=65501, peers=70000):
-        """
-        @brief  Create BGPBgpConfederationPeers record
-        @param asn:  AS number
-        @type  asn:  int
-        @param peers:  peers number
-        @type  peers:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_bgp_confederation_peers(asn=65501, peers=70000)
-        @endcode
+        """Create BGPBgpConfederationPeers record.
+
+        Args:
+            asn(int):  AS number
+            peers(int):  peers number
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_bgp_confederation_peers(asn=65501, peers=70000)
+
         """
         pass
 
     @abstractmethod
     def create_bgp_distance_network(self, asn=65501, ip="40.0.0.0/24", mask='255.255.255.0', distance=100, route_map='routeMap'):
-        """
-        @brief  Create BGPDistanceNetwork record
-        @param asn:  AS number
-        @type  asn:  int
-        @param ip:  IP address
-        @type  ip:  str
-        @param mask:  IP address mask
-        @type  mask:  str
-        @param distance:  IP address distance
-        @type  distance:  int
-        @param route_map:  route map name
-        @type  route_map:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_bgp_distance_network(asn=65501, ip="40.0.0.0", mask='255.255.255.0', distance=100, route_map='routeMap')
-        @endcode
+        """Create BGPDistanceNetwork record.
+
+        Args:
+            asn(int):  AS number
+            ip(str):  IP address
+            mask(str):  IP address mask
+            distance(int):  IP address distance
+            route_map(str):  route map name
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_bgp_distance_network(asn=65501, ip="40.0.0.0", mask='255.255.255.0', distance=100, route_map='routeMap')
+
         """
         pass
 
     @abstractmethod
     def create_bgp_distance_admin(self, asn=65501, ext_distance=100, int_distance=200, local_distance=50):
-        """
-        @brief  Create BGPDistanceAdmin record
-        @param asn:  AS number
-        @type  asn:  int
-        @param ext_distance:  external distance
-        @type  ext_distance:  int
-        @param int_distance:  internal distance
-        @type  int_distance:  int
-        @param local_distance:  local distance
-        @type  local_distance:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_bgp_distance_admin(asn=65501, ext_distance=100, int_distance=200, local_distance=50)
-        @endcode
+        """Create BGPDistanceAdmin record.
+
+        Args:
+            asn(int):  AS number
+            ext_distance(int):  external distance
+            int_distance(int):  internal distance
+            local_distance(int):  local distance
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_bgp_distance_admin(asn=65501, ext_distance=100, int_distance=200, local_distance=50)
+
         """
         pass
 
     @abstractmethod
     def get_table_bgp_neighbor(self):
-        """
-        @brief  Get BGPNeighbour table
-        @rtype:  list[dict]
-        @return  table
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_bgp_neighbor()
-        @endcode
+        """Get BGPNeighbour table.
+
+        Returns:
+            list[dict]: table
+
+        Examples::
+
+            env.switch[1].ui.get_table_bgp_neighbor()
+
         """
         pass
 
     @abstractmethod
     def get_table_bgp_neighbor_connections(self):
-        """
-        @brief  Get BGPNeighborConnection table
-        @rtype:  list[dict]
-        @return  table
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_bgp_neighbor_connections()
-        @endcode
+        """Get BGPNeighborConnection table.
+
+        Returns:
+            list[dict]:  table
+
+        Examples::
+
+            env.switch[1].ui.get_table_bgp_neighbor_connections()
+
         """
         pass
 
     @abstractmethod
     def get_table_bgp_aggregate_address(self):
-        """
-        @brief  Get BGPAggregateAddress table
-        @rtype:  list[dict]
-        @return  table
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_bgp_aggregate_address()
-        @endcode
+        """Get BGPAggregateAddress table.
+
+        Returns:
+            list[dict]:  table
+
+        Examples::
+
+            env.switch[1].ui.get_table_bgp_aggregate_address()
+
         """
         pass
 
     @abstractmethod
     def get_table_bgp_confederation_peers(self):
-        """
-        @brief  Get BGPBgpConfederationPeers table
-        @rtype:  list[dict]
-        @return  table
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_bgp_confederation_peers()
-        @endcode
+        """Get BGPBgpConfederationPeers table.
+
+        Returns:
+            list[dict] table
+
+        Examples::
+
+            env.switch[1].ui.get_table_bgp_confederation_peers()
+
         """
         pass
 
     @abstractmethod
     def get_table_bgp_distance_admin(self):
-        """
-        @brief  Get BGPDistanceAdmin table
-        @rtype:  list[dict]
-        @return  table
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_bgp_distance_admin()
-        @endcode
+        """Get BGPDistanceAdmin table.
+
+        Returns:
+            list[dict]: table
+
+        Examples::
+
+            env.switch[1].ui.get_table_bgp_distance_admin()
+
         """
         pass
 
     @abstractmethod
     def get_table_bgp_distance_network(self):
-        """
-        @brief  Get BGPDistanceNetwork table
-        @rtype:  list[dict]
-        @return  table
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_bgp_distance_network()
-        @endcode
+        """Get BGPDistanceNetwork table.
+
+        Returns:
+            list[dict]: table
+
+        Examples::
+
+            env.switch[1].ui.get_table_bgp_distance_network()
+
         """
         pass
 
     @abstractmethod
     def get_table_bgp_network(self):
-        """
-        @brief  Get BGPNetwork table
-        @rtype:  list[dict]
-        @return  table
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_bgp_network()
-        @endcode
+        """Get BGPNetwork table.
+
+        Returns:
+            list[dict]:  table
+
+        Examples::
+
+            env.switch[1].ui.get_table_bgp_network()
+
         """
         pass
 
     @abstractmethod
     def get_table_bgp_peer_group_members(self):
-        """
-        @brief  Get BGPPeerGroupMembers table
-        @rtype:  list[dict]
-        @return  table
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_bgp_peer_group_members()
-        @endcode
+        """Get BGPPeerGroupMembers table.
+
+        Returns:
+            list[dict]: table
+
+        Examples::
+
+            env.switch[1].ui.get_table_bgp_peer_group_members()
+
         """
         pass
 
     @abstractmethod
     def get_table_bgp_peer_groups(self):
-        """
-        @brief  Get BGPPeerGroups table
-        @rtype:  list[dict]
-        @return  table
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_bgp_peer_groups()
-        @endcode
+        """Get BGPPeerGroups table
+
+        Returns:
+            list[dict]:  table
+
+        Example:
+
+            env.switch[1].ui.get_table_bgp_peer_groups()
+
         """
         pass
 
     @abstractmethod
     def get_table_bgp_redistribute(self):
-        """
-        @brief  Get BGPRedistribute table
-        @rtype:  list[dict]
-        @return:  table
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_bgp_redistribute()
-        @endcode
+        """Get BGPRedistribute table.
+
+        Returns:
+            list[dict]: table
+
+        Examples::
+
+            env.switch[1].ui.get_table_bgp_redistribute()
+
         """
         pass
 
@@ -2313,378 +2439,387 @@ class UiInterface(object):
     def create_match_api_tcam_subtable(self, source_id, table_id, table_name,
                                        max_table_entries, match_field_type_pairs,
                                        actions):
-        """
-        @brief  create a sub-table of tcam
-        @param  source_id:  the source id in the tcam table.
-        @type  source_id:  int
-        @param  table_id:  a given table id.
-                           If switchd running, table id starts from 5
-                           If matchd is running, table id starts from 4
-        @type  table_id:  int
-        @param  table_name:  a given table name.
-        @type  table_name:  str
-        @param  max_table_entries:  maximum number of flows can be set.
-        @type  max_table_entries:  int
-        @param  match_field_type_pairs:  list of given match field with match type
-        @type  match_field_type_pairs:  list[tuple(str, str)]
-        @param  actions:  list of actions for configurable matches
-        @type  actions:  list[str]
+        """Create a sub-table of tcam.
+
+        Args:
+            source_id(int):  the source id in the tcam table.
+            table_id(int):  a given table id.
+                            If switchd running, table id starts from 5
+                            If matchd is running, table id starts from 4
+            table_name(str):  a given table name.
+            max_table_entries(int):  maximum number of flows can be set.
+            match_field_type_pairs(list[tuple(str, str)]):  list of given match field with match type
+            actions(list[str]):  list of actions for configurable matches
+
         """
         pass
 
     @abstractmethod
     def create_match_api_rule(self, prio_id, handle_id, table_id,
                               match_field_value_mask_list, action, action_value=None):
-        """
-        @brief set a rule into the table
-        @param  prio_id:  Higher id has a higher priority.
-        @type  prio_id:  int
-        @param  handle_id:  handle for match.
-        @type  handle_id:  int
-        @param  table_id:  the source table id where match to be set.
-        @type  table_id:  int
-        @param  match_field_value_mask_list:  field with match field, value and mask.
-        @type  match_field_value_mask_list:  list[tuple(str, str, str)]
-        @param  action:  given action for source table
-        @type  action:  str
-        @raise  UIException:  for TypeError - Not enough arguments for format string
-        @raise  UIException:  In case of Command execution Error reported in MatchAPI
+        """Set a rule into the table.
+
+        Args:
+            prio_id(int):  Higher id has a higher priority.
+            handle_id(int):  handle for match.
+            table_id(int):  the source table id where match to be set.
+            match_field_value_mask_list(list[tuple(str, str, str)]):  field with match field, value and mask.
+            action(str):  given action for source table
+
+        Raises:
+            UIException:  for TypeError - Not enough arguments for format string
+            UIException:  In case of Command execution Error reported in MatchAPI
+
         """
         pass
 
     @abstractmethod
     def get_table_match_api(self, table_id=None):
-        """
-        @brief  Lists the match api tables
-        @param  table_id:  table ID
-        @type  int
-        @rtype:  list[dict]
+        """Lists the match api tables.
+
+        Args:
+            table_id(int):  table ID
+
+        Returns:
+            list[dict]
+
         """
         pass
 
     @abstractmethod
     def get_rules_match_api(self, table_id=None, handle_id=None):
-        """
-        @brief  Lists the match api rules of the table
-        @params  table_id:  table ID (mandatory parameter)
-        @type  table_id:  int
-        @params  handle_id:  optional parameter
-        @type  handle_id:   int
-        @rtype:  list[dict]
+        """Lists the match api rules of the table.
+
+        Args:
+            table_id(int):  table ID (mandatory parameter)
+            handle_id(int):  optional parameter
+
+        Returns:
+            list[dict]
+
         """
         pass
 
     @abstractmethod
     def delete_match_api_rule(self, handle_id, table_id):
-        """
-        @brief delete a rule from the table
-        @param  handle_id:  handle for match.[MANDATORY]
-        @type  handle_id:  int
-        @param  table_id:  the source table id where match to be set.[MANDATORY]
-        @type  table_id:  int
+        """Delete a rule from the table.
+
+        Args:
+            handle_id(int):  handle for match.[MANDATORY]
+            table_id(int):  the source table id where match to be set.[MANDATORY]
+
         """
         pass
 
     @abstractmethod
     def delete_match_api_tcam_subtable(self, source_id, table_id=0, table_name=None):
-        """
-        @brief  Destroy a sub-table of tcam
-        @param  source_id:  the source id in the tcam table.[MANDATORY]
-        @type  source_id:  int
-        @param  table_id:  a given table id.[MANDATORY if table_name not specified]
-        @type  table_id:  int
-        @param  table_name:  a given table name.[MANDATORY if table_id not specified]
-        @type  table_name:  str
+        """Destroy a sub-table of tcam.
+
+        Args:
+            source_id(int):  the source id in the tcam table.[MANDATORY]
+            table_id(int):  a given table id.[MANDATORY if table_name not specified]
+            table_name(str):  a given table name.[MANDATORY if table_id not specified]
+
         """
         pass
 
 # OVS configuration
     @abstractmethod
     def create_ovs_bridge(self, bridge_name):
-        """
-        @brief  Create OvsBridges record
-        @param bridge_name:  OVS bridge name
-        @type  bridge_name:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_ovs_bridge('spp0')
-        @endcode
+        """Create OvsBridges record.
+
+        Args:
+            bridge_name(str):  OVS bridge name
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ovs_bridge('spp0')
+
         """
         pass
 
     @abstractmethod
     def get_table_ovs_bridges(self):
-        """
-        @brief  Get OvsBridges table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries))
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ovs_bridges()
-        @endcode
+        """Get OvsBridges table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries))
+
+        Examples::
+
+            env.switch[1].ui.get_table_ovs_bridges()
+
         """
         pass
 
     @abstractmethod
     def delete_ovs_bridge(self):
-        """
-        @brief  Delete OVS Bridge
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_ovs_bridge()
-        @endcode
+        """Delete OVS Bridge.
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_ovs_bridge()
+
         """
         pass
 
     @abstractmethod
     def create_ovs_port(self, port, bridge_name):
-        """
-        @brief  Create OvsPorts record
-        @param port:  port Id
-        @type  port:  int
-        @param bridge_name:  OVS bridge name
-        @type  bridge_name:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_ovs_port(1, 'spp0')
-        @endcode
+        """Create OvsPorts record.
+
+        Args:
+            port(int):  port Id
+            bridge_name(str):  OVS bridge name
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ovs_port(1, 'spp0')
+
         """
         pass
 
     @abstractmethod
     def get_table_ovs_ports(self):
-        """
-        @brief  Get OvsPorts table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries))
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ovs_ports()
-        @endcode
+        """Get OvsPorts table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries))
+
+        Examples::
+
+            env.switch[1].ui.get_table_ovs_ports()
+
         """
         pass
 
     @abstractmethod
     def get_table_ovs_rules(self):
-        """
-        @brief  Get OvsFlowRules table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries))
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ovs_rules()
-        @endcode
+        """Get OvsFlowRules table.
+
+        Returns:
+            list[dict]: table (list of dictionaries))
+
+        Examples::
+
+            env.switch[1].ui.get_table_ovs_rules()
+
         """
         pass
 
     @abstractmethod
     def create_ovs_bridge_controller(self, bridge_name, controller):
-        """
-        @brief  Create OvsControllers record
-        @param bridge_name:  OVS bridge name
-        @type  bridge_name:  str
-        @param controller:  controller address
-        @type  controller:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_ovs_bridge_controller("spp0", "tcp:127.0.0.1:6633")
-        @endcode
+        """Create OvsControllers record.
+
+        Args:
+            bridge_name(str):  OVS bridge name
+            controller(str):  controller address
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ovs_bridge_controller("spp0", "tcp:127.0.0.1:6633")
+
         """
         pass
 
     @abstractmethod
     def get_table_ovs_controllers(self):
-        """
-        @brief  Get OvsControllers table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries))
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ovs_controllers()
-        @endcode
+        """Get OvsControllers table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries))
+
+        Examples::
+
+            env.switch[1].ui.get_table_ovs_controllers()
+
         """
         pass
 
     @abstractmethod
     def create_ovs_flow_rules(self, bridge_id, table_id, flow_id, priority, enabled):
-        """
-        @brief  Create OvsFlowRules table
-        @param bridge_id:  OVS bridge ID
-        @type  bridge_id:  int
-        @param table_id:  Table ID
-        @type  table_id:  int
-        @param flow_id:  Flow ID
-        @type  flow_id:  int
-        @param priority:  Rule priority
-        @type  priority:  int
-        @param enabled:  Rule status
-        @type  enabled:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_ovs_flow_rules(0, 0, 1, 2000, "Enabled")
-        @endcode
+        """Create OvsFlowRules table.
+
+        Args:
+            bridge_id(int):  OVS bridge ID
+            table_id(int):  Table ID
+            flow_id(int):  Flow ID
+            priority(int):  Rule priority
+            enabled(str):  Rule status
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ovs_flow_rules(0, 0, 1, 2000, "Enabled")
+
         """
         pass
 
     @abstractmethod
     def delete_ovs_flow_rules(self, bridge_id, table_id, flow_id, priority):
-        """
-        @brief  Delete row from OvsFlowRules table
-        @param bridge_id:  OVS bridge ID
-        @type  bridge_id:  int
-        @param table_id:  Table ID
-        @type  table_id:  int
-        @param flow_id:  Flow ID
-        @type  flow_id:  int
-        @param priority:  Rule priority
-        @type  priority:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_ovs_flow_rules(bridgeId, tableId, flowId, priority)
-        @endcode
+        """Delete row from OvsFlowRules table.
+
+        Args:
+            bridge_id(int):  OVS bridge ID
+            table_id(int):  Table ID
+            flow_id(int):  Flow ID
+            priority(int):  Rule priority
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_ovs_flow_rules(bridgeId, tableId, flowId, priority)
+
         """
         pass
 
     @abstractmethod
     def configure_ovs_resources(self, **kwargs):
-        """
-        @brief  Configure OvsResources table
-        @param kwargs:  parameters to be configured:
+        """Configure OvsResources table.
+
+        Args:
+            **kwargs(dict): parameters to be configured:
                             "controllerRateLimit";
                             "vlansLimit";
                             "untaggedVlan";
                             "rulesLimit".
-        @type  kwargs:  dict
-        @return:  None
 
-        @par Example:
-        @code
-        env.switch[1].ui.configure_ovs_resources(rulesLimit=2000)
-        @endcode
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_ovs_resources(rulesLimit=2000)
+
         """
         pass
 
     @abstractmethod
     def get_table_ovs_flow_actions(self):
-        """
-        @brief  Get OvsFlowActions table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries))
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ovs_flow_actions()
-        @endcode
+        """Get OvsFlowActions table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries))
+
+        Examples::
+
+            env.switch[1].ui.get_table_ovs_flow_actions()
+
         """
         pass
 
     @abstractmethod
     def create_ovs_flow_actions(self, bridge_id, table_id, flow_id, action, param, priority=2000):
-        """
-        @brief  Add row to OvsFlowActions table
-        @param bridge_id:  OVS bridge ID
-        @type  bridge_id:  int
-        @param table_id:  Table ID
-        @type  table_id:  int
-        @param flow_id:  Flow ID
-        @type  flow_id:  int
-        @param priority:  Rule priority
-        @type  priority:  int
-        @param action:  Action name
-        @type  action:  str
-        @param param:  Action parameter
-        @type  param:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_ovs_flow_actions(0, 0, 1, 'Output', '25')
-        @endcode
+        """Add row to OvsFlowActions table.
+
+        Args:
+            bridge_id(int):  OVS bridge ID
+            table_id(int):  Table ID
+            flow_id(int):  Flow ID
+            priority(int):  Rule priority
+            action(str):  Action name
+            param(str):  Action parameter
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ovs_flow_actions(0, 0, 1, 'Output', '25')
+
         """
         pass
 
     @abstractmethod
     def delete_ovs_flow_actions(self, bridge_id, table_id, flow_id, action, priority=2000):
-        """
-        @brief  Delete row from OvsFlowActions table
-        @param bridge_id:  OVS bridge ID
-        @type  bridge_id:  int
-        @param table_id:  Table ID
-        @type  table_id:  int
-        @param flow_id:  Flow ID
-        @type  flow_id:  int
-        @param priority:  Rule priority
-        @type  priority:  int
-        @param action:  Action name
-        @type  action:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_ovs_flow_actions(0, 0, 1, 'Output')
-        @endcode
+        """Delete row from OvsFlowActions table.
+
+        Args:
+            bridge_id(int):  OVS bridge ID
+            table_id(int):  Table ID
+            flow_id(int):  Flow ID
+            priority(int):  Rule priority
+            action(str):  Action name
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_ovs_flow_actions(0, 0, 1, 'Output')
+
         """
         pass
 
     @abstractmethod
     def get_table_ovs_flow_qualifiers(self):
-        """
-        @brief  Get OvsFlowQualifiers table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries))
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ovs_flow_qualifiers()
-        @endcode
+        """Get OvsFlowQualifiers table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_ovs_flow_qualifiers()
+
         """
         pass
 
     @abstractmethod
     def create_ovs_flow_qualifiers(self, bridge_id, table_id, flow_id, field, data, priority=2000):
-        """
-        @brief  Add row to OvsFlowQualifiers table
-        @param bridge_id:  OVS bridge ID
-        @type  bridge_id:  int
-        @param table_id:  Table ID
-        @type  table_id:  int
-        @param flow_id:  Flow ID
-        @type  flow_id:  int
-        @param priority:  Rule priority
-        @type  priority:  int
-        @param field:  Expression name
-        @type  field:  str
-        @param data:  Expression data
-        @type  data:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_ovs_flow_qualifiers(0, 0, i, 'EthSrc', '00:00:00:00:00:01')
-        @endcode
+        """Add row to OvsFlowQualifiers table.
+
+        Args:
+            bridge_id(int):  OVS bridge ID
+            table_id(int):  Table ID
+            flow_id(int):  Flow ID
+            priority(int):  Rule priority
+            field(str):  Expression name
+            data(str):  Expression data
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ovs_flow_qualifiers(0, 0, i, 'EthSrc', '00:00:00:00:00:01')
+
         """
         pass
 
     @abstractmethod
     def delete_ovs_flow_qualifiers(self, bridge_id, table_id, flow_id, field, priority=2000):
-        """
-        @brief  Delete row from OvsFlowQualifiers table
-        @param bridge_id:  OVS bridge ID
-        @type  bridge_id:  int
-        @param table_id:  Table ID
-        @type  table_id:  int
-        @param flow_id:  Flow ID
-        @type  flow_id:  int
-        @param priority:  Rule priority
-        @type  priority:  int
-        @param field:  Expression name
-        @type  field:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_ovs_flow_qualifiers(bridgeId, tableId, flowId, field)
-        @endcode
+        """Delete row from OvsFlowQualifiers table.
+
+        Args:
+            bridge_id(int):  OVS bridge ID
+            table_id(int):  Table ID
+            flow_id(int):  Flow ID
+            priority(int):  Rule priority
+            field(str):  Expression name
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_ovs_flow_qualifiers(bridgeId, tableId, flowId, field)
+
         """
         pass
 
@@ -2692,9 +2827,10 @@ class UiInterface(object):
 
     @abstractmethod
     def configure_global_lldp_parameters(self, **kwargs):
-        """
-        @brief Configure global LLDP parameters
-        @param  kwargs:  parameters to be modified:
+        """Configure global LLDP parameters.
+
+        Args:
+            **kwargs(dict):  parameters to be modified:
                              'messageFastTx';
                              'messageTxHoldMultiplier';
                              'messageTxInterval';
@@ -2702,127 +2838,142 @@ class UiInterface(object):
                              'txCreditMax';
                              'txFastInit';
                              'locChassisIdSubtype'.
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_global_lldp_parameters(messageTxInterval=5)
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_global_lldp_parameters(messageTxInterval=5)
+
         """
         pass
 
     @abstractmethod
     def configure_lldp_ports(self, ports, **kwargs):
-        """
-        @brief Configure LldpPorts records
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param  kwargs:  parameters to be modified:
+        """Configure LldpPorts records.
+
+        Args:
+            ports(list[int]):  list of ports
+            **kwargs(dict):  parameters to be modified:
                              'adminStatus';
                              'tlvManAddrTxEnable';
                              'tlvPortDescTxEnable';
                              'tlvSysCapTxEnable';
                              'tlvSysDescTxEnable';
                              'tlvSysNameTxEnable'.
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_lldp_ports([1, 2], adminStatus='Disabled')
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_lldp_ports([1, 2], adminStatus='Disabled')
+
         """
         pass
 
     @abstractmethod
     def get_table_lldp(self, param=None):
-        """
-        @brief  Get Lldp table
-        @param param:  parameter name (optional)
-        @type  param:  str
-        @rtype:  list[dict]|int|str
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_lldp()
-        @endcode
+        """Get Lldp table.
+
+        Args:
+            param(str):  parameter name (optional)
+
+        Returns:
+            list[dict]|int|str: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_lldp()
+
         """
         pass
 
     @abstractmethod
     def get_table_lldp_ports(self, port=None, param=None):
-        """
-        @brief  Get LldpPorts table
-        @param port:  port Id (optional)
-        @type  port:  int
-        @param param:  parameter name (optional)
-        @type  param:  str
-        @rtype:  list[dict]|int|str
-        @return:  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_lldp_ports(1)
-        @endcode
+        """Get LldpPorts table.
+
+        Args:
+            port(int):  port Id (optional)
+            param(str):  parameter name (optional)
+
+        Returns:
+            list[dict]|int|str:  table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_lldp_ports(1)
+
         """
         pass
 
     @abstractmethod
     def get_table_lldp_ports_stats(self, port=None, param=None):
-        """
-        @brief  Get LldpPorts table statistics
-        @param port:  port Id (optional)
-        @type  port:  int
-        @param param:  parameter name (optional)
-        @type  param:  str
-        @rtype:  list[dict]|int|str
-        @return:  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_lldp_ports_stats(1)
-        @endcode
+        """Get LldpPorts table statistics.
+
+        Args:
+            port(int):  port Id (optional)
+            param(str):  parameter name (optional)
+
+        Returns:
+            list[dict]|int|str: table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_lldp_ports_stats(1)
+
         """
         pass
 
     @abstractmethod
     def get_table_lldp_remotes(self, port=None):
-        """
-        @brief  Get LldpRemotes table
-        @param port:  port Id (optional)
-        @type  port:  int
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_lldp_remotes(1)
-        @endcode
+        """Get LldpRemotes table.
+
+        Args:
+            port(int):  port Id (optional)
+
+        Returns:
+            list[dict]: table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_lldp_remotes(1)
+
         """
         pass
 
     @abstractmethod
     def get_table_remotes_mgmt_addresses(self, port=None):
-        """
-        @brief  Get LldpRemotesMgmtAddresses table
-        @param port:  port Id (optional)
-        @type  port:  int
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_remotes_mgmt_addresses(1)
-        @endcode
+        """Get LldpRemotesMgmtAddresses table.
+
+        Args:
+            port(int):  port Id (optional)
+
+        Returns:
+            list[dict]: table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_remotes_mgmt_addresses(1)
+
         """
         pass
 
     @abstractmethod
     def disable_lldp_on_device_ports(self, ports=None):
-        """
-        @brief  Disable Lldp on device ports (if port=None Lldp should be disabled on all ports)
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.disable_lldp_on_device_ports()
-        @endcode
+        """Disable Lldp on device ports (if port=None Lldp should be disabled on all ports).
+
+        Args:
+            ports(list[int]):  list of ports
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.disable_lldp_on_device_ports()
+
         """
         pass
 
@@ -2830,131 +2981,139 @@ class UiInterface(object):
 
     @abstractmethod
     def set_dcb_admin_mode(self, ports, mode='Enabled'):
-        """
-        @brief Enable/Disable DCB on ports
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param mode:  "Enabled" or 'Disabled'
-        @type  mode:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.set_dcb_admin_mode([1, 2], "Enabled")
-        @endcode
+        """Enable/Disable DCB on ports.
+
+        Args:
+            ports(list[int]):  list of ports
+            mode(str):  "Enabled" or 'Disabled'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.set_dcb_admin_mode([1, 2], "Enabled")
+
         """
         pass
 
     @abstractmethod
     def enable_dcbx_tlv_transmission(self, ports, dcbx_tlvs="all", mode="Enabled"):
-        """
-        @brief Enable/Disable the transmission of all Type-Length-Value messages
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param dcbx_tlvs:  TLV message types
-        @type  dcbx_tlvs:  str
-        @param mode:  "Enabled" or 'Disabled'
-        @type  mode:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.enable_dcbx_tlv_transmission([1, 2], dcbx_tlvs="all", mode="Enabled")
-        @endcode
+        """Enable/Disable the transmission of all Type-Length-Value messages.
+
+        Args:
+            ports(list[int]):  list of ports
+            dcbx_tlvs(str):  TLV message types
+            mode(str):  "Enabled" or 'Disabled'
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.enable_dcbx_tlv_transmission([1, 2], dcbx_tlvs="all", mode="Enabled")
+
         """
         pass
 
     @abstractmethod
     def get_table_dcbx_ports(self, port=None, param=None):
-        """
-        @brief  Get DcbxPorts table
-        @param port:  port Id (optional)
-        @type  port:  int
-        @param param:  parameter name (optional)
-        @type  param:  str
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_dcbx_ports()
-        @endcode
+        """Get DcbxPorts table.
+
+        Args:
+            port(int):  port Id (optional)
+            param(str):  parameter name (optional)
+
+        Returns:
+            list[dict]:  table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_dcbx_ports()
+
         """
         pass
 
     @abstractmethod
     def get_table_dcbx_app_remote(self, port=None):
-        """
-        @brief  Get DcbxAppRemotes table
-        @param port:  port Id (optional)
-        @type  port:  int
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_dcbx_app_remote()
-        @endcode
+        """Get DcbxAppRemotes table.
+
+        Args:
+            port(int):  port Id (optional)
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_dcbx_app_remote()
+
         """
         pass
 
     @abstractmethod
     def get_table_dcbx_app_ports(self, table_type="Admin", port=None):
-        """
-        @brief  Get DcbxAppPorts* table
-        @param table_type:  "Admin", "Local"
-        @type  table_type:  str
-        @param port:  port Id (optional)
-        @type  port:  int
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_dcbx_app_ports("Admin", 1)
-        @endcode
+        """Get DcbxAppPorts* table.
+
+        Args:
+            table_type(str):  "Admin", "Local"
+            port(int):  port Id (optional)
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_dcbx_app_ports("Admin", 1)
+
         """
         pass
 
     @abstractmethod
     def get_table_dcbx_app_maps(self, table_type="Admin", port=None):
-        """
-        @brief  Get DcbxAppMaps* table
-        @param table_type:  "Admin", "Local" or "Remote"
-        @type  table_type:  str
-        @param port:  port Id (optional)
-        @type  port:  int
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_dcbx_app_maps("Admin", 1)
-        @endcode
+        """Get DcbxAppMaps* table
+
+        Args:
+            table_type(str):  "Admin", "Local" or "Remote"
+            port(int):  port Id (optional)
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_dcbx_app_maps("Admin", 1)
+
         """
         pass
 
     @abstractmethod
     def configure_application_priority_rules(self, ports, app_prio_rules, delete_params=False, update_params=False):
-        """
-        @brief Configure Application Priority rules
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param app_prio_rules:  list of rules dictionaries
-        @type  app_prio_rules:  list[dict]
-        @param delete_params: if delete specified params or not
-        @type delete_params: bool
-        @param update_params: if update specified params or not
-        @type update_params: bool
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_application_priority_rules([1, 2], [{"selector": 1, "protocol": 2, "priority":1}, ])
-        @endcode
+        """Configure Application Priority rules.
+
+        Args:
+            ports(list[int]):  list of ports
+            app_prio_rules(list[dict]):  list of rules dictionaries
+            delete_params(bool): if delete specified params or not
+            update_params(bool): if update specified params or not
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_application_priority_rules([1, 2], [{"selector": 1, "protocol": 2, "priority":1}, ])
+
         """
         pass
 
     @abstractmethod
     def configure_dcbx_ets(self, ports, **kwargs):
-        """
-        @brief Configure DCBx ETS Conf/Reco parameter for ports list
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param  kwargs:  parameters to be modified:
+        """Configure DCBx ETS Conf/Reco parameter for ports list.
+
+        Args:
+            ports(list[int]):  list of ports
+            **kwargs(dict):  parameters to be modified:
                              "willing";
                              "cbs";
                              "maxTCs";
@@ -2964,117 +3123,128 @@ class UiInterface(object):
                              "recoBandwidth";
                              "recoPriorityAssignment";
                              "recoAlgorithm".
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_dcbx_ets([1, 2], confBandwidth=100)
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_dcbx_ets([1, 2], confBandwidth=100)
+
         """
         pass
 
     @abstractmethod
     def configure_dcbx_cn(self, ports, **kwargs):
-        """
-        @brief Configure DCBx CN parameter for the ports list
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param  kwargs:  parameters to be modified:
+        """Configure DCBx CN parameter for the ports list.
+
+        Args:
+            ports(list[int]):  list of ports
+            **kwargs(dict):  parameters to be modified:
                              "cnpvSupported";
                              "cnpvReady".
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_dcbx_cn([1, 2], cnpvSupported='Enabled')
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_dcbx_cn([1, 2], cnpvSupported='Enabled')
+
         """
         pass
 
     @abstractmethod
     def configure_dcbx_pfc(self, ports, **kwargs):
-        """
-        @brief Configure DCBx PFC parameter for the ports list
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param  kwargs:  parameters to be modified:
+        """Configure DCBx PFC parameter for the ports list.
+
+        Args:
+            ports(list[int]):  list of ports
+            **kwargs(dict):  parameters to be modified:
                              "mbc";
                              "enabled";
                              "willing".
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_dcbx_pfc([1, 2])
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_dcbx_pfc([1, 2])
+
         """
         pass
 
     @abstractmethod
     def configure_dcbx_app(self, ports, **kwargs):
-        """
-        @brief Configure DCBx APP parameter for the ports list
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param  kwargs:  parameters to be modified:
+        """Configure DCBx APP parameter for the ports list.
+
+        Args:
+            ports(list[int]):  list of ports
+            **kwargs(dict):  parameters to be modified:
                              "willing".
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_dcbx_app([1, 2])
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_dcbx_app([1, 2])
+
         """
         pass
 
     @abstractmethod
     def get_table_dcbx_remotes(self, port=None, param=None):
-        """
-        @brief  Get DcbxRemotes* table
-        @param port:  port Id (optional)
-        @type  port:  int
-        @param param:  parameter name (optional)
-        @type  param:  str
-        @rtype:  list[dict]|int|str
-        @return:  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_dcbx_remotes(1)
-        @endcode
+        """Get DcbxRemotes* table.
+
+        Args:
+            port(int):  port Id (optional)
+            param(str):  parameter name (optional)
+
+        Returns:
+            list[dict]|int|str: table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_dcbx_remotes(1)
+
         """
         pass
 
     @abstractmethod
     def get_table_dcbx_pfc(self, table_type="Local", port=None):
-        """
-        @brief  Get DcbxRemotes* table
-        @param port:  port Id (optional)
-        @type  port:  int
-        @param table_type:  Table types "Admin"| "Local"| "Remote"
-        @type  table_type:  str
-        @rtype:  list[dict]|int|str
-        @return:  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_dcbx_pfc()
-        @endcode
+        """Get DcbxRemotes* table.
+
+        Args:
+            port(int):  port Id (optional)
+            table_type(str):  Table types "Admin"| "Local"| "Remote"
+
+        Returns:
+            list[dict]|int|str:  table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_dcbx_pfc()
+
         """
         pass
 
     @abstractmethod
     def get_table_dcbx_ets_ports(self, table_type='Admin', port=None):
-        """
-        @brief  Get DcbxEtsPorts* table
-        @param port:  port Id (optional)
-        @type  port:  int
-        @param table_type:  Table types "Admin"| "Local"
-        @type  table_type:  str
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_dcbx_ets_ports()
-        @endcode
+        """Get DcbxEtsPorts* table.
+
+        Args:
+            port(int):  port Id (optional)
+            table_type(str):  Table types "Admin"| "Local"
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_dcbx_ets_ports()
+
         """
         pass
 
@@ -3082,142 +3252,154 @@ class UiInterface(object):
 
     @abstractmethod
     def get_table_ufd_config(self):
-        """
-        @brief  Get UFDConfig table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ufd_config()
-        @endcode
+        """Get UFDConfig table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_ufd_config()
+
         """
         pass
 
     @abstractmethod
     def configure_ufd(self, enable='Enabled', hold_on_time=None):
-        """
-        @brief  Modify UFDConfig table
-        @param enable:  Enable or disable UFD
-        @type  enable:  str
-        @param hold_on_time:  hold on time
-        @type  hold_on_time:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_ufd(enable='Enabled')
-        @endcode
+        """Modify UFDConfig table.
+
+        Args:
+            enable(str):  Enable or disable UFD
+            hold_on_time(int):  hold on time
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_ufd(enable='Enabled')
+
         """
         pass
 
     @abstractmethod
     def create_ufd_group(self, group_id, threshold=None, enable='Enabled'):
-        """
-        @brief  Create UFDGroups record
-        @param group_id:  UFD group ID
-        @type  group_id:  int
-        @param threshold:  group threshold
-        @type  threshold:  int
-        @param enable:  Enable or disable UFD group
-        @type  enable:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_ufd_group(1)
-        @endcode
+        """Create UFDGroups record.
+
+        Args:
+            group_id(int):  UFD group ID
+            threshold(int):  group threshold
+            enable(str):  Enable or disable UFD group
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ufd_group(1)
+
         """
         pass
 
     @abstractmethod
     def modify_ufd_group(self, group_id, threshold=None, enable=None):
-        """
-        @brief  Modify UFDGroups record
-        @param group_id:  UFD group ID
-        @type  group_id:  int
-        @param threshold:  group threshold
-        @type  threshold:  int
-        @param enable:  Enable or disable UFD group
-        @type  enable:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.modify_ufd_group(1, enable='Disabled')
-        @endcode
+        """Modify UFDGroups record.
+
+        Args:
+            group_id(int):  UFD group ID
+            threshold(int):  group threshold
+            enable(str):  Enable or disable UFD group
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.modify_ufd_group(1, enable='Disabled')
+
         """
         pass
 
     @abstractmethod
     def delete_ufd_group(self, group_id):
-        """
-        @brief  Delete UFDGroups record
-        @param group_id:  UFD group ID
-        @type  group_id:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_ufd_group(2)
-        @endcode
+        """Delete UFDGroups record.
+
+        Args:
+            group_id(int):  UFD group ID
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_ufd_group(2)
+
         """
         pass
 
     @abstractmethod
     def get_table_ufd_groups(self):
-        """
-        @brief  Get UFDGroups table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ufd_groups()
-        @endcode
+        """Get UFDGroups table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_ufd_groups()
+
         """
         pass
 
     @abstractmethod
     def create_ufd_ports(self, ports, port_type, group_id):
-        """
-        @brief  Create UFDPorts2Groups record
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param port_type:  type of port
-        @type  port_type:  str
-        @param group_id:  UFD group Id
-        @type  group_id:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_ufd_ports([1, ], 'LtM' 2)
-        @endcode
+        """Create UFDPorts2Groups record.
+
+        Args:
+            ports(list[int]):  list of ports
+            port_type(str):  type of port
+            group_id(int):  UFD group Id
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_ufd_ports([1, ], 'LtM' 2)
+
         """
         pass
 
     @abstractmethod
     def delete_ufd_ports(self, ports, port_type, group_id):
-        """
-        @brief  Delete UFDPorts2Groups record
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param port_type:  type of port
-        @type  port_type:  str
-        @param group_id:  UFD group Id
-        @type  group_id:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_ufd_ports([1, ], 'LtM' 2)
-        @endcode
+        """Delete UFDPorts2Groups record.
+
+        Args:
+            ports(list[int]):  list of ports
+            port_type(str):  type of port
+            group_id(int):  UFD group Id
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_ufd_ports([1, ], 'LtM' 2)
+
         """
         pass
 
     @abstractmethod
     def get_table_ufd_ports(self):
-        """
-        @brief  Get UFDPorts2Groups table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_ufd_ports()
-        @endcode
+        """Get UFDPorts2Groups table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_ufd_ports()
+
         """
         pass
 
@@ -3225,115 +3407,121 @@ class UiInterface(object):
 
     @abstractmethod
     def configure_qinq_ports(self, ports, **kwargs):
-        """
-        @brief Configure QinQ Ports
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param  kwargs:  parameters to be modified:
+        """Configure QinQ Ports.
+
+        Args:
+            ports(list[int]):  list of ports
+            **kwargs(dict):  parameters to be modified:
                              "mode";
                              "tpid".
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_qinq_ports([1, ], tpid=2)
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_qinq_ports([1, ], tpid=2)
+
         """
         pass
 
     @abstractmethod
     def configure_qinq_vlan_stacking(self, ports, provider_vlan_id, provider_vlan_priority):
-        """
-        @brief Configure QinQVlanStacking
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param provider_vlan_id:  provider vlan Id
-        @type  provider_vlan_id:  int
-        @param provider_vlan_priority:  provider vlan priority
-        @type  provider_vlan_priority:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_qinq_vlan_stacking([1, ], 2, 7)
-        @endcode
+        """Configure QinQVlanStacking.
+
+        Args:
+            ports(list[int]):  list of ports
+            provider_vlan_id(int):  provider vlan Id
+            provider_vlan_priority(int):  provider vlan priority
+
+        Returns:
+            None
+
+        Examples:
+
+            env.switch[1].ui.configure_qinq_vlan_stacking([1, ], 2, 7)
+
         """
         pass
 
     @abstractmethod
     def get_table_qinq_vlan_stacking(self):
-        """
-        @brief  Get QinQVlanStacking table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_qinq_vlan_stacking()
-        @endcode
+        """Get QinQVlanStacking table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_qinq_vlan_stacking()
+
         """
         pass
 
     @abstractmethod
     def configure_qinq_vlan_mapping(self, ports, customer_vlan_id, customer_vlan_priority, provider_vlan_id, provider_vlan_priority):
-        """
-        @brief Configure QinQCustomerVlanMapping and QinQProviderVlanMapping
-        @param ports:  list of ports
-        @type  ports:  list[int]
-        @param customer_vlan_id:  customer vlan Id
-        @type  customer_vlan_id:  int
-        @param customer_vlan_priority:  customer vlan priority
-        @type  customer_vlan_priority:  int
-        @param provider_vlan_id:  provider vlan Id
-        @type  provider_vlan_id:  int
-        @param provider_vlan_priority:  provider vlan priority
-        @type  provider_vlan_priority:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_qinq_vlan_mapping([1, ], 2, 7, 5, 6)
-        @endcode
+        """Configure QinQCustomerVlanMapping and QinQProviderVlanMapping.
+
+        Args:
+            ports(list[int]):  list of ports
+            customer_vlan_id(int):  customer vlan Id
+            customer_vlan_priority(int):  customer vlan priority
+            provider_vlan_id(int):  provider vlan Id
+            provider_vlan_priority(int):  provider vlan priority
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_qinq_vlan_mapping([1, ], 2, 7, 5, 6)
+
         """
         pass
 
     @abstractmethod
     def get_table_qinq_customer_vlan_mapping(self):
-        """
-        @brief Get QinQCustomerVlanMapping table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_qinq_customer_vlan_mapping()
-        @endcode
+        """Get QinQCustomerVlanMapping table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_qinq_customer_vlan_mapping()
+
         """
         pass
 
     @abstractmethod
     def get_table_qinq_provider_vlan_mapping(self):
-        """
-        @brief Get QinQProviderVlanMapping table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_qinq_provider_vlan_mapping()
-        @endcode
+        """Get QinQProviderVlanMapping table.
+
+        Returns:
+            list[dict]: table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_qinq_provider_vlan_mapping()
+
         """
         pass
 
     @abstractmethod
     def get_table_qinq_ports(self, port=None, param=None):
-        """
-        @brief Get QinQPorts table
-        @param port:  port Id (optional)
-        @type  port:  int
-        @param param:  parameter name (optional)
-        @type  param:  str
-        @rtype:  list[dict]|int|str
-        @return:  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_qinq_ports()
-        @endcode
+        """Get QinQPorts table.
+
+        Args:
+            port(int):  port Id (optional)
+            param(str):  parameter name (optional)
+
+        Returns:
+            list[dict]|int|str:  table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_qinq_ports()
+
         """
         pass
 
@@ -3341,86 +3529,90 @@ class UiInterface(object):
 
     @abstractmethod
     def get_table_errdisable_errors_config(self, app_name=None, app_error=None):
-        """
-        @brief Get ErrdisableErrorsConfig table
-        @param app_name:  application name
-        @type  app_name:  str
-        @param app_error:  application error
-        @type  app_error:  str
-        @rtype:  list[dict]|str
-        @return:  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_errdisable_errors_config()
-        @endcode
+        """Get ErrdisableErrorsConfig table.
+
+        Args:
+            app_name(str):  application name
+            app_error(str):  application error
+
+        Returns:
+            list[dict]|str:  table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_table_errdisable_errors_config()
+
         """
         pass
 
     @abstractmethod
     def get_table_errdisable_config(self):
-        """
-        @brief Get ErrdisableConfig table
-        @rtype:  list[dict]
-        @return:  table (list of dictionaries)
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_errdisable_config()
-        @endcode
+        """Get ErrdisableConfig table.
+
+        Returns:
+            list[dict]:  table (list of dictionaries)
+
+        Examples::
+
+            env.switch[1].ui.get_table_errdisable_config()
+
         """
         pass
 
     @abstractmethod
     def modify_errdisable_errors_config(self, detect=None, recovery=None, app_name=None, app_error=None):
-        """
-        @brief Configure ErrdisableErrorsConfig table
-        @param detect:  detect status
-        @type  detect:  str
-        @param recovery:  recovery status
-        @type  recovery:  str
-        @param app_name:  application name
-        @type  app_name:  str
-        @param app_error:  application error
-        @type  app_error:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.modify_errdisable_errors_config(detect="Enabled", app_name='L2UfdControlApp', app_error='ufd')
-        @endcode
+        """Configure ErrdisableErrorsConfig table.
+
+        Args:
+            detect(str):  detect status
+            recovery(str):  recovery status
+            app_name(str):  application name
+            app_error(str):  application error
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.modify_errdisable_errors_config(detect="Enabled", app_name='L2UfdControlApp', app_error='ufd')
+
         """
         pass
 
     @abstractmethod
     def modify_errdisable_config(self, interval=None):
-        """
-        @brief Configure ErrdisableConfig table
-        @param interval:  recovery interval
-        @type  interval:  int
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.modify_errdisable_config(10)
-        @endcode
+        """Configure ErrdisableConfig table.
+
+        Args:
+            interval(int):  recovery interval
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.modify_errdisable_config(10)
+
         """
         pass
 
     @abstractmethod
     def get_errdisable_ports(self, port=None, app_name=None, app_error=None, param=None):
-        """
-        @brief Get ErrdisablePorts table
-        @param port:  port Id (optional)
-        @type  port:  int
-        @param app_name:  application name (optional)
-        @type  app_name:  str
-        @param app_error:  application error (optional)
-        @type  app_error:  str
-        @param param:  parameter name (optional)
-        @type  param:  str
-        @rtype:  list[dict]|int|str
-        @return:  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_errdisable_ports()
-        @endcode
+        """Get ErrdisablePorts table.
+
+        Args:
+            port(int):  port Id (optional)
+            app_name(str):  application name (optional)
+            app_error(str):  application error (optional)
+            param(str):  parameter name (optional)
+
+        Returns:
+            list[dict]|int|str: table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_errdisable_ports()
+
         """
         pass
 
@@ -3428,50 +3620,53 @@ class UiInterface(object):
 
     @abstractmethod
     def create_mirror_session(self, port, target, mode):
-        """
-        @brief Configure PortsMirroring table
-        @param port:  source port Id
-        @type  port:  int
-        @param target:  target port Id
-        @type  target:  int
-        @param mode:  mirroring mode
-        @type  mode:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_mirror_session(1, 2, 'Redirect')
-        @endcode
+        """Configure PortsMirroring table.
+
+        Args:
+            port(int):  source port Id
+            target(int):  target port Id
+            mode(str):  mirroring mode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_mirror_session(1, 2, 'Redirect')
+
         """
         pass
 
     @abstractmethod
     def get_mirroring_sessions(self):
-        """
-        @brief Get PortsMirroring table
-        @rtype:  list[dict]|int|str
-        @return:  table (list of dictionaries) or value
-        @par Example:
-        @code
-        env.switch[1].ui.get_mirroring_sessions()
-        @endcode
+        """Get PortsMirroring table.
+
+        Returns:
+            list[dict]|int|str:  table (list of dictionaries) or value
+
+        Examples::
+
+            env.switch[1].ui.get_mirroring_sessions()
+
         """
         pass
 
     @abstractmethod
     def delete_mirroring_session(self, port, target, mode):
-        """
-        @brief Delete mirroring session from the PortsMirroring table
-        @param port:  source port Id
-        @type  port:  int
-        @param target:  target port Id
-        @type  target:  int
-        @param mode:  mirroring mode
-        @type  mode:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.delete_mirroring_session(1, 2, 'Redirect')
-        @endcode
+        """Delete mirroring session from the PortsMirroring table.
+
+        Args:
+            port(int):  source port Id
+            target(int):  target port Id
+            mode(str):  mirroring mode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.delete_mirroring_session(1, 2, 'Redirect')
+
         """
         pass
 
@@ -3479,33 +3674,37 @@ class UiInterface(object):
 
     @abstractmethod
     def create_dhcp_relay(self, iface_name='global', server_ip=None, fwd_iface_name=None):
-        """
-        @brief  Configure DhcpRelayAdmin or DhcpRelayV6Admin table
-        @param iface_name:  VLAN inteface name
-        @type  iface_name:  str
-        @param server_ip:  DHCP Server IP address
-        @type  server_ip:  str
-        @param fwd_iface_name:  VLAN forward interface name (for IPv6 config only)
-        @type  fwd_iface_name:  str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_dhcp_relay(iface_name='global', server_ip='10.10.0.2')
-        @endcode
+        """Configure DhcpRelayAdmin or DhcpRelayV6Admin table.
+
+        Args:
+            iface_name(str):  VLAN inteface name
+            server_ip(str):  DHCP Server IP address
+            fwd_iface_name(str):  VLAN forward interface name (for IPv6 config only)
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_dhcp_relay(iface_name='global', server_ip='10.10.0.2')
+
         """
         pass
 
     @abstractmethod
     def get_table_dhcp_relay(self, dhcp_relay_ipv6=False):
-        """
-        @brief  Return DhcpRelayAdmin or DhcpRelayV6Admin table
-        @param dhcp_relay_ipv6:  is IPv6 config defined
-        @type  dhcp_relay_ipv6:  bool
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_dhcp_relay(dhcp_relay_ipv6=False)
-        @endcode
+        """Return DhcpRelayAdmin or DhcpRelayV6Admin table
+
+        Args:
+            dhcp_relay_ipv6(bool):  is IPv6 config defined
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.get_table_dhcp_relay(dhcp_relay_ipv6=False)
+
         """
         pass
 
@@ -3513,51 +3712,55 @@ class UiInterface(object):
 
     @abstractmethod
     def configure_tunneling_global(self, **kwargs):
-        """
-        @brief  Configure TunnelingGlobalAdmin table
-        @param  kwargs:  parameters to be modified:
+        """Configure TunnelingGlobalAdmin table.
+
+        Args:
+            **kwargs(dict):  parameters to be modified:
                              "vnTag";
                              "vxlanInnerVlanProcessing";
                              "mode",
                              "vxlanDestUDPPort".
-        @type  kwargs:  dict
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.configure_tunneling_global()
-        @endcode
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.configure_tunneling_global()
+
         """
         pass
 
     @abstractmethod
     def create_tunnels(self, tunnel_id=None, destination_ip=None, vrf=0, encap_type=None):
-        """
-        @brief  Configure TunnelsAdmin table
-        @param tunnel_id:  Tunnel ID
-        @type  tunnel_id:  int
-        @param destination_ip:  Destination IP address
-        @type  destination_ip:  str
-        @param vrf:  Tunnel VRF
-        @type  vrf:  int
-        @param encap_type:  Tunnel encapsulation type
-        @type  encap_type: str
-        @return:  None
-        @par Example:
-        @code
-        env.switch[1].ui.create_tunnels(tunnel_id=records_count, destination_ip=ip_list, encap_type='VXLAN')
-        @endcode
+        """Configure TunnelsAdmin table.
+
+        Args:
+            tunnel_id(int):  Tunnel ID
+            destination_ip(str):  Destination IP address
+            vrf(int):  Tunnel VRF
+            encap_type(str):  Tunnel encapsulation type
+
+        Returns:
+            None
+
+        Examples::
+
+            env.switch[1].ui.create_tunnels(tunnel_id=records_count, destination_ip=ip_list, encap_type='VXLAN')
+
         """
         pass
 
     @abstractmethod
     def get_table_tunnels_admin(self):
-        """
-        @brief  Return TunnelsAdmin table
-        @rtype:  list[dict]
-        @return  table
-        @par Example:
-        @code
-        env.switch[1].ui.get_table_tunnels_admin()
-        @endcode
+        """Return TunnelsAdmin table.
+
+        Returns:
+            list[dict]:  table
+
+        Examples::
+
+            env.switch[1].ui.get_table_tunnels_admin()
+
         """
         pass

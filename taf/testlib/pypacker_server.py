@@ -1,22 +1,23 @@
 #!/usr/bin/env python
-"""
-@copyright Copyright (c) 2017, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+# Copyright (c) 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-    http://www.apache.org/licenses/LICENSE-2.0
+"""``pypacker_server.py``
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+`Remote Pypacker traffic generator with XMLRPC API.`
 
-@file  pypacker_server.py
-
-@summary  Remote Pypacker traffic generator with XMLRPC API.
 """
 
 import os
@@ -39,8 +40,8 @@ from .dev_pypacker import PypackerTG
 
 
 class XMLPypackerServer(xmlrpc.XMLRPC):
-    """
-    @description  Pypacker server handler.
+    """Pypacker server handler.
+
     """
 
     class_logger = loggers.ClassLogger()
@@ -50,32 +51,35 @@ class XMLPypackerServer(xmlrpc.XMLRPC):
         return cls.__name__
 
     def xmlrpc_ping(self):
-        """
-        @brief  Return server name
-        @rtype:  str
-        @return:  Server name
+        """Return server name.
+
+        Returns:
+            str:  Server name
+
         """
         return self._get_server_name()
 
     def xmlrpc_setup(self, config, opts):
-        """
-        @brief  Create TCMS proxy instance and set necessary attributes.
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  cli options (ArgumentParser( parsed options).
-        @type  opts:  ArgumentParser(
-        @return:  None
+        """Create TCMS proxy instance and set necessary attributes.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(ArgumentParser):  cli options (ArgumentParser( parsed options).
+
+        Returns:
+            None
+
         """
         self.pypacker = PypackerTG(config, pickle.loads(opts.data))
         self.__register_methods()
 
     def __register_methods(self):
-        """
-        @brief  Register all Pypacker TG methods
+        """Register all Pypacker TG methods.
+
         """
         def xmlrpc_wrap(func, *args, **kwargs):
-            """
-            @brief  Register all Pypacker TG methods
+            """Register all Pypacker TG methods.
+
             """
             try:
                 return func(*args, **kwargs)
@@ -85,15 +89,15 @@ class XMLPypackerServer(xmlrpc.XMLRPC):
                 raise xmlrpc.Fault(500, traceback_message)
 
         def wrap_method(method):
-            """
-            @brief  Register all Pypacker TG methods
+            """Register all Pypacker TG methods.
+
             """
             return lambda args, kwargs: xmlrpc_wrap(getattr(self.pypacker, method),
                                                     *pickle.loads(args.data), **pickle.loads(kwargs.data))
 
         def wrap_attibute(attr):
-            """
-            @brief  Register all Pypacker TG attributes
+            """Register all Pypacker TG attributes.
+
             """
             return lambda: getattr(self.pypacker, attr)
 
@@ -114,10 +118,11 @@ class XMLPypackerServer(xmlrpc.XMLRPC):
         self.xmlrpc_stop_sniff = self.stop_sniff
 
     def stop_sniff(self, args, kwargs):
-        """
-        @brief  Stops sniffing on specified interfaces and returns captured data
+        """Stops sniffing on specified interfaces and returns captured data.
 
-        @note  Redefine standard method because we need convert packet data string before sending over xml.
+        Notes:
+            Redefine standard method because we need convert packet data string before sending over xml.
+
         """
         try:
             self.class_logger.debug("Stop sniffing")
@@ -137,8 +142,8 @@ class XMLPypackerServer(xmlrpc.XMLRPC):
             raise xmlrpc.Fault(500, message)
 
     def xmlrpc_tgcmd(self, method, args=None, kwargs=None):
-        """
-        @brief  Store shutdown server command.
+        """Store shutdown server command.
+
         """
         args = args if args is not None else []
         kwargs = kwargs if kwargs is not None else {}
@@ -153,16 +158,16 @@ class XMLPypackerServer(xmlrpc.XMLRPC):
             raise xmlrpc.Fault(500, str(err))
 
     def xmlrpc_shutdown(self, trycount=0, lasttry=0):
-        """
-        @brief  Store shutdown server command.
+        """Store shutdown server command.
+
         """
         self.class_logger.info("Shutdown command received.")
         self.shutdown()
         return "Shutdown command is added to queue."
 
     def shutdown(self):
-        """
-        @brief  Shutdown xmlrpc server.
+        """Shutdown xmlrpc server.
+
         """
         pid = os.getpid()
         os.kill(pid, signal.SIGTERM)
@@ -170,8 +175,8 @@ class XMLPypackerServer(xmlrpc.XMLRPC):
 
 
 def parse_options():
-    """
-    @brief  Parsing options.
+    """Parsing options.
+
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--port", action="store", default=None,
@@ -189,21 +194,21 @@ def parse_options():
 
 
 def main(ppid):
-    """
-    @brief  Start standalone server
+    """Start standalone server.
+
     """
 
     def get_local_port():
-        """
-        @brief  Return free local port.
+        """Return free local port.
+
         """
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
             s.bind(("", 0))
             return s.getsockname()[1]
 
     def signal_handler(signum, frame):
-        """
-        @brief  Process termination signals.
+        """Process termination signals.
+
         """
         mod_logger.info("Caught a signal=%s", signum)
         time.sleep(3)

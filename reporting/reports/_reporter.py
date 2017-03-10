@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``_reporter.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`py.test log parser and gmail mail sender`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  _reporter.py
-
-@summary py.test log parser and gmail mail sender.
 """
 # TODO: Replace prints with logger
 
@@ -32,18 +31,20 @@ import unicodedata
 
 
 class LogParser(object):
-    """
-    @description  Class for parsing py.test logs
+    """Class for parsing py.test logs.
+
     """
 
     def __init__(self, logfile=None, logdir=None):
-        """
-        @brief  Initialize instance of LogParser class
-        @param  logfile:  Path to logfile
-        @type  logfile:  str
-        @param  logdir:  Path to logdir
-        @type  logdir:  str
-        @raise  Exception:  logfile or logdir option must be specified
+        """Initialize instance of LogParser class.
+
+        Args:
+            logfile(str):  Path to logfile
+            logdir(str):  Path to logdir
+
+        Raises:
+            Exception:  logfile or logdir option must be specified
+
         """
         if logfile and logdir:
             raise Exception("Only single option file or dir must be specified.")
@@ -62,13 +63,17 @@ class LogParser(object):
                          'x': 'xfailed', self.pytest_error_key: 'pytest collection failures'}
 
     def _read_file(self, logfile=None):
-        """
-        @brief  Read logfile
-        @param  logfile:  Path to logfile
-        @type  logfile:  str
-        @raise  Exception:  error while open file
-        @rtype:  list[str]
-        @return:  Lines from logfile
+        """Read logfile.
+
+        Args:
+            logfile(str): Path to logfile
+
+        Raises:
+            Exception: error while open file
+
+        Returns:
+            list[str]: Lines from logfile
+
         """
         try:
             logs = open(logfile, "rb").readlines()
@@ -79,14 +84,15 @@ class LogParser(object):
             return logs
 
     def get_full_logs(self, logfile=None, logdir=None):
-        """
-        @brief  Return full log (list of string with \\n at the end)
-        @param  logfile:  Path to logfile
-        @type  logfile:  str
-        @param  logdir:  Path to logdir
-        @type  logdir:  str
-        @rtype:  list[str]
-        @return:  Lines from logfile and files in logdir
+        """Return full log (list of string with \\n at the end).
+
+        Args:
+            logfile(str):  Path to logfile
+            logdir(str):  Path to logdir
+
+        Returns:
+            list[str]: Lines from logfile and files in logdir
+
         """
         logs = []
         if logfile:
@@ -103,10 +109,11 @@ class LogParser(object):
         return logs
 
     def get_pytest_short(self):
-        """
-        @brief  Return only lines with result of running test cases(list of string)
-        @rtype:  list[str]
-        @return:  Lines with test case results
+        """Return only lines with result of running test cases(list of string).
+
+        Returns:
+            list[str]: Lines with test case results
+
         """
         logs = self.get_full_logs(logdir=self.pytestlog_dir)
         lines = []
@@ -116,10 +123,11 @@ class LogParser(object):
         return lines
 
     def get_pytest_stats(self):
-        """
-        @brief  Return number of passed/failed/skipped tests
-        @rtype:  dict
-        @return:  Number of passed/failed/skipped tests
+        """Return number of passed/failed/skipped tests.
+
+        Returns:
+            dict: Number of passed/failed/skipped tests
+
         """
         summary = {}
         for stat in self.get_pytest_short():
@@ -130,14 +138,15 @@ class LogParser(object):
         return summary
 
     def get_pytest_stats_hr(self, items=None, header=None):
-        """
-        @brief  Return human readable short report - number passed/failed/skipped tests
-        @param  items:  Passed/failed/skipped items statistics
-        @type  items:  dict
-        @param  header:  Report header
-        @type  header:  str
-        @rtype:  str
-        @return:  Number of passed/failed/skipped tests in human readable short report
+        """Return human readable short report - number passed/failed/skipped tests.
+
+        Args:
+            items(dict):  Passed/failed/skipped items statistics
+            header(str):  Report header
+
+        Returns:
+            str: Number of passed/failed/skipped tests in human readable short report
+
         """
         if header:
             status = "{0} (".format(header)
@@ -161,10 +170,11 @@ class LogParser(object):
         return status
 
     def get_pytest_cases(self):
-        """
-        @brief  Return pytest cases
-        @rtype:  dict
-        @return:  Dictionary of test cases
+        """Return pytest cases.
+
+        Returns:
+            dict: Dictionary of test cases
+
         """
         cases = {}
         for item in self.get_pytest_short():
@@ -180,10 +190,11 @@ class LogParser(object):
         return cases
 
     def get_pytest_stats_full(self):
-        """
-        @brief  Return full automated test cases execution results.
-        @rtype:  str
-        @return:  Automated test cases execution results
+        """Return full automated test cases execution results.
+
+        Returns:
+            str: Automated test cases execution results
+
         """
         report = "Environment:\n"
         report += "Switchpp: {0}\n".format(self.get_spp_full_info())
@@ -199,10 +210,11 @@ class LogParser(object):
         return report
 
     def get_spp_version(self):
-        """
-        @brief  Get a switchpp version from a custom log file.
-        @rtype:  str
-        @return:  switchppVersion value (build number)
+        """Get a switchpp version from a custom log file.
+
+        Returns:
+            str: switchppVersion value (build number)
+
         """
         version = ""
         logs = self.get_full_logs(logdir=self.customlog_dir)
@@ -213,10 +225,11 @@ class LogParser(object):
         return version
 
     def get_spp_cpu_arch(self):
-        """
-        @brief  Get a switchpp cpu architecture from a custom log file.
-        @rtype:  str
-        @return:  cpuArchitecture value
+        """Get a switchpp cpu architecture from a custom log file.
+
+        Returns:
+            str: cpuArchitecture value
+
         """
         arch = ""
         logs = self.get_full_logs(logdir=self.customlog_dir)
@@ -227,10 +240,11 @@ class LogParser(object):
         return arch
 
     def get_spp_chip_name(self):
-        """
-        @brief  Get a switchpp chipName from a custom log file.
-        @rtype:  str
-        @return:  chipName value
+        """Get a switchpp chipName from a custom log file.
+
+        Returns:
+            str: chipName value
+
         """
         chip = ""
         logs = self.get_full_logs(logdir=self.customlog_dir)
@@ -241,10 +255,11 @@ class LogParser(object):
         return chip
 
     def get_spp_full_info(self):
-        """
-        @brief  Get a switchpp chipSubType from a custom log file.
-        @rtype:  str
-        @return:  chipSubType value
+        """Get a switchpp chipSubType from a custom log file.
+
+        Returns:
+            str: chipSubType value
+
         """
         info = ""
         logs = self.get_full_logs(logdir=self.customlog_dir)
@@ -255,10 +270,11 @@ class LogParser(object):
         return info
 
     def get_vlab_full_info(self):
-        """
-        @brief  Get Vlab info from a custom log file.
-        @rtype:  str
-        @return:  Vlab info
+        """Get Vlab info from a custom log file.
+
+        Returns:
+            str: Vlab info
+
         """
         info = ""
         logs = self.get_full_logs(logdir=self.customlog_dir)
@@ -270,23 +286,20 @@ class LogParser(object):
 
 
 class MailSender(object):
-    """
-    @description  Send report mails with attachment
+    """Send report mails with attachment.
+
     """
 
     def __init__(self, test_info=None, message=None, attachment_file=None, attachment_dir=None, rcpt=None):
-        """
-        @brief  Initialize instance of MailSender class
-        @param  test_info:  Test info (subject)
-        @type  test_info:  str
-        @param  message:  Mail message
-        @type  message:  str
-        @param  attachment_file:  Path to file to be attached
-        @type  attachment_file:  str
-        @param  attachment_dir:  Path to directory to be attached
-        @type  attachment_dir:  str
-        @param  rcpt:  List of recepients
-        @type  rcpt:  list[str]
+        """Initialize instance of MailSender class.
+
+        Args:
+            test_info(str):  Test info (subject)
+            message(str):  Mail message
+            attachment_file(str):  Path to file to be attached
+            attachment_dir(str):  Path to directory to be attached
+            rcpt(list[str]):  List of recepients
+
         """
 
         # Import necessary modules only in case using MailSender
@@ -311,13 +324,17 @@ class MailSender(object):
         self.rcpt = rcpt
 
     def mail_attachment(self, path=None):
-        """
-        @brief  Add attachment from file
-        @param  path:  Path to file
-        @type  path:  str
-        @raise  IOError:  file is not attached to mail
-        @rtype:  MIMEBase
-        @return:  attachment
+        """Add attachment from file.
+
+        Args:
+            path(str):  Path to file
+
+        Raises:
+            IOError:  file is not attached to mail
+
+        Returns:
+            MIMEBase: attachment
+
         """
         attachment = None
         ctype, encoding = self.mimetypes.guess_type(path)
@@ -341,12 +358,14 @@ class MailSender(object):
             return attachment
 
     def create_msg(self, rcpt=None):
-        """
-        @brief  Create message body
-        @param  rcpt:  List of recepients
-        @type  rcpt:  str
-        @rtype:  MIMEMultipart
-        @return:  Email message
+        """Create message body.
+
+        Args:
+            rcpt(str):  List of recepients
+
+        Returns:
+            MIMEMultipart: Email message
+
         """
         msg = self.MIMEMultipart()
         msg['Subject'] = self.subject
@@ -368,13 +387,15 @@ class MailSender(object):
         return msg
 
     def send_message(self, msg=None, rcpt=None):
-        """
-        @brief  Sending message
-        @param  msg:  Email message
-        @type  msg:  MIMEMultipart
-        @param  rcpt:  List of recepients
-        @type  rcpt:  str
-        @raise  Exception:  error on mail sending
+        """Sending message.
+
+        Args:
+            msg(MIMEMultipart):  Email message
+            rcpt(str):  List of recepients
+
+        Raises:
+            Exception:  error on mail sending
+
         """
         smtpserver = self.smtplib.SMTP("smtp.gmail.com", 587)
         smtpserver.ehlo()
@@ -393,10 +414,11 @@ class MailSender(object):
             smtpserver.close()
 
     def send(self):
-        """
-        @brief  Create and send message to all recipients
-        @rtype:  bool
-        @return:  True is send message successfully
+        """Create and send message to all recipients.
+
+        Returns:
+            bool: True is send message successfully
+
         """
         for rcpt in self.rcpt:
             msg = self.create_msg(rcpt=rcpt)
@@ -405,8 +427,8 @@ class MailSender(object):
 
 
 class SingleHTMLConverter(html.parser.HTMLParser):
-    """
-    @description  This class transform any _local_ HTML page to a single HTML file with embedded js, css and images
+    """This class transform any _local_ HTML page to a single HTML file with embedded js, css and images.
+
     """
 
     def __init__(self, *args, **kwargs):
@@ -423,13 +445,15 @@ class SingleHTMLConverter(html.parser.HTMLParser):
         self.output_file = None
 
     def handle_starttag(self, tag, attrs):
-        """
-        @brief  Handle HTML start tag
-        @param  tag:  HTML tag name
-        @type  tag:  str
-        @param  attrs:  HTML tag attributes
-        @type  attrs:  dict
-        @raise  Exception:  error on adding data to html file
+        """Handle HTML start tag.
+
+        Args:
+            tag(str):  HTML tag name
+            attrs(dict):  HTML tag attributes
+
+        Raises:
+            Exception:  error on adding data to html file
+
         """
         attrs = dict(attrs)
         error = ''
@@ -466,74 +490,82 @@ class SingleHTMLConverter(html.parser.HTMLParser):
             self.stack.append(self.__html_start_tag(tag, attrs))
 
     def handle_endtag(self, tag):
-        """
-        @brief  Handle HTML end tag
-        @param  tag:  HTML tag name
-        @type  tag:  str
+        """Handle HTML end tag.
+
+        Args:
+            tag(str):  HTML tag name
+
         """
         self.stack.append(self.__html_end_tag(tag))
         if tag.lower() == 'a':
             self.stack.append(self.__html_end_tag('blink'))
 
     def handle_startendtag(self, tag, attrs):
-        """
-        @brief  Handle HTML startend tag
-        @param  tag:  HTML tag name
-        @type  tag:  str
-        @param  attrs:  HTML tag attributes
-        @type  attrs:  dict
+        """Handle HTML startend tag.
+
+        Args:
+            tag(str):  HTML tag name
+            attrs(dict):  HTML tag attributes
+
         """
         self.stack.append(self.__html_startend_tag(tag, attrs))
 
     def handle_data(self, data):
-        """
-        @brief  Handle HTML data
-        @param  data:  HTML data
-        @type  data:  str
+        """Handle HTML data.
+
+        Args:
+            data(str):  HTML data
+
         """
         self.stack.append(data)
 
     def __html_start_tag(self, tag, attrs):
-        """
-        @brief  Handle HTML start tag
-        @param  tag:  HTML tag name
-        @type  tag:  str
-        @param  attrs:  HTML tag attributes
-        @type  attrs:  dict
-        @rtype:  str
-        @return:  HTML start tag
+        """Handle HTML start tag.
+
+        Args:
+            tag(str):  HTML tag name
+            attrs(dict):  HTML tag attributes
+
+        Returns:
+            str: HTML start tag
+
         """
         return '<%s%s>' % (tag, self.__html_attrs(attrs))
 
     def __html_startend_tag(self, tag, attrs):
-        """
-        @brief  Handle HTML startend tag
-        @param  tag:  HTML tag name
-        @type  tag:  str
-        @param  attrs:  HTML tag attributes
-        @type  attrs:  dict
-        @rtype:  str
-        @return:  HTML startend tag
+        """Handle HTML startend tag.
+
+        Args:
+            tag(str):  HTML tag name
+            attrs(dict):  HTML tag attributes
+
+        Returns:
+            str: HTML startend tag
+
         """
         return '<%s%s/>' % (tag, self.__html_attrs(attrs))
 
     def __html_end_tag(self, tag):
-        """
-        @brief  Handle HTML end tag
-        @param  tag:  HTML tag name
-        @type  tag:  str
-        @rtype:  str
-        @return:  HTML end tag
+        """Handle HTML end tag.
+
+        Args:
+            tag(str):  HTML tag name
+
+        Returns:
+            str: HTML end tag
+
         """
         return '</%s>' % tag
 
     def __html_attrs(self, attrs):
-        """
-        @brief  Handle HTML tag attributes
-        @param  attrs:  HTML tag attributes
-        @type  attrs:  dict
-        @rtype:  str
-        @return:  HTML tag attributes
+        """Handle HTML tag attributes.
+
+        Args:
+            attrs(dict):  HTML tag attributes
+
+        Returns:
+            str: HTML tag attributes
+
         """
         _attrs = ''
         if attrs:
@@ -541,12 +573,14 @@ class SingleHTMLConverter(html.parser.HTMLParser):
         return _attrs
 
     def __get_data(self, data_file_name=None):
-        """
-        @brief  Return content of the file as one line string with new lines.
-        @param  data_file_name:  Path to the file
-        @type  data_file_name:  str
-        @rtype:  tuple(str, Exception)
-        @return:  Content of the file, error while file reading
+        """Return content of the file as one line string with new lines.
+
+        Args:
+            data_file_name(str):  Path to the file
+
+        Returns:
+            tuple(str, Exception): Content of the file, error while file reading
+
         """
         data = None
         error = None
@@ -578,16 +612,16 @@ class SingleHTMLConverter(html.parser.HTMLParser):
 
     # TODO: this function must found all images, not only the first
     def __replace_images(self, data, data_path, ctype='tag'):
-        """
-        @brief  Replace images links to embedded base64 encoded images in data.
-        @param  data:  HTML data
-        @type  data:  str
-        @param  data_path:  Path to the directory with images
-        @type  data_path:  str
-        @param  ctype:  Image content type (css|tag)
-        @type  ctype:  str
-        @rtype:  str
-        @return:  Modified HTML data
+        """Replace images links to embedded base64 encoded images in data.
+
+        Args:
+            data(str): HTML data
+            data_path(str):  Path to the directory with images
+            ctype(str):  Image content type (css|tag)
+
+        Returns:
+            str: Modified HTML data
+
         """
         if ctype == "css":
             # image_re = re.compile('.*:[\s]*url\(([\w\-\./]+\.gif)\).*', re.M | re.S)
@@ -612,19 +646,20 @@ class SingleHTMLConverter(html.parser.HTMLParser):
         return data
 
     def convert_file(self, html_file_name=None, resources_path=None, output_file_name=None):
-        """
-        @brief  Convert html_file_name to single html with embedded js, css and images
-                and write it to output_file_name if one,
-                or return converted content of the file.
-        @param  html_file_name:  Path to html file
-        @type  html_file_name:  str
-        @param  resources_path:  Path to html resources
-        @type  resources_path:  str
-        @param  output_file_name:  Path to the output html file
-        @type  output_file_name:  str
-        @raise  Exception:  html_file_name argument is None
-        @rtype:  list or tuple
-        @return:  List of errors or tuple(html output, list of errors)
+        """Convert html_file_name to single html with embedded js, css and images
+           and write it to output_file_name if one,or return converted content of the file.
+
+        Args:
+            html_file_name(str):  Path to html file
+            resources_path(str):  Path to html resources
+            output_file_name(str):  Path to the output html file
+
+        Raises:
+            Exception:  html_file_name argument is None
+
+        Returns:
+            list or tuple:  List of errors or tuple(html output, list of errors)
+
         """
         self.output_file_name = None
         if not html_file_name:
@@ -651,8 +686,8 @@ class SingleHTMLConverter(html.parser.HTMLParser):
 
 
 class ExternalXSLTProcessor(object):
-    """
-    @description  Convert XML to HTML. This class use external Linux utility xsltproc.
+    """Convert XML to HTML. This class use external Linux utility xsltproc.
+
     """
 
     def __init__(self, xslt_style, concat_xslt=None):
@@ -669,10 +704,11 @@ class ExternalXSLTProcessor(object):
             raise Exception("Program %s not found." % self.xsltproc)
 
     def _which(self):
-        """
-        @brief  Analog of Unix command 'which'.
-        @rtype:  str
-        @return:  Path to executable file (xsltproc) if one.
+        """Analog of Unix command 'which'.
+
+        Returns:
+            str: Path to executable file (xsltproc) if one.
+
         """
         def is_exe(fpath):
             return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
@@ -689,12 +725,12 @@ class ExternalXSLTProcessor(object):
         return None
 
     def _create_index_xml(self, xmlfile_list, output_xml):
-        """
-        @brief  Create index.xml
-        @param  xmlfile_list:  List of xml files
-        @type  xmlfile_list:  list[str]
-        @param  output_xml:  Path to output xml file
-        @type  output_xml:  str
+        """Create index.xml.
+
+        Args:
+            xmlfile_list(list[str]):  List of xml files
+            output_xml(str):  Path to output xml file
+
         """
         open(output_xml, 'w').write('')
         try:
@@ -710,17 +746,19 @@ class ExternalXSLTProcessor(object):
             xfile.close()
 
     def process_xml(self, xml_file, xslt_file, output_xml=None):
-        """
-        @brief  Process xml file with xslt processor.
-        @param  xml_file:  Input xml file
-        @type  xml_file:  str
-        @param  xslt_file:  Input xslt file
-        @type  xslt_file:  str
-        @param  output_xml:  Path to output xml file
-        @type  output_xml:  str
-        @raise  Exception:  xsltproc returns an error
-        @rtype:  tuple
-        @return:  returncode, stdoutdata, stderrdata
+        """Process xml file with xslt processor.
+
+        Args:
+            xml_file(str):  Input xml file
+            xslt_file(str):  Input xslt file
+            output_xml(str):  Path to output xml file
+
+        Raises:
+            Exception:  xsltproc returns an error
+
+        Returns:
+            tuple: returncode, stdoutdata, stderrdata
+
         """
         # Generate xsltproc command and args
         popen_cmd = [str(self.xsltproc_path)]
@@ -742,14 +780,15 @@ class ExternalXSLTProcessor(object):
         return retcode, p_out, p_err
 
     def concat_xml(self, xmlfile_list, output_xml=None):
-        """
-        @brief  Create united xml report.
-        @param  xmlfile_list:  List of xml files
-        @type  xmlfile_list:  list[str]
-        @param  output_xml:  Path to output xml file
-        @type  output_xml:  str
-        @rtype:  tuple
-        @return:  returncode, stdoutdata, stderrdata
+        """Create united xml report.
+
+        Args:
+            xmlfile_list(list[str]):  List of xml files
+            output_xml(str):  Path to output xml file
+
+        Returns:
+            tuple: returncode, stdoutdata, stderrdata
+
         """
         _tmp_file = tempfile.mkstemp(prefix='xsltproc.', suffix='.tmp', dir=os.curdir)
         try:
@@ -760,26 +799,28 @@ class ExternalXSLTProcessor(object):
             os.remove(_tmp_file[1])
 
     def convert_xml(self, xml_file, output_html=None):
-        """
-        @brief  Create html report from single xml file
-        @param  xml_file:  Input xml file
-        @type  xml_file:  str
-        @param  output_html:  Path to output html file
-        @type  output_html:  str
-        @rtype:  tuple
-        @return:  returncode, stdoutdata, stderrdata
+        """Create html report from single xml file.
+
+        Args:
+            xml_file(str):  Input xml file
+            output_html(str):  Path to output html file
+
+        Returns:
+            tuple: returncode, stdoutdata, stderrdata
+
         """
         return self.process_xml(xml_file, self.xslt_style, output_html)
 
     def convert_xml_list(self, xmlfile_list, html_file):
-        """
-        @brief  Create html report from xml files list
-        @param  xmlfile_list:  List of xml files
-        @type  xmlfile_list:  list[str]
-        @param  html_file:  Path to output html file
-        @type  html_file:  str
-        @rtype:  tuple
-        @return:  returncode, stdoutdata, stderrdata
+        """Create html report from xml files list.
+
+        Args:
+            xmlfile_list(list[str]):  List of xml files
+            html_file(str):  Path to output html file
+
+        Returns:
+            tuple: returncode, stdoutdata, stderrdata
+
         """
         _tmp_file = tempfile.mkstemp(prefix='xsltproc.', suffix='.tmp', dir=os.curdir)
         try:
@@ -790,14 +831,15 @@ class ExternalXSLTProcessor(object):
             os.remove(_tmp_file[1])
 
     def convert_dir(self, xml_dir, html_file):
-        """
-        @brief  Create summary html report from all xml files in given directory
-        @param  xml_dir:  Path to the directory with xml files
-        @type  xml_dir:  str
-        @param  html_file:  Path to output html file
-        @type  html_file:  str
-        @rtype:  tuple
-        @return:  returncode, stdoutdata, stderrdata
+        """Create summary html report from all xml files in given directory.
+
+        Args:
+            xml_dir(str):  Path to the directory with xml files
+            html_file(str):  Path to output html file
+
+        Returns:
+            tuple: returncode, stdoutdata, stderrdata
+
         """
         xmlfile_list = []
         for root, dirs, files in os.walk(xml_dir):
@@ -819,23 +861,27 @@ class ExternalXSLTProcessor(object):
 #
 
 def _expvars(path):
-    """
-    @brief  Alias to os.path methods to expand vars and user in path
-    @param  path:  Path
-    @type  path:  str
-    @rtype:  str
-    @return:  Modified path
+    """Alias to os.path methods to expand vars and user in path.
+
+    Args:
+        path(str):  Path
+
+    Returns:
+        str:  Modified path
+
     """
     return os.path.expanduser(os.path.expandvars(path))
 
 
 def _get_real_file_path(filename):
-    """
-    @brief  Return absolute file path
-    @param  filename:  File name
-    @type  filename:  str
-    @rtype:  str
-    @return:  Absolute file path
+    """Return absolute file path.
+
+    Args:
+        filename(str):  File name
+
+    Returns:
+        str: Absolute file path
+
     """
     _file_name = None
     filename = os.path.normpath(_expvars(filename))
@@ -848,14 +894,15 @@ def _get_real_file_path(filename):
 
 
 def _is_file_in_dir(directory, file_mask):
-    """
-    @brief  Check if file with file_mask exists in directory
-    @param  directory:  directory
-    @type  directory:  str
-    @param  file_mask:  mask of the file. E.g. '.xml$'
-    @type  file_mask:  str
-    @rtype:  bool
-    @return:  True if file exists in the directory
+    """Check if file with file_mask exists in directory.
+
+    Args:
+        directory(str):  directory
+        file_mask(str):  mask of the file. E.g. '.xml$'
+
+    Returns:
+        bool: True if file exists in the directory
+
     """
     for root, dirs, files in os.walk(directory):
         if directory != root:
@@ -871,14 +918,15 @@ def _is_file_in_dir(directory, file_mask):
 
 
 def _get_xmls_path(xmlpath=None, logdir=None):
-    """
-    @brief  Return path to directory with xml files for create html report
-    @param  xmlpath:  Path to xml files
-    @type  xmlpath:  str
-    @param  logdir:  Path to logdir
-    @type  logdir:  str
-    @rtype:  str
-    @return:  Path to directory with xml files
+    """Return path to directory with xml files for create html report.
+
+    Args:
+        xmlpath(str):  Path to xml files
+        logdir(str):  Path to logdir
+
+    Returns:
+        str: Path to directory with xml files
+
     """
     # Priority 1: xmlpath defined explicitly
     _abs_path_1 = None
@@ -955,22 +1003,19 @@ def parse_options():
 
 
 def get_mail_opts(maillist, info, logdir=None, logfile=None, attype="none", html_file=None):
-    """
-    @brief  Return email dictionary
-    @param  maillist:  List of recepients
-    @type  maillist:  str
-    @param  info:  Additional info
-    @type  info:  str
-    @param  logdir:  Path to directoru with logs
-    @type  logdir:  str
-    @param  logfile:  Path to txt file
-    @type  logfile:  str
-    @param  attype:  Type of attached file (none|text|html)
-    @type  attype:  str
-    @param  html_file:  Path to html file
-    @type  html_file:  str
-    @rtype:  dict
-    @return:  Mail options dictionary
+    """Return email dictionary.
+
+    Args:
+        maillist(str):  List of recepients
+        info(str):  Additional info
+        logdir(str):  Path to directoru with logs
+        logfile(str):  Path to txt file
+        attype(str):  Type of attached file (none|text|html)
+        html_file(str):  Path to html file
+
+    Returns:
+        dict: Mail options dictionary
+
     """
     if logdir:
         log = LogParser(logdir=logdir)
@@ -1002,20 +1047,18 @@ def get_mail_opts(maillist, info, logdir=None, logfile=None, attype="none", html
 
 
 def create_pure_html(output_file, xmlpath, logdir, xslt_style, xslt_concat):
-    """
-    @brief  Create html report from xml logs
-    @param  output_file:  Generated HTML destination path
-    @type  output_file:  str
-    @param  xmlpath:  Path to xml reports
-    @type  xmlpath:  str
-    @param  logdir:  Path to buildbot logdir
-    @type  logdir:  str | None
-    @param  xslt_style:  Path to xslt files for generating HTML
-    @type  xslt_style:  str
-    @param  xslt_concat:  Path to concatenation xslt style.
-            It's used for generating single HTML file from multiple xml files
-    @type  xslt_concat:  str
-    @raise  Exception:  XSLT style not found; XML files not found
+    """Create html report from xml logs.
+
+    Args:
+        output_file(str):  Generated HTML destination path
+        xmlpath(str):  Path to xml reports
+        logdir(str | None):  Path to buildbot logdir
+        xslt_style(str):  Path to xslt files for generating HTML
+        xslt_concat(str): Path to concatenation xslt style. It's used for generating single HTML file from multiple xml files
+
+    Raises:
+        Exception:  XSLT style not found; XML files not found
+
     """
     # Check existence of xslt styles
     xslt_style = _get_real_file_path(xslt_style)
@@ -1047,14 +1090,13 @@ def create_pure_html(output_file, xmlpath, logdir, xslt_style, xslt_concat):
 
 
 def create_single_html(output_file, pure_html, html_resources):
-    """
-    @brief  Create all in one html report
-    @param  output_file:  SingleHTML destination path
-    @type  output_file:  str
-    @param  pure_html:  Path to current HTML file
-    @type  pure_html:  str
-    @param  html_resources:  Path to resources (css, js, images) for given HTML file
-    @type  html_resources:  str
+    """Create all in one html report.
+
+    Args:
+        output_file(str): SingleHTML destination path
+        pure_html(str):  Path to current HTML file
+        html_resources(str):  Path to resources (css, js, images) for given HTML file
+
     """
     html_converter = SingleHTMLConverter()
     html_converter.convert_file(pure_html, html_resources, output_file)
@@ -1063,30 +1105,20 @@ def create_single_html(output_file, pure_html, html_resources):
 
 def create_report(logfile, logdir, info, attype, maillist,
                   html, htmlres, xmlpath, xslt_style, xslt_concat, **kwargs):
-    """
-    @brief  Contain full reporting steps
+    """Contain full reporting steps.
 
-    @param  logfile:  Path to txt file
-    @type  logfile:  str
-    @param  logdir:  Path to directoru with logs
-    @type  logdir:  str
-    @param  info:  Additional info
-    @type  info:  str
-    @param  attype:  Type of attached file (none|text|html)
-    @type  attype:  str
-    @param  maillist:  List of recepients
-    @type  maillist:  str
-    @param  html:  Path to current HTML file
-    @type  html:  str
-    @param  htmlres:  Path to resources (css, js, images) for given HTML file
-    @type  htmlres:  str
-    @param  xmlpath:  Path to xml reports
-    @type  xmlpath:  str
-    @param  xslt_style:  Path to xslt files for generating HTML
-    @type  xslt_style:  str
-    @param  xslt_concat:  Path to concatenation xslt style.
-            It's used for generating single HTML file from multiple xml files
-    @type  xslt_concat:  str
+    Args:
+        logfile(str):  Path to txt file
+        logdir(str):  Path to directory with logs
+        info(str):  Additional info
+        attype(str):  Type of attached file (none|text|html)
+        maillist(str):  List of recepients
+        html(str):  Path to current HTML file
+        htmlres(str):  Path to resources (css, js, images) for given HTML file
+        xmlpath(str):  Path to xml reports
+        xslt_style(str):  Path to xslt files for generating HTML
+        xslt_concat(str): Path to concatenation xslt style. It's used for generating single HTML file from multiple xml files
+
     """
     # Temporary files if no options for save report
     temp_file_1 = None

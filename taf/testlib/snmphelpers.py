@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``snmphelpers.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`SNMP specific helpers functions`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  snmphelpers.py
-
-@summary  SNMP specific helpers functions.
 """
 
 import sys
@@ -35,16 +34,18 @@ from . import loggers
 
 
 def is_mibs_folder_empty(path):
-    """
-    @brief  Checks is MIBs folder empty of not
-    @param  path:  path to MIBs folder
-    @type  path:  str
-    @rtype:  bool
-    @return:  True if empty and False if not
-    @par  Example:
-    @code
-    is_mibs_folder_empty()
-    @endcode
+    """Checks is MIBs folder empty of not.
+
+    Args:
+        path(str):  path to MIBs folder
+
+    Returns:
+        bool:  True if empty and False if not
+
+    Examples::
+
+        is_mibs_folder_empty()
+
     """
     empty = True
     if os.path.exists(path):
@@ -56,38 +57,35 @@ def is_mibs_folder_empty(path):
 
 
 def clear_mibs_folder(path):
-    """
-    @brief  Removes all ONS mibs from MIBS folder
-    @param  path:  path to MIBs folder
-    @type  path:  str
-    @par  Example:
-    @code
-    clear_mibs_folder()
-    @endcode
+    """Removes all ONS mibs from MIBS folder.
+
+    Args:
+        path(str):  path to MIBs folder
+
+    Examples::
+
+        clear_mibs_folder()
+
     """
     if os.path.exists(path):
         shutil.rmtree(path)
 
 
 def get_remote_file(hostname, port, username, password, remotepath, localpath):
-    """
-    @brief  Get remote file to local machine.
-    @param  hostname:  Remote IP-address
-    @type  hostname:  str
-    @param  port:  Remote SSH port
-    @type  port:  int
-    @param  username:  Remote host username for authentication
-    @type  username:  str
-    @param  password:  Remote host password for authentication
-    @type  password:  str
-    @param  remotepath:  Remote file to download location path
-    @type  remotepath:  str
-    @param  localpath:  Local path to save remote file
-    @type  localpath:  str
-    @par  Example:
-    @code
-    get_remote_file(host, port, username, password, tar_remotepath, tar_localpath)
-    @endcode
+    """Get remote file to local machine.
+
+    Args:
+        hostname(str):  Remote IP-address
+        port(int):  Remote SSH port
+        username(str):  Remote host username for authentication
+        password(str):  Remote host password for authentication
+        remotepath(str):  Remote file to download location path
+        localpath(str):  Local path to save remote file
+
+    Examples::
+
+        get_remote_file(host, port, username, password, tar_remotepath, tar_localpath)
+
     """
     transport = paramiko.Transport((hostname, port))
     transport.connect(username=username, password=password)
@@ -100,16 +98,16 @@ def get_remote_file(hostname, port, username, password, remotepath, localpath):
 
 
 def untar_file(tar_path, untar_path):
-    """
-    @brief  Unpack tar file.
-    @param  tar_path:  Path to tar file
-    @type  tar_path:  str
-    @param  untar_path:  Path where to unpack
-    @type  untar_path:  str
-    @par  Example:
-    @code
-    untar_file(tar_localpath, mib_path_txt)
-    @endcode
+    """Unpack tar file.
+
+    Args:
+        tar_path(str):  Path to tar file
+        untar_path(str):  Path where to unpack
+
+    Examples::
+
+        untar_file(tar_localpath, mib_path_txt)
+
     """
     old_folder = os.path.join(untar_path, 'mibs')
     if os.path.isfile(old_folder):
@@ -121,16 +119,16 @@ def untar_file(tar_path, untar_path):
 
 
 def file_convert(mib_txt_path, mib_py_path):
-    """
-    @brief  Convert .txt MIB to .py
-    @param  mib_txt_path:  Full path to .txt MIB.
-    @type  mib_txt_path:  str
-    @param  mib_py_path:  Full path to .py MIB
-    @type  mib_py_path:  str
-    @par  Example:
-    @code
-    file_convert(mib_txt_path, mib_py_path)
-    @endcode
+    """Convert .txt MIB to .py.
+
+    Args:
+        mib_txt_path(str):  Full path to .txt MIB.
+        mib_py_path(str):  Full path to .py MIB
+
+    Examples::
+
+        file_convert(mib_txt_path, mib_py_path)
+
     """
     mod_logger_snmp = loggers.module_logger(name=__name__)
 
@@ -190,16 +188,16 @@ def file_convert(mib_txt_path, mib_py_path):
 
 
 def convert_to_py(txt_dir_path, py_dir_path):
-    """
-    @brief  Converts .txt MIB's to .py
-    @param  txt_dir_path:  Path to dir with .txt MIB's.
-    @type  txt_dir_path:  str
-    @param  py_dir_path:  Path to dir with .py MIB's
-    @type  py_dir_path:  str
-    @par  Example:
-    @code
-    convert_to_py(mib_path_tmp, mib_path)
-    @endcode
+    """Converts .txt MIB's to .py.
+
+    Args:
+        txt_dir_path(str):  Path to dir with .txt MIB's.
+        py_dir_path(str):  Path to dir with .py MIB's
+
+    Examples::
+
+        convert_to_py(mib_path_tmp, mib_path)
+
     """
     mod_logger_snmp = loggers.module_logger(name=__name__)
     txt_dir_path = os.path.join(txt_dir_path, "MIB")
@@ -225,18 +223,17 @@ def convert_to_py(txt_dir_path, py_dir_path):
 
 
 def create_mib_folder(config, path, env):
-    """
-    @brief  Creates MIB folder.
-    @param  config:  Configuration dictionary.
-    @type  config:  dict
-    @param  path:  Path to MIB folder.
-    @type  path:  str
-    @param  env:  Environment object.
-    @type  env:  Environment
-    @par  Example:
-    @code
-    create_mib_folder()
-    @endcode
+    """Creates MIB folder.
+
+    Args:
+        config(dict):  Configuration dictionary.
+        path(str):  Path to MIB folder.
+        env(Environment):  Environment object.
+
+    Examples::
+
+        create_mib_folder()
+
     """
     if config is None:
         pytest.fail("UI settings not fount in environment configuration.")

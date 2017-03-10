@@ -1,24 +1,23 @@
-#! /usr/bin/env python
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``clinns.py``
+
+`Module contains classes for managing device using SSH connection or SSH connection emulation for Linux Network`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  clinns.py
-
-@summary  Module contains classes for managing device using SSH connection or SSH connection emulation for Linux Network
-Namespaces.
-"""
 from subprocess import Popen, PIPE
 
 import pexpect
@@ -29,12 +28,12 @@ from .custom_exceptions import CLINNSException
 
 
 def ip_net_namespace_mode(function):
-    """
-    @brief Decorator: get clissh_instance for class methods
+    """Decorator: get clissh_instance for class methods.
+
     """
     def wrapper(*args, **kwargs):
-        """
-        @brief  Add "ip netns exec " prefix to all commands to forward them into network namespace.
+        """Add "ip netns exec " prefix to all commands to forward them into network namespace.
+
         """
 
         if "command" in kwargs:
@@ -65,49 +64,36 @@ def ip_net_namespace_mode(function):
 
 
 class CLISSHNetNS(CLIGenericMixin):
-    """
-    @description Class for executing command inside of namespace. Unused parameters added to support the same interface
+    """Class for executing command inside of namespace. Unused parameters added to support the same interface
     for other CLI classes.
 
-    @code{.py}
-    client = CLISSHNetNS("some_nns", timeout=10)
-    client.exec_command("some_command")
-    @endcode
+    Examples::
+
+        client = CLISSHNetNS("some_nns", timeout=10)
+        client.exec_command("some_command")
 
     """
     class_logger = loggers.ClassLogger()
 
     def __init__(self, nsname, port=None, username=None, password=None, page_break=None, prompt=None, pass_prompt=None,
                  sudo_prompt=None, login_prompt=None, page_break_lines=None, exit_cmd=None, timeout=10, quiet=False):
-        """
-        @brief  Initialize CLISSHNetNS class
+        """Initialize CLISSHNetNS class.
 
-        @param  nsname:  NNS name.
-        @type  nsname:  str
-        @param  port:  Host port.
-        @type  port:  int
-        @param  username:  Host user
-        @type  username:  str
-        @param  password:  Host password
-        @type  password:  str
-        @param  page_break:  Page brake marker.
-        @type  page_break:  str
-        @param  prompt:  Shell prompt.
-        @type  prompt:  str
-        @param  pass_prompt:  Login password prompt.
-        @type  pass_prompt:  str
-        @param  sudo_prompt:  Sudo password prompt.
-        @type  sudo_prompt:  str
-        @param login_prompt:  Login prompt (str).
-        @type  login_prompt:  str
-        @param page_break_lines:  Number of page brake lines (int).
-        @type  page_break_lines:  int
-        @param exit_cmd:  Command to perform telnet exit (str).
-        @type  exit_cmd:  str
-        @param  timeout:  Default timeout for commands.
-        @type  timeout:  int
-        @param  quiet:  Flag for return code verification.
-        @type  quiet:  bool
+        Args:
+            nsname(str):  NNS name.
+            port(int):  Host port.
+            username(str):  Host user
+            password(str):  Host password
+            page_break(str):  Page brake marker.
+            prompt(str):  Shell prompt.
+            pass_prompt(str):  Login password prompt.
+            sudo_prompt(str):  Sudo password prompt.
+            login_prompt(str):  Login prompt.
+            page_break_lines(int):  Number of page brake lines.
+            exit_cmd(str):  Command to perform telnet exit.
+            timeout(int):  Default timeout for commands.
+            quiet(bool):  Flag for return code verification.
+
         """
 
         super(CLISSHNetNS, self).__init__()
@@ -125,39 +111,43 @@ class CLISSHNetNS(CLIGenericMixin):
         self.quiet = quiet
 
     def login(self, *args, **kwargs):
-        """
-        @brief  Shell is always opened for Popen\\Pexpect.
+        """Shell is always opened for Popen\\Pexpect.
+
         """
         self.login_status = True
 
     def open_shell(self):
-        """
-        @brief  Shell is always opened for Popen\\Pexpect.
+        """Shell is always opened for Popen\\Pexpect.
+
         """
         pass
 
     def close_shell(self):
-        """
-        @brief  Shell is always opened for Popen\\Pexpect.
+        """Shell is always opened for Popen\\Pexpect.
+
         """
         pass
 
     def check_shell(self):
-        """
-        @brief  Shell is always existed for Popen\\Pexpect.
+        """Shell is always existed for Popen\\Pexpect.
+
         """
         pass
 
     def close(self):
-        """
-        @brief  Popen\\Pexpect object is always opened and doesn't have 'close' method.
+        """Popen\\Pexpect object is always opened and doesn't have 'close' method.
+
         """
         pass
 
     def shell_read(self, timeout=0, interval=0.1):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::shell_read()
-        """
+        """Read data from output buffer.
+
+         Args:
+             timeout(int):  Increases time to read data from output buffer.
+             interval(int):  Time delay between attempts to read data from output buffer.
+
+         """
         data = ""
         if self.child:
             data = self.child.read()
@@ -167,8 +157,15 @@ class CLISSHNetNS(CLIGenericMixin):
 
     @ip_net_namespace_mode
     def exec_command(self, command, timeout=None):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::exec_command()
+        """Execute command without shell (tty).
+
+        Args:
+            command(str):  Command to be executed.
+            timeout(int):  Timeout for command execution.
+
+        Returns:
+            tuple(str, str, int): tuple of stdout, stderr, rc
+
         """
         self.class_logger.debug(command)
         command = command.split(" ")
@@ -183,11 +180,25 @@ class CLISSHNetNS(CLIGenericMixin):
     @ip_net_namespace_mode
     def shell_command(self, command, alternatives=None, timeout=None, sudo=False, ret_code=True, expected_rc="0",
                       quiet=None, raw_output=False, interval=0.1):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::shell_command()
-        @param  interval:  Interval between read data cycles.
-        @type  interval:  int | float
-        @raise  CLINNSException:  unexpected return code
+        """Run interactive command on previously created shell (tty).
+
+        Args:
+            command(str):  Command to be executed.
+            alternatives(tuple):  Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
+                                  action can be:
+                                      - str - in case this is just command;
+                                      - function - callable object to execute without parameters;
+            timeout(int):  Expecting timeout.
+            sudo(bool):  Flag if sudo should be added to the list of alternatives.
+            ret_code(bool):  Flag if return code should be added to the list of alternatives.
+            expected_rc(int): Sets return code and verifies if return code of executed command the same as expected return code (int or str).
+            quiet(bool):  Flag to verify if expected return equals expected.
+            raw_output(bool):  Flag whether to return 'pure' output.
+            interval(int | float): Interval between read data cycles.
+
+        Raises:
+            CLINNSException:  unexpected return code.
+
         """
         self.class_logger.debug("Command {0}".format(command))
         if timeout is None:
@@ -221,8 +232,11 @@ class CLISSHNetNS(CLIGenericMixin):
 
     @ip_net_namespace_mode
     def send_command(self, command):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::send_command()
+        """Run command without waiting response.
+
+        Args:
+            command(str):  Command to be executed.
+
         """
 
         self.class_logger.debug(command)
@@ -230,8 +244,12 @@ class CLISSHNetNS(CLIGenericMixin):
         Popen(command, stdout=PIPE, stderr=PIPE)
 
     def put_file(self, src, dst):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::put_file()
+        """Transfer file from/to remote host.
+
+        Args:
+            src(str):  File's source.
+            dst(str):  File's destination.
+
         """
         if isinstance(src, str):
             src = [src, ]
@@ -243,22 +261,24 @@ class CLISSHNetNS(CLIGenericMixin):
                 self.class_logger.warning("Error when copy {0} to {1} : \n{2}".format(_src, _dst, se))
 
     def get_file(self, src, dst):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::get_file()
+        """Put file to remote host.
+
+        Args:
+            src(str):  File's source.
+            dst(str):  File's destination.
+
         """
         self.put_file(src, dst)
 
     def native_cmd(self, command, shell=False, wait=True, verbose=True):
-        """
-        @brief  Execute popen command.
-        @param  command:  Command to be executed.
-        @type  command:  str
-        @param  shell:  Flag specifies whether to use the shell as the program to execute.
-        @type  shell:  bool
-        @param  wait:  Flag specifies whether to wait for command output.
-        @type  wait:  bool
-        @param  verbose:  Flag specifies whether to print command output.
-        @type  verbose:  bool
+        """Execute open command.
+
+        Args:
+            command(str):  Command to be executed.
+            shell(bool):  Flag specifies whether to use the shell as the program to execute.
+            wait(bool):  Flag specifies whether to wait for command output.
+            verbose(bool):  Flag specifies whether to print command output.
+
         """
         if verbose:
             self.class_logger.debug(command)

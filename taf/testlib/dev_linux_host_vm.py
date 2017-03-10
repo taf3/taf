@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2015-2016, Intel Corporation.
+# Copyright (c) 2015 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``dev_linux_host_vm.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`OpenStack VM host device related functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  dev_linux_host_vm.py
-
-@summary  OpenStack VM host device related functionality.
 """
 
 from . import clissh
@@ -43,8 +42,9 @@ class GenericLinuxVirtualHost(GenericLinuxHost):
 
         Required in virtual environment. When we create VMs host object we do not know the IP yet.
 
-        @param ipaddr:
-        @return:
+        Args:
+            ipaddr(list):  IPv4 address to be assigned to the specific interface
+
         """
         self.ipaddr = ipaddr
         ssh_eligible = self.ssh_pass or self.ssh_pkey or self.ssh_pkey_file
@@ -54,13 +54,17 @@ class GenericLinuxVirtualHost(GenericLinuxHost):
 
     def _get_nics(self, force_check=False):
         """Returns list of detected network adapterrs in the system
-        Note: Order of the adapters is very important. It should be according to how the
-        networks are defined when VM is created. Proper order is in self.os_networks
 
-        @param force_check: force re-reading nics
-        @type force_check: bool
-        @return: list of nics
-        @rtype: list
+        Notes:
+            Order of the adapters is very important. It should be according to how the
+            networks are defined when VM is created. Proper order is in self.os_networks
+
+        Args:
+            force_check(bool): force re-reading nics
+
+        Returns:
+            list: list of nics
+
         """
         if self.nics is None or force_check:
             self.nics = []
@@ -103,13 +107,17 @@ class GenericLinuxVirtualHost(GenericLinuxHost):
         return self.map_nics_if(f=f, mapper=mapper, force_check=force_check)
 
     def waiton(self, timeout=180):
-        """
-        @brief  Wait until device is fully operational.
-        @param  timeout:  Wait timeout
-        @type  timeout:  int
-        @raise  SwitchException:  device doesn't response
-        @rtype:  dict
-        @return  Status dictionary from probe method or raise an exception.
+        """Wait until device is fully operational.
+
+        Args:
+            timeout(int):  Wait timeout
+
+        Raises:
+            SwitchException:  device doesn't response
+
+        Returns:
+            dict:  Status dictionary from probe method or raise an exception.
+
         """
         return super(GenericLinuxVirtualHost, self).waiton(timeout)
 

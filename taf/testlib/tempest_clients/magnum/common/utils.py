@@ -10,6 +10,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""``utils.py``
+
+"""
+
 import collections
 import functools
 import inspect
@@ -29,6 +33,7 @@ def parameterized_class(cls):
 
     Mark your class with @parameterized_class.
     Mark your test cases with @parameterized.
+
     """
     test_functions = inspect.getmembers(cls, predicate=inspect.ismethod)
     for (name, f) in test_functions:
@@ -60,7 +65,7 @@ def parameterized_class(cls):
 def parameterized(data):
     """A function decorator for parameterized test cases.
 
-    Example:
+    Example::
 
         @parameterized({
             'zero': dict(val=0),
@@ -69,11 +74,14 @@ def parameterized(data):
         def test_val(self, val):
             self.assertEqual(val, self.get_val())
 
-    The above will generate two test cases:
+    The above will generate two test cases::
+
         `test_val_zero` which runs with val=0
         `test_val_one` which runs with val=1
 
-    :param data: A dictionary that looks like {tag: {arg1: val1, ...}}
+    Args:
+        data(dict): A dictionary that looks like {tag: {arg1: val1, ...}}
+
     """
     def wrapped(f):
         f._test_data = data
@@ -94,7 +102,9 @@ def wait_for_condition(condition, interval=1, timeout=40):
 
 
 def memoized(func):
-    """A decorator to cache function's return value"""
+    """A decorator to cache function's return value
+
+    """
     cache = {}
 
     @functools.wraps(func)

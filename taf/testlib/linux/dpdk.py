@@ -1,25 +1,27 @@
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``dpdk.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Class for dpdk operations`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Note:
+    Examples of dpdk usage in tests::
 
-@file  dpdk.py
+        inst.ui.dpdk.modify_iface_status(bind_action='bind', ifaces=["0000:01:00.0", "01:00.0"],
+                                         drv='igb_uio', force=False, show_status=True)
 
-@summary  Class for dpdk operations
-@note
-Examples of dpdk usage in tests:
-inst.ui.dpdk.modify_iface_status(bind_action='bind', ifaces=["0000:01:00.0", "01:00.0"],
-                                 drv='igb_uio', force=False, show_status=True)
 """
 
 import re
@@ -28,34 +30,32 @@ from testlib.custom_exceptions import CmdArgsException
 
 
 class Dpdk(object):
-    """
-    @description  Class for interfaces modifications using DPDK tools
+    """Class for interfaces modifications using DPDK tools.
+
     """
 
     SERVICE = 'dpdk-devbind'
 
     def __init__(self, cli_send_command):
-        """
-        @brief  Initialize DPDK class.
+        """Initialize DPDK class.
+
         """
         super(Dpdk, self).__init__()
         self.send_command = cli_send_command
 
     def modify_iface_status(self, bind_action='', ifaces=None, drv='', force=False, show_status=False):
-        """
-        @brief  Performs binding, unbinding NICs to specific driver and/or showing NICs status
-        @param  ifaces:  List of network interfaces in format <domain:bus:slot.func> or <bus:slot.func>
-        @type  ifaces:  list(str)
-        @param  bind_action:  action to be performed on NICs: bind | unbind
-        @type  bind_action:  str
-        @param  drv:  Driver file name (without extension)
-        @type  drv:  str
-        @param  force:  Flag to override modifying NIC used by Linux
-        @type  force:  bool
-        @param  show_status:  Flag to override modifying NIC used by Linux
-        @type  show_status:  bool
-        @rtype:  None or list(dict)
-        @return:  None or dictionary with interfaces status information
+        """Performs binding, unbinding NICs to specific driver and/or showing NICs status.
+
+        Args:
+            ifaces(str):  List of network interfaces in format <domain:bus:slot.func> or <bus:slot.func>
+            bind_action(str):  action to be performed on NICs: bind | unbind
+            drv(str):  Driver file name (without extension)
+            force(bool):  Flag to override modifying NIC used by Linux
+            show_status(bool):  Flag to override modifying NIC used by Linux
+
+        Returns:
+            None or list(dict):  None or dictionary with interfaces status information
+
         """
         if bind_action == 'bind':
             # Action 'bind' mandatory arguments: ifaces, drv

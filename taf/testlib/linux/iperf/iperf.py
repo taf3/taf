@@ -1,22 +1,23 @@
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``iperf.py``
+
+`Run iperf on the remote host and parse output`
+
 """
-@copyright Copyright (c) 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  iperf.py
-
-@summary  Run iperf on the remote host and parse output
-"""
 import os
 import sys
 from collections import namedtuple
@@ -42,13 +43,13 @@ IPERF_UNITS = {
 
 
 class IPerfParser(sumparser.SumParser):
-    """
-    @description  Class for parsing Iperf output
+    """Class for parsing Iperf output.
+
     """
 
     def __init__(self, *args, **kwargs):
-        """
-        @brief  Initialize IPerfParser class
+        """Initialize IPerfParser class.
+
         """
         if kwargs.get('units', None):
             kwargs['units'] = UNITS[kwargs['units']]
@@ -56,12 +57,14 @@ class IPerfParser(sumparser.SumParser):
         self.format = iperfexpressions.ParserKeys.human
 
     def parse(self, output):
-        """
-        @brief  Parse output from iperf execution
-        @param output: iperf output
-        @type  output: str
-        @rtype:  list
-        @return:  list of parsed iperf results
+        """Parse output from iperf execution.
+
+        Args:
+            output(str): iperf output
+
+        Returns:
+            list:  list of parsed iperf results
+
         """
         results = []
         for line in output.splitlines():
@@ -80,30 +83,30 @@ class IPerfParser(sumparser.SumParser):
 
 
 class Iperf(tool_general.GenericTool):
-    """
-    @description  Class for Iperf functionality
+    """Class for Iperf functionality.
+
     """
 
     def __init__(self, run_command):
-        """
-        @brief  Initialize Iperf class
-        @param run_command: function that runs the actual commands
-        @type run_command: function
+        """Initialize Iperf class.
+
+        Args:
+            run_command(function): function that runs the actual commands
+
         """
         super(Iperf, self).__init__(run_command, 'iperf')
 
     def start(self, prefix=None, options=None, command=None, **kwargs):
-        """
-        @brief  Generate Iperf command, launch iperf and store results in the file
-        @param prefix: command prefix
-        @type  prefix: str
-        @param options: intermediate iperf options list
-        @type  options: list of str
-        @param command: intermediate iperf command object
-        @type  command: Command
+        """Generate Iperf command, launch iperf and store results in the file.
 
-        @rtype:  dict
-        @return:  iperf instance process info
+        Args:
+            prefix(str): command prefix
+            options(list of str): intermediate iperf options list
+            command(Command): intermediate iperf command object
+
+        Returns:
+            dict:  iperf instance process info
+
         """
         # intermediate operands in 'command' and 'options', if any,  prevail in this
         # respective order and overrule the (both default and set) method arguments
@@ -135,18 +138,17 @@ class Iperf(tool_general.GenericTool):
         return instance_id
 
     def parse(self, output, parser=None, threads=1, units='m'):
-        """
-        @brief  Parse the Iperf output
-        @param output:  Iperf origin output
-        @type  output: str
-        @param parser: parser object
-        @type parser: IPerfParser
-        @param threads: num iperf threads
-        @type threads: int
-        @param units: iperf units
-        @type units: str
-        @rtype:  list
-        @return:  list of parsed iperf results
+        """Parse the Iperf output.
+
+        Args:
+            output(str):  Iperf origin output
+            parser(IPerfParser): parser object
+            threads(int): num iperf threads
+            units(str): iperf units
+
+        Returns:
+            list:  list of parsed iperf results
+
         """
         if not parser:
             parser = IPerfParser(threads=threads, units=IPERF_UNITS[units])

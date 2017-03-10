@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``loggers.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`logging functionality for TAF`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file loggers.py
-
-@summary logging functionality for TAF.
 """
 
 import errno
@@ -30,31 +29,32 @@ from threading import Thread
 
 
 class NoErrArgumentParser(argparse.ArgumentParser):
-    """
-    @description  ArgumentParser class that handle only predefined for an instance options.
+    """ArgumentParser class that handle only predefined for an instance options.
 
-    @note  The original ArgumentParser class raises an error if handle unknown option.
-           But py.test have it's own options and it's own custom parser and if ArgumentParser find them it raises an error.
-           Using this class allows not to define all possible options in each module that uses ArgumentParser.
+    Notes:
+        The original ArgumentParser class raises an error if handle unknown option.
+        But py.test have it's own options and it's own custom parser and if ArgumentParser find them it raises an error.
+        Using this class allows not to define all possible options in each module that uses ArgumentParser.
+
     """
 
     def __init__(self, *args, **kwargs):
-        """
-        @brief  Initialize NoErrArgumentParser class
+        """Initialize NoErrArgumentParser class.
+
         """
         self.valid_args_cre_list = []
         argparse.ArgumentParser.__init__(self, *args, **kwargs)
 
     def add_argument(self, *args, **kwargs):
-        """
-        @brief  Add arguments and save regexps of valid for the instance options in valid_args_cre_list
+        """Add arguments and save regexps of valid for the instance options in valid_args_cre_list.
+
         """
         self.valid_args_cre_list.append(re.compile("^{0}".format(args[0])))
         argparse.ArgumentParser.add_argument(self, *args, **kwargs)
 
     def parse_args(self, *args, **kwargs):
-        """
-        @brief  Filter out invalid options and parse only predefined ones for the instance
+        """Filter out invalid options and parse only predefined ones for the instance.
+
         """
         if len(args) > 0:
             args_to_parse = args[0]
@@ -79,8 +79,8 @@ class NoErrArgumentParser(argparse.ArgumentParser):
 
 
 def parse_options():
-    """
-    @brief  Parse additional cli logging options
+    """Parse additional cli logging options.
+
     """
     parser = NoErrArgumentParser(usage=argparse.SUPPRESS, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -108,8 +108,8 @@ def parse_options():
 
 
 def mkdir_p(path):
-    """
-    @brief  Create a directory.
+    """Create a directory.
+
     """
     try:
         os.makedirs(path)
@@ -161,23 +161,20 @@ del _OPTS
 
 
 class ClassLogger(object):
-    """
-    @details  Class logger descriptor.
+    """Class logger descriptor.
+
     """
 
     def __init__(self, log_level=LOG_LEVEL, log_file=LOG_FILENAME, log_stream=LOG_STREAM, for_exception=False, introspection=True):
-        """
-        @brief  Initialize instance of ClassLogger
-        @param  log_level:  Log level value
-        @type  log_level:  str
-        @param  log_file:  Path to log file
-        @type  log_file:  str
-        @param  log_stream:  Log stream value
-        @type  log_stream:  bool
-        @param  for_exception:  True for exception information
-        @type  for_exception:  bool
-        @param  introspection:  True for extended information
-        @type  introspection:  bool
+        """Initialize instance of ClassLogger.
+
+        Args:
+            log_level(str):  Log level value
+            log_file(str):  Path to log file
+            log_stream(bool):  Log stream value
+            for_exception(bool):  True for exception information
+            introspection(bool):  True for extended information
+
         """
         self._logger = None
         self.for_exception = for_exception
@@ -197,13 +194,17 @@ class ClassLogger(object):
         self._logger_adapter = None
 
     def __get__(self, instance, owner):
-        """
-        @brief  This method is called from class.
-        @param  owner:  class instance
-        @type  owner:  object
-        @rtype:  logging.LoggerAdapter
-        @return:  logger adaptor
-        @note  In case using logger for module level use get() method. __get__() won't be called from module level.
+        """This method is called from class.
+
+        Args:
+            owner(object):  class instance
+
+        Returns:
+            logging.LoggerAdapter:  logger adaptor
+
+        Notes:
+            In case using logger for module level use get() method. __get__() won't be called from module level.
+
         """
         if self.for_exception:
             caller_frame = inspect.stack()[2]
@@ -219,16 +220,16 @@ class ClassLogger(object):
         return _logger_adaptor
 
     def _get_logger(self, modulename, classname="", caller_func=""):
-        """
-        @brief  Configure and return loggerAdapter instance.
-        @param  modulename:  module name
-        @type  modulename:  str
-        @param  classname:  class name
-        @type  classname:  str
-        @param  caller_func:  function name
-        @type  caller_func:  str
-        @rtype:  logging.LoggerAdapter
-        @return:  logger adaptor
+        """Configure and return loggerAdapter instance.
+
+        Args:
+            modulename(str):  module name
+            classname(str):  class name
+            caller_func(str):  function name
+
+        Returns:
+            logging.LoggerAdapter:  logger adaptor
+
         """
         if classname:
             classname = "{0}.".format(classname)
@@ -254,30 +255,33 @@ class ClassLogger(object):
         return self._logger_adapter
 
     def get(self, modulename, classname=""):
-        """
-        @brief  Return logerAdapter instance for module level loging.
-        @param  modulename:  module name
-        @type  modulename:  str
-        @param  classname:  class name
-        @type  classname:  str
-        @rtype:  logging.LoggerAdapter
-        @return:  logger adaptor
+        """Return logerAdapter instance for module level loging.
+
+        Args:
+            modulename(str):  module name
+            classname(str):  class name
+
+        Returns:
+            logging.LoggerAdapter:  logger adaptor
+
         """
         _logger_adaptor = self._get_logger(modulename, classname)
         return _logger_adaptor
 
 
 class LoggerWrapper(Thread):
-    """
-    @brief  Read text message from a pipe and redirect them to a logger.
+    """Read text message from a pipe and redirect them to a logger.
 
-    @note  The object itself is able to supply a file descriptor to be used for writing.
-           fdWrite ==> fdRead ==> pipeReader
+    Notes:
+        The object itself is able to supply a file descriptor to be used for writing.
+
+        fdWrite ==> fdRead ==> pipeReader
+
     """
 
     def __init__(self, logger, level):
-        """
-        @brief  Setup the object with a logger and a loglevel and start the thread.
+        """Setup the object with a logger and a loglevel and start the thread.
+
         """
         # Initialize the superclass
         super(LoggerWrapper, self).__init__()
@@ -295,16 +299,17 @@ class LoggerWrapper(Thread):
         self.start()
 
     def fileno(self):
-        """
-        @brief  Return the write file descriptor of the pipe.
+        """Return the write file descriptor of the pipe.
+
         """
         return self.fd_write
 
     def run(self):
-        """
-        @brief  This is the method executed by the thread, it simply read from the pipe (using a file-like wrapper) and write the text to log.
+        """This is the method executed by the thread, it simply read from the pipe (using a file-like wrapper) and write the text to log.
 
-        @note  NB the trailing newline character of the string read from the pipe is removed.
+        Notes:
+            NB the trailing newline character of the string read from the pipe is removed.
+
         """
         # Endless loop, the method will exit this loop only when the pipe is close that is when a call to self.pipeReader.readline() returns an empty string
         while True:
@@ -326,23 +331,23 @@ class LoggerWrapper(Thread):
         print(">" * 50, "Redirection thread terminated.")
 
     def _write(self, message):
-        """
-        @brief  Utility method to send the message to the logger with the correct loglevel.
+        """Utility method to send the message to the logger with the correct loglevel.
+
         """
         self.logger.log(self.level, message)
 
 
 def module_logger(name="", clsname=""):
-    """
-    @brief  Return LoggerAdapter for module level logging.
+    """Return LoggerAdapter for module level logging.
+
     """
     # return ClassLogger(introspection=False).get(name)
     return ClassLogger().get(name, clsname)
 
 
 def pipe_loggers(name, log_file):
-    """
-    @brief  Return LoggerWrapper for pipe logging.
+    """Return LoggerWrapper for pipe logging.
+
     """
     log_file = os.path.join(LOG_DIR, log_file) if LOG_DIR is not None else None
     logger = ClassLogger(log_file=log_file, introspection=False).get(name)

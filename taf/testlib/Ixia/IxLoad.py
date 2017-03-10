@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``IxLoad.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`IxLoad specific functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  IxLoad.py
-
-@summary  IxLoad specific functionality.
 """
 
 import os
@@ -27,19 +26,19 @@ from . import ixia_helpers
 
 
 class IxLoad(object):
-    """
-    @description  IXIA interaction base class.
+    """IXIA interaction base class.
+
     """
 
     class_logger = None
 
     def __init__(self, config, opts):
-        """
-        @brief  Initializes connection to IxLoad
-        @param config:  IxLoad related part of environment configuration
-        @type  config:  dict
-        @param opts:  py.test config.option object which contains all py.test cli options
-        @type  opts:  OptionParser
+        """Initializes connection to IxLoad.
+
+        Args:
+            config(dict):  IxLoad related part of environment configuration
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options
+
         """
         self.__opts = opts
         self.__config = config
@@ -85,20 +84,24 @@ class IxLoad(object):
         self.repo_file = None
 
     def tcl(self, cmd):
-        """
-        @brief  Log end execute tcl code
-        @param cmd:  Tcl script
-        @type  cmd:  str
-        @rtype:  str
-        @return:  Result of execution
+        """Log end execute tcl code.
+
+        Args:
+            cmd(str):  Tcl script
+
+        Returns:
+            str:  Result of execution
+
         """
         self.class_logger.debug("Run tcl command: %s", cmd)
         return self.tcl_interpret.eval(cmd)
 
     def connect(self):
-        """
-        @brief  Logs in to IXIA and takes ports ownership.
-        @return:  None
+        """Logs in to IXIA and takes ports ownership.
+
+        Returns:
+            None
+
         """
         # Set simple config
         self.tcl("namespace eval ::IxLoadPrivate {};" +
@@ -113,15 +116,20 @@ class IxLoad(object):
         self.class_logger.info("IxLoad startup complete.")
 
     def disconnect(self):
-        """
-        @brief  Logs out from IXIA and clears ports ownership.
-        @return:  None
+        """Logs out from IXIA and clears ports ownership.
+
+        Returns:
+            None
+
         """
         self.tcl("::IxLoad disconnect")
 
     def check(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::check()
+        """Check if TG object is alive and ready for processing
+
+        Returns:
+            None or raise and exception.
+
         """
         try:
             # TODO: Add proper connect status verification.
@@ -134,24 +142,42 @@ class IxLoad(object):
             self.__init__(self.__config, self.__opts)
 
     def create(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::create()
+        """Perform all necessary procedures to initialize TG device and prepare it for interaction.
+
+        Returns:
+            None or raise and exception.
+
+        Notes:
+            Method has to check --get_only option.
+            Set of steps to configure TG device is related to particular TG type.
+
         """
         return self.connect()
 
     def destroy(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::destroy()
+        """Perform all necessary procedures to uninitialize TG device.
+
+        Returns:
+            None or raise and exception.
+
+        Note:
+            Method has to check --get_only and --leave_on options.
+            Set of steps to unconfigure TG device is related to particular TG type.
+            Method has to clear all connections and stop all captures and data streams.
+
         """
         self.cleanup(mode="fast")
         self.disconnect()
 
     def cleanup(self, mode="complete"):
-        """
-        @brief  This method should do IxLoad config cleanup
-        @param mode:  "fast" or "complete". Not implemented
-        @type  mode:  str
-        @return:  None
+        """This method should do IxLoad config cleanup.
+
+        Args:
+            mode(str):  "fast" or "complete". Not implemented
+
+        Returns:
+            None
+
         """
         # TODO: Implement proper config cleanup method.
         self.tcl("$testController releaseConfigWaitFinish;" +
@@ -162,15 +188,20 @@ class IxLoad(object):
         # ::IxLoad delete $repository
 
     def sanitize(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::sanitize()
+        """This method has to clear all stuff which can cause device inconsistent state after exit or unexpected exception.
+
+        Note:
+            E.g. clear connections, stop threads. This method is called from pytest.softexit
+
         """
         self.disconnect()
 
     def logger_setup(self):
-        """
-        @brief  Enable IxLoad logger
-        @return:  None
+        """Enable IxLoad logger.
+
+        Returns:
+            None
+
         """
         self.class_logger.info("Setting up IxLoad logger...")
         self.tcl("set logtag \"IxLoad-api\";" +
@@ -181,11 +212,14 @@ class IxLoad(object):
                  "$logEngine setFile $logName 2 256 1")
 
     def load_repo(self, repo=None):
-        """
-        @brief  Loading rxf repo file or create new one
-        @param repo:  Repository name
-        @type  repo:  str
-        @return:  None
+        """Loading rxf repo file or create new one.
+
+        Args:
+            repo(str):  Repository name
+
+        Returns:
+            None
+
         """
         if repo is None:
             self.tcl("set repository [::IxLoad new ixRepository]")
@@ -200,20 +234,22 @@ class IxLoad(object):
         self.class_logger.debug("Discovered tests list: {0}".format(self.tst.tc_list))
 
     def copy_local_file(self, local_path, remote_path):
-        """
-        @brief  Copy local file to IxLoad host
-        @param local_path:  Local path to file
-        @type  local_path:  str
-        @param remote_path:  Remote path to file
-        @type  remote_path:  str
-        @return:  None
+        """Copy local file to IxLoad host.
+
+        Args:
+            local_path(str):  Local path to file
+            remote_path(str):  Remote path to file
+
+        Returns:
+            None
+
         """
         self.tcl("::IxLoad sendFileCopy \"{0}\" \"{1}\"".format(local_path, remote_path).replace("\\", "\\\\"))
 
 
 class IxLoadTests(object):
-    """
-    @description  Class for managing IxLoad Tests
+    """Class for managing IxLoad Tests.
+
     """
 
     def __init__(self, tcl, res_path=""):
@@ -223,9 +259,11 @@ class IxLoadTests(object):
         self.res_path = res_path
 
     def load_tclist(self):
-        """
-        @brief  Loading list of IxLoad Tests
-        @return:  None
+        """Loading list of IxLoad Tests.
+
+        Returns:
+            None
+
         """
         _tlist = []
         num_tests = self.tcl("$repository testList.indexCount")
@@ -237,22 +275,27 @@ class IxLoadTests(object):
         self.tc_list = _tlist
 
     def start(self, t_name):
-        """
-        @brief  Start ixLoad test without waiting for result
-        @param t_name:  test case name
-        @type  t_name:  str
-        @return:  None
+        """Start ixLoad test without waiting for result.
+
+        Args:
+            t_name(str):  test case name
+
+        Returns:
+            None
+
         """
         self.tcl("puts {0}".format(t_name))
 
     def run(self, t_name, res_path=None):
-        """
-        @brief  Run ixLoad test until completion
-        @param t_name:  test case name
-        @type  t_name:  str
-        @param res_path:  Path to result
-        @type  res_path:  str
-        @return:  Path to report
+        """Run ixLoad test until completion.
+
+        Args:
+            t_name(str):  test case name
+            res_path(str):  Path to result
+
+        Returns:
+            str:Path to report
+
         """
         # Set result dir.
         res_path = res_path if res_path is not None else self.res_path
@@ -265,48 +308,56 @@ class IxLoadTests(object):
         return res_path
 
     def cleanup(self):
-        """
-        @brief  Cleanup list of IxLoad Tests
-        @return:  None
+        """Cleanup list of IxLoad Tests.
+
+        Returns:
+            None
+
         """
         self.tcl("$testController releaseConfigWaitFinish;" +
                  "if {[lsearch [info vars] test] >= 0} {$test clearDUTList; ::IxLoad delete $test}"
                  )
 
     def report(self, pdf=False):
-        """
-        @brief  Enable/Disable report options
-        @param pdf:  Enable/Disable PDF report
-        @type  pdf:  bool
-        @return:  None
+        """Enable/Disable report options.
+
+        Args:
+            pdf(bool):  Enable/Disable PDF report
+
+        Returns:
+            None
+
         """
         self.tcl("ixNet setAttribute [ixNet getRoot]/testConfiguration -enableGenerateReportAfterRun {0}".format(pdf))
 
 
 class QuickTests(object):
-    """
-    @description  Class for managing QuickTests.
+    """Class for managing QuickTests.
+
     """
 
     def __init__(self, tcl):
-        """
-        @brief  Initialize QuickTests class
-        @param tcl:  Tcl interpreter
-        @type  tcl:  Tkinter.Tcl
+        """Initialize QuickTests class.
+
+        Args:
+            tcl(Tkinter.Tcl):  Tcl interpreter
+
         """
         self.tcl = tcl
         self.tc_list = []
         self.load_tclist()
 
     def load_tclist(self):
-        """
-        @brief  Loading list of QuickTests
-        @return:  None
+        """Loading list of QuickTests.
+
+        Returns:
+            None
+
         """
 
         def store_tc(qt):
-            """
-            @brief  Store quick test in tc_list
+            """Store quick test in tc_list.
+
             """
             qt_name, qt_id = qt.split(":")
             self.tc_list.append((qt_name, qt_id))
@@ -320,35 +371,40 @@ class QuickTests(object):
             list(map(store_tc, _qtlist))
 
     def start(self, qt_name, qt_id):
-        """
-        @brief  Start QuickTest without waiting for result
-        @param qt_name:  QuickTest name
-        @type  qt_name:  str
-        @param qt_id:  QuickTest id
-        @type  qt_id:  int
-        @rtype:  str
-        @return:  Result of execution
+        """Start QuickTest without waiting for result.
+
+        Args:
+            qt_name(str):  QuickTest name
+            qt_id(int):  QuickTest id
+
+        Returns:
+            str: Result of execution
+
         """
         self.tcl("ixNet exec start [ixNet getRoot]/quickTest/{0}:{1}".format(qt_name, qt_id))
 
     def run(self, qt_name, qt_id):
-        """
-        @brief  Run QuickTest until completion
-        @param qt_name:  QuickTest name
-        @type  qt_name:  str
-        @param qt_id:  QuickTest id
-        @type  qt_id:  int
-        @rtype:  str
-        @return:  Result of execution
+        """Run QuickTest until completion.
+
+        Args:
+            qt_name(str):  QuickTest name
+            qt_id(int):  QuickTest id
+
+        Returns:
+            str:  Result of execution
+
         """
         rc = self.tcl("ixNet exec run [ixNet getRoot]/quickTest/{0}:{1}".format(qt_name, qt_id))
         return rc
 
     def report(self, pdf=False):
-        """
-        @brief  Enable/Disable report options
-        @param  pdf:  Enable/Disable PDF report
-        @type  pdf:  bool
-        @return:  None
+        """Enable/Disable report options.
+
+        Args:
+            pdf(bool):  Enable/Disable PDF report
+
+        Returns:
+            None
+
         """
         self.tcl("ixNet setAttribute [ixNet getRoot]/testConfiguration -enableGenerateReportAfterRun {0}".format(pdf))

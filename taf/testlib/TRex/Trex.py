@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``Trex.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`TRex traffic generator based on TRex stateless Python API`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  Trex.py
-
-@summary  TRex traffic generator based on TRex stateless Python API.
 """
 import os
 
@@ -26,8 +26,8 @@ from testlib.custom_exceptions import TrexException
 
 
 class TrexMixin(object):
-    """
-    @description  TRex interaction base class
+    """TRex interaction base class.
+
     """
 
     SYNC_PORT = 4501
@@ -39,12 +39,12 @@ class TrexMixin(object):
                             'stcp_increment', 'dtcp_increment', 'required_size']
 
     def __init__(self, config, opts):
-        """
-        @brief  Initializes connection to TRex
-        @param config:  Configuration information
-        @type  config:  dict
-        @param opts:  py.test config.option object which contains all py.test cli options
-        @type  opts:  OptionParser
+        """Initializes connection to TRex.
+
+        Args:
+            config(dict):  Configuration information
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options
+
         """
         super(TrexMixin, self).__init__(config, opts)
         self.stream_ids = {}
@@ -56,10 +56,14 @@ class TrexMixin(object):
         self.trex = TApi.STLClient(username=self.user, server=self.host, sync_port=self.sync_port, async_port=self.async_port)
 
     def connect(self):
-        """
-        @brief  Logs in to TRex server
-        @raise  TrexException:  error on connecting to server
-        @return:  None
+        """Logs in to TRex server.
+
+        Raises:
+            TrexException:  error on connecting to server
+
+        Returns:
+            None
+
         """
         try:
             self.trex.connect()
@@ -73,10 +77,14 @@ class TrexMixin(object):
     __connect = connect
 
     def _reset_ports(self):
-        """
-        @brief  Reset TG ports configuration
-        @raise  TrexException:  error resetting ports
-        @return:  None
+        """Reset TG ports configuration.
+
+        Raises:
+            TrexException:  error resetting ports
+
+        Returns:
+            None
+
         """
         try:
             self.trex.reset(ports=self.ports)
@@ -86,50 +94,96 @@ class TrexMixin(object):
             raise TrexException("Error resetting ports")
 
     def disconnect(self, mode='fast'):
-        """
-        @brief  Logs out from TRex server
-        @param mode:  Type of mode to execute
-        @type  mode:  str
-        @return:  None
+        """Logs out from TRex server.
+
+        Args:
+            mode(str):  Type of mode to execute
+
+        Returns:
+            None
+
         """
         self.trex.disconnect()
 
     __disconnect = disconnect
 
     def disconnect_port(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::disconnect_port()
+        """Simulate port link disconnecting (set it to admin down etc).
+
+        Args:
+            iface(str):  Interface to disconnect.
+
+        Raises:
+            NotImplementedError:  not implemented
+
+        Returns:
+            None or raise and exception.
+
         """
         pass
 
     def connect_port(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::connect_port()
+        """Simulate port link connecting (set it to admin up etc).
+
+        Args:
+            iface(str):  Interface to connect.
+
+        Raises:
+            NotImplementedError:  not implemented
+
+        Returns:
+            None or raise and exception.
+
         """
         pass
 
     def check(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::check()
+        """Check if TG object is alive and ready for processing.
+
+        Returns:
+            None or raise and exception.
+
         """
         if not self.trex.is_connected():
             self.__connect()
 
     def create(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::create()
+        """Perform all necessary procedures to initialize TG device and prepare it for interaction.
+
+        Returns:
+            None or raise and exception.
+
+        Notes:
+            Method has to check --get_only option.
+
+            Set of steps to configure TG device is related to particular TG type.
+
         """
         self.__connect()
 
     def destroy(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::destroy()
+        """Perform all necessary procedures to uninitialize TG device.
+
+        Returns:
+            None or raise and exception.
+
+        Notes:
+            Method has to check --get_only and --leave_on options.
+            Set of steps to unconfigure TG device is related to particular TG type.
+            Method has to clear all connections and stop all captures and data streams.
+
         """
         self.__disconnect()
 
     def cleanup(self, mode="complete"):
-        """
-        @copydoc testlib::tg_template::GenericTG::cleanup()
+        """This method should do Ixia ports cleanup (remove streams etc).
+
+        Args:
+            mode(str): "fast" or "complete". If mode == "fast", method does not clear streams on the port, but stops them (str).
+
+        Returns:
+            None or raise and exception.
+
         """
         try:
             self.stop_streams()
@@ -139,27 +193,34 @@ class TrexMixin(object):
             self.clear_streams()
 
     def sanitize(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::sanitize()
+        """This method has to clear all stuff which can cause device inconsistent state after exit or unexpected exception.
+
+        Notes:
+            E.g. clear connections, stop threads. This method is called from pytest.softexit
+
         """
         self.__disconnect()
 
     def clear_streams(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::clear_streams()
+        """Stop and clear all traffic streams.
+
         """
         self.stream_ids = {}
         self._reset_ports()
 
     def _check_supported_increments_and_values(self, **kwargs):
-        """
-        @brief  Check whether provided increments are supported or not
-        @param  kwargs:  Increment parameters to be modified
-        @type  kwargs:  dict
-        @raise  TrexException: Unsupported increment is passed to method.
-                TypeError:  Tuple must be passed to method.
-        @rtype:  dict
-        @return:  Dictionary of increments and values to be set
+        """Check whether provided increments are supported or not.
+
+        Args:
+            kwargs(dict):  Increment parameters to be modified
+
+        Raises:
+            TrexException: Unsupported increment is passed to method.
+            TypeError:  Tuple must be passed to method.
+
+        Returns:
+            dict:  Dictionary of increments and values to be set
+
         """
         increments = {x: y for x, y in kwargs.items()
                       if y is not None and ('increment' in x or (x == 'required_size' and isinstance(y, tuple)))}
@@ -194,12 +255,14 @@ class TrexMixin(object):
 
     @staticmethod
     def _set_increments(packet, **kwargs):
-        """
-        @brief  Set increments for stream using Field Engine
-        @param  kwargs:  Increment parameters to be modified
-        @type  kwargs:  dict
-        @rtype:  object(STLScVmRaw) | None
-        @return:  Field Engine STLScVmRaw Class object
+        """Set increments for stream using Field Engine.
+
+        Args:
+            kwargs(dict):  Increment parameters to be modified
+
+        Returns:
+            object(STLScVmRaw) | None:  Field Engine STLScVmRaw Class object
+
         """
 
         if not kwargs:
@@ -299,12 +362,68 @@ class TrexMixin(object):
                    required_size=64, fragsize=None, build_packet=True, eth_type_increment=None, dscp_increment=None, protocol_increment=None,
                    sipv6_increment=None, dipv6_increment=None, fl_increment=None, dhcp_si_increment=None, in_vlan_increment=None,
                    tc_increment=None, nh_increment=None, cont_burst=False, force_errors=None, udf_dependancies=None):
-        """
-        @copydoc testlib::tg_template::GenericTG::set_stream()
-        @param stcp_increment:  source TCP address increment
-        @type  stcp_increment:  tuple
-        @param dtcp_increment:  destination TCP address increment
-        @type  dtcp_increment:  tuple
+        """Set traffic stream with specified parameters on specified TG port.
+
+        Args:
+            packet_def(tuple(dict{dict})):  Packet definition. Tuple of dictionaries of dictionaries in format:
+                                            ({layerX: {field1: value, field2: value}, {layerY: {field1:value, fieldN: value}})
+            count(int):  How many packets to send in a stream.
+            inter(int):  Interval between sending each packet.
+            rate(int):  Interface rate in percents.
+            continuous(bool):  Should stream be sent continuously or not. Continuous streams have to be started using start_streams method.
+            iface(str, tuple):  Interface to use for packet sending (type depends on particular tg ports type).
+            adjust_size(bool):  See description for _build_pypacker_packet function.
+            required_size(int, tuple):  Integer or tuple of parameters needed to be set when packet size should be incremented.
+                                        Tuple examples: ('Increment', <step>, <min>, <max>), ('Random', <min>, <max>)
+            fragsize(int):  Max size of packet's single frame
+            is_valid(bool):  Recalculate check sum and length for each packet layer
+                             (by default pypacker do this automatically in case length and check sum aren't set).
+                             This parameter has to be set True with all incrementation parameters.
+            build_packet(bool):  Build packet from definition or use already built pypacker packet.
+            sa_increment(tuple):  Source MAC increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            da_increment(tuple):  Destination MAC increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            sip_increment(tuple):  Source IPv4 increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            dip_increment(tuple):  Destination IPv4 increment parameters. Tuple (<step>, <count>). Use count=0 for continuous increment.
+            arp_sa_increment(tuple):  Source MAC increment parameters for ARP packet. Tuple (<step>, <count>). Has to be used in pair with arp_sip_increment.
+            arp_sip_increment(tuple):  Source IP increment parameters for ARP packet. Tuple (<step>, <count>). Has to be used in pair with arp_sa_increment.
+            igmp_ip_increment(tuple):  Destination IP increment parameters for IGMP packet. Tuple (<step>, <count>).
+            lldp_sa_increment(tuple):  Source MAC increment parameters for LLDP packet. Tuple (<step>, <count>).
+            vlan_increment(tuple):  VLAN increment parameters for tagged packet. Tuple (<step>, <count>).
+            sudp_increment(tuple):  UDP source port increment parameters.
+            dudp_increment(tuple):  UDP destination port increment parameters.
+            eth_type_increment(tuple):  Ethernet frame type increment parameters.
+            dscp_increment(tuple):  DSCP increment parameters.
+            protocol_increment(tuple):  IP protocol incrementation..
+            sipv6_increment(tuple):  Source IPv6 increment parameters.
+            dipv6_increment(tuple):  Destination IPv6 increment parameters.
+            fl_increment(tuple):  Flow label increment parameters.
+            dhcp_si_increment(tuple):  DHCP IP increment parameters.
+            in_vlan_increment(tuple):  Inner vlan ID increment parameters for double tagged frames. Tuple (<step>, <count>).
+            tc_increment(tuple):  IPv6 Traffic Class increment parameters.
+            nh_increment(tuple):  IPv6 Next Header increment parameters.
+
+            cont_burst(bool):  Should stream be sent as continuous burst or not. Continuous streams have to be started using start_streams method.
+            force_errors(str):  Emulate Errors for configured stream.
+                                Enum ("bad" /*streamErrorBadCRC, "none" /*streamErrorNoCRC, "dribble" /*streamErrorDribble, "align" /*streamErrorAlignment).
+            udf_dependancies(dict):  Set UDF dependencies in case one incerement is dependant from another.
+                                     Dictionary {<dependant_increment> : <initial_increment>}
+            stcp_increment(tuple):  source TCP address increment
+            dtcp_increment(tuple):  destination TCP address increment
+
+        Returns:
+            int: stream id
+
+        Notes:
+            It's not expected to configure a lot of incrementation options. Different traffic generator could have different limitations for these options.
+
+        Example::
+
+            stream_id_1 = tg.set_stream(pack_ip, count=100, iface=iface)
+            stream_id_2 = tg.set_stream(pack_ip, continuous=True, inter=0.1, iface=iface)
+            stream_id_3 = tg.set_stream(pack_ip_udp, count=5, protocol_increment=(3, 5), iface=iface)
+            stream_id_4 = tg.set_stream(pack_ip_udp, count=18, sip_increment=(3, 3), dip_increment=(3, 3), iface=iface,
+                                        udf_dependancies={'sip_increment': 'dip_increment'})
+
         """
         stream_id = max(self.stream_ids) + 1 if self.stream_ids else 1
         self.class_logger.debug("Stream ID is: %s", stream_id)
@@ -360,8 +479,14 @@ class TrexMixin(object):
         return stream_id
 
     def send_stream(self, stream_id):
-        """
-        @copydoc testlib::tg_template::GenericTG::send_stream()
+        """Sends the stream created by 'set_stream' method.
+
+        Args:
+            stream_id(int):  ID of the stream to be send.
+
+        Returns:
+            float: timestamp.
+
         """
         self.class_logger.debug("Sending stream %s...", stream_id)
         stream_port = self.stream_ids[stream_id]['iface']
@@ -370,8 +495,14 @@ class TrexMixin(object):
         self.trex.start(ports=[stream_port])
 
     def start_streams(self, stream_list):
-        """
-        @copydoc testlib::tg_template::GenericTG::start_streams()
+        """Enable and start streams from the list simultaneously.
+
+        Args:
+            stream_list(list[int]):  List of stream IDs.
+
+        Returns:
+            None
+
         """
         self.class_logger.debug("Starting streams %s...", stream_list)
 
@@ -382,16 +513,19 @@ class TrexMixin(object):
         self.trex.start(ports=stream_ports)
 
     def start_streams_from_file(self, file_path, iface, wait=False):
-        """
-        @brief  Load and start stream(s) from profile file(yaml,pcap or py)
-        @param file_path: path to file(yaml,pcap or py)
-        @type  file_path:  str
-        @param iface: interface name
-        @type  iface:  int
-        @param wait: wait until traffic is ended
-        @type  wait:  bool
-        @raise  TrexException:  error on opening profile file
-        @return:  stream id list
+        """Load and start stream(s) from profile file(yaml,pcap or py).
+
+        Args:
+            file_path(str): path to file(yaml,pcap or py)
+            iface(int): interface name
+            wait(bool): wait until traffic is ended
+
+        Raises:
+            TrexException:  error on opening profile file
+
+        Returns:
+            list{int}: Stream id list
+
         """
         # Try to load a profile
         try:
@@ -413,8 +547,14 @@ class TrexMixin(object):
         return stream_id_list
 
     def stop_streams(self, stream_list=None):
-        """
-        @copydoc testlib::tg_template::GenericTG::stop_streams()
+        """ Disable streams from the list.
+
+        Args:
+            stream_list(list[int]):  Stream IDs to stop. In case stream_list is not set all running streams will be stopped.
+
+        Returns:
+            None
+
         """
         # If stream_list not defined then stop all streams
         if not stream_list:
@@ -429,20 +569,24 @@ class TrexMixin(object):
             self.trex.remove_all_streams(ports=stream_ports)
 
     def stop_all_streams(self):
-        """
-        @brief  Stop streams for all owned ports
-        @return:  None
+        """Stop streams for all owned ports.
+
+        Returns:
+            None
+
         """
         self.trex.stop(ports=self.ports)
         self.trex.remove_all_streams(ports=self.ports)
 
     def get_statistics(self, iface=None):
-        """
-        @brief  Read statistics
-        @param iface:  interface name
-        @type  iface:  int
-        @rtype:  dict
-        @return:  interface statistics
+        """Read statistics.
+
+        Args:
+            iface(int):  interface name
+
+        Returns:
+            dict: interface statistics
+
         """
         if iface is not None:
             return self.trex.get_stats(iface)[iface]
@@ -450,80 +594,177 @@ class TrexMixin(object):
             return self.trex.get_stats(self.ports)
 
     def clear_statistics(self, ifaces):
-        """
-        @brief  Clear statistics
-        @param ifaces:  interfaces names
-        @type  ifaces:  list
-        @return:  None
+        """Clear statistics.
+
+        Args:
+            ifaces(list):  interfaces names
+
+        Returns:
+            None
+
         """
         self.trex.clear_stats(ports=ifaces)
 
     def get_received_frames_count(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_received_frames_count()
+        """Read statistics - number of received valid frames.
+
+        Args:
+            iface(str):  Interface name.
+
+        Returns:
+            int: Number of received frames.
+
         """
         return self.trex.get_stats(iface)[iface]['ipackets']
 
     def get_sent_frames_count(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_sent_frames_count()
+        """Read statistics - number of sent frames.
+
+        Args:
+            iface(str):  Interface name.
+
+        Returns:
+            int: Number of sent frames.
+
         """
         return self.trex.get_stats(iface)[iface]['opackets']
 
     def get_port_txrate(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_port_txrate()
+        """Return port transmission rate.
+
+        Args:
+            iface(str):  Interface name.
+
+        Returns:
+            int: Frames per second.
+
         """
         return self.trex.get_stats(iface)[iface]['tx_pps']
 
     def get_port_rxrate(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_port_rxrate()
+        """Return port receiving rate.
+
+        Args:
+            iface(str):  Interface name.
+
+        Returns:
+            int: Frames per second.
+
         """
         return self.trex.get_stats(iface)[iface]['rx_pps']
 
     def start_sniff(self, ifaces, sniffing_time=None, packets_count=0, filter_layer=None, src_filter=None, dst_filter=None):
-        """
-        @copydoc testlib::tg_template::GenericTG::start_sniff()
+        """Starts sniffing on specified interfaces.
+
+        Args:
+            ifaces(list):  List of TG interfaces for capturing.
+            sniffing_time(int):  Time in seconds for sniffing.
+            packets_count(int):  Count of packets to sniff (no count limitation in case 0).
+            filter_layer(str):  Name of predefined sniffing filter criteria.
+            src_filter(str):  Sniff only packet with defined source MAC.
+            dst_filter(str):  Sniff only packet with defined destination MAC.
+
+        Returns:
+            None
+
+        Notes:
+            This method introduces additional 1.5 seconds timeout after capture enabling.
+            It's required by Ixia sniffer to wait until capturing is started.
+
+        Example::
+
+            env.tg[1].start_sniff(['eth0', ], filter_layer='IP', src_filter='00:00:00:01:01:01', dst_filter='00:00:00:22:22:22')
+
         """
         pytest.skip("Method is not supported by TRex TG")
 
     def stop_sniff(self, ifaces, force=False, drop_packets=False, sniff_packet_count=1000):
-        """
-        @copydoc testlib::tg_template::GenericTG::stop_sniff()
+        """Stops sniffing on specified interfaces and returns captured data.
+
+        Args:
+            ifaces(list):  List of interfaces where capturing has to be stopped.
+            force(bool):  Stop capturing even if time or packet count criteria isn't achieved.
+            drop_packets(bool):  Don't return sniffed data (used in case you need just read statistics).
+            sniff_packet_count(int):  Default number of packets to return (used to avoid test hanging in case storm).
+
+        Returns:
+            dict: Dictionary where key = interface name, value = list of sniffed packets.
+
         """
         pytest.skip("Method is not supported by TRex TG")
 
     def get_filtered_frames_count(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_filtered_frames_count()
+        """Read statistics - number of received frames which fit filter criteria.
+
+        Args:
+            iface(str):  Interface name.
+
+        Returns:
+            int: Number of filtered frames.
+
         """
         pytest.skip("Method is not supported by TRex TG")
 
     def get_uds_3_frames_count(self, iface):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_uds_3_frames_count()
+        """Read statistics - number of non-filtered received frames (valid and invalid).
+
+        Args:
+            iface(str):  Interface name.
+
+        Returns:
+            int: Number of received frames
+
         """
         pytest.skip("Method is not supported by TRex TG")
 
     def set_flow_control(self, iface, mode):
-        """
-        @copydoc testlib::tg_template::GenericTG::set_flow_control()
+        """Enable/Disable flow control on the port.
+
+        Args:
+            iface(str):  Interface name.
+            mode(bool):  True/False.
+
+        Returns:
+            None
+
         """
         pytest.skip("Method is not supported by TRex TG")
 
     def set_qos_stat_type(self, iface, ptype):
-        """
-        @copydoc testlib::tg_template::GenericTG::set_qos_stat_type()
+        """Set the QoS counters to look for priority bits for given packets type.
+
+        Args:
+            iface(str):  Interface name.
+            ptype(str):  Priority type: VLAN/IP.
+
+        Returns:
+            None
+
         """
         pytest.skip("Method is not supported by TRex TG")
 
     def get_qos_frames_count(self, iface, prio):
-        """
-        @copydoc testlib::tg_template::GenericTG::get_qos_frames_count()
+        """Get captured QoS frames count.
+
+        Args:
+            iface(str):  Interface name.
+            prio(int):  Priority.
+
+        Returns:
+            int: captured QoS frames count.
+
         """
         pytest.skip("Method is not supported by TRex TG")
 
     def get_port_qos_rxrate(self, iface, qos):
-        """@copydoc testlib::tg_template::GenericTG::get_port_qos_rxrate()"""
+        """Return port receiving rate for specific qos.
+
+        Args:
+            iface(str):  Interface name.
+            qos(int):  Qos value.
+
+        Returns:
+            int: Frames per second (int)
+
+        """
         pytest.skip("Method is not supported by TRex TG")

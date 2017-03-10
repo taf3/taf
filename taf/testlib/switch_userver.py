@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``switch_userver.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`uServer-specific functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  switch_userver.py
-
-@summary  uServer-specific functionality.
 """
 
 import time
@@ -25,17 +24,17 @@ from .switch_ons import SwitchONS
 
 
 class SwitchUServer(SwitchONS):
-    """
-    @description  uServer devices class.
+    """uServer devices class.
+
     """
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize SwitchUServer class
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
+        """Initialize SwitchUServer class.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
         """
         super(SwitchUServer, self).__init__(config, opts)
         self.default_restart_type = "ui"
@@ -45,18 +44,19 @@ class SwitchUServer(SwitchONS):
             self.default_restart_type = "ipmi"
 
     def _fill_ipmi(self, config):
-        """
-        @brief  Configure IPMI
-        @param  config:  Configuration information.
-        @type  config:  dict
+        """Configure IPMI.
+
+        Args:
+            config(dict):  Configuration information.
+
         """
         self.ipmi = {}
         for key in list(config.keys()):
             self.ipmi[key] = config[key]
 
     def get_chassis_config(self):
-        """
-        @brief  Get chassis configuration
+        """Get chassis configuration.
+
         """
         if "ipmi" in self.config:
             chassis_info = self.getprop_table('ChassisConfig')[0]
@@ -64,8 +64,8 @@ class SwitchUServer(SwitchONS):
             self.ipmi["ipmi_slot"] = int(chassis_info['switchSlotId']) + 1
 
     def _ipmi_restart(self):
-        """
-        @brief  Restart IPMI
+        """Restart IPMI.
+
         """
         import os
 
@@ -77,8 +77,8 @@ class SwitchUServer(SwitchONS):
                                                                 self.ipmi["ipmi_reset_cmd"].format(slot_id=self.ipmi["ipmi_slot"])))
 
     def _ipmi_poweroff(self):
-        """
-        @brief  Performing Power Off via IPMI
+        """Performing Power Off via IPMI.
+
         """
         import os
         self.class_logger.info("Performing PowerOFF via IPMI")
@@ -89,8 +89,8 @@ class SwitchUServer(SwitchONS):
                                                                 self.ipmi["ipmi_off_cmd"].format(slot_id=self.ipmi["ipmi_slot"])))
 
     def _ipmi_poweron(self):
-        """
-        @brief  Performing Power On via IPMI
+        """Performing Power On via IPMI.
+
         """
         import os
         self.class_logger.info("Performing PowerON via IPMI")
@@ -101,12 +101,12 @@ class SwitchUServer(SwitchONS):
                                                                 self.ipmi["ipmi_on_cmd"].format(slot_id=self.ipmi["ipmi_slot"])))
 
     def restart(self, wait_on=True, mode="powercycle"):
-        """
-        @brief  Power Off IPMI
-        @param  wait_on:  Indicates if wait for device status
-        @type  wait_on:  bool
-        @param  mode:  Restart mode. powercycle|ui|ipmi
-        @type  mode:  str
+        """Power Off IPMI.
+
+        Args:
+            wait_on(bool):  Indicates if wait for device status
+            mode(str):  Restart mode. powercycle|ui|ipmi
+
         """
         if mode == "ipmi":
             if "ipmi" in self.config:
@@ -125,12 +125,12 @@ class SwitchUServer(SwitchONS):
         return super(SwitchUServer, self).restart(wait_on, mode)
 
     def get(self, init_start=False, retry_count=7):
-        """
-        @brief  Get or start switch instance. Get chassis configuration.
-        @param init_start:  Perform switch start operation or not
-        @type  init_start:  bool
-        @param retry_count:  Number of retries to start(restart) switch
-        @type  retry_count:  int
+        """Get or start switch instance. Get chassis configuration.
+
+        Args:
+            init_start(bool):  Perform switch start operation or not
+            retry_count(int):  Number of retries to start(restart) switch
+
         """
         super(SwitchUServer, self).get(init_start, retry_count)
         # Make sure that ChassisConfig is already updated

@@ -1,22 +1,22 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+"""``dev_switch_sdv_100g_rr.py``
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+`SDV 100G RR  switch-specific functionality`
 
-@file  dev_switch_sdv_100g_rr.py
-
-@summary  SDV 100G RR  switch-specific functionality.
 """
 from collections import OrderedDict
 from collections import namedtuple
@@ -26,8 +26,8 @@ from .si_fm10k import SiliconFM10K
 
 
 class SwitchRR(SwitchReal):
-    """
-    @description  SDV 100G RR device.
+    """SDV 100G RR device.
+
     """
     # has to happen here so it occurs before we create the Ui
     # in super().__init__()
@@ -86,8 +86,8 @@ class SwitchRR(SwitchReal):
         'read_write', False)
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize SwitchRR class.
+        """Initialize SwitchRR class.
+
         """
         # has to occur before because it is used in the Ui which is created
         # in SwitchGeneral.__init__

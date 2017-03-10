@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``iperf_tool.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Standalone script for Iperf manipulation`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  iperf_tool.py
-
-@summary  Standalone script for Iperf manipulation
 """
 
 import argparse
@@ -33,13 +32,13 @@ mod_logger = loggers.module_logger(__name__)
 
 
 class IPerfRunner(object):
-    """
-    @description Run Iperf on the remote host
+    """Run Iperf on the remote host.
+
     """
 
     def __init__(self, host, user, password):
-        """
-        @brief  Initialize IPerfRunner class
+        """Initialize IPerfRunner class.
+
         """
         super(IPerfRunner, self).__init__()
         self.host = host
@@ -48,17 +47,19 @@ class IPerfRunner(object):
         self.ssh = clissh.CLISSH(host, 22, user, password, sudo_prompt="Password:")
 
     def execute_command(self, command, timeout=10, expected_rcs=frozenset({0})):
-        """
-        @brief  Execute command on the remote host
-        @param command: command to execute
-        @type  command:  str
-        @param timeout: timeout for command execution
-        @type  timeout: int
-        @param expected_rcs: expected return code values
-        @type  expected_rcs:  set
-        @raise TAFCoreException: unexpected return code or sdterr
-        @rtype:  tuple(stdout, sdterr, rc)
-        @return:  command execution result
+        """Execute command on the remote host.
+
+        Args:
+            command(str): command to execute
+            timeout(int): timeout for command execution
+            expected_rcs(set): expected return code values
+
+        Raises:
+            TAFCoreException: unexpected return code or sdterr
+
+        Returns:
+            tuple(stdout, sdterr, rc):  command execution result
+
         """
         cmd_status = self.ssh.exec_command(command, timeout=timeout)
         if int(cmd_status.rc) not in expected_rcs:
@@ -72,28 +73,21 @@ class IPerfRunner(object):
         return cmd_status
 
     def run(self, **kwargs):
-        """
-        @brief  Connect to the remote host, run iperf and parse output
-        @param server: iperf server IP address
-        @type  server:  str
-        @param threads: iperf connections count
-        @type  threads:  int
-        @param interval: iperf interval time
-        @type  interval:  int
-        @param time: time of iperf execution
-        @type  time:  int
-        @param bind: host IP address for bind to
-        @type  bind:  str
-        @param udp_mode: flag for launch iperf in UDP mode
-        @type  udp_mode:  bool
-        @param port: iperf L4 port
-        @type  port:  int
-        @param units: iperf bandwidth format
-        @type  units:  str
-        @param iperf_file: file to store iperf origin output
-        @type  iperf_file:  str
-        @rtype:  list(tuple)
-        @return:  list of parsed iperf results
+        """Connect to the remote host, run iperf and parse output.
+
+        Args:
+            server(str): iperf server IP address
+            threads(int): iperf connections count
+            interval(int): iperf interval time
+            time(int): time of iperf execution
+            bind(str): host IP address for bind to
+            udp_mode(bool): flag for launch iperf in UDP mode
+            port(int): iperf L4 port
+            units(str): iperf bandwidth format
+            iperf_file(str): file to store iperf origin output
+
+        Returns:
+            list(tuple): list of parsed iperf results
         """
         try:
             self.ssh.login()
@@ -214,7 +208,9 @@ def create_argparser():
 
 
 def main(args):
-    """ Execute iperf on the remote host """
+    """ Execute iperf on the remote host
+
+    """
     host = IPerfRunner(args.host, args.user, args.password)
     res = host.run(server=args.server, threads=args.threads, interval=args.interval,
                    time=args.timeout, bind=args.bind, udp_mode=args.udp_mode,

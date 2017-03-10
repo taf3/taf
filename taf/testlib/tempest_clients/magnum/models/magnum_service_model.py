@@ -10,21 +10,31 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""``magnum_service_model.py``
+
+"""
+
 from testlib.tempest_clients.magnum.models import models
 
 
 class MagnumServiceData(models.BaseModel):
-    """Data that encapsulates magnum_service attributes"""
+    """Data that encapsulates magnum_service attributes
+
+    """
     pass
 
 
 class MagnumServiceEntity(models.EntityModel):
-    """Entity Model that represents a single instance of MagnumServiceData"""
+    """Entity Model that represents a single instance of MagnumServiceData
+
+    """
     ENTITY_NAME = 'mservice'
     MODEL_TYPE = MagnumServiceData
 
 
 class MagnumServiceCollection(models.CollectionModel):
-    """Collection Model that represents a list of MagnumServiceData objects"""
+    """Collection Model that represents a list of MagnumServiceData objects
+
+    """
     COLLECTION_NAME = 'mservicelists'
     MODEL_TYPE = MagnumServiceData

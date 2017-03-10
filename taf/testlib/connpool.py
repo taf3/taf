@@ -1,22 +1,22 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+"""``connpool.py``
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+`Connection Pool class`
 
-@file  connpool.py
-
-@summary  Connection Pool class.
 """
 
 import time
@@ -29,23 +29,21 @@ from .custom_exceptions import ConnPoolException
 # TODO: add ability to block waiting on a connection to be released
 # TODO: check if new connection object isn't link to previous one
 class ConnectionPool(object):
-    """
-    @description  Generic connection pool
+    """Generic connection pool`
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, connection_class=None, max_connections=None, time_to_live=30, **connection_kwargs):
-        """
-        @brief  Initialize ConnectionPool class
-        @param  connection_class:  Telnet connection class
-        @type  connection_class:  TelnetCMD
-        @param  max_connections:  Maximum available connections
-        @type  max_connections:  int
-        @param  time_to_live:  Time to live for each connection
-        @type  time_to_live:  int
-        @param  connection_kwargs:  Connection arguments
-        @type  connection_kwargs:  dict
+        """Initialize ConnectionPool class.
+
+        Args:
+            connection_class(TelnetCMD):  Telnet connection class
+            max_connections(int):  Maximum available connections
+            time_to_live(int):  Time to live for each connection
+            connection_kwargs(dict):  Connection arguments
+
         """
         self.connection_class = connection_class
         self.connection_kwargs = connection_kwargs
@@ -56,11 +54,14 @@ class ConnectionPool(object):
         self._in_use_connections = set()
 
     def get_connection(self):
-        """
-        @brief  Get a connection from the pool
-        @raise  ConnPoolException:  connection is dead, error on connection creation
-        @rtype:  TelnetCMD
-        @return:  Telnet connection
+        """Get a connection from the pool.
+
+        Raises:
+            ConnPoolException:  connection is dead, error on connection creation
+
+        Returns:
+            TelnetCMD:  Telnet connection
+
         """
         # self.class_logger.info("Try to get connection...")
         for i in range(1, self.retry_count + 1):
@@ -112,11 +113,14 @@ class ConnectionPool(object):
         raise ConnPoolException(message)
 
     def make_connection(self):
-        """
-        @brief  Create a new connection
-        @raise  ConnPoolException:  too many connections
-        @rtype:  TelnetCMD
-        @return:  Telnet connection
+        """Create a new connection.
+
+        Raises:
+            ConnPoolException:  too many connections
+
+        Returns:
+            TelnetCMD:  Telnet connection
+
         """
         if self._created_connections() >= self.max_connections:
             raise ConnPoolException("Too many connections.")
@@ -125,19 +129,21 @@ class ConnectionPool(object):
         return connection
 
     def release(self, connection):
-        """
-        @brief  Releases the connection back to the pool
-        @param  connection:  Telnet connection
-        @type  connection:  TelnetCMD
+        """Releases the connection back to the pool.
+
+        Args:
+            connection(TelnetCMD):  Telnet connection
+
         """
         self._in_use_connections.remove(connection)
         self._available_connections.append((connection, time.time()))
 
     def del_connection_in_use(self, connection):
-        """
-        @brief  Delete connection in use (in case any error)
-        @param  connection:  Telnet connection
-        @type  connection:  TelnetCMD
+        """Delete connection in use (in case any error).
+
+        Args:
+            connection(TelnetCMD):  Telnet connection
+
         """
         try:
             self._in_use_connections.remove(connection)
@@ -146,8 +152,8 @@ class ConnectionPool(object):
             self.class_logger.warning("Error occurred while removing connection: %s" % (err, ))
 
     def disconnect_all(self):
-        """
-        @brief  Disconnects all connections in the pool
+        """Disconnects all connections in the pool.
+
         """
         all_conns = chain([_x[0] for _x in self._available_connections], self._in_use_connections)
         for connection in all_conns:
@@ -159,9 +165,10 @@ class ConnectionPool(object):
         self._in_use_connections = set()
 
     def _created_connections(self):
-        """
-        @brief  Return number of created connections
-        @rtype:  int
-        @return:  Number of created connections
+        """Return number of created connections
+
+        Returns:
+            int:  Number of created connections
+
         """
         return len(self._available_connections) + len(self._in_use_connections)

@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``IxLoadTclAPI.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`IxLoad Tcl API wrapper module`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  IxLoadTclAPI.py
-
-@summary  IxLoad Tcl API wrapper module.
 """
 
 import json
@@ -34,18 +33,19 @@ SIMULATE = False
 
 
 class IxLoadTclAPI(object):
-    """
-    @brief  IxLoad Tcl API base wrapper class.
+    """IxLoad Tcl API base wrapper class.
+
     """
 
     class_logger = ClassLogger()
 
     def __init__(self, ipaddr, user):
-        """
-        @brief  Initializes connection to IxLoad.
+        """Initializes connection to IxLoad.
 
-        @param ipaddr:  IxLoad host IP address (str).
-        @param user:  IxLoad windows user (str).
+        Args:
+            ipaddr(str):  IxLoad host IP address.
+            user(str):  IxLoad windows user.
+
         """
         import tkinter
         self.tcl_interpret = tkinter.Tcl()
@@ -86,8 +86,8 @@ class IxLoadTclAPI(object):
         self.tst = None
 
     def tcl(self, cmd):
-        """
-        @brief  Tcl wrapper.
+        """Tcl wrapper.
+
         """
         self.class_logger.debug("Run tcl command: %s", cmd)
         if not SIMULATE:
@@ -96,10 +96,11 @@ class IxLoadTclAPI(object):
             return ""
 
     def connect(self):
-        """
-        @brief  Logs in to IXIA and takes ports ownership.
+        """Logs in to IXIA and takes ports ownership.
 
-        @return  none
+        Returns:
+            None
+
         """
         # Set simple config
         # self.tcl("namespace eval ::IxLoadPrivate {};" +
@@ -117,10 +118,11 @@ class IxLoadTclAPI(object):
         self.class_logger.info("IxLoad startup complete.")
 
     def disconnect(self):
-        """
-        @brief  Logs out from IXIA and clears ports ownership.
+        """Logs out from IXIA and clears ports ownership.
 
-        @return  none
+        Returns:
+            None
+
         """
         self.tcl("::IxLoad disconnect")
 
@@ -139,8 +141,8 @@ class IxLoadTclAPI(object):
                  "::IxLoad delete $logEngine")
 
     def load_repo(self, repo=None):
-        """
-        @brief  Loading rxf repo file or create new one.
+        """Loading rxf repo file or create new one.
+
         """
         if repo is None:
             self.tcl("set repository [::IxLoad new ixRepository]")
@@ -157,20 +159,20 @@ class IxLoadTclAPI(object):
         self.class_logger.debug("Discovered tests list: {0}".format(self.tst.tc_list))
 
     def copy_local_file(self, local_path, remote_path):
-        """
-        @brief  Copy local file to IxLoad host.
+        """Copy local file to IxLoad host.
+
         """
         self.tcl("::IxLoad sendFileCopy \"{0}\" \"{1}\"".format(local_path, remote_path).replace("\\", "\\\\"))
 
     def copy_remote_file(self, remote_path, local_path):
-        """
-        @brief  Copy remote file from IxLoad host to local host.
+        """Copy remote file from IxLoad host to local host.
+
         """
         self.tcl("::IxLoad retrieveFileCopy \"{0}\" \"{1}\"".format(remote_path, local_path).replace("\\", "\\\\"))
 
     def retrieve_results(self, dst_path):
-        """
-        @brief  Retrieve result csv files from IxLoad host to local dst_path.
+        """Retrieve result csv files from IxLoad host to local dst_path.
+
         """
         self.tcl("::IxLoad retrieveResults \"{0}\"".format(dst_path).replace("\\", "\\\\"))
 
@@ -247,8 +249,8 @@ class IxLoadTclAPI(object):
 
 
 class IxLoadTests(object):
-    """
-    @brief  Class for managing IxLoad Tests.
+    """Class for managing IxLoad Tests.
+
     """
 
     def __init__(self, tcl, test_controller, res_path=""):
@@ -259,8 +261,8 @@ class IxLoadTests(object):
         self.test_controller = test_controller
 
     def load_tclist(self):
-        """
-        @brief  Loading list of IxLoad Tests.
+        """Loading list of IxLoad Tests.
+
         """
         _tlist = []
         num_tests = self.tcl("$repository testList.indexCount")
@@ -272,14 +274,14 @@ class IxLoadTests(object):
         self.tc_list = _tlist
 
     def start(self, t_name):
-        """
-        @brief  Start ixLoad test without waiting for result.
+        """Start ixLoad test without waiting for result.
+
         """
         self.tcl("puts {0}".format(t_name))
 
     def run(self, t_name, res_path=None):
-        """
-        @brief  Run ixLoad test until completion.
+        """Run ixLoad test until completion.
+
         """
         # Set result dir.
         res_path = res_path if res_path is not None else self.res_path
@@ -296,15 +298,15 @@ class IxLoadTests(object):
                  "if {[lsearch [info vars] test] >= 0} {$test clearDUTList; ::IxLoad delete $test}")
 
     def report(self, pdf=False):
-        """
-        @brief  Enable/Disable report options.
+        """Enable/Disable report options.
+
         """
         self.tcl("ixNet setAttribute [ixNet getRoot]/testConfiguration -enableGenerateReportAfterRun {0}".format(pdf))
 
 
 class IxLoadStats(list):
-    """
-    @brief  Custom list class to support columns header names.
+    """Custom list class to support columns header names.
+
     """
 
     headers = None

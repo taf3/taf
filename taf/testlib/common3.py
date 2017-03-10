@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``common3.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Testlib common functionality version 3.x`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  common3.py
-
-@summary  Testlib common functionality version 3.x.
 """
 
 # Python built-in imports
@@ -44,12 +43,12 @@ custom_classes = {}
 
 # Add soft exit with environment sanitizing before exit.
 def softexit(message, env=None):
-    """
-    @brief  Sanitizing environment and exit py.test execution.
-    @param  message:  Exit message
-    @type  message:  str
-    @param  env:  Environment instance
-    @type  env:  Environment
+    """Sanitizing environment and exit py.test execution.
+
+    Args:
+        message(str):  Exit message
+        env(Environment):  Environment instance
+
     """
     if env is not None:
         env.sanitize()
@@ -61,22 +60,26 @@ pytest.softexit = softexit
 
 # Environment is inherited from dict to provide backward compatibility with TAFv1 suites
 class Environment(dict):
-    """
-    @description  Main class of all test environment.
+    """Main class of all test environment.
 
-    @note  This class has to be used as base fixture in all test cases.
-           It provides number of common methods to initialize, shutdown,
-           cleanup environment functions which basically call appropriate methods of particular device classes.
+    Notes:
+        This class has to be used as base fixture in all test cases.
+        It provides number of common methods to initialize, shutdown,
+        cleanup environment functions which basically call appropriate methods of particular device classes.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, opts=None, **kwargs):
-        """
-        @brief  Read configuration files and create device objects.
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
-        @raise  TAFCoreException:  unexpected entry_type
+        """Read configuration files and create device objects.
+
+        Args:
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
+        Raises:
+            TAFCoreException:  unexpected entry_type
+
         """
         super(Environment, self).__init__(**kwargs)
         self.opts = opts
@@ -224,15 +227,21 @@ class Environment(dict):
         return devices
 
     def _get_conf(self, file_name=None):
-        """
-        @brief  Load environment config from file.
-        @param  file_name:  Name of a json file with a test environment configuration.
-        @type  file_name:  str
-        @raise  TAFCoreException:  configuration file is not found
-        @raise  IOError:  error on reading configuration file
-        @rtype:  dict
-        @return:  dict of the selected configuration.
-        @note  This method shouldn't be used outside this class. Use "config" attribute to access environment configuration.
+        """Load environment config from file.
+
+        Args:
+            file_name(str):  Name of a json file with a test environment configuration.
+
+        Raises:
+            TAFCoreException:  configuration file is not found
+            IOError:  error on reading configuration file
+
+        Returns:
+            dict:  dict of the selected configuration.
+
+        Notes:
+            This method shouldn't be used outside this class. Use "config" attribute to access environment configuration.
+
         """
         if not file_name:
             self.class_logger.info("Environment file isn't set. All configurations will be taken from setup file.")
@@ -251,14 +260,18 @@ class Environment(dict):
         return config
 
     def _get_setup(self, file_name):
-        """
-        @brief  Reads setup file based on provided name
-        @param  file_name:  Name of a json file with setup.
-        @type  file_name:  str
-        @raise  TAFCoreException:  setup file is not found
-        @raise  IOError:  error on reading setup file
-        @rtype:  list[dict]
-        @return:  setup json content (list of dict).
+        """Reads setup file based on provided name.
+
+        Args:
+            file_name(str):  Name of a json file with setup.
+
+        Raises:
+            TAFCoreException:  setup file is not found
+            IOError:  error on reading setup file
+
+        Returns:
+            list[dict]:  setup json content.
+
         """
         if not file_name:
             message = "Setup name must be specified."
@@ -276,32 +289,35 @@ class Environment(dict):
         return setup
 
     def _get_device_conf(self, device_id):
-        """
-        @brief  Return config entry by given Id if one, else return None
-        @param  device_id:  Entry ID.
-        @type  device_id:  str
-        @rtype:  dict
-        @return:  Entry config.
+        """Return config entry by given Id if one, else return None.
+
+        Args:
+            device_id(str):  Entry ID.
+
+        Returns:
+            dict:  Entry config.
+
         """
         return next((entry for entry in self.config if entry['id'] == device_id), None)
 
     def id2instance(self, device_id):
-        """
-        @brief  Returns entry instance by device id.
-        @param  device_id:  Could be one of: device LINK_NAME, 'autoname' or 'id' from config.
-        @type  device_id:  str
-        @rtype:  GenericEntry
-        @return:  Entry instance
+        """Returns entry instance by device id.
 
-        @par Example:
-        @code{.py}
-        # by LINK_NAME
-        env.id2instance("sw1")
-        # by "autoname"
-        env.get_device_id("DEV2")
-        # by ID
-        env.get_device_id("9")
-        @endcode
+        Args:
+            device_id(str):  Could be one of: device LINK_NAME, 'autoname' or 'id' from config.
+
+        Returns:
+            GenericEntry: Entry instance
+
+        Examples::
+
+            # by LINK_NAME
+            env.id2instance("sw1")
+            # by "autoname"
+            env.get_device_id("DEV2")
+            # by ID
+            env.get_device_id("9")
+
         """
         dev_id = self.get_device_id(device_id)
         entry = [e for e in self.config if e['id'] == dev_id][0]
@@ -313,13 +329,17 @@ class Environment(dict):
         return instance
 
     def _append_related_confs(self, conf_ids):
-        """
-        @brief  Create dictionary with related device configurations.
-        @param  conf_ids:  List of related config IDs.
-        @type  conf_ids:  list[str]
-        @raise  Exception:  configuration is not found for specific device ID
-        @rtype:  dict
-        @return:  Dictionary with related device configurations
+        """Create dictionary with related device configurations.
+
+        Args:
+            conf_ids(list[str]):  List of related config IDs.
+
+        Raises:
+            Exception:  configuration is not found for specific device ID
+
+        Returns:
+            dict:  Dictionary with related device configurations
+
         """
         related_confs = {}
         for device_id in conf_ids:
@@ -331,17 +351,19 @@ class Environment(dict):
         return related_confs
 
     def safe_executor(self, obj, method, *args, **kwargs):
-        """
-        @brief  Invokes obj.method(*args, **kwargs) in try block and return error message with traceback.
-        @param  obj:  Entry instance
-        @type  obj:  GenericEntry
-        @param  method:  method name that has to be executed
-        @type  method:  str
-        @rtype:  str
-        @return:  Error message with traceback
-        @warning
-        - Don't use in case obj.method has to return something.
-        - Don't use in case an exception has to be handled by py.test.
+        """Invokes obj.method(*args, **kwargs) in try block and return error message with traceback.
+
+        Args:
+            obj(GenericEntry):  Entry instance
+            method(str):  method name that has to be executed
+
+        Returns:
+            str:  Error message with traceback
+
+        Warning:
+            - Don't use in case obj.method has to return something.
+            - Don't use in case an exception has to be handled by py.test.
+
         """
         try:
             self.class_logger.debug("Perform %s(*%s, **%s) on entry_type=%s, id=%s" %
@@ -356,20 +378,21 @@ class Environment(dict):
             return message
 
     def parallelize(self, objects, method, safe=False):
-        """
-        @brief  Run objects method in multiple threads.
-        @param  objects:  list of device objects.
-        @type  objects:  list[GenericEntry]
-        @param  method:  method name that has to be executed.
-        @type  method:  str
-        @param  safe:  Hide exception raisings, but print log message.
-        @type  safe:  bool
-        @return:  None
-        @par Example:
-        @code{.py}
-        objects = [env.lhost[1], env.lhost[2]]
-        env.parallelize(objects, "cleanup", False)
-        @endcode
+        """Run objects method in multiple threads.
+
+        Args:
+            objects(list[GenericEntry]):  list of device objects.
+            method(str):  method name that has to be executed.
+            safe(bool):  Hide exception raisings, but print log message.
+
+        Returns:
+            None
+
+        Examples::
+
+            objects = [env.lhost[1], env.lhost[2]]
+            env.parallelize(objects, "cleanup", False)
+
         """
         threads = []
 
@@ -385,15 +408,16 @@ class Environment(dict):
             thread.join()
 
     def ordered_action(self, action, prio, entry_types):
-        """
-        @brief  Perform action on entries with type in entry_types and ordered by prio.
-        @param  action:  method name to execute.
-        @type  action:  str
-        @param  prio:  priority name to sort objects by.
-        @type  prio:  str
-        @param  entry_types:  entry types to apply action (apply action to all entry types if None).
-        @type  entry_types:  list[str]
-        @return:  None
+        """Perform action on entries with type in entry_types and ordered by prio.
+
+        Args:
+            action(str):  method name to execute.
+            prio(str):  priority name to sort objects by.
+            entry_types(list[str]):  entry types to apply action (apply action to all entry types if None).
+
+        Returns:
+            None
+
         """
         # Select all types in case list isn't set.
         if not entry_types:
@@ -419,12 +443,14 @@ class Environment(dict):
                     getattr(obj, action)()
 
     def _get_prio_dict(self, prio):
-        """
-        @brief  Return dict of entries by prio.
-        @param  prio:  Priority name to order dict by .
-        @type  prio:  str
-        @rtype:  dict
-        @return:  dict of lists where key = priority, value = list of device objects.
+        """Return dict of entries by prio.
+
+        Args:
+            prio(str):  Priority name to order dict by .
+
+        Returns:
+            dict:  dict of lists where key = priority, value = list of device objects.
+
         """
         prio_dict = {}
         for _e in self.config:
@@ -437,47 +463,54 @@ class Environment(dict):
         return prio_dict
 
     def initialize(self, entry_types=None):
-        """
-        @brief  Initialize test environment
-        @param  entry_types:  List of entry types
-        @type  entry_types:  list[str]
+        """Initialize test environment.
+
+        Args:
+            entry_types(list[str]):  List of entry types
+
         """
         self.class_logger.info("Initialize environment...")
         self.ordered_action("create", "sprio", entry_types)
 
     def cleanup(self, entry_types=None):
-        """
-        @brief  Cleaning environment.
-        @param  entry_types:  List of entry types
-        @type  entry_types:  list[str]
+        """Cleaning environment.
+
+        Args:
+            entry_types(list[str]):  List of entry types
+
         """
         self.class_logger.info("Cleanup environment...")
         self.ordered_action("cleanup", "cprio", entry_types)
 
     def sanitize(self, entry_types=None):
-        """
-        @brief  Sanitizing environment.
-        @param  entry_types:  List of entry types
-        @type  entry_types:  list[str]
+        """Sanitizing environment.
+
+        Args:
+            entry_types(list[str]):  List of entry types
+
         """
         self.class_logger.info("Sanitizing environment...")
         self.ordered_action("sanitize", "kprio", entry_types)
 
     def check(self, entry_types=None):
-        """
-        @brief  Checking environment.
-        @param  entry_types:  List of entry types
-        @type  entry_types:  list[str]
+        """Checking environment.
+
+        Args:
+            entry_types(list[str]):  List of entry types
+
         """
         self.class_logger.info("Check environment...")
         self.ordered_action("check", "tprio", entry_types)
 
     def shutdown(self, entry_types=None):
-        """
-        @brief  Stopping/Disconnecting environment.
-        @param  entry_types:  List of entry types
-        @type  entry_types:  list[str]
-        @note  This method cares to release all environment even an exception is raised during destroy process.
+        """Stopping/Disconnecting environment.
+
+        Args:
+            entry_types(list[str]):  List of entry types
+
+        Note:
+            This method cares to release all environment even an exception is raised during destroy process.
+
         """
         # Keep all error messages and print them at the end.
         # This object won't be append in case parallelize execution.
@@ -507,33 +540,36 @@ class Environment(dict):
                 sys.stderr.flush()
 
     def get_device_id(self, dut):
-        """
-        @brief  Search device in config object by device name.
-        @param  dut:  Could be one of: device LINK_NAME, 'autoname' or 'id' from config.
-        @type  dut:  str
-        @raise  TAFCoreException:  unknown device type
-        @rtype:  str, int
-        @return  Device id which configured.
-        @par Example:
-        Config object like:
-        @code{.json}
-        {
-            "env": [
-                    {"id": 5, "port_list": [["port1", 10000], ["port2", 40000]},
-                    {"id": 9, "autoname": "DEV2", "port_list": [["port1", 10000], ["port2", 40000]}
-                   ]
-            "cross": {"ID": [[5, 1, 9, 2], [5, 2, 9, 1]]}
-        }
-        @endcode
-        Result is:
-        @code{.py}
-        # by LINK_NAME
-        env.get_device_id("sw1") == 5
-        # by "autoname"
-        env.get_device_id("DEV2") == 9
-        # by ID
-        env.get_device_id(9) == 9
-        @endcode
+        """Search device in config object by device name.
+
+        Args:
+            dut(str):  Could be one of: device LINK_NAME, 'autoname' or 'id' from config.
+
+        Raises:
+            TAFCoreException:  unknown device type
+
+        Returns:
+            str, int:  Device id which configured.
+
+        Examples (Config object like)::
+
+            {
+                "env": [
+                        {"id": 5, "port_list": [["port1", 10000], ["port2", 40000]},
+                        {"id": 9, "autoname": "DEV2", "port_list": [["port1", 10000], ["port2", 40000]}
+                       ]
+                "cross": {"ID": [[5, 1, 9, 2], [5, 2, 9, 1]]}
+            }
+
+        Result is::
+
+            # by LINK_NAME
+            env.get_device_id("sw1") == 5
+            # by "autoname"
+            env.get_device_id("DEV2") == 9
+            # by ID
+            env.get_device_id(9) == 9
+
         """
         # Find dut in dut_map if it is ID device
         if dut in list(self.dut_map.values()):
@@ -554,33 +590,35 @@ class Environment(dict):
             raise TAFCoreException(message)
 
     def get_real_port_name(self, dut, port_id):
-        """
-        @brief  Search real port number/name by device name and port Id in config object.
-        @param  dut:  Could be one of: device LINK_NAME, 'autoname' or 'id' from config.
-        @type  dut:  str
-        @param  port_id:  Port Id from config object (ids starts from 1).
-        @type  port_id:  int
-        @raise  TAFCoreException:  port_id is not found in configuration; device doesn't have ports or port_list attributes
-        @rtype:  int, str
-        @return:  Real port number/name or exception if there is no port with given Id in config.
-        @par Example:
-        Config object like:
-        @code{.json}
-        {
-            "env": [
-                    {"id": 99, "autoname": "DEV1", "port_list": [["port1", 10000], ["port2", 10000]},
-                    {"id": 100, "ports": ["port10", 11]}
-                   ]
-            "cross": {"ID": [[99, 1, 100, 2], [99, 2, 100, 1]]}
-        }
-        @endcode
-        Result is:
-        @code
-        # by LINK_MAME
-        env.get_real_port_name("sw2", 2) == 11
-        # by "autoname"
-        env.get_real_port_name("DEV1", 1) == "port1"
-        @endcode
+        """Search real port number/name by device name and port Id in config object.
+
+        Args:
+            dut(str):  Could be one of: device LINK_NAME, 'autoname' or 'id' from config.
+            port_id(int):  Port Id from config object (ids starts from 1).
+
+        Raises:
+            TAFCoreException:  port_id is not found in configuration; device doesn't have ports or port_list attributes
+
+        Returns:
+            int, str:  Real port number/name or exception if there is no port with given Id in config.
+
+        Examples (Config object like)::
+
+            {
+                "env": [
+                        {"id": 99, "autoname": "DEV1", "port_list": [["port1", 10000], ["port2", 10000]},
+                        {"id": 100, "ports": ["port10", 11]}
+                       ]
+                "cross": {"ID": [[99, 1, 100, 2], [99, 2, 100, 1]]}
+            }
+
+        Result is::
+
+            # by LINK_MAME
+            env.get_real_port_name("sw2", 2) == 11
+            # by "autoname"
+            env.get_real_port_name("DEV1", 1) == "port1"
+
         """
         # find device ID by acronym
         dev_id = self.get_device_id(dut)
@@ -608,31 +646,33 @@ class Environment(dict):
             raise TAFCoreException(message)
 
     def get_port_speed(self, dut, port_id):
-        """
-        @brief  Search speed port in config object namely in 'port_list' by device name and port Id.
-        @param  dut:  Could be one of: device LINK_NAME, 'autoname' or 'id' from config.
-        @type  dut:  str
-        @param port_id:  Port Id from config object (ids starts from 1)
-        @type  port_id:  int
-        @raise  TAFCoreException:  port is not present in configuration's 'port_list'
-        @rtype:  int
-        @return  Port speed or exception if there is no port with given Id in config.
-        @par Example:
-        Config object like:
-        @code{.json}
-        {
-            "env": [
-                    {"id": 5, "autoname": "DEV1", "port_list": [["port1", 10000], ["port2", 40000]},
-                    {"id": 9, "ports": ["port10", 11]}
-                   ]
-            "cross": {"ID": [[5, 1, 9, 2], [5, 2, 9, 1]]}
-        }
-        @endcode
-        Result is:
-        @code{.py}
-        env.get_port_speed("sw1", 2) == 40000
-        env.get_port_speed("DEV1", 1) == 10000
-        @endcode
+        """Search speed port in config object namely in 'port_list' by device name and port Id.
+
+        Args:
+            dut(str):  Could be one of: device LINK_NAME, 'autoname' or 'id' from config.
+            port_id(int):  Port Id from config object (ids starts from 1)
+
+        Raises:
+            TAFCoreException:  port is not present in configuration's 'port_list'
+
+        Returns:
+            int:  Port speed or exception if there is no port with given Id in config.
+
+        Examples (Config object like)::
+
+            {
+                "env": [
+                        {"id": 5, "autoname": "DEV1", "port_list": [["port1", 10000], ["port2", 40000]},
+                        {"id": 9, "ports": ["port10", 11]}
+                       ]
+                "cross": {"ID": [[5, 1, 9, 2], [5, 2, 9, 1]]}
+            }
+
+        Result is::
+
+            env.get_port_speed("sw1", 2) == 40000
+            env.get_port_speed("DEV1", 1) == 10000
+
         """
         # find device id by acronym
         dev_id = self.get_device_id(dut)
@@ -653,54 +693,56 @@ class Environment(dict):
                     raise TAFCoreException(message)
 
     def get_ports(self, links=None):
-        """
-        @brief  Returns dictionary of ports based on links between devices.
+        """Returns dictionary of ports based on links between devices.
 
-        @param  links:  List of devices in format [['dev1', 'dev2', number_of_links, port_speed], ] (list of lists).
-                Where: \a number_of_links - optional parameter(int or enum - "ALL"); \a port_speed - optional parameter.
-        @type  links:  list[list]
-        @raise  TAFCoreException:  wrong link format,
-        @rtype:  dict
-        @return  ports.
-        @par Example:
-        Config object like:
-        @code{.json}
-        {
-            "env": [
-                    {"id": 99, "autoname": "DEV1", "port_list": [["port1", 10000], ["port2", 40000], ["port3", 10000]},
-                    {"id": 100, "port_list": [["port10", 40000], [11, 10000], ["port12", 40000]}
-                   ]
-            "cross": {"ID": [[99, 1, 100, 2], [99, 2, 100, 1]]}
-        }
-        @endcode
-        Result is:
-        @code{.py}
-        ports = env.get_ports([['sw1', 'sw2', 1], ])
-        assert ports == {('sw2', 'sw1'): {1: "port10"}, ('sw1', 'sw2'): {1: "port1"}}
+        Args:
+            links(list[list]):  List of devices in format [['dev1', 'dev2', number_of_links, port_speed], ] (list of lists).
+                                Where: \a number_of_links - optional parameter(int or enum - "ALL"); \a port_speed - optional parameter.
 
-        ports = env.get_ports([['DEV1', 'sw2', 2], ])
-        assert ports == {('sw2', 'sw1'): {1: "port10", 2: 11}, ('sw1', 'sw2'): {1: "port1", 2: "port2"}}
+        Raises:
+            TAFCoreException:  wrong link format
 
-        # with optional parameter "port_speed"
-        ports = env.get_ports([['sw1', 'sw2', 1, 10000], ])
-        assert ports == {('sw1', 'sw2'): {1: "port1"}, ('sw2', 'sw1'): {1: "11"}}
+        Returns:
+            dict:  ports
 
-        # Method returns all links between devices if no any optional parameters
-        ports = env.get_ports([['sw1', 'sw2', ], ])
-        assert ports == {('sw1', 'sw2'): {1: "port1", 2: "port2"}, ('sw2', 'sw1'): {1: "port10", 2: 11}}
+        Examples (Config object like)::
 
-        # The same with enum "ALL"
-        ports = env.get_ports([['sw1', 'sw2', "ALL"], ])
-        assert ports == {('sw1', 'sw2'): {1: "port1", 2: "port2"}, ('sw2', 'sw1'): {1: "port10", 2: 11}}
+            {
+                "env": [
+                        {"id": 99, "autoname": "DEV1", "port_list": [["port1", 10000], ["port2", 40000], ["port3", 10000]},
+                        {"id": 100, "port_list": [["port10", 40000], [11, 10000], ["port12", 40000]}
+                       ]
+                "cross": {"ID": [[99, 1, 100, 2], [99, 2, 100, 1]]}
+            }
 
-        # With optional parameters "port_speed" and "ALL"
-        ports = env.get_ports([['sw1', 'sw2', "ALL", 40000], ])
-        assert ports == {('sw1', 'sw2'): {1: "port2"}, ('sw2', 'sw1'): {1: "port10"}}
+        Result is::
 
-        # Method returns all links between devices if no parameter
-        ports = env.get_ports()
-        assert ports == {('sw1', 'sw2'): {1: "port1", 2: "port2"}, ('sw2', 'sw1'): {1: "port10", 2: 11}}
-        @endcode
+            ports = env.get_ports([['sw1', 'sw2', 1], ])
+            assert ports == {('sw2', 'sw1'): {1: "port10"}, ('sw1', 'sw2'): {1: "port1"}}
+
+            ports = env.get_ports([['DEV1', 'sw2', 2], ])
+            assert ports == {('sw2', 'sw1'): {1: "port10", 2: 11}, ('sw1', 'sw2'): {1: "port1", 2: "port2"}}
+
+            # with optional parameter "port_speed"
+            ports = env.get_ports([['sw1', 'sw2', 1, 10000], ])
+            assert ports == {('sw1', 'sw2'): {1: "port1"}, ('sw2', 'sw1'): {1: "11"}}
+
+            # Method returns all links between devices if no any optional parameters
+            ports = env.get_ports([['sw1', 'sw2', ], ])
+            assert ports == {('sw1', 'sw2'): {1: "port1", 2: "port2"}, ('sw2', 'sw1'): {1: "port10", 2: 11}}
+
+            # The same with enum "ALL"
+            ports = env.get_ports([['sw1', 'sw2', "ALL"], ])
+            assert ports == {('sw1', 'sw2'): {1: "port1", 2: "port2"}, ('sw2', 'sw1'): {1: "port10", 2: 11}}
+
+            # With optional parameters "port_speed" and "ALL"
+            ports = env.get_ports([['sw1', 'sw2', "ALL", 40000], ])
+            assert ports == {('sw1', 'sw2'): {1: "port2"}, ('sw2', 'sw1'): {1: "port10"}}
+
+            # Method returns all links between devices if no parameter
+            ports = env.get_ports()
+            assert ports == {('sw1', 'sw2'): {1: "port1", 2: "port2"}, ('sw2', 'sw1'): {1: "port10", 2: 11}}
+
         """
 
         if links:
@@ -813,13 +855,13 @@ class Environment(dict):
 
 
 class Cross(dict):
-    """
-    @description  New interface to cross object without device id.
+    """New interface to cross object without device id.
+
     """
 
     def __init__(self, setup, env):
-        """
-        @brief  Initialize Cross class
+        """Initialize Cross class.
+
         """
         super(Cross, self).__init__()
         self.setup = setup
@@ -829,13 +871,17 @@ class Cross(dict):
                 self[key] = value
 
     def get_device_id(self, connection):
-        """
-        @brief  Search device in setup object by given connection
-        @param  connection:  Connection info in format [sw1, port1, sw2, port2]
-        @type  connection:  list
-        @raise  Exception:  no device in connection
-        @rtype:  int
-        @return:  device id which own connection
+        """Search device in setup object by given connection.
+
+        Args:
+            connection(list):  Connection info in format [sw1, port1, sw2, port2]
+
+        Raises:
+            Exception:  no device in connection
+
+        Returns:
+            int:  device id which own connection
+
         """
         connection_reverse = connection[2:] + connection[:2]
         try:
@@ -847,29 +893,34 @@ class Cross(dict):
             raise Exception("Can not find device with such connection: %s in config" % connection)
 
     def xconnect(self, connection):
-        """
-        @brief  Wrapper for xconnect method defined in xconnect.py module
-        @param  connection:  Connection info in format [sw1, port1, sw2, port2]
-        @type  connection:  list
+        """Wrapper for xconnect method defined in xconnect.py module.
+
+        Args:
+            connection(list):  Connection info in format [sw1, port1, sw2, port2]
+
         """
         id_real_device = self.get_device_id(connection)
         return self[id_real_device].xconnect(connection)
 
     def xdisconnect(self, connection):
-        """
-        @brief  Wrapper for xdisconnect method defined in xconnect.py module
-        @param  connection:  in format [sw1, port1, sw2, port2]
-        @type  connection:  list
+        """Wrapper for xdisconnect method defined in xconnect.py module.
+
+        Args:
+            connection(list):  in format [sw1, port1, sw2, port2]
+
         """
         id_real_device = self.get_device_id(connection)
         return self[id_real_device].xdisconnect(connection)
 
     def cross_connect(self, conn_list):
-        """
-        @brief  Wrapper for cross_connect method defined in xconnect.py module
-        @param  conn_list:  List of connections
-        @type  conn_list:  list[list]
-        @raise  Exception:  conn_list is empty
+        """Wrapper for cross_connect method defined in xconnect.py module.
+
+        Args:
+            conn_list(list[list]):  List of connections
+
+        Raises:
+            Exception:  conn_list is empty
+
         """
         if conn_list:
             connection = conn_list[0]
@@ -879,11 +930,14 @@ class Cross(dict):
             raise Exception("conn_list is empty")
 
     def cross_disconnect(self, disconn_list):
-        """
-        @brief  Wrapper for cross_disconnect method defined in xconnect.py module
-        @param  disconn_list:  List of connections
-        @type  disconn_list:  list[list]
-        @raise  Exception:  disconn_list is empty
+        """Wrapper for cross_disconnect method defined in xconnect.py module.
+
+        Args:
+            disconn_list(list[list]):  List of connections
+
+        Raises:
+            Exception:  disconn_list is empty
+
         """
         if disconn_list:
             connection = disconn_list[0]
@@ -893,15 +947,18 @@ class Cross(dict):
             raise Exception("disconn_list is empty")
 
     def get_connection(self, dev_id, port_no):
-        """
-        @brief  Get connection for device port
-        @param  dev_id:  Device ID/autoname/linkname ('tg1')
-        @type  dev_id:  str
-        @param  port_no:  Device port number.
-        @type  dev_id:  int
-        @raise  Exception:  no connection for current port
-        @rtype:  list
-        @return:  Connection info
+        """Get connection for device port.
+
+        Args:
+            dev_id(str):  Device ID/autoname/linkname ('tg1')
+            port_no(int):  Device port number.
+
+        Raises:
+            Exception:  no connection for current port
+
+        Returns:
+            list:  Connection info
+
         """
         # Get device
         device_id = self.env.get_device_id(dev_id)
@@ -927,12 +984,12 @@ class Cross(dict):
         return connection
 
     def device_port_disconnect(self, dev_id, port_no):
-        """
-        @brief  Connect/Disconnect device port
-        @param  dev_id:  Device ID/autoname/linkname ('tg1')
-        @type  dev_id:  str
-        @param  port_no:  Device port number.
-        @type  dev_id:  int
+        """Connect/Disconnect device port.
+
+        Args:
+            dev_id(str):  Device ID/autoname/linkname ('tg1')
+            port_no(int):  Device port number.
+
         """
         # Get connection
         connection = self.get_connection(dev_id, port_no)
@@ -941,12 +998,12 @@ class Cross(dict):
         self.cross_disconnect([connection, ])
 
     def device_port_connect(self, dev_id, port_no):
-        """
-        @brief  Connect/Disconnect device port
-        @param  dev_id:  Device ID/autoname/linkname ('tg1')
-        @type  dev_id:  str
-        @param  port_no:  Device port number.
-        @type  dev_id:  int
+        """Connect/Disconnect device port.
+
+        Args:
+            dev_id(str):  Device ID/autoname/linkname ('tg1')
+            port_no(int):  Device port number.
+
         """
         # Get connection
         connection = self.get_connection(dev_id, port_no)

@@ -9,6 +9,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+"""``client.py``
+
+"""
 
 import abc
 
@@ -22,7 +25,9 @@ import tempest
 
 @six.add_metaclass(abc.ABCMeta)
 class MagnumClient(rest_client.RestClient):
-    """Abstract class responsible for setting up auth provider"""
+    """Abstract class responsible for setting up auth provider
+
+    """
 
     def __init__(self, auth_provider):
         config = tempest.config.CONF
@@ -45,10 +50,14 @@ class MagnumClient(rest_client.RestClient):
 
     @classmethod
     def add_filters(cls, url, filters):
-        """add_filters adds dict values (filters) to url as query parameters
+        """add_filters adds dict values (filters) to url as query parameters.
 
-        :param url: base URL for the request
-        :param filters: dict with var:val pairs to add as parameters to URL
-        :returns: url string
+        Args:
+            url: base URL for the request
+            filters: dict with var:val pairs to add as parameters to URL
+
+        Returns:
+            url string
+
         """
         return url + "?" + parse(filters)
