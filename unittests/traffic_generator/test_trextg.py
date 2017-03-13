@@ -1,5 +1,5 @@
 """
-@copyright Copyright (c) 2016, Intel Corporation.
+@copyright Copyright (c) 2016 - 2017, Intel Corporation.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -64,9 +64,13 @@ def trex_hlt(request):
 @pytest.mark.skipif(skip_flag, reason="Need to install TRex client package")
 class TestTrexTg(object):
 
-    packet_definition = ({"Ether": {"dst": "ff:ff:ff:ff:ff:ff", "src": "00:00:00:00:00:02"}}, {"IP": {"src": '10.1.1.1', "dst": '20.1.1.1'}}, {"UDP": {"sport": 10, "dport": 50}},)
+    packet_definition = ({"Ether": {"dst": "ff:ff:ff:ff:ff:ff", "src": "00:00:00:00:00:02"}},
+                         {"IP": {"src": '10.1.1.1', "dst": '20.1.1.1'}},
+                         {"UDP": {"sport": 10, "dport": 50}},)
 
-    packet_definition_tcp = ({"Ether": {"dst": "ff:ff:ff:ff:ff:ff", "src": "00:00:00:00:00:02"}}, {"IP": {"src": '10.1.1.1', "dst": '20.1.1.1'}}, {"TCP": {"sport": 10, "dport": 50}},)
+    packet_definition_tcp = ({"Ether": {"dst": "ff:ff:ff:ff:ff:ff", "src": "00:00:00:00:00:02"}},
+                             {"IP": {"src": '10.1.1.1', "dst": '20.1.1.1'}},
+                             {"TCP": {"sport": 10, "dport": 50}},)
 
     def test_single_stream_trex(self, trex):
         """
@@ -233,10 +237,10 @@ class TestTrexTg(object):
         # Set traffic stream
         stream_id = trex.set_stream(self.packet_definition, count=packet_count, inter=interval, iface=iface, adjust_size=True)
         # Send stream
-        trex.start_streams([stream_id, ])
+        trex.start_streams([stream_id])
         time.sleep(sleep)
         # Stop streams
-        trex.stop_streams([stream_id, ])
+        trex.stop_streams([stream_id])
         # get and verify interface statistics
         data = trex.get_statistics(iface)
         assert sleep / interval - 1 <= data['opackets'] <= sleep / interval + 1
@@ -255,7 +259,7 @@ class TestTrexTg(object):
         trex.send_stream(stream_id)
         time.sleep(1)
         # Stop stream
-        trex.stop_streams([stream_id, ])
+        trex.stop_streams([stream_id])
         # get and verify interface statistics
         assert trex.get_sent_frames_count(iface) == packet_count
         # Clear statistics and verify that statistic was cleared

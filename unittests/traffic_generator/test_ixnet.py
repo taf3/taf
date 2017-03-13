@@ -1,5 +1,5 @@
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+@copyright Copyright (c) 2011 - 2017, Intel Corporation.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ from testlib.custom_exceptions import IxiaException
 IXNET_CONF = {"name": "IxNetwork-103", "entry_type": "tg", "instance_type": "ixiahl", "id": "1",
               "ip_host": "X.X.X.X", "tcl_server": "X.X.X.X:8200", "user": "IxNetwork/user",
               "kprio": 200, "sprio": 200, "cprio": 200, "tprio": 200,
-              "ports": [[1, 2, 9], ]}
+              "ports": [[1, 2, 9]]}
 
 
 class Tg(IxiaHLTMixin, PacketProcessor):
@@ -46,7 +46,7 @@ class Tg(IxiaHLTMixin, PacketProcessor):
     DEFAULT_MAX_SNIFF_TIME = 3600
 
     def __init__(self, *args, **kwargs):
-        super(Tg, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.sniff_ids = {}
         self.host = args[0]['ip_host']
         self.username = args[0]['user']
@@ -521,9 +521,9 @@ def test_stp(request):
     time.sleep(10)
 
     iface = tg.ports[0]
-    tg.start_sniff([iface, ], sniffing_time=25, packets_count=100, filter_layer="STP")
+    tg.start_sniff([iface], sniffing_time=25, packets_count=100, filter_layer="STP")
 
-    data = tg.stop_sniff([iface, ])
+    data = tg.stop_sniff([iface])
 
     assert "STP" in data[iface]
 

@@ -71,9 +71,9 @@ class TestTGs(object):
         src_mac = PACKET_DEFINITION[0]["Ethernet"]["src"]
         stream_id = tg.set_stream(PACKET_DEFINITION, count=packet_count,
                                   iface=iface, adjust_size=True, required_size=1450)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=src_mac)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -93,9 +93,9 @@ class TestTGs(object):
         """ Single stream """
         stream_id = tg.set_stream(PACKET_DEFINITION, count=5, inter=1, iface=tg.ports[0], adjust_size=True)
         time_stamp = time.time()
-        tg.start_streams([stream_id, ])
+        tg.start_streams([stream_id])
         print("Time to start stream %2.6fs." % (time.time() - time_stamp))
-        tg.stop_streams([stream_id, ])
+        tg.stop_streams([stream_id])
 
     def test_multistreams_and_multifaces(self, tg):
         """ Multiple streams and multiple ifaces """
@@ -141,9 +141,9 @@ class TestTGs(object):
         src_mac = PACKET_DEFINITION[0]["Ethernet"]["src"]
         stream_id = tg.set_stream(PACKET_DEFINITION, count=packet_count, iface=iface,
                                   adjust_size=True, required_size=200, inter=0.005)
-        tg.start_sniff([iface, ], sniffing_time=10, filter_layer="IP", src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=10, filter_layer="IP", src_filter=src_mac)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -155,10 +155,10 @@ class TestTGs(object):
         packet_count = 11
         stream_id_1 = tg.set_stream(PACKET_DEFS[0], count=packet_count - 1, iface=iface)
         stream_id_2 = tg.set_stream(PACKET_DEFS[1], count=packet_count - 10, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=3, filter_layer="IP", dst_filter=BROADCAT_MAC)
+        tg.start_sniff([iface], sniffing_time=3, filter_layer="IP", dst_filter=BROADCAT_MAC)
         tg.send_stream(stream_id_1)
         tg.send_stream(stream_id_2)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -171,12 +171,12 @@ class TestTGs(object):
         expected_count = 2
         stream_id_1 = tg.set_stream(PACKET_DEFS[0], iface=iface)
         stream_id_2 = tg.set_stream(PACKET_DEFS[1], iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=3, filter_layer="IP", dst_filter=BROADCAT_MAC)
-        tg.start_streams([stream_id_1, ])
-        tg.start_streams([stream_id_2, ])
-        tg.stop_streams([stream_id_1, ])
-        tg.stop_streams([stream_id_2, ])
-        data = tg.stop_sniff([iface, ])
+        tg.start_sniff([iface], sniffing_time=3, filter_layer="IP", dst_filter=BROADCAT_MAC)
+        tg.start_streams([stream_id_1])
+        tg.start_streams([stream_id_2])
+        tg.stop_streams([stream_id_1])
+        tg.stop_streams([stream_id_2])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == expected_count, \
@@ -187,10 +187,10 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id_1 = tg.set_stream(PACKET_DEFS[0], count=packet_count, inter=0.1, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", dst_filter=BROADCAT_MAC)
-        tg.start_streams([stream_id_1, ])
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", dst_filter=BROADCAT_MAC)
+        tg.start_streams([stream_id_1])
         tg.set_stream(PACKET_DEFS[1], count=1, iface=iface)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -203,12 +203,12 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id_1 = tg.set_stream(PACKET_DEFS[0], count=packet_count, inter=1, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=10, dst_filter=BROADCAT_MAC)
-        tg.start_streams([stream_id_1, ])
+        tg.start_sniff([iface], sniffing_time=10, dst_filter=BROADCAT_MAC)
+        tg.start_streams([stream_id_1])
         stream_id_2 = tg.set_stream(PACKET_DEFS[1], count=1, iface=iface)
-        tg.start_streams([stream_id_2, ])
-        data = tg.stop_sniff([iface, ])
-        tg.stop_streams([stream_id_1, stream_id_2, ])
+        tg.start_streams([stream_id_2])
+        data = tg.stop_sniff([iface])
+        tg.stop_streams([stream_id_1, stream_id_2])
         packets = data.get(iface, [])
 
         assert len(packets) >= packet_count, \
@@ -219,10 +219,10 @@ class TestTGs(object):
         iface = tg.ports[0]
         stream_id_1 = tg.set_stream(PACKET_DEFS[0], count=10, inter=1, iface=iface)
         stream_id_2 = tg.set_stream(PACKET_DEFS[1], count=10, inter=1, iface=iface)
-        tg.start_streams([stream_id_1, stream_id_2, ])
-        tg.stop_streams([stream_id_1, stream_id_2, ])
-        tg.start_sniff([iface, ], sniffing_time=5, dst_filter=BROADCAT_MAC)
-        data = tg.stop_sniff([iface, ])
+        tg.start_streams([stream_id_1, stream_id_2])
+        tg.stop_streams([stream_id_1, stream_id_2])
+        tg.start_sniff([iface], sniffing_time=5, dst_filter=BROADCAT_MAC)
+        data = tg.stop_sniff([iface])
 
         assert data[iface] == []
 
@@ -233,10 +233,10 @@ class TestTGs(object):
         stream_id_1 = tg.set_stream(PACKET_DEFINITION, count=1, iface=iface)
         stream_id_2 = tg.set_stream(ARP, count=packet_count, iface=iface)
         stream_id_3 = tg.set_stream(DOT1Q_ARP, count=1, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ARP")
-        tg.start_streams([stream_id_1, stream_id_2, stream_id_3, ])
-        tg.stop_streams([stream_id_1, stream_id_2, stream_id_3, ])
-        data = tg.stop_sniff([iface, ])
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ARP")
+        tg.start_streams([stream_id_1, stream_id_2, stream_id_3])
+        tg.stop_streams([stream_id_1, stream_id_2, stream_id_3])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -246,10 +246,10 @@ class TestTGs(object):
         """ Sniff for one packet, but sniff nothing """
         iface = tg.ports[0]
         stream_id = tg.set_stream(DOT1Q_ARP, count=5, inter=0.02, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=3, packets_count=1, filter_layer="ARP")
-        tg.start_streams([stream_id, ])
-        tg.stop_streams([stream_id, ])
-        data = tg.stop_sniff([iface, ])
+        tg.start_sniff([iface], sniffing_time=3, packets_count=1, filter_layer="ARP")
+        tg.start_streams([stream_id])
+        tg.stop_streams([stream_id])
+        data = tg.stop_sniff([iface])
 
         assert data[iface] == []
 
@@ -258,10 +258,10 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(QINQ, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=3)
-        tg.start_streams([stream_id_1, ])
-        tg.stop_streams([stream_id_1, ])
-        data = tg.stop_sniff([iface, ])
+        tg.start_sniff([iface], sniffing_time=3)
+        tg.start_streams([stream_id_1])
+        tg.stop_streams([stream_id_1])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -275,10 +275,10 @@ class TestTGs(object):
         iface = tg.ports[0]
         src_mac = PACKET_DEFINITION[0]["Ethernet"]["src"]
         stream_id_1 = tg.set_stream(PACKET_DEFINITION, count=100, iface=iface)
-        tg.clear_statistics([iface, ])
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=src_mac)
+        tg.clear_statistics([iface])
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=src_mac)
         tg.send_stream(stream_id_1)
-        tg.stop_sniff([iface, ])
+        tg.stop_sniff([iface])
 
         end_receive_statistics = tg.get_received_frames_count(iface)
         end_sent_statistics = tg.get_sent_frames_count(iface)
@@ -310,12 +310,12 @@ class TestTGs(object):
         stream8 = tg.set_stream(packet8, count=1, sa_increment=(-2, 20), continuous=True, iface=iface)
         stream9 = tg.set_stream(packet9, count=1, da_increment=(-3, 15), continuous=True, iface=iface)
 
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
 
-        tg.start_sniff([iface, ], sniffing_time=5, dst_filter="00:00:00:00:00:02")
-        tg.start_streams([stream1, ])
-        tg.stop_sniff([iface, ])
-        tg.stop_streams([stream1, ])
+        tg.start_sniff([iface], sniffing_time=5, dst_filter="00:00:00:00:00:02")
+        tg.start_streams([stream1])
+        tg.stop_sniff([iface])
+        tg.stop_streams([stream1])
 
         end_receive_statistics = tg.get_received_frames_count(iface)
         end_sent_statistics = tg.get_sent_frames_count(iface)
@@ -323,12 +323,12 @@ class TestTGs(object):
         assert end_receive_statistics == 20
         assert end_sent_statistics == 20
 
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:00:00:05")
-        tg.start_streams([stream2, ])
-        tg.stop_sniff([iface, ])
-        tg.stop_streams([stream2, ])
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:00:00:00:05")
+        tg.start_streams([stream2])
+        tg.stop_sniff([iface])
+        tg.stop_streams([stream2])
 
         end_receive_statistics = tg.get_received_frames_count(iface)
         end_sent_statistics = tg.get_sent_frames_count(iface)
@@ -336,12 +336,12 @@ class TestTGs(object):
         assert end_receive_statistics == 15
         assert end_sent_statistics == 15
 
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="notIP")
-        tg.start_streams([stream3, ])
-        tg.stop_sniff([iface, ])
-        tg.stop_streams([stream3, ])
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="notIP")
+        tg.start_streams([stream3])
+        tg.stop_sniff([iface])
+        tg.stop_streams([stream3])
 
         end_receive_statistics = tg.get_received_frames_count(iface)
         end_sent_statistics = tg.get_sent_frames_count(iface)
@@ -349,30 +349,10 @@ class TestTGs(object):
         assert end_receive_statistics >= 300
         assert end_sent_statistics == 300
 
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
 
-        tg.start_sniff([iface, ], sniffing_time=5)
-        tg.start_streams([stream4, ])
-
-        middle_receive_statistics = tg.get_received_frames_count(iface)
-        middle_sent_statistics = tg.get_sent_frames_count(iface)
-
-        assert middle_receive_statistics > 0
-        assert middle_sent_statistics > 0
-
-        tg.stop_sniff([iface, ])
-        tg.stop_streams([stream4, ])
-
-        end_receive_statistics = tg.get_received_frames_count(iface)
-        end_sent_statistics = tg.get_sent_frames_count(iface)
-
-        assert end_receive_statistics > middle_receive_statistics
-        assert end_sent_statistics > middle_sent_statistics
-
-        tg.clear_statistics([iface, ])
-
-        tg.start_sniff([iface, ], sniffing_time=5)
-        tg.start_streams([stream5, ])
+        tg.start_sniff([iface], sniffing_time=5)
+        tg.start_streams([stream4])
 
         middle_receive_statistics = tg.get_received_frames_count(iface)
         middle_sent_statistics = tg.get_sent_frames_count(iface)
@@ -380,8 +360,8 @@ class TestTGs(object):
         assert middle_receive_statistics > 0
         assert middle_sent_statistics > 0
 
-        tg.stop_sniff([iface, ])
-        tg.stop_streams([stream5, ])
+        tg.stop_sniff([iface])
+        tg.stop_streams([stream4])
 
         end_receive_statistics = tg.get_received_frames_count(iface)
         end_sent_statistics = tg.get_sent_frames_count(iface)
@@ -389,12 +369,32 @@ class TestTGs(object):
         assert end_receive_statistics > middle_receive_statistics
         assert end_sent_statistics > middle_sent_statistics
 
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
 
-        tg.start_sniff([iface, ], sniffing_time=5, dst_filter="00:00:00:00:00:02")
-        tg.start_streams([stream6, ])
-        tg.stop_sniff([iface, ])
-        tg.stop_streams([stream6, ])
+        tg.start_sniff([iface], sniffing_time=5)
+        tg.start_streams([stream5])
+
+        middle_receive_statistics = tg.get_received_frames_count(iface)
+        middle_sent_statistics = tg.get_sent_frames_count(iface)
+
+        assert middle_receive_statistics > 0
+        assert middle_sent_statistics > 0
+
+        tg.stop_sniff([iface])
+        tg.stop_streams([stream5])
+
+        end_receive_statistics = tg.get_received_frames_count(iface)
+        end_sent_statistics = tg.get_sent_frames_count(iface)
+
+        assert end_receive_statistics > middle_receive_statistics
+        assert end_sent_statistics > middle_sent_statistics
+
+        tg.clear_statistics([iface])
+
+        tg.start_sniff([iface], sniffing_time=5, dst_filter="00:00:00:00:00:02")
+        tg.start_streams([stream6])
+        tg.stop_sniff([iface])
+        tg.stop_streams([stream6])
 
         end_receive_statistics = tg.get_received_frames_count(iface)
         end_sent_statistics = tg.get_sent_frames_count(iface)
@@ -402,12 +402,12 @@ class TestTGs(object):
         assert end_receive_statistics == 20
         assert end_sent_statistics == 20
 
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
 
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:00:00:0a")
-        tg.start_streams([stream7, ])
-        tg.stop_sniff([iface, ])
-        tg.stop_streams([stream7, ])
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:00:00:00:0a")
+        tg.start_streams([stream7])
+        tg.stop_sniff([iface])
+        tg.stop_streams([stream7])
 
         end_receive_statistics = tg.get_received_frames_count(iface)
         end_sent_statistics = tg.get_sent_frames_count(iface)
@@ -415,10 +415,10 @@ class TestTGs(object):
         assert end_receive_statistics == 15
         assert end_sent_statistics == 15
 
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
 
-        tg.start_sniff([iface, ], sniffing_time=5)
-        tg.start_streams([stream8, ])
+        tg.start_sniff([iface], sniffing_time=5)
+        tg.start_streams([stream8])
 
         middle_receive_statistics = tg.get_received_frames_count(iface)
         middle_sent_statistics = tg.get_sent_frames_count(iface)
@@ -426,8 +426,8 @@ class TestTGs(object):
         assert middle_receive_statistics > 0
         assert middle_sent_statistics > 0
 
-        tg.stop_sniff([iface, ])
-        tg.stop_streams([stream8, ])
+        tg.stop_sniff([iface])
+        tg.stop_streams([stream8])
 
         end_receive_statistics = tg.get_received_frames_count(iface)
         end_sent_statistics = tg.get_sent_frames_count(iface)
@@ -435,10 +435,10 @@ class TestTGs(object):
         assert end_receive_statistics > middle_receive_statistics
         assert end_sent_statistics > middle_sent_statistics
 
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
 
-        tg.start_sniff([iface, ], sniffing_time=5)
-        tg.start_streams([stream9, ])
+        tg.start_sniff([iface], sniffing_time=5)
+        tg.start_streams([stream9])
 
         time.sleep(1)
 
@@ -448,8 +448,8 @@ class TestTGs(object):
         assert middle_receive_statistics > 0
         assert middle_sent_statistics > 0
 
-        tg.stop_sniff([iface, ])
-        tg.stop_streams([stream9, ])
+        tg.stop_sniff([iface])
+        tg.stop_streams([stream9])
 
         end_receive_statistics = tg.get_received_frames_count(iface)
         end_sent_statistics = tg.get_sent_frames_count(iface)
@@ -462,9 +462,9 @@ class TestTGs(object):
         ix_iface = tg.ports[0]
         packet_count = 2
         stream_id = tg.set_stream(ETH_IP_ICMP, count=1, iface=ix_iface, required_size=200, fragsize=110)
-        tg.start_sniff([ix_iface, ], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([ix_iface], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([ix_iface, ])
+        data = tg.stop_sniff([ix_iface])
         packets = data.get(ix_iface, [])
 
         assert len(packets) == packet_count, \
@@ -475,9 +475,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, sa_increment=(1, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", dst_filter=DST_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ICMP", dst_filter=DST_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -491,9 +491,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, sa_increment=(1, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, packets_count=10, filter_layer="ICMP", dst_filter=DST_MAC)
+        tg.start_sniff([iface], sniffing_time=5, packets_count=10, filter_layer="ICMP", dst_filter=DST_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -507,9 +507,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, da_increment=(1, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -523,9 +523,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, da_increment=(1, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -541,9 +541,9 @@ class TestTGs(object):
         stream_id = tg.set_stream(ETH_IP_ICMP, iface=iface,
                                   count=packet_count, sa_increment=(1, 5),
                                   required_size=200, fragsize=110)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", dst_filter=DST_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ICMP", dst_filter=DST_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that sniffed count == (count of packets) * (number of fragments per packet)
@@ -559,9 +559,9 @@ class TestTGs(object):
         packet_count = 1
         stream_id = tg.set_stream(ETH_IP_ICMP, iface=iface,
                                   count=packet_count, required_size=("Random", 100, 1500))
-        tg.start_sniff([iface, ], sniffing_time=3, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=3, filter_layer="ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -576,9 +576,9 @@ class TestTGs(object):
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_ICMP, iface=iface,
                                   count=packet_count, required_size=("Random", 1000, 1500))
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
@@ -594,9 +594,9 @@ class TestTGs(object):
         start_size = 70
         stream_id = tg.set_stream(ETH_IP_ICMP, iface=iface, count=packet_count,
                                   required_size=("Increment", 2, start_size, 78))
-        tg.start_sniff([iface, ], sniffing_time=3, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=3, filter_layer="ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -613,9 +613,9 @@ class TestTGs(object):
         expected_size_set = set(range(strat_size, end_size + 1, step))
         stream_id = tg.set_stream(ETH_IP_ICMP, iface=iface, count=packet_count,
                                   required_size=("Increment", step, strat_size, end_size))
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -637,9 +637,9 @@ class TestTGs(object):
         expected_size_set = sorted(range(end_size, start_size - 1, step))[packet_count - 1:]
         stream_id = tg.set_stream(ETH_IP_ICMP, iface=iface, count=packet_count,
                                   required_size=("Increment", step, start_size, end_size))
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -655,9 +655,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, sip_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -671,9 +671,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, sip_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -687,9 +687,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, sip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -703,9 +703,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, sip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -719,9 +719,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, dip_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -735,9 +735,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, dip_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -751,9 +751,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, dip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -767,9 +767,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, dip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.ICMP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.ICMP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -784,12 +784,12 @@ class TestTGs(object):
         packet_count = 100
         src_mac = PACKET_DEFINITION[0]["Ethernet"]["src"]
 
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
         stream_id_1 = tg.set_stream(PACKET_DEFINITION, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=7, filter_layer="IP", src_filter=src_mac)
-        tg.start_streams([stream_id_1, ])
-        tg.stop_sniff([iface, ])
-        tg.stop_streams([stream_id_1, ])
+        tg.start_sniff([iface], sniffing_time=7, filter_layer="IP", src_filter=src_mac)
+        tg.start_streams([stream_id_1])
+        tg.stop_sniff([iface])
+        tg.stop_streams([stream_id_1])
 
         end_receive_statistics = tg.get_received_frames_count(iface)
         end_sent_statistics = tg.get_sent_frames_count(iface)
@@ -797,7 +797,7 @@ class TestTGs(object):
         assert end_receive_statistics == packet_count
         assert end_sent_statistics == packet_count
 
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
 
         end_receive_statistics = tg.get_received_frames_count(iface)
         end_sent_statistics = tg.get_sent_frames_count(iface)
@@ -810,9 +810,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ARP, count=packet_count, arp_sa_increment=(3, 5), arp_sip_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ARP")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ARP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -831,9 +831,9 @@ class TestTGs(object):
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_ARP, count=packet_count, arp_sa_increment=(3, 5),
                                   arp_sip_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.ARP")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.ARP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -852,9 +852,9 @@ class TestTGs(object):
         packet_count = 10
         stream_id = tg.set_stream(ARP, count=packet_count, arp_sa_increment=(3, 5),
                                   arp_sip_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ARP")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ARP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -873,9 +873,9 @@ class TestTGs(object):
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_TCP, count=packet_count, vlan_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -889,9 +889,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(DOT1Q_IP_TCP, count=packet_count, vlan_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -908,10 +908,10 @@ class TestTGs(object):
         min_packet_count = len(range(start_mac_val, end_mac_val + 1))
         stream_id = tg.set_stream(ETH_IP_ICMP, continuous=True,
                                   da_increment=(start_mac_val, end_mac_val), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
-        tg.start_streams([stream_id, ])
-        tg.stop_streams([stream_id, ])
-        data = tg.stop_sniff([iface, ])
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="ICMP", src_filter=SRC_MAC)
+        tg.start_streams([stream_id])
+        tg.stop_streams([stream_id])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) >= min_packet_count, \
@@ -925,9 +925,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, inter=0.5, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=10, packets_count=10, filter_layer="IP", src_filter=SRC_MAC)
-        tg.start_streams([stream_id, ])
-        data = tg.stop_sniff([iface, ])
+        tg.start_sniff([iface], sniffing_time=10, packets_count=10, filter_layer="IP", src_filter=SRC_MAC)
+        tg.start_streams([stream_id])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -941,10 +941,10 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sa_increment=(1, 2), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
-        tg.start_streams([stream_id, ])
-        tg.stop_streams([stream_id, ])
-        data = tg.stop_sniff([iface, ])
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
+        tg.start_streams([stream_id])
+        tg.stop_streams([stream_id])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count // 2, \
@@ -958,10 +958,10 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, da_increment=(1, 2), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", dst_filter=DST_MAC)
-        tg.start_streams([stream_id, ])
-        tg.stop_streams([stream_id, ])
-        data = tg.stop_sniff([iface, ])
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", dst_filter=DST_MAC)
+        tg.start_streams([stream_id])
+        tg.stop_streams([stream_id])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count // 2, \
@@ -975,10 +975,10 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sa_increment=(1, 2), da_increment=(1, 2), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC, dst_filter=DST_MAC)
-        tg.start_streams([stream_id, ])
-        tg.stop_streams([stream_id, ])
-        data = tg.stop_sniff([iface, ])
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC, dst_filter=DST_MAC)
+        tg.start_streams([stream_id])
+        tg.stop_streams([stream_id])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count // 2, \
@@ -994,11 +994,11 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sa_increment=(1, 2), da_increment=(1, 2), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=7, packets_count=packet_count, filter_layer="ARP",
+        tg.start_sniff([iface], sniffing_time=7, packets_count=packet_count, filter_layer="ARP",
                        src_filter=SRC_MAC, dst_filter=DST_MAC)
-        tg.start_streams([stream_id, ])
-        tg.stop_streams([stream_id, ])
-        data = tg.stop_sniff([iface, ])
+        tg.start_streams([stream_id])
+        tg.stop_streams([stream_id])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert packets == [], \
@@ -1011,9 +1011,9 @@ class TestTGs(object):
 
         stream_id = tg.set_stream(LLDP, count=5, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, dst_filter="01:80:c2:00:00:0e")
+        tg.start_sniff([iface], sniffing_time=5, dst_filter="01:80:c2:00:00:0e")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in list(data.keys())
 
@@ -1037,9 +1037,9 @@ class TestTGs(object):
 
         stream_id = tg.set_stream(LLDP, count=10, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, dst_filter="01:80:c2:00:00:0e")
+        tg.start_sniff([iface], sniffing_time=5, dst_filter="01:80:c2:00:00:0e")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in list(data.keys())
 
@@ -1063,11 +1063,11 @@ class TestTGs(object):
 
         stream_id = tg.set_stream(LLDP, continuous=True, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, packets_count=20, filter_layer="LLDP", dst_filter="01:80:c2:00:00:0e")
-        tg.start_streams([stream_id, ])
+        tg.start_sniff([iface], sniffing_time=5, packets_count=20, filter_layer="LLDP", dst_filter="01:80:c2:00:00:0e")
+        tg.start_streams([stream_id])
         time.sleep(5)
-        tg.stop_streams([stream_id, ])
-        data = tg.stop_sniff([iface, ])
+        tg.stop_streams([stream_id])
+        data = tg.stop_sniff([iface])
 
         assert iface in data
 
@@ -1091,11 +1091,11 @@ class TestTGs(object):
 
         stream_id = tg.set_stream(LLDP, continuous=True, sa_increment=(1, 0), lldp_sa_increment=(1, 0), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, packets_count=20, dst_filter="01:80:c2:00:00:0e")
-        tg.start_streams([stream_id, ])
+        tg.start_sniff([iface], sniffing_time=5, packets_count=20, dst_filter="01:80:c2:00:00:0e")
+        tg.start_streams([stream_id])
         time.sleep(5)
-        tg.stop_streams([stream_id, ])
-        data = tg.stop_sniff([iface, ])
+        tg.stop_streams([stream_id])
+        data = tg.stop_sniff([iface])
 
         assert iface in data
 
@@ -1117,9 +1117,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sudp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="UDP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="UDP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1133,9 +1133,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_TCP, count=packet_count, stcp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="TCP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="TCP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1150,9 +1150,9 @@ class TestTGs(object):
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sudp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="UDP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="UDP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1166,9 +1166,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_TCP, count=packet_count, stcp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="TCP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="TCP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1182,9 +1182,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, sudp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1198,9 +1198,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_TCP, count=packet_count, stcp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1214,9 +1214,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, dudp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="UDP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="UDP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1230,9 +1230,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, dudp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="UDP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="UDP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1247,9 +1247,9 @@ class TestTGs(object):
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, dudp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1263,9 +1263,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sudp_increment=(3, 5), dudp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="UDP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="UDP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1282,9 +1282,9 @@ class TestTGs(object):
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_TCP, count=packet_count, stcp_increment=(3, 5),
                                   dtcp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="TCP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="TCP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1301,9 +1301,9 @@ class TestTGs(object):
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sudp_increment=(3, 5), dudp_increment=(3, 5), iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="UDP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="UDP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1319,9 +1319,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_TCP, count=packet_count, stcp_increment=(3, 5), dtcp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="TCP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="TCP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1337,9 +1337,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, sudp_increment=(3, 5), dudp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1355,9 +1355,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_TCP, count=packet_count, stcp_increment=(3, 5), dtcp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1373,9 +1373,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, protocol_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1389,9 +1389,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, protocol_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1405,9 +1405,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, protocol_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1421,9 +1421,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sip_increment=(3, 5), protocol_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1439,9 +1439,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, sip_increment=(3, 5), protocol_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1457,9 +1457,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, eth_type_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1473,9 +1473,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, eth_type_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1489,9 +1489,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, dscp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1505,9 +1505,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, dscp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1521,9 +1521,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, dscp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1537,9 +1537,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sip_increment=(3, 5), dscp_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1556,9 +1556,9 @@ class TestTGs(object):
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sip_increment=(3, 15), dip_increment=(3, 10),
                                   dscp_increment=(3, 5), protocol_increment=(3, 30), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1579,9 +1579,9 @@ class TestTGs(object):
         packet_count = 18
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sip_increment=(3, 3), dip_increment=(3, 3),
                                   dscp_increment=(3, 3), iface=iface, udf_dependancies={'sip_increment': 'dip_increment'})
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1603,9 +1603,9 @@ class TestTGs(object):
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sip_increment=(3, 3),
                                   dip_increment=(3, 3), dscp_increment=(3, 3), iface=iface,
                                   udf_dependancies={'dip_increment': 'sip_increment', 'dscp_increment': 'dip_increment'})
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1627,9 +1627,9 @@ class TestTGs(object):
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sip_increment=(3, 3),
                                   dip_increment=(3, 3), dscp_increment=(3, 3), iface=iface,
                                   udf_dependancies={'dip_increment': 'sip_increment', 'dscp_increment': 'sip_increment'})
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1649,9 +1649,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(IP6, count=packet_count, sipv6_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1665,9 +1665,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(IP6, count=packet_count, sipv6_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1681,9 +1681,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, sipv6_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1697,9 +1697,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, sipv6_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1714,9 +1714,9 @@ class TestTGs(object):
         packet_count = 5
         stream_id = tg.set_stream(IP6, count=packet_count, sipv6_increment=(3, 5),
                                   dipv6_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1732,9 +1732,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, sipv6_increment=(3, 5), dipv6_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1750,9 +1750,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(IP6, count=packet_count, dipv6_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1766,9 +1766,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(IP6, count=packet_count, dipv6_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1782,9 +1782,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, dipv6_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1798,9 +1798,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, dipv6_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.IPv6", src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1814,9 +1814,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(IP6, count=packet_count, fl_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1830,9 +1830,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(IP6, count=packet_count, fl_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1846,9 +1846,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, fl_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1862,9 +1862,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(IP6, count=packet_count, fl_increment=(3, 5), sipv6_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1880,9 +1880,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, fl_increment=(3, 5), dipv6_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1898,9 +1898,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(IP6, count=packet_count, nh_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1914,9 +1914,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(IP6, count=packet_count, nh_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1930,9 +1930,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, nh_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1946,9 +1946,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(IP6, count=packet_count, tc_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1962,9 +1962,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(IP6, count=packet_count, tc_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:0a:00:02:08")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:0a:00:02:08")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -1978,9 +1978,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, tc_increment=(3, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=5, src_filter="00:00:00:03:02:01")
+        tg.start_sniff([iface], sniffing_time=5, src_filter="00:00:00:03:02:01")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2034,11 +2034,11 @@ class TestTGs(object):
         stream_ids.append(tg.set_stream(pack_p7, count=8, iface=iface))
 
         tg.set_qos_stat_type(iface, "VLAN")
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
 
-        tg.start_sniff([iface, ], sniffing_time=5)
+        tg.start_sniff([iface], sniffing_time=5)
         tg.start_streams(stream_ids)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         tg.stop_streams(stream_ids)
         packets = data.get(iface, [])
 
@@ -2103,11 +2103,11 @@ class TestTGs(object):
             stream_ids.append(tg.set_stream(pack, count=1, iface=iface))
 
         tg.set_qos_stat_type(iface, "IP")
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
 
-        tg.start_sniff([iface, ], sniffing_time=5)
+        tg.start_sniff([iface], sniffing_time=5)
         tg.start_streams(stream_ids)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         tg.stop_streams(stream_ids)
         packets = data.get(iface, [])
 
@@ -2127,17 +2127,17 @@ class TestTGs(object):
         stream_id_1 = tg.set_stream(ETH_IP_TCP, continuous=True, inter=0.1, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_TCP, continuous=True, inter=0.05, iface=iface)
 
-        tg.start_streams([stream_id_1, ])
+        tg.start_streams([stream_id_1])
         time.sleep(1)
         assert 10 * 0.9 <= tg.get_port_txrate(iface) <= 10 * 1.1
         assert 10 * 0.9 <= tg.get_port_rxrate(iface) <= 10 * 1.1
-        tg.stop_streams([stream_id_1, ])
+        tg.stop_streams([stream_id_1])
 
-        tg.start_streams([stream_id_2, ])
+        tg.start_streams([stream_id_2])
         time.sleep(1)
         assert 20 * 0.95 <= tg.get_port_txrate(iface) <= 20 * 1.05
         assert 20 * 0.95 <= tg.get_port_rxrate(iface) <= 20 * 1.05
-        tg.stop_streams([stream_id_2, ])
+        tg.stop_streams([stream_id_2])
 
         tg.start_streams([stream_id_1, stream_id_2])
         time.sleep(1)
@@ -2151,9 +2151,9 @@ class TestTGs(object):
         packet_count = 5
         src_mac = DOT1Q_IP_UDP[0]["Ethernet"]["src"]
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, sip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=src_mac)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2168,9 +2168,9 @@ class TestTGs(object):
         packet_count = 1
         src_mac = DOT1Q_IP_UDP[0]["Ethernet"]["src"]
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, dip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=src_mac)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2185,9 +2185,9 @@ class TestTGs(object):
         packet_count = 1
         src_mac = DOT1Q_IP_UDP[0]["Ethernet"]["src"]
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, dscp_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=src_mac)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2202,9 +2202,9 @@ class TestTGs(object):
         packet_count = 1
         src_mac = DOT1Q_IP_UDP[0]["Ethernet"]["src"]
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, protocol_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=src_mac)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2219,9 +2219,9 @@ class TestTGs(object):
         packet_count = 3
         src_mac = DOT1Q_ARP[0]["Ethernet"]["src"]
         stream_id = tg.set_stream(DOT1Q_ARP, count=3, arp_sa_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=3, src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=3, src_filter=src_mac)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == 1, \
@@ -2236,9 +2236,9 @@ class TestTGs(object):
         packet_count = 1
         src_mac = DOT1Q_ARP[0]["Ethernet"]["src"]
         stream_id = tg.set_stream(DOT1Q_ARP, count=1, arp_sip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=3, src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=3, src_filter=src_mac)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2252,9 +2252,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(ETH_IP_IGMP, count=packet_count, igmp_ip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2266,9 +2266,9 @@ class TestTGs(object):
         packet = copy.deepcopy(ETH_IP_IGMP)
         packet[3]["IGMP"]["type"] = 18
         stream_id = tg.set_stream(packet, count=packet_count, igmp_ip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2280,9 +2280,9 @@ class TestTGs(object):
         packet = copy.deepcopy(ETH_IP_IGMP)
         packet[3]["IGMP"]["type"] = 23
         stream_id = tg.set_stream(packet, count=packet_count, igmp_ip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2295,9 +2295,9 @@ class TestTGs(object):
         packet[3]["IGMP"]["type"] = 34
         packet[3]["IGMP"]["maxresp"] = 0
         stream_id = tg.set_stream(packet, count=packet_count, igmp_ip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2310,9 +2310,9 @@ class TestTGs(object):
         packet = copy.deepcopy(ETH_IP_IGMP)
         packet[3]["IGMP"]["type"] = 22
         stream_id = tg.set_stream(packet, count=packet_count, igmp_ip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2326,9 +2326,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, sip_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=3, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=3, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2342,9 +2342,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sudp_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2358,9 +2358,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, dudp_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2374,9 +2374,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, vlan_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2390,9 +2390,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(QINQ, count=packet_count, vlan_increment=(2, 5), iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2406,10 +2406,10 @@ class TestTGs(object):
         iface = tg.ports[0]
         stream_id_1 = tg.set_stream(PACKET_DEFINITION, continuous=True, iface=iface)
 
-        tg.start_sniff([iface, ])
-        tg.start_streams([stream_id_1, ])
-        tg.stop_streams([stream_id_1, ])
-        tg.stop_sniff([iface, ])
+        tg.start_sniff([iface])
+        tg.start_streams([stream_id_1])
+        tg.stop_streams([stream_id_1])
+        tg.stop_sniff([iface])
         start_receive_statistics = tg.get_received_frames_count(iface)
         end_receive_statistics = tg.get_received_frames_count(iface)
 
@@ -2422,9 +2422,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(ETH_IP_IGMP, count=packet_count, iface=iface, adjust_size=False)
-        tg.start_sniff([iface, ], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=2)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -2440,10 +2440,10 @@ class TestTGs(object):
         stream_id_1 = tg.set_stream(DOT1Q_ARP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ARP, count=packet_count, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.ARP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="Dot1Q.ARP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.ARP filter layer are sniffed
@@ -2461,10 +2461,10 @@ class TestTGs(object):
         stream_id_1 = tg.set_stream(DOT1Q_ARP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ARP, count=packet_count, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="Dot1Q.ARP")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="Dot1Q.ARP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.ARP filter layer are sniffed
@@ -2472,10 +2472,10 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
         p1 = packets[0]
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer=filter_dot1q_arp)
+        tg.start_sniff([iface], sniffing_time=5, filter_layer=filter_dot1q_arp)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
         # Verify that only packets with specified Dot1Q.ARP filter layer are sniffed
         assert len(packets) == packet_count, \
@@ -2493,11 +2493,11 @@ class TestTGs(object):
         stream_id_3 = tg.set_stream(ETH_IP_UDP, count=packet_count, iface=iface)
         stream_id_4 = tg.set_stream(DOT1Q_ARP, count=packet_count, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="notARP",
+        tg.start_sniff([iface], sniffing_time=4, filter_layer="notARP",
                        src_filter=SRC_MAC)
-        tg.start_streams([stream_id_1, stream_id_2, stream_id_3, stream_id_4, ])
-        tg.stop_streams([stream_id_1, stream_id_2, stream_id_3, stream_id_4, ])
-        data = tg.stop_sniff([iface, ])
+        tg.start_streams([stream_id_1, stream_id_2, stream_id_3, stream_id_4])
+        tg.stop_streams([stream_id_1, stream_id_2, stream_id_3, stream_id_4])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified ARP filter layer are sniffed
@@ -2511,10 +2511,10 @@ class TestTGs(object):
         stream_id_1 = tg.set_stream(DOT1Q_ARP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ARP, count=packet_count, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="Dot1Q.ARP")
+        tg.start_sniff([iface], sniffing_time=4, filter_layer="Dot1Q.ARP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q filter layer are sniffed
@@ -2530,10 +2530,10 @@ class TestTGs(object):
         stream_id_1 = tg.set_stream(DOT1Q_ARP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ARP, count=packet_count, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.ARP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="Dot1Q.ARP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q filter layer are sniffed
@@ -2541,10 +2541,10 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
         p1 = packets[0]
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=filter_dot1q_arp)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer=filter_dot1q_arp)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q filter layer are sniffed
@@ -2561,10 +2561,10 @@ class TestTGs(object):
         stream_id_1 = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_UDP, count=packet_count, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="IP", dst_filter=DST_MAC)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="IP", dst_filter=DST_MAC)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified IP filter layer are sniffed
@@ -2581,10 +2581,10 @@ class TestTGs(object):
         filter_ip = (12, "08 00", "00 00")
         stream_id_1 = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_UDP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="IP", dst_filter=DST_MAC)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="IP", dst_filter=DST_MAC)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified IP filter layer are sniffed
@@ -2592,10 +2592,10 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
         p1 = packets[0]
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=filter_ip, dst_filter=DST_MAC)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer=filter_ip, dst_filter=DST_MAC)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified IP filter layer are sniffed
@@ -2610,10 +2610,10 @@ class TestTGs(object):
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_UDP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="Dot1Q.IP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.IP filter layer are sniffed
@@ -2630,10 +2630,10 @@ class TestTGs(object):
         filter_dot1q_ip = (12, "81 00 00 00 08 00", "00 00 FF FF 00 00")
         stream_id_1 = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_UDP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.IP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="Dot1Q.IP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.IP filter layer are sniffed
@@ -2641,10 +2641,10 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
         p1 = packets[0]
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=filter_dot1q_ip)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer=filter_dot1q_ip)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.IP filter layer are sniffed
@@ -2660,10 +2660,10 @@ class TestTGs(object):
         stream_id_1 = tg.set_stream(STP, count=1, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_UDP, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="STP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="STP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         # Verify that only packets with specified STP layer are sniffed
         assert len(data[iface]) == 1
@@ -2678,20 +2678,20 @@ class TestTGs(object):
         stream_id_1 = tg.set_stream(STP, count=1, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_UDP, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="STP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="STP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         # Verify that only packets with specified STP layer are sniffed
         assert len(data[iface]) == 1
 
         p1 = data[iface][0]
 
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=(14, "42 42 03 00 00", "00 00 00 00 00"))
+        tg.start_sniff([iface], sniffing_time=2, filter_layer=(14, "42 42 03 00 00", "00 00 00 00 00"))
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         # Verify that only packets with specified STP layer are sniffed
         assert len(data[iface]) == 1
@@ -2708,11 +2708,11 @@ class TestTGs(object):
         stream_id_1 = tg.set_stream(STP, count=1, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_UDP, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="notSTP",
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="notSTP",
                        src_filter=SRC_MAC)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         # Verify that only packets with specified not STP layer are sniffed
         assert len(data[iface]) == 1
@@ -2725,10 +2725,10 @@ class TestTGs(object):
         packet_count = 1
         stream_id_1 = tg.set_stream(ETH_IP_UDP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_TCP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="TCP", dst_filter=DST_MAC)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="TCP", dst_filter=DST_MAC)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified TCP layer are sniffed
@@ -2745,10 +2745,10 @@ class TestTGs(object):
         filter_tcp = (12, "08 00 00 00 00 00 00 00 00 00 00 06", "00 00 FF FF FF FF FF FF FF FF FF 00")
         stream_id_1 = tg.set_stream(ETH_IP_UDP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_TCP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="TCP", dst_filter=DST_MAC)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="TCP", dst_filter=DST_MAC)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified TCP layer are sniffed
@@ -2756,10 +2756,10 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
         p1 = packets[0]
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=filter_tcp, dst_filter=DST_MAC)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer=filter_tcp, dst_filter=DST_MAC)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified TCP layer are sniffed
@@ -2774,10 +2774,10 @@ class TestTGs(object):
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_TCP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_TCP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.TCP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="Dot1Q.TCP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.TCP layer are sniffed
@@ -2795,10 +2795,10 @@ class TestTGs(object):
                             "00 00 FF FF 00 00 FF FF FF FF FF FF FF FF FF 00")
         stream_id_1 = tg.set_stream(DOT1Q_IP_TCP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_TCP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.TCP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="Dot1Q.TCP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.TCP layer are sniffed
@@ -2806,10 +2806,10 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
         p1 = packets[0]
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=filter_dot1q_tcp)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer=filter_dot1q_tcp)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.TCP layer are sniffed
@@ -2824,9 +2824,9 @@ class TestTGs(object):
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_UDP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="UDP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="UDP", src_filter=SRC_MAC)
         tg.start_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified UDP layer are sniffed
@@ -2844,9 +2844,9 @@ class TestTGs(object):
                       "00 00 FF FF FF FF FF FF FF FF FF 00")
         stream_id_1 = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_UDP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="UDP", src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="UDP", src_filter=SRC_MAC)
         tg.start_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified UDP layer are sniffed
@@ -2854,9 +2854,9 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
         p1 = packets[0]
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=filter_udp, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer=filter_udp, src_filter=SRC_MAC)
         tg.start_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified UDP layer are sniffed
@@ -2871,10 +2871,10 @@ class TestTGs(object):
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_UDP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.UDP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="Dot1Q.UDP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.UDP layer are sniffed
@@ -2892,10 +2892,10 @@ class TestTGs(object):
                             "00 00 FF FF 00 00 FF FF FF FF FF FF FF FF FF 00")
         stream_id_1 = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_UDP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.UDP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="Dot1Q.UDP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.UDP layer are sniffed
@@ -2903,10 +2903,10 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
         p1 = packets[0]
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=filter_dot1q_udp)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer=filter_dot1q_udp)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.UDP layer are sniffed
@@ -2921,10 +2921,10 @@ class TestTGs(object):
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_ICMP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="ICMP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="ICMP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified ICMP layer are sniffed
@@ -2942,10 +2942,10 @@ class TestTGs(object):
                        "00 00 FF FF FF FF FF FF FF FF FF 00")
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_ICMP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="ICMP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="ICMP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified ICMP layer are sniffed
@@ -2953,10 +2953,10 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
         p1 = packets[0]
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=filter_icmp)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer=filter_icmp)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified ICMP layer are sniffed
@@ -2971,10 +2971,10 @@ class TestTGs(object):
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_ICMP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.ICMP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="Dot1Q.ICMP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.ICMP layer are sniffed
@@ -2992,10 +2992,10 @@ class TestTGs(object):
                              "00 00 FF FF 00 00 FF FF FF FF FF FF FF FF FF 00")
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_ICMP, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer="Dot1Q.ICMP")
+        tg.start_sniff([iface], sniffing_time=2, filter_layer="Dot1Q.ICMP")
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.ICMP layer are sniffed
@@ -3003,10 +3003,10 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
         p1 = packets[0]
-        tg.start_sniff([iface, ], sniffing_time=2, filter_layer=filter_dot1q_icmp)
+        tg.start_sniff([iface], sniffing_time=2, filter_layer=filter_dot1q_icmp)
         tg.start_streams([stream_id_1, stream_id_2])
         tg.stop_streams([stream_id_1, stream_id_2])
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         # Verify that only packets with specified Dot1Q.ICMP layer are sniffed
@@ -3029,11 +3029,11 @@ class TestTGs(object):
                     {"BGPHeader": {"type": 2}},
                     {"BGPUpdate": {"withdrawn_len": 0, "withdrawn": [], "nlri": [(24, '20.1.1.0')],
                                    "total_path": [{"BGPPathAttribute": {"type": 1, "origin": 1}},
-                                                  {"BGPPathAttribute": {"type": 2, "aspath": []}}, ]}}, )
+                                                  {"BGPPathAttribute": {"type": 2, "aspath": []}}]}}, )
         stream_id = tg.set_stream(bgp_open, count=1, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="Dot1Q.TCP")
+        tg.start_sniff([iface], sniffing_time=4, filter_layer="Dot1Q.TCP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in data and data[iface]
         # filter our packets from data
@@ -3098,9 +3098,9 @@ class TestTGs(object):
 
         stream_id = tg.set_stream(bgp_update, count=1, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="TCP")
+        tg.start_sniff([iface], sniffing_time=4, filter_layer="TCP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in data and data[iface]
         # filter our packets from data
@@ -3126,9 +3126,9 @@ class TestTGs(object):
                     {"BGPNotification": {"ErrorCode": 6, "ErrorSubCode": 1, "Data": '\x00\x01\x01\x00\x00\x00\x02'}},
                     )
         stream_id = tg.set_stream(bgp_open, count=1, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=4, filter_layer="Dot1Q.TCP")
+        tg.start_sniff([iface], sniffing_time=4, filter_layer="Dot1Q.TCP")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in data and data[iface]
         # filter our packets from data
@@ -3155,10 +3155,10 @@ class TestTGs(object):
         stream_id_4 = tg.set_stream(RSTP, count=2, inter=0.1, iface=iface, adjust_size=False)
         stream_id_5 = tg.set_stream(pack_mstp_2, count=2, inter=0.1, iface=iface, adjust_size=False)
 
-        tg.start_sniff([iface, ], sniffing_time=20, filter_layer="STP", src_filter="00:00:00:11:11:11")
+        tg.start_sniff([iface], sniffing_time=20, filter_layer="STP", src_filter="00:00:00:11:11:11")
         tg.start_streams([stream_id_1, stream_id_2, stream_id_3, stream_id_4, stream_id_5])
 
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         tg.stop_streams([stream_id_1, stream_id_2, stream_id_3, stream_id_4, stream_id_5])
 
         assert iface in data and data[iface]
@@ -3181,9 +3181,9 @@ class TestTGs(object):
         packet_count = 1
         src_mac = QINQ[0]["Ethernet"]["src"]
         stream_id = tg.set_stream(QINQ, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=src_mac)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -3207,9 +3207,9 @@ class TestTGs(object):
         packet[1]["Dot1Q"]["type"] = ETHER_TYPE_PBRIDGE
         src_mac = packet[0]["Ethernet"]["src"]
         stream_id = tg.set_stream(packet, count=packet_count, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=src_mac)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -3228,9 +3228,9 @@ class TestTGs(object):
         pack = copy.deepcopy(DOT1Q_IP_TCP)
         pack[1]["Dot1Q"]["prio"] = DOT1Q_PRIO_2
         stream_id = tg.set_stream(pack, count=packet_count, iface=iface, adjust_size=False)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -3251,9 +3251,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(PAUSE, count=packet_count, iface=iface, adjust_size=False)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -3270,9 +3270,9 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(PFC, count=packet_count, iface=iface, adjust_size=False)
-        tg.start_sniff([iface, ], sniffing_time=2, src_filter=SRC_MAC)
+        tg.start_sniff([iface], sniffing_time=2, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -3294,9 +3294,9 @@ class TestTGs(object):
         pack = copy.deepcopy(PAUSE)
         pack[1]["FlowControl"]["opcode"] = opcode
         stream_id = tg.set_stream(pack, count=packet_count, iface=iface, adjust_size=False)
-        tg.start_sniff([iface, ], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=2)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -3356,9 +3356,9 @@ class TestTGs(object):
                                       {'LLDPDUEnd': {'length': 0, 'type': 0}}]}})
         stream_id = tg.set_stream(pack, count=1, iface=iface, adjust_size=False)
 
-        tg.start_sniff([iface, ], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=2)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in data, "No packets were sniffed."
         # filter our packets from data
@@ -3415,9 +3415,9 @@ class TestTGs(object):
                                            {"LLDPDUEnd": {"type": 0, "length": 0}}]}})
         stream_id = tg.set_stream(pack_dcbx, count=1, iface=iface, adjust_size=False)
 
-        tg.start_sniff([iface, ], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=2)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in data, "No packets were sniffed."
         # filter our packets from data
@@ -3465,9 +3465,9 @@ class TestTGs(object):
 
         stream_id = tg.set_stream(pack_dcbx, count=1, iface=iface, adjust_size=False)
 
-        tg.start_sniff([iface, ], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=2)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in data, "No packets were sniffed."
         # filter our packets from data
@@ -3509,9 +3509,9 @@ class TestTGs(object):
                                       {"LLDPDUEnd": {"type": 0, "length": 0}}]}})
         stream_id = tg.set_stream(pack, count=1, iface=iface, adjust_size=False)
 
-        tg.start_sniff([iface, ], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=2)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in data, "No packets were sniffed."
         # filter our packets from data
@@ -3544,9 +3544,9 @@ class TestTGs(object):
                 {"Padding": {'load': "\x00" * 10}},)
         stream_id = tg.set_stream(pack, count=1, iface=iface, adjust_size=False)
 
-        tg.start_sniff([iface, ], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=2)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in data, "No packets were sniffed."
         # filter our packets from data
@@ -3587,9 +3587,9 @@ class TestTGs(object):
                 {"LACPReserved": {'reserved': "\x00" * 50}}, )
         stream_id = tg.set_stream(pack, count=1, iface=iface, adjust_size=False)
 
-        tg.start_sniff([iface, ], sniffing_time=2, dst_filter=dst_mac, src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=2, dst_filter=dst_mac, src_filter=src_mac)
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in data, "No packets were sniffed."
         assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
@@ -3682,9 +3682,9 @@ class TestTGs(object):
 
         stream_id = tg.set_stream(dhcp_request, count=5, dhcp_si_increment=(2, 5), required_size=346, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer="IP", src_filter="00:00:10:00:01:02")
+        tg.start_sniff([iface], sniffing_time=5, filter_layer="IP", src_filter="00:00:10:00:01:02")
         tg.send_stream(stream_id)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in list(data.keys())
 
@@ -3713,10 +3713,10 @@ class TestTGs(object):
         # send packet, sniff pkt stream
         pkt = ({"Ethernet": {"src": SRC_MAC, "dst": DST_MAC, "padding": padding}},
                {"IP": {"src": IP_SRC, "dst": IP_DST, "p": IP_PROTO_IP}})
-        tg.start_sniff([iface, ], sniffing_time=3,
+        tg.start_sniff([iface], sniffing_time=3,
                        filter_layer="IP", src_filter=SRC_MAC, dst_filter=DST_MAC)
         tg.send_stream(tg.set_stream(pkt, count=packet_count, iface=iface, required_size=packet_size))
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
 
         assert len(packets) == packet_count, \
@@ -3788,7 +3788,7 @@ class TestTGs(object):
         iface = tg.ports[0]
         packet_count = 10000
         stream_id_1 = tg.set_stream(PACKET_DEFINITION, count=packet_count, rate=0.01, iface=iface)
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
 
         tg.send_stream(stream_id_1)
         end_sent_statistics = tg.get_sent_frames_count(iface)
@@ -3805,13 +3805,13 @@ class TestTGs(object):
         packets_count = 20
         src_mac = PACKET_DEFINITION[0]["Ethernet"]["src"]
 
-        tg.clear_statistics([iface, ])
+        tg.clear_statistics([iface])
         stream_1 = tg.set_stream(PACKET_DEFINITION, count=packets_count // 2, inter=0.1, iface=iface)
         stream_2 = tg.set_stream(PACKET_DEFINITION, count=packets_count // 2, inter=0.1, iface=iface)
-        tg.start_sniff([iface, ], sniffing_time=4, src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=4, src_filter=src_mac)
         tg.send_stream(stream_1)
         tg.send_stream(stream_2)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert iface in data
         assert len(data[iface]) == packets_count

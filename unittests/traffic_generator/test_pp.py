@@ -59,9 +59,9 @@ class TestPacketProcessor(object):
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
                                     required_size=1000, fragsize=200, iface=iface)
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.start_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         data_1 = tg.assemble_fragmented_packets(data[iface])
         # Verify that fragmented packet is assembled
         assert len(data_1) == 1
@@ -71,9 +71,9 @@ class TestPacketProcessor(object):
 
         tg.streams[stream_id_1]['packet'] = pac
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.start_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         # Verify that assembled packet has len = 996
         assert len(data[iface][0]) == 996
@@ -88,9 +88,9 @@ class TestPacketProcessor(object):
         offset = tg.get_packet_field(tg.streams[stream_id_1]['packet'][2], "IP", "offset")
         tg.streams[stream_id_1]['packet'][2].ip.offset = offset - 1
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.start_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         data_1 = tg.assemble_fragmented_packets(data[iface])
 
         # Verify that fragmented packet is assembled
@@ -105,9 +105,9 @@ class TestPacketProcessor(object):
 
         tg.streams[stream_id_1]['packet'].pop(0)
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.start_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         data_1 = tg.assemble_fragmented_packets(data[iface])
 
         # Verify that fragmented packet is assembled
@@ -122,9 +122,9 @@ class TestPacketProcessor(object):
 
         tg.streams[stream_id_1]['packet'][0].ip.offset = 1
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.start_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         data_1 = tg.assemble_fragmented_packets(data[iface])
 
         # Verify that fragmented packet is assembled
@@ -139,9 +139,9 @@ class TestPacketProcessor(object):
 
         tg.streams[stream_id_1]['packet'][0].ip.offset = 0
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.start_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         data_1 = tg.assemble_fragmented_packets(data[iface])
 
         # Verify that fragmented packet is assembled
@@ -156,9 +156,9 @@ class TestPacketProcessor(object):
 
         tg.streams[stream_id_1]['packet'].pop(4)
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.stop_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         data_1 = tg.assemble_fragmented_packets(data[iface])
 
         # Verify that fragmented packet is assembled
@@ -173,9 +173,9 @@ class TestPacketProcessor(object):
 
         tg.streams[stream_id_1]['packet'][4].ip.offset = 0
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.stop_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         data_1 = tg.assemble_fragmented_packets(data[iface])
 
         # Verify that fragmented packet is assembled
@@ -190,9 +190,9 @@ class TestPacketProcessor(object):
 
         tg.streams[stream_id_1]['packet'][4].ip.offset = 1
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.stop_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         data_1 = tg.assemble_fragmented_packets(data[iface])
 
         # Verify that fragmented packet is assembled
@@ -207,9 +207,9 @@ class TestPacketProcessor(object):
 
         tg.streams[stream_id_1]['packet'].pop(2)
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.stop_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         data_1 = tg.assemble_fragmented_packets(data[iface])
 
         # Verify that fragmented packet is assembled
@@ -226,9 +226,9 @@ class TestPacketProcessor(object):
         pack_2.time += 1
         tg.streams[stream_id_1]['packet'].append(pack_2)
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.stop_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         data_1 = tg.assemble_fragmented_packets(data[iface])
 
         # Verify that fragmented packet is assembled
@@ -239,9 +239,9 @@ class TestPacketProcessor(object):
 
         tg.streams[stream_id_1]['packet'] = pac
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.stop_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         # Verify that assembled packet has len = 996
         assert len(data[iface][0]) == 996
@@ -258,10 +258,10 @@ class TestPacketProcessor(object):
         for pac in tg.streams[stream_id_2]['packet']:
             pac.ip.id = 2
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.stop_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
         tg.send_stream(stream_id_2)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         data_1 = tg.assemble_fragmented_packets(data[iface])
 
         # Verify that fragmented packet is assembled
@@ -274,10 +274,10 @@ class TestPacketProcessor(object):
         tg.streams[stream_id_1]['packet'] = pac_1
         tg.streams[stream_id_2]['packet'] = pac_2
 
-        tg.start_sniff([iface, ], sniffing_time=5, filter_layer='Dot1Q.ICMP')
+        tg.stop_sniff([iface], sniffing_time=5, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
         tg.send_stream(stream_id_2)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert len(data[iface][0]) == 996
         assert len(data[iface][1]) == 1196
@@ -301,12 +301,12 @@ class TestPacketProcessor(object):
         tg.streams[stream_id_3]['packet'].ip.id = 3
         tg.streams[stream_id_4]['packet'].ip.id = 4
 
-        tg.start_sniff([iface, ], sniffing_time=8, filter_layer='Dot1Q.ICMP')
+        tg.stop_sniff([iface], sniffing_time=8, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
         tg.send_stream(stream_id_2)
         tg.send_stream(stream_id_3)
         tg.send_stream(stream_id_4)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
         data_1 = tg.assemble_fragmented_packets(data[iface])
 
         # Verify that fragmented packet is assembled
@@ -323,12 +323,12 @@ class TestPacketProcessor(object):
         tg.streams[stream_id_3]['packet'] = pac_3
         tg.streams[stream_id_4]['packet'] = pac_4
 
-        tg.start_sniff([iface, ], sniffing_time=8, filter_layer='Dot1Q.ICMP')
+        tg.stop_sniff([iface], sniffing_time=8, filter_layer='Dot1Q.ICMP')
         tg.send_stream(stream_id_1)
         tg.send_stream(stream_id_2)
         tg.send_stream(stream_id_3)
         tg.send_stream(stream_id_4)
-        data = tg.stop_sniff([iface, ])
+        data = tg.stop_sniff([iface])
 
         assert len(data[iface][0]) == 996
         assert len(data[iface][1]) == 1196
