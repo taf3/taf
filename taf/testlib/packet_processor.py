@@ -158,23 +158,25 @@ class PacketProcessor(object):
         @type  layer:  str
         @rtype:  pypacker.Packet
         @return:  return Pypacker object
+        @raise  PypackerException: Pypacker library does not support protocol
         """
-        if '.' not in layer:
-            if layer in ["Ethernet", "ARP", "LLC", "STP"]:
-                return getattr(getattr(pypacker.layer12, layer.lower()), layer)
-            elif layer in ["IP", "IP6", "ICMP", "IGMP"]:
-                return getattr(getattr(pypacker.layer3, layer.lower()), layer)
-            elif layer in ["TCP", "UDP"]:
-                return getattr(getattr(pypacker.layer4, layer.lower()), layer)
-            elif layer == "FlowControl":
-                return getattr(getattr(pypacker.layer12, "flow_control"), layer)
-            elif layer in ["Pause", "PFC"]:
-                return getattr(getattr(getattr(pypacker.layer12, "flow_control"), "FlowControl"), layer)
-        # Handle inner pypacker class e.g. icmp.ICMP.Echo
-        else:
+        if '.' in layer:
+            # Handle inner pypacker class e.g. icmp.ICMP.Echo
             layer, inner_layer = layer.split('.')
             pypacker_layer = self._get_pypacker_layer(layer)
             return getattr(pypacker_layer, inner_layer)
+        elif layer in ["Ethernet", "ARP", "LLC", "STP"]:
+            return getattr(getattr(pypacker.layer12, layer.lower()), layer)
+        elif layer in ["IP", "IP6", "ICMP", "IGMP"]:
+            return getattr(getattr(pypacker.layer3, layer.lower()), layer)
+        elif layer in ["TCP", "UDP"]:
+            return getattr(getattr(pypacker.layer4, layer.lower()), layer)
+        elif layer == "FlowControl":
+            return getattr(getattr(pypacker.layer12, "flow_control"), layer)
+        elif layer in ["Pause", "PFC"]:
+            return getattr(getattr(getattr(pypacker.layer12, "flow_control"), "FlowControl"), layer)
+        else:
+            raise PypackerException("Pypacker does not support protocol {0}".format(layer))
 
     @staticmethod
     def _get_pypacker_layer_fields(packet):
@@ -218,20 +220,21 @@ class PacketProcessor(object):
             @brief  Return pypacker Packet object built according to definition.
             """
             layer_name = next(iter(layer_dict))
-            pypacker_layer = self._get_pypacker_layer(layer_name)
-            if pypacker_layer:
-                sl = pypacker_layer()
-            # Skip undefined layers e.g. Dot1Q
-            else:
+            try:
+                pypacker_layer = self._get_pypacker_layer(layer_name)
+            except PypackerException:
+                # Skip undefined layers e.g. Dot1Q
                 return None
 
-            for field, value in layer_dict[layer_name].items():
-                if getattr(sl, '{0}_s'.format(field), None):
-                    setattr(sl, '{0}_s'.format(field), value)
-                else:
-                    setattr(sl, field, value)
+            packet_layer = pypacker_layer()
 
-            return sl
+            for field, value in layer_dict[layer_name].items():
+                if getattr(packet_layer, '{0}_s'.format(field), None):
+                    setattr(packet_layer, '{0}_s'.format(field), value)
+                else:
+                    setattr(packet_layer, field, value)
+
+            return packet_layer
 
         # Converting packet_definition to pypacker.Packet.
         packet = reduce(lambda a, b: a + b, map(_pypacker_layer, packet_definition))
@@ -284,12 +287,7 @@ class PacketProcessor(object):
         """
         try:
             packet_value = self.get_packet_field(packet, layer, field)
-            if value is None:
-                return True
-            elif packet_value == value:
-                return True
-            else:
-                return False
+            return value is None or packet_value == value
         except PypackerException:
             return False
 

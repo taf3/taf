@@ -869,35 +869,36 @@ class PacketGenerator(object):
         if not self.stream_increments:
             return self.packet
         else:
-            fields = [x[0] for x in self.stream_increments]
-            values = [x[1] for x in self.stream_increments]
+            fields, values = [], []
+            for field, value in self.stream_increments:
+                fields.append(field)
+                values.append(value)
             for mapped_values in itertools.zip_longest(*values):
                 for field, value in itertools.zip_longest(fields, mapped_values):
                     if not value:
                         continue
-                    else:
-                        # Find layer and set value
-                        if '.' in field:
-                            layer, layer_field = field.split('.')
-                            # Set value for layer 3 and higher protocol
-                            for layers in self.packet:
-                                packet_layer = getattr(layers, layer, None)
-                                if packet_layer:
-                                    setattr(packet_layer, layer_field, value)
-                                    break
-                        # Set value for layer 2 protocol
-                        elif field == "S-Dot1Q":
-                            setattr(getattr(self.packet, "vlan", None)[0], "vid", value)
-                        elif field == "C-Dot1Q":
-                            setattr(getattr(self.packet, "vlan", None)[1], "vid", value)
-                        elif field == "padding":
-                            packet_str = self.packet.bin()
-                            if len(packet_str) < value:
-                                self.packet = ethernet.Ethernet(packet_str + (b"\x00" * (value - len(packet_str))))
-                            else:
-                                self.packet = ethernet.Ethernet(packet_str[:value])
+                    # Find layer and set value
+                    elif '.' in field:
+                        layer, layer_field = field.split('.')
+                        # Set value for layer 3 and higher protocol
+                        for layers in self.packet:
+                            packet_layer = getattr(layers, layer, None)
+                            if packet_layer:
+                                setattr(packet_layer, layer_field, value)
+                                break
+                    # Set value for layer 2 protocol
+                    elif field == "S-Dot1Q":
+                        setattr(getattr(self.packet, "vlan", None)[0], "vid", value)
+                    elif field == "C-Dot1Q":
+                        setattr(getattr(self.packet, "vlan", None)[1], "vid", value)
+                    elif field == "padding":
+                        packet_str = self.packet.bin()
+                        if len(packet_str) < value:
+                            self.packet = ethernet.Ethernet(packet_str + (b"\x00" * (value - len(packet_str))))
                         else:
-                            setattr(self.packet, field, value)
+                            self.packet = ethernet.Ethernet(packet_str[:value])
+                    else:
+                        setattr(self.packet, field, value)
                 return self.packet
 
 
