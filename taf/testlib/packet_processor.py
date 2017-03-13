@@ -391,7 +391,7 @@ class PacketProcessor(object):
             # Handle inner pypacker class e.g. icmp.ICMP.Echo, icmp6.ICMP6.Echo
             if class_name in self.inner_classes:
                 # get main class ICMP + echo
-                class_name = "{0}.{1}".format(next(iter(layer_dict)), class_name)
+                class_name = "{0}.{1}".format(next(iter(layer_dict)), class_name)  # NOQA pylint: disable=used-before-assignment
             fields = self._get_pypacker_layer_fields(layer)
             layer_dict = {class_name: {}}
             for field in fields:

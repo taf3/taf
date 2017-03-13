@@ -382,7 +382,7 @@ class Tg(IxiaHLTMixin, PacketProcessor):
                     raw_packet = self.tcl("captureBuffer cget -frame").replace(" ", "")
                     timestamp = float(self.tcl("captureBuffer cget -timestamp").replace(" ", ""))
                     # self.class_logger.debug(raw_packet)
-                    pkt = pypacker.ethernet.Ethernet(raw_packet.decode("hex"))
+                    pkt = pypacker.ethernet.Ethernet(raw_packet.decode("hex"))  # pylint: disable=no-member
                     pkt.time = self.sniff_ids[_iface]['start_time'] + timestamp / 1000000000
                     packet_list.append(pkt)
 

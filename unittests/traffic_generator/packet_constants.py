@@ -82,7 +82,8 @@ DOT1Q = ({"Ethernet": {"src": SRC_MAC, "dst": DST_MAC}},
          )
 
 IP6 = ({"Ethernet": {"src": '00:00:0a:00:02:08', "dst": "00:01:12:12:34:12", "type": ETHER_TYPE_IP6}},
-       {"IP6": {"src": "2000::1:2", "dst": "2000::2:2"}},
+       {"IP6": {"src": "2000::1:2", "dst": "2000::2:2", "nxt": IP_PROTO_TCP}},
+       {"TCP": {}},
        )
 
 QINQ = ({"Ethernet": {"src": SRC_MAC, "dst": DST_MAC}},

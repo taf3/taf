@@ -22,7 +22,19 @@ import pytest
 
 from testlib import dev_ixia
 from testlib import dev_pypacker
-
+from testlib import dev_rpypacker
+a = '''lkjh
+;klj
+joiu
+'''
+IXIA_CONFIGURATION_SCRIPT = """\
+ixClearPortStats {chassis} {card} {port}
+port get {chassis} {card} {port}
+port config -rxTxMode gigLoopback
+port config -loopback portLoopback
+port set {chassis} {card} {port}
+port write {chassis} {card} {port}
+"""
 
 # Environment configs
 IXIA_CONFIG = {"name": "IXIA", "entry_type": "tg", "instance_type": "ixiahl", "id": 1, "ip_host": "X.X.X.X",
@@ -30,10 +42,13 @@ IXIA_CONFIG = {"name": "IXIA", "entry_type": "tg", "instance_type": "ixiahl", "i
 
 PYPACKER_CONFIG = {"name": "Pypacker", "entry_type": "tg", "instance_type": "pypacker", "id": 2, "ports": ["eth0"]}
 
+RPYPACKER_CONFIG = {"name": "Pypacker", "entry_type": "tg", "instance_type": "rpypacker", "id": 3,
+                    "ipaddr": "localhost", "ssh_user": "user_name", "ssh_pass": "user_password", "ports": ["eth0"]}
+
 
 def pytest_addoption(parser):
     parser.addoption("--tgtype", action="append", default=["pypacker"],
-                     choices=["ixiahl", "pypacker"],
+                     choices=["ixiahl", "pypacker", "rpypacker"],
                      help="TG type, '%default' by default.")
 
 
@@ -42,15 +57,17 @@ class FakeOpts(object):
         self.setup = "setup.json"
         self.env = ""
         self.get_only = False
-        self.lhost_ui = 'linux_bash'
+        self.lhost_ui = "linux_bash"
 
 
-@pytest.fixture(scope="session", params=["pypacker", "ixiahl"])
+@pytest.fixture(scope="session", params=["pypacker", "rpypacker", "ixiahl"])
 def traffic_generator(request):
     if request.param not in request.config.option.tgtype:
         pytest.skip("{0} API is skipped for test.".format(request.param.upper()))
     if request.param == "pypacker":
         tg = dev_pypacker.PypackerTG(PYPACKER_CONFIG, request.config.option)
+    elif request.param == "rpypacker":
+        tg = dev_rpypacker.RemotePypackerTG(RPYPACKER_CONFIG, FakeOpts())
     elif request.param == "ixiahl":
         tg = dev_ixia.Ixia(IXIA_CONFIG, request.config.option)
     request.addfinalizer(tg.destroy)
@@ -62,13 +79,8 @@ def traffic_generator(request):
 def tg(request, traffic_generator):
     traffic_generator.cleanup()
     if traffic_generator.type == "ixiahl":
-        iface = traffic_generator.ports[0]
-        chassis, card, port = iface
-        traffic_generator.tcl("ixClearPortStats {chassis} {card} {port}; \
-                               port get {chassis} {card} {port}; \
-                               port config -rxTxMode gigLoopback; \
-                               port config -loopback portLoopback; \
-                               port set {chassis} {card} {port}; \
-                               port write {chassis} {card} {port}"
-                              .format(**{'chassis': chassis, 'card': card, 'port': port}))
+        keys = ['chassis', 'card', 'port']
+        data = {key: value for key, value in zip(keys, traffic_generator.ports[0])}
+        traffic_generator.tcl(IXIA_CONFIGURATION_SCRIPT.format(**data))
+
     return traffic_generator

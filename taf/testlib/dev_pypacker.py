@@ -598,7 +598,7 @@ class PypackerTG(PacketProcessor, GenericTG):
 
         with suppress(KeyboardInterrupt):
             for _ in zip(timeout_iter, port_data_iter):
-                with stop_lock, suppress(self.pcap.PcapError):
+                with stop_lock, suppress(self.pcap.PcapError):  # pylint: disable=no-member
                     pc.dispatch(100, put_to_collector)
                 time.sleep(0.01)
 
