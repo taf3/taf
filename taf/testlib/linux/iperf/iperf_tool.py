@@ -129,7 +129,7 @@ def create_argparser():
         required=False,
         help='iperf server info',
         default=None,
-        action="store"
+        action="store",
     )
 
     arg_parser.add_argument(
@@ -137,7 +137,7 @@ def create_argparser():
         required=False,
         help='iperf timeout',
         default=10,
-        action="store"
+        action="store",
     )
 
     arg_parser.add_argument(
@@ -145,7 +145,7 @@ def create_argparser():
         required=False,
         help='iperf interval',
         default=0,
-        action="store"
+        action="store",
     )
 
     arg_parser.add_argument(
@@ -153,7 +153,7 @@ def create_argparser():
         required=False,
         help='iperf bind value',
         default=None,
-        action="store"
+        action="store",
     )
 
     arg_parser.add_argument(
@@ -161,7 +161,7 @@ def create_argparser():
         required=False,
         help='iperf traffic mode udp',
         default=False,
-        action="store_true"
+        action="store_true",
     )
 
     arg_parser.add_argument(
@@ -169,7 +169,7 @@ def create_argparser():
         required=False,
         help='iperf bandwidth value',
         default=None,
-        action="store"
+        action="store",
     )
 
     arg_parser.add_argument(
@@ -177,7 +177,7 @@ def create_argparser():
         required=False,
         help='iperf threads info',
         default=1,
-        action="store"
+        action="store",
     )
 
     arg_parser.add_argument(
@@ -185,7 +185,7 @@ def create_argparser():
         required=False,
         help='iperf TCP port',
         default=None,
-        action="store"
+        action="store",
     )
 
     arg_parser.add_argument(
@@ -193,7 +193,7 @@ def create_argparser():
         required=False,
         help='iperf units info',
         default='a',
-        action="store"
+        action="store",
     )
 
     arg_parser.add_argument(
@@ -201,7 +201,7 @@ def create_argparser():
         help='Set log_level, default: %(default)s',
         choices=[x for x in loggers.levels],
         action="store",
-        default='INFO'
+        default='INFO',
     )
 
     return arg_parser

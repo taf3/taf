@@ -47,11 +47,11 @@ class UiIssCli(UiHelperMixin, UiInterface):
         self.is_config_mode = False
         self.mode_prompt = ""
         self.switch.cli = clicmd_iss.CLICmd(
-                    # don't use _sshtun_port, we need port 23
-                    self.switch.ipaddr, None,
-                    self.switch.config['cli_user'],
-                    self.switch.config['cli_user_passw'],
-                    self.switch.config['cli_user_prompt'], self.switch.type)
+            # don't use _sshtun_port, we need port 23
+            self.switch.ipaddr, None,
+            self.switch.config['cli_user'],
+            self.switch.config['cli_user_passw'],
+            self.switch.config['cli_user_prompt'], self.switch.type)
 
     def connect(self):
         self.ris = {}

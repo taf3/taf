@@ -68,9 +68,9 @@ class MultipleTGClass(object):
 
     def create_multiple_tg(self):
         config = {
-                  'instance_type': "_".join(set((x.type for x in self.env.tg.values()))),
-                  'id': "".join((x.id for x in self.env.tg.values()))
-                  }
+            'instance_type': "_".join(set((x.type for x in self.env.tg.values()))),
+            'id': "".join((x.id for x in self.env.tg.values())),
+        }
         self.tg = multiple_tg.MultipleTG(self.env.tg, config, self.env.opts)
         self.env.tg = {1: self.tg}
         self.env.dut_map['tg1'] = self.tg.id
@@ -110,7 +110,7 @@ class MultipleTGPlugin(object):
     @pytest.fixture(scope='class', autouse=True)
     def one_tg(self, request, env_init):
         multiple_marker = next((m for m in getattr(request.cls, 'pytestmark', [])
-                                    if m.name == 'multiple_tgs'), None)
+                                if m.name == 'multiple_tgs'), None)
         if len(getattr(env_init, 'tg', {})) > 1 and not multiple_marker:
             tg = MultipleTGClass(env_init)
             tg.setup()

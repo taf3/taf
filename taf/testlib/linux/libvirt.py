@@ -63,7 +63,7 @@ class Libvirt(object):
         """
         return self.cli_send_command(cmd, expected_rcs=expected_rc)
 
-    def virsh_execute_command(self, command,  expected_rc=frozenset({0})):
+    def virsh_execute_command(self, command, expected_rc=frozenset({0})):
         """Method for virsh command execution.
 
         Args:

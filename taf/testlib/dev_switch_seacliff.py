@@ -45,7 +45,7 @@ class SwitchSeacliff(SwitchONS):
     # QOS Attributes
     class IndexedAttributes(namedtuple("IndexedAttributes", (
         'index_min', 'index_max', 'default_value_list',
-        'value_min', 'value_max', 'step', 'cpu_port')
+        'value_min', 'value_max', 'step', 'cpu_port'),
     )):
         """These attributes have a value associated per index.
 

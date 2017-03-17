@@ -38,8 +38,8 @@ IPERF_UNITS = {
     'K': 'kbytes',
     'a': 'mbytes',
     'g': 'gbits',
-    'G': 'gbytes'
-    }
+    'G': 'gbytes',
+}
 
 
 class IPerfParser(sumparser.SumParser):

@@ -70,7 +70,7 @@ class XMLPypackerServer(xmlrpc.XMLRPC):
             None
 
         """
-        self.pypacker = PypackerTG(config, pickle.loads(opts.data))
+        self.pypacker = PypackerTG(config, pickle.loads(opts.data))  # pylint: disable=attribute-defined-outside-init
         self.__register_methods()
 
     def __register_methods(self):
@@ -115,7 +115,7 @@ class XMLPypackerServer(xmlrpc.XMLRPC):
 
         # Need to wrap stop_sniff separately
         # because we have to perform additional procedures with sniffed data before sending.
-        self.xmlrpc_stop_sniff = self.stop_sniff
+        self.xmlrpc_stop_sniff = self.stop_sniff  # pylint: disable=attribute-defined-outside-init
 
     def stop_sniff(self, args, kwargs):
         """Stops sniffing on specified interfaces and returns captured data.

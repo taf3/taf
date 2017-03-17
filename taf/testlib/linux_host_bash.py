@@ -61,7 +61,7 @@ STAT_MAP = {
     "RxUcstPktsIPv4": "cntRxUcstPktsIPv4",
     "RxUcstPktsIPv6": "cntRxUcstPktsIPv6",
     "RxUcstPktsNonIP": "cntRxUcstPktsNonIP",
-    "TxUcstPktsIPv4": "cntTxUcstPkts"
+    "TxUcstPktsIPv4": "cntTxUcstPkts",
 }
 
 
@@ -361,7 +361,7 @@ class LinuxHostBash(LinuxHostInterface):
                         [self.cli_send_command(
                             command=com[0],
                             timeout=timeout,
-                            expected_rcs=expected_rcs).stdout]
+                            expected_rcs=expected_rcs).stdout],
                     )
                 except UIException:
                     results.append([''])
@@ -781,7 +781,7 @@ class LinuxHostBash(LinuxHostInterface):
                 if 'index' in kwargs:
                     commands.append(
                         "ip link set dev {0} swattr {1} {2} index {3}".format(
-                            port, kwargs['setPortAttr'], kwargs['attrVal'], kwargs['index']
+                            port, kwargs['setPortAttr'], kwargs['attrVal'], kwargs['index'],
                         ))
                 else:
                     commands.append("ip link set dev {0} swattr {1} {2}".format(
@@ -915,7 +915,7 @@ class LinuxHostBash(LinuxHostInterface):
         ip_cmd = '/sbin/ip'
         if ports:
             command_list = [['{} -o {} link show {}'.format(ip_cmd,
-                iplink_params, self.generate_port_name(port=p))] for p in ports]
+                                                            iplink_params, self.generate_port_name(port=p))] for p in ports]
         else:
             command_list = [['{} -o {} link show'.format(ip_cmd, iplink_params)], ]
 
@@ -927,7 +927,7 @@ class LinuxHostBash(LinuxHostInterface):
         pci_list = self.cli_get_all(command_list, multicall_treshold=1, split_lines=False)
 
         command_list = [["cat /sys/class/net/{0}/{1}".format(
-                            _port['name'], 'mtu')] for _port in ports]
+            _port['name'], 'mtu')] for _port in ports]
         frame_sizes = self.cli_get_all(command_list, multicall_treshold=1)
         command_list = [["ethtool {0}".format(_port['name'])] for _port in ports]
         ethtool_info = self.cli_get_all(command_list, multicall_treshold=1)
@@ -1829,7 +1829,7 @@ class LinuxHostBash(LinuxHostInterface):
             'lagControlType': 'Static',
 
             # Feature not implemented WW05'15
-            'hashMode': 'None'
+            'hashMode': 'None',
         }
 
         # ONPSS 2.x does not have separate lagId/Name field
@@ -1911,7 +1911,7 @@ class LinuxHostBash(LinuxHostInterface):
             'globalHash': '',
 
             # Feature not implemented WW05'15
-            'collectorMaxDelay': 'None'
+            'collectorMaxDelay': 'None',
         }
         return [_row]
 
@@ -2546,7 +2546,7 @@ class LinuxHostBash(LinuxHostInterface):
             'tlvPortDescTxEnable': 'portDesc',
             'tlvSysCapTxEnable': 'sysCap',
             'tlvSysDescTxEnable': 'sysDesc',
-            'tlvSysNameTxEnable': 'sysName'
+            'tlvSysNameTxEnable': 'sysName',
         }
 
         # Select only allowed parameters for configuration
@@ -3248,7 +3248,7 @@ class LinuxHostBash(LinuxHostInterface):
         icmp_kwargs = {
             'options': options,
             'timeout': timeout,
-            'expected_rcs': expected_rcs
+            'expected_rcs': expected_rcs,
         }
         output = self.icmp_ping_request(*icmp_args, **icmp_kwargs).stdout
         return self.parse_icmp_ping_result(output)

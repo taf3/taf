@@ -85,17 +85,17 @@ def parse_options():
     parser = NoErrArgumentParser(usage=argparse.SUPPRESS, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument("--logdir", dest="logdir", default=None,
-                      help="Directory path to store log files.")
+                        help="Directory path to store log files.")
     parser.add_argument("--loglevel", dest="loglevel", default="INFO",
-                      help="Logging level (DEBUG, INFO, WARNING, ERROR, FATAL, CRITICAL).")
+                        help="Logging level (DEBUG, INFO, WARNING, ERROR, FATAL, CRITICAL).")
     parser.add_argument("--logprefix", dest="logprefix", default="main",
-                      help="Log files prefix.")
+                        help="Log files prefix.")
     parser.add_argument("--silent", action="store_true", dest="silent", default=False,
-                      help="Do not print logging to console.")
+                        help="Do not print logging to console.")
     parser.add_argument("-k", action="store", dest="keyword", default=None,
-                      help="pytest kewords.")
+                        help="pytest kewords.")
     parser.add_argument("-m", action="store", dest="markexpr", default=None,
-                      help="pytest markers expression.")
+                        help="pytest markers expression.")
 
     opts = parser.parse_args()
 

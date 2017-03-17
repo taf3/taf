@@ -73,7 +73,7 @@ def ixload_import(tcl_object):
                     "      package req IxLoad;" +
                     "} {" +
                     "    return -code error \"Cannot import IxLoad package.\";" +
-                    "}"
+                    "}",
                     )
 
 
@@ -101,7 +101,7 @@ def tcl_puts_replace(tcl_interpret):
                        "    } else {" +
                        "        eval original_puts $args" +
                        "    }" +
-                       "}"
+                       "}",
                        )
 
 

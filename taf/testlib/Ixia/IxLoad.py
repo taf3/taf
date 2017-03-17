@@ -315,7 +315,7 @@ class IxLoadTests(object):
 
         """
         self.tcl("$testController releaseConfigWaitFinish;" +
-                 "if {[lsearch [info vars] test] >= 0} {$test clearDUTList; ::IxLoad delete $test}"
+                 "if {[lsearch [info vars] test] >= 0} {$test clearDUTList; ::IxLoad delete $test}",
                  )
 
     def report(self, pdf=False):

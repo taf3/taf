@@ -152,7 +152,7 @@ class IxLoadTclAPI(object):
             ixload_repo = self.ixload_tmppath + _repo_name
             self.copy_local_file(repo, ixload_repo)
             self.tcl("set repository [::IxLoad new ixRepository -name \"{0}\"]".format(ixload_repo).replace("\\", "\\\\"))
-            self.repo_file = repo
+            self.repo_file = repo  # pylint: disable=attribute-defined-outside-init
         # self.tst = IxLoadTests(self.tcl)
         self.tst = IxLoadTests(self.tcl, self.test_controller,
                                "{0}{1}".format(self.ixload_respath, self.__log_name))
@@ -947,9 +947,9 @@ class IxLoadHTTPClient(IxLoadGenericObjectMixin):
     def init(self):
         self.clear("agent.actionList")
         self.clear("agent.cmdPercentagePool.percentageCommandList")
-        self.agent_actionlist = []
-        self.agent_headerlist = []
-        self.timeline = None
+        self.agent_actionlist = []  # pylint: disable=attribute-defined-outside-init
+        self.agent_headerlist = []  # pylint: disable=attribute-defined-outside-init
+        self.timeline = None  # pylint: disable=attribute-defined-outside-init
 
     def append_agent_actionlist(self, agent_action):
         self.tcl("${0} agent.actionList.appendItem -object ${1}".format(self.name, agent_action.name))
@@ -960,7 +960,7 @@ class IxLoadHTTPClient(IxLoadGenericObjectMixin):
         self.agent_headerlist.append(agent_header)
 
     def new_timeline(self):
-        self.timeline = IxLoadixTimeline(self.tcl)
+        self.timeline = IxLoadixTimeline(self.tcl)  # pylint: disable=attribute-defined-outside-init
         return self.timeline
 
     def config_percentagecmdlist(self, **kwargs):

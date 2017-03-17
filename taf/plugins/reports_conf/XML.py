@@ -47,6 +47,7 @@ def str2dict(dictstr):
         raise Exception("Cannot convert given string (%s) to dictionary." % (dictstr, ))
     return _dict
 
+
 class ReportingServerConfig(object):
     """Reporting Server configuration.
 
@@ -114,19 +115,21 @@ class ReportingServerConfig(object):
             log_class.info("Enabling XML report creation ...")
             commands.append(["reportadd", [name, "xml"]])
             commands.append(["reportconfig",
-                            [name, "xml", "options",
-                            [["update", update]]
-                            ]])
+                             [name, "xml", "options", [["update", update]]],
+                             ])
             # In case html selected but xml omitted create xml file with the same name as html.
             if item.config.option.xml_file is None:
                 item.config.option.xml_file = os.path.splitext(item.config.option.xml_html)[0] + ".xml"
             commands.append(["reportconfig",
-                            [name, "xml", "logfile", item.config.option.xml_file]])
+                             [name, "xml", "logfile", item.config.option.xml_file],
+                             ])
             if item.config.option.xml_prefix is not None:
                 commands.append(["reportconfig",
-                                [name, "xml", "prefix", item.config.option.xml_prefix]])
+                                 [name, "xml", "prefix", item.config.option.xml_prefix],
+                                 ])
             commands.append(["reportconfig",
-                            [name, "xml", "cfgfile", item.config.option.xml_cfg]])
+                             [name, "xml", "cfgfile", item.config.option.xml_cfg],
+                             ])
             if item.config.option.xml_info is not None:
                 commands.extend(["reportconfig",
                                  [name, "xml", "info_dict", [key, value]]]
@@ -138,12 +141,15 @@ class ReportingServerConfig(object):
             # Add buildname from cli option if it isn't equal to real buildname from switch properties
             if buildname is not None and env_prop['switchppVersion'] != buildname:
                 commands.append(["reportconfig",
-                                 [name, "xml", "info_dict", ["TM buildname", buildname]]])
+                                 [name, "xml", "info_dict", ["TM buildname", buildname]],
+                                 ])
             # Order and configure HTML report to server.
             if item.config.option.xml_html is not None:
                 log_class.info("Enabling HTML report creation ...")
                 commands.append(["reportconfig",
-                                [name, "xml", "htmlfile", item.config.option.xml_html]])
+                                 [name, "xml", "htmlfile", item.config.option.xml_html],
+                                 ])
                 commands.append(["reportconfig",
-                                [name, "xml", "htmlcfg", item.config.option.xml_htmlcfg]])
+                                 [name, "xml", "htmlcfg", item.config.option.xml_htmlcfg],
+                                 ])
         return commands

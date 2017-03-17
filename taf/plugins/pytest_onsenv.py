@@ -32,8 +32,8 @@ from testlib import dev_linux_host
 # WORKAROUND: add fix from pytest 2.6 (fix issue498: https://bitbucket.org/hpk42/pytest/commits/6a5904c4816cebd3e146a4277c0ad5021b131753#chg-_pytest/python.py)
 def finish(self):
     try:
-        while self._finalizer:
-            func = self._finalizer.pop()
+        while self._finalizer:  # pylint: disable=protected-access
+            func = self._finalizer.pop()  # pylint: disable=protected-access
             func()
     finally:
         if hasattr(self, "cached_result"):
@@ -68,12 +68,13 @@ def _check_pytest_version(version, max_version):
             return False
     return False
 
+
 if _check_pytest_version(pytest.__version__, '2.5.2'):
-    from _pytest.python import FixtureDef
+    from _pytest.python import FixtureDef  # pylint: disable=no-name-in-module
     FixtureDef.finish = finish
 
-# WORKAROUND END
 
+# WORKAROUND END
 TESTENV_OPTIONS = ["none", "simplified2", "simplified3", "simplified4", "simplified5", "golden",
                    "diamond", "mixed"]
 
@@ -104,8 +105,8 @@ def pytest_addoption(parser):
     parser.addoption("--testenv", action="store", default="none",
                      choices=TESTENV_OPTIONS,
                      help=(
-                     "Verify environment before starting tests ({}). '%default' by default.".format(
-                         " | ".join(TESTENV_OPTIONS))))
+                         "Verify environment before starting tests ({}). '%default' by default.".format(
+                             " | ".join(TESTENV_OPTIONS))))
     parser.addoption("--use_parallel_init", action="store_true", default=False,
                      help="Use threads for simultaneous switches processing. %default by default.")
     parser.addoption("--fail_ctrl", action="store", default="restart",

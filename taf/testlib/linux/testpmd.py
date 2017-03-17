@@ -91,7 +91,7 @@ class TestPmd(object):
 
         """
         assert all([par in ARGS_MAP or par in STANDALONE_ARGS for par in kwargs]), \
-            "Unsupported arguments are passed into current method. Supported are: \n {}\n{}".format(ARGS_MAP.keys(),STANDALONE_ARGS.keys())
+            "Unsupported arguments are passed into current method. Supported are: \n {}\n{}".format(ARGS_MAP.keys(), STANDALONE_ARGS.keys())
         inserts = ' '.join('{} {}'.format(ARGS_MAP[param], str(val))
                            for param, val in kwargs.items() if param in ARGS_MAP)
         inserts = inserts + ' ' + ' '.join([str(STANDALONE_ARGS[param]) for param, val in kwargs.items() if param in STANDALONE_ARGS and val])

@@ -65,7 +65,7 @@ def snmpget(snmp_host, snmp_community_string, snmp_get_oid,
         cmdgen.CommandGenerator().getCmd(
             cmdgen.CommunityData('my-agent', snmp_community_string, 0),
             cmdgen.UdpTransportTarget((snmp_host, snmp_service_port)),
-            snmp_get_oid
+            snmp_get_oid,
         )
 
     return errorIndication, errorStatus, errorIndex, varBinds
@@ -99,7 +99,7 @@ def snmpset(snmp_host, snmp_community_string, snmp_set_oid,
         cmdgen.CommandGenerator().setCmd(
             cmdgen.CommunityData('my-agent', snmp_community_string, 0),
             cmdgen.UdpTransportTarget((snmp_host, snmp_service_port)),
-            (snmp_set_oid, set_type(snmp_set_value))
+            (snmp_set_oid, set_type(snmp_set_value)),
         )
 
     return errorIndication, errorStatus, errorIndex, varBinds

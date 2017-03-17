@@ -523,8 +523,8 @@ class HostLexer(lexer.RegexLexer):
 
             (r'\d+\.\d+\.\d+\.\d+/\d+', TT_IPv4_MASK),
             (r'\d+\.\d+\.\d+\.\d+', TT_IPv4_ADDR),
-            (r'\$[\w_][\w_\d]*', TT_VARIABLE)
-        ]
+            (r'\$[\w_][\w_\d]*', TT_VARIABLE),
+        ],
     }
 
 
@@ -539,12 +539,12 @@ class HostParser(LL_Parser):
             TT_BR_LEFT,
             TT_BR_RIGHT,
             TT_EXCLMARK,
-            TT_COMMA
+            TT_COMMA,
         },
         'N': {
             '<HOST_GRP>',
             '<HOST_EXPR>',
-            '<HOST_PARENS_CONTD>'
+            '<HOST_PARENS_CONTD>',
         },
         'R': {
             (('<HOST_GRP>', ), ('<HOST_EXPR>', )),
@@ -555,9 +555,9 @@ class HostParser(LL_Parser):
             (('<HOST_EXPR>', ), (TT_VARIABLE, )),
 
             (('<HOST_PARENS_CONTD>', ), ()),
-            (('<HOST_PARENS_CONTD>', ), (TT_COMMA, '<HOST_GRP>', '<HOST_PARENS_CONTD>'))
+            (('<HOST_PARENS_CONTD>', ), (TT_COMMA, '<HOST_GRP>', '<HOST_PARENS_CONTD>')),
         },
-        'S': '<HOST_GRP>'
+        'S': '<HOST_GRP>',
     }
 
     def __init__(self):

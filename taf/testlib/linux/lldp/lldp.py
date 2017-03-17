@@ -32,7 +32,7 @@ class Lldp(object):
             lldptool=lldptool.LLDPTOOL,
             command="set-lldp",
             interface=port_name,
-            enableTx=status
+            enableTx=status,
         )
         self.run_command(cmd)
 
@@ -40,7 +40,7 @@ class Lldp(object):
         cmd = "{lldptool} {command} -i {interface} adminStatus".format(
             lldptool=lldptool.LLDPTOOL,
             command="get-lldp",
-            interface=port_name
+            interface=port_name,
         )
         stdout, stderr, exit_status = self.run_command(cmd)
 
@@ -50,7 +50,7 @@ class Lldp(object):
         cmd = "{lldptool} {command} -i {interface} -V {tlv} {enableTx}".format(
             lldptool=lldptool.LLDPTOOL, command="set-tlv",
             interface=port_name, tlv=tlv,
-            enableTx=enable_tx
+            enableTx=enable_tx,
         )
         self.run_command(cmd)
 
@@ -158,6 +158,7 @@ class PortIdSubTypes(IntEnum):
     INTERFACE_NAME = 5
     AGENT_CIRCUIT_ID = 6
     LOCALLY_ASSIGNED = 7
+
 
 # dict because we do string lookup
 SYS_CAPABILITIES = {

@@ -28,7 +28,7 @@ from _pytest.skipping import MarkEvaluator
 # Modified MarkEvaluator._istrue in order to handle nested skipif markers in parametrized tests
 def _istrue(self):
     if self.holder:
-        d = self._getglobals()
+        d = self._getglobals()  # pylint: disable=protected-access
         if self.holder.args:
             self.result = False
             skipif_cond = list(self.holder.args)
@@ -38,7 +38,7 @@ def _istrue(self):
                 pass
             for expr in skipif_cond:
                 self.expr = expr
-                if isinstance(expr, py.builtin._basestring):  # pylint: disable=no-member
+                if isinstance(expr, py.builtin._basestring):  # pylint: disable=no-member, protected-access
                     result = cached_eval(self.item.config, expr, d)
                 else:
                     if self.get("reason") is None:
@@ -54,7 +54,8 @@ def _istrue(self):
             self.result = True
     return getattr(self, 'result', False)
 
-MarkEvaluator._istrue = _istrue
+
+MarkEvaluator._istrue = _istrue  # pylint: disable=protected-access
 
 
 def pytest_configure(config):
@@ -84,14 +85,14 @@ class SkipFilterPlugin(object):
         """Handle skipif condition and remove skipped tests from test run.
 
         """
-        self.items_count = len(items)
-        self.reasons = set()
+        self.items_count = len(items)  # pylint: disable=attribute-defined-outside-init
+        self.reasons = set()  # pylint: disable=attribute-defined-outside-init
         for item in items[:]:
             evalskip = MarkEvaluator(item, 'skipif')
             if evalskip.istrue():
                 self.reasons.add(evalskip.getexplanation())
                 items.remove(item)
-        self.filtered_count = len(items)
+        self.filtered_count = len(items)  # pylint: disable=attribute-defined-outside-init
 
     def pytest_terminal_summary(self, terminalreporter):
         """Add info in summary about removed tests.

@@ -103,8 +103,8 @@ class SyslogNotifier(object):
 
         """
         servers = []
-        self.loggers = []
-        self.logs_path = []
+        self.loggers = []  # pylint: disable=attribute-defined-outside-init
+        self.logs_path = []  # pylint: disable=attribute-defined-outside-init
 
         switches_ids = session.config.env.switch
         for switch_id in switches_ids:
@@ -147,9 +147,9 @@ class SyslogNotifier(object):
             logger_item["logger"] = logger
             self.loggers += [logger_item]
 
-        self.setup_fail = False
-        self.call_fail = False
-        self.teardown_fail = False
+        self.setup_fail = False  # pylint: disable=attribute-defined-outside-init
+        self.call_fail = False  # pylint: disable=attribute-defined-outside-init
+        self.teardown_fail = False  # pylint: disable=attribute-defined-outside-init
 
     def _create_header(self, env_prop, stage):
         """Send syslog header/footer message for each device in config.
@@ -227,11 +227,11 @@ class SyslogNotifier(object):
 
         """
         if report.when == "setup" and report.outcome == "failed":
-            self.setup_fail = True
+            self.setup_fail = True  # pylint: disable=attribute-defined-outside-init
         elif report.when == "call" and report.outcome == "failed":
-            self.call_fail = True
+            self.call_fail = True  # pylint: disable=attribute-defined-outside-init
         elif report.when == "teardown" and report.outcome == "failed":
-            self.teardown_fail = True
+            self.teardown_fail = True  # pylint: disable=attribute-defined-outside-init
         return report.when == "teardown" and (self.setup_fail or self.call_fail or self.teardown_fail)
 
     def get_log_path(self, switch_name):

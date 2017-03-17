@@ -413,7 +413,7 @@ class LLDPToolParse(unittest.TestCase):
             4: False,
             5: True,
             6: False,
-            7: True
+            7: True,
         }
 
     def test_cee_app(self):
@@ -451,7 +451,7 @@ class LLDPToolParse(unittest.TestCase):
             4: True,
             5: False,
             6: True,
-            7: False
+            7: False,
         })
 
     @staticmethod
@@ -479,6 +479,7 @@ class LLDPToolParse(unittest.TestCase):
         self.assertEqual(
             r['up2tc'], {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7})
         self.assertEqual(r['tcbw'], (12, 12, 12, 12, 13, 13, 13, 13))
+
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestLldptool)

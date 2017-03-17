@@ -85,8 +85,8 @@ class CaseLoggerExecutor(object):
         """Add message into device logs on test case setup.
 
         """
-        self.log_timestamp = time.time()
-        self.tc_name = get_tcname(self.node)
+        self.log_timestamp = time.time()  # pylint: disable=attribute-defined-outside-init
+        self.tc_name = get_tcname(self.node)  # pylint: disable=attribute-defined-outside-init
 
         # Make notice of test setup in log file.
         for switch in list(self.env.switch.values()):

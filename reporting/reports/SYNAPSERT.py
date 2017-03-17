@@ -18,11 +18,8 @@
 
 """
 
-import os
-import sys
-
-from plugins.pytest_helpers import get_failure_reason
 import loggers
+from plugins.pytest_helpers import get_failure_reason
 
 
 class SYNAPSERT(object):

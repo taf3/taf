@@ -63,7 +63,7 @@ LAG_HASH_MODES = {
     'UseUdp': 'l3_hash_config_use_udp', 'Dscp': 'l3_hash_config_dscp_mask',
     'EtherType': 'l2_hash_key_ethertype_mask', 'Ip6Flow': 'l3_hash_config_flow_mask',
     'SymmetrizeL3': 'l3_hash_config_symmetrize_l3_fields',
-    'OuterVlanId': 'l2_hash_key_vlan_id_1_mask', 'VlanId': 'l2_hash_key_vlan_id_1_mask'
+    'OuterVlanId': 'l2_hash_key_vlan_id_1_mask', 'VlanId': 'l2_hash_key_vlan_id_1_mask',
 }
 
 
@@ -71,7 +71,7 @@ STAT_MAP = {
     "RxUcstPktsIPv4": "cntRxUcstPktsIPv4",
     "RxUcstPktsIPv6": "cntRxUcstPktsIPv6",
     "RxUcstPktsNonIP": "cntRxUcstPktsNonIP",
-    "TxUcstPktsIPv4": "cntTxUcstPkts"
+    "TxUcstPktsIPv4": "cntTxUcstPkts",
 }
 
 
@@ -165,7 +165,7 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
         for row in table_ports:
             if row.get("macAddress") == "00:00:00:00:00:00":
                 self.modify_ports(ports=[row['portId']], macAddress="00:00:{0}:{1}:{2}:{3}".format(
-                        switch_id[0:2], switch_id[2:4], switch_id[4:6], row['portId']))
+                    switch_id[0:2], switch_id[2:4], switch_id[4:6], row['portId']))
 
         # Restart lldpad to advertise new TLV's due to MAC address change above
         # self.clear_lldp_config()
@@ -194,11 +194,11 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
         # need to detect switch before we can get port info
         # in case we need to restart it
         self.switch_driver.autodetect()
-        self.test_point = TestPointApp(self.switch.ipaddr, self.switch._sshtun_port,
-                                       self.switch._sshtun_user, self.switch._sshtun_pass,
+        self.test_point = TestPointApp(self.switch.ipaddr, self.switch._sshtun_port,  # pylint: disable=protected-access
+                                       self.switch._sshtun_user, self.switch._sshtun_pass,  # pylint: disable=protected-access
                                        self.mode_prompt)
-        self.switchd = SwitchdSharedApp(self.switch.ipaddr, self.switch._sshtun_port,
-                                        self.switch._sshtun_user, self.switch._sshtun_pass,
+        self.switchd = SwitchdSharedApp(self.switch.ipaddr, self.switch._sshtun_port,  # pylint: disable=protected-access
+                                        self.switch._sshtun_user, self.switch._sshtun_pass,  # pylint: disable=protected-access
                                         self.mode_prompt, self.switch_driver.name)
 
     def disconnect(self):
@@ -409,7 +409,7 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
                         [self.cli_send_command(
                             command=com[0],
                             timeout=timeout,
-                            expected_rcs=expected_rcs).stdout]
+                            expected_rcs=expected_rcs).stdout],
                     )
                 except UIException:
                     results.append([''])
@@ -1083,7 +1083,7 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
                 if 'index' in kwargs:
                     commands.append(
                         "ip link set dev {0} swattr {1} {2} index {3}".format(
-                            port, kwargs['setPortAttr'], kwargs['attrVal'], kwargs['index']
+                            port, kwargs['setPortAttr'], kwargs['attrVal'], kwargs['index'],
                         ))
                 else:
                     commands.append("ip link set dev {0} swattr {1} {2}".format(
@@ -1231,7 +1231,7 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
         ports = list(itertools.chain.from_iterable(all_port_dicts))
 
         command_list = [["cat /sys/class/net/{0}/switch/{1}".format(
-                            _port['name'], 'max_frame_size')] for _port in ports]
+            _port['name'], 'max_frame_size')] for _port in ports]
         frame_sizes = self.cli_get_all(command_list, multicall_treshold=1)
 
         command_list = [["ethtool {0}".format(_port['name'])] for _port in ports]
@@ -1662,7 +1662,7 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
                     row['tagged'] = tagged
                 if row['tagged'] == 'Tagged':
                     row['tagged'] = ''
-                ports_tagged_dict[row['portId']] =tagged if row['pvid'] == '' else ' '.join([row['pvid'], row['tagged']]).strip()
+                ports_tagged_dict[row['portId']] = tagged if row['pvid'] == '' else ' '.join([row['pvid'], row['tagged']]).strip()
                 ports.remove(row['portId'])
 
             # Group records in ports_tagged_dict by values
@@ -3195,7 +3195,7 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
             'lagControlType': 'Static',
 
             # Feature not implemented WW05'15
-            'hashMode': 'None'
+            'hashMode': 'None',
         }
 
         # ONPSS 2.x does not have separate lagId/Name field
@@ -3277,7 +3277,7 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
             'globalHash': '',
 
             # Feature not implemented WW05'15
-            'collectorMaxDelay': 'None'
+            'collectorMaxDelay': 'None',
         }
         return [_row]
 
@@ -3479,7 +3479,7 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
         """
         _row = {
             'portId': row['portId'],
-            'actorPortPriority': 0
+            'actorPortPriority': 0,
         }
 
         # ONS 1.x lagId is int
@@ -5377,7 +5377,7 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
             'tlvPortDescTxEnable': 'portDesc',
             'tlvSysCapTxEnable': 'sysCap',
             'tlvSysDescTxEnable': 'sysDesc',
-            'tlvSysNameTxEnable': 'sysName'
+            'tlvSysNameTxEnable': 'sysName',
         }
 
         # Select only allowed parameters for configuration
@@ -5464,7 +5464,7 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
         for p, tlvs, admin_status in tlvs_list:
             row = {
                 "LocalPortNum": self.name_to_portid_map[p],
-                "adminStatus": "Disabled"
+                "adminStatus": "Disabled",
             }
             for tlv, value in tlvs:
                 if tlv == lldp.TlvNames.CHASSIS_ID:
@@ -6741,10 +6741,10 @@ class UiOnpssShell(UiHelperMixin, UiInterface):
             'vm_bytes': kwargs.get('vm_bytes', self.switch.hw.stress_tool_attributes.vm_bytes),
             'io': kwargs.get('io', self.switch.hw.stress_tool_attributes.io),
             'disk': kwargs.get('disk', self.switch.hw.stress_tool_attributes.disk),
-            'time': kwargs.get('time', None)
-            }
-        params = default_workers if not kwargs or \
-                                    len(kwargs) == 1 and kwargs.get('time', None) else kwargs
+            'time': kwargs.get('time', None),
+        }
+        params = default_workers if (not kwargs or
+                                     len(kwargs) == 1 and kwargs.get('time', None)) else kwargs
         self.stresstool.start(**params)
 
     def get_active_workloads(self):

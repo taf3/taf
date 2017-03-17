@@ -122,7 +122,7 @@ class MultipleTG(PacketProcessor, GenericTG):
         for tg in self.tgs.values():
             tg.start()
 
-        self.status = all(x.status for x in self.tgs.values())
+        self.status = all(x.status for x in self.tgs.values())  # pylint: disable=attribute-defined-outside-init
 
     def stop(self):
         """Shutdown TG instances.

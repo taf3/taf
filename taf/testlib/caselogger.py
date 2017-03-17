@@ -105,8 +105,8 @@ class CaseLogger(object):
                 command = "tar -h -czf '/tmp/logs_{0}_{1}_{2}.tar.gz' /var/log/".format(self.sw.name, test_name, timestamp)
                 command_timeout = 120
 
-            self.sw.ssh.shell_command(command, timeout=command_timeout, alternatives=[('password', self.sw._sshtun_pass, False, True), ],
-                                      sudo=True, ret_code=True, quiet=True)
+            self.sw.ssh.shell_command(command, timeout=command_timeout, alternatives=[
+                ('password', self.sw._sshtun_pass, False, True), ], sudo=True, ret_code=True, quiet=True)  # pylint: disable=protected-access
 
             self.sw.ssh.get_file(get_log, buf_log, proto="scp")
 
@@ -118,8 +118,8 @@ class CaseLogger(object):
             finally:
                 self.rssh.close()
 
-            self.sw.ssh.shell_command("rm -- '{0}'".format(get_log), timeout=25, alternatives=[('password', self.sw._sshtun_pass, False, True), ],
-                                      sudo=True, ret_code=True, quiet=True)
+            self.sw.ssh.shell_command("rm -- '{0}'".format(get_log), timeout=25, alternatives=[
+                ('password', self.sw._sshtun_pass, False, True), ], sudo=True, ret_code=True, quiet=True)  # pylint: disable=protected-access
 
             self.switch_disconnect()
 
@@ -143,8 +143,8 @@ class CaseLogger(object):
                         buf_core = "/tmp/{0}".format(core_file)
                         buf_list.append(buf_core)
                         self.sw.ssh.get_file(get_core, buf_core, proto="scp")
-                        self.sw.ssh.shell_command("rm -- '{0}'".format(get_core), alternatives=[('password', self.sw._sshtun_pass, False, True), ], timeout=15,
-                                                  sudo=True, ret_code=True, quiet=True)
+                        self.sw.ssh.shell_command("rm -- '{0}'".format(get_core), alternatives=[
+                            ('password', self.sw._sshtun_pass, False, True), ], timeout=15, sudo=True, ret_code=True, quiet=True)  # pylint: disable=protected-access
 
             self.switch_disconnect()
 

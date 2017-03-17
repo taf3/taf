@@ -28,7 +28,7 @@ class HugePages(object):
         """
         super(HugePages, self).__init__()
         self.cli_send_command = cli_send_command
- 
+
     def _hugepages_helper(self, kwargs):
         """Helper function for getting and setting hugepages.
 
@@ -56,7 +56,7 @@ class HugePages(object):
             mnt_dir(str): Mount dir
             hugepage_size(int): Current hugepage allocated size
             kwargs(dict): Additional arguments to pass to commandline
-        
+
         """
         self.cli_send_command("mkdir -p {}".format(mnt_dir))
         self.change_number(nr_hugepages, per_node=per_node, hugepage_size=hugepage_size)
@@ -80,7 +80,7 @@ class HugePages(object):
         cmd = ' '.join(cmd)
         self.cli_send_command(cmd)
 
-    def get_number(self,  per_node=None, hugepage_size=DEFAULT_HUGEPAGE_SIZE):
+    def get_number(self, per_node=None, hugepage_size=DEFAULT_HUGEPAGE_SIZE):
         """Get number of hugepages.
 
         Args:

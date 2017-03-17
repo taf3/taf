@@ -74,6 +74,7 @@ def encode(payload):
     """
     return base64.urlsafe_b64encode(bz2.compress(payload.encode('utf-8'))).decode('utf-8')
 
+
 # max is 1024**127
 PAYLOAD_CUTOFF = 1024 * 96
 

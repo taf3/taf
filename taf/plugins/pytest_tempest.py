@@ -44,14 +44,14 @@ def pytest_addoption(parser):
         '--tempest_path': {
             'action': 'store',
             'default': None,
-            'help': "Path to tempest modules, '%default' by default."
+            'help': "Path to tempest modules, '%default' by default.",
         },
         '--reuse_venv': {
             'action': 'store',
             'default': True,
             'help': "Reuse(=True) or Delete(=False) existing public networks/routers\
-            , '%default' by default."
-        }
+            , '%default' by default.",
+        },
     }
 
     for opt, opt_kwargs in options.items():

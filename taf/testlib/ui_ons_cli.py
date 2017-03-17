@@ -39,7 +39,7 @@ STAT_MAP = {
     "RxUcstPktsIPv4": "IfInUcastPkts",
     "RxUcstPktsIPv6": "IfInUcastPkts",
     "RxUcstPktsNonIP": "IfInUcastPkts",
-    "TxUcstPktsIPv4": "IfOutUcastPkts"
+    "TxUcstPktsIPv4": "IfOutUcastPkts",
 }
 
 
@@ -60,7 +60,7 @@ class UiOnsCli(UiHelperMixin, UiInterface):
         self.is_config_mode = False
         self.mode_prompt = 'Switch #'
         self.switch.cli = clicmd_ons.CLICmd(
-            self.switch.ipaddr, self.switch._sshtun_port,
+            self.switch.ipaddr, self.switch._sshtun_port,  # pylint: disable=protected-access
             self.switch.config['cli_user'],
             self.switch.config['cli_user_passw'],
             self.switch.config['cli_user_prompt'], self.switch.type,
@@ -1020,7 +1020,8 @@ t
         """
         # define ports directly from the switch
         ports_table = self.get_table_ports(ports=None)
-        assert ports_table, "Ports table is empty on device %s" % (self.switch.xmlproxy._ServerProxy__host, )
+        assert ports_table, "Ports table is empty on device %s" % \
+                            (self.switch.xmlproxy._ServerProxy__host, )  # pylint: disable=protected-access
         # define multicall params for Ports.find method
         port_ids = [x["portId"] for x in ports_table if x["operationalStatus"] != 'NotPresent' and
                     x["type"] == 'Physical' and

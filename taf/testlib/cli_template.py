@@ -36,6 +36,7 @@ class Raw(str):
     """
     pass
 
+
 CmdStatus = namedtuple("CmdStatus", "stdout, stderr, rc")
 
 

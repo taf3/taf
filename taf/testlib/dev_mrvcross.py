@@ -28,6 +28,7 @@ class StaticCrossMRV(dev_staticcross_ons.StaticCrossONS):
 
     pass
 
+
 ENTRY_TYPE = "mrv"
 INSTANCES = {"occ": StaticCrossMRV, "mcc": StaticCrossMRV}
 NAME = "cross"

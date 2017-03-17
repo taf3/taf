@@ -115,7 +115,7 @@ class TimeoutTransport(xmlrpc.client.Transport):
         return TimeoutHTTPConnection(host, self.timeout)
 
 
-class _Method(xmlrpc.client._Method):
+class _Method(xmlrpc.client._Method):  # pylint: disable=protected-access
     """_Method class definition.
 
     """
@@ -146,11 +146,12 @@ class _Method(xmlrpc.client._Method):
 
         return self.__send(self.__name, args)
 
-xmlrpc.client._Method = _Method
+
+xmlrpc.client._Method = _Method  # pylint: disable=protected-access
 
 
 class TimeoutServerProxy(xmlrpc.client.ServerProxy):
-    """xmlrpclib.ServerProxy class with additional timeout option.
+    """xmlrpclib.ServerProxy class with additional timeout option
 
     """
 

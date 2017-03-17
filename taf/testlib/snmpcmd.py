@@ -525,7 +525,7 @@ class SNMPCmd(object):
             raise CustomException(error_indication)
         else:
             if error_status:
-                messages = ('%s at %s' % (error_status.prettyPrint(), # pylint: disable=no-member
+                messages = ('%s at %s' % (error_status.prettyPrint(),  # pylint: disable=no-member
                                           error_index and var_binds[int(error_index) - 1] or '?'))
                 raise CustomException(messages)
             else:

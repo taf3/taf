@@ -126,5 +126,5 @@ class SmartRerun(object):
                 tr.write_line("%-8s%-8s%-10s %s" % (test_cases[tcname]["Passed"],
                                                     test_cases[tcname]["Failed"],
                                                     test_cases[tcname]["Can't Test"],
-                                                    tcname
+                                                    tcname,
                                                     ))

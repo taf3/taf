@@ -661,7 +661,7 @@ class SingleHTMLConverter(html.parser.HTMLParser):
             list or tuple:  List of errors or tuple(html output, list of errors)
 
         """
-        self.output_file_name = None
+        self.output_file_name = None  # pylint: disable=attribute-defined-outside-init
         if not html_file_name:
             raise Exception('Argument html_file_name is obligated.')
         if resources_path:
@@ -672,7 +672,7 @@ class SingleHTMLConverter(html.parser.HTMLParser):
         self.collect_errors = []
         self.feed(_html_string)
         if output_file_name:
-            self.output_file_name = output_file_name
+            self.output_file_name = output_file_name  # pylint: disable=attribute-defined-outside-init
             open(self.output_file_name, 'w').write('')
             for line in self.stack:
                 try:
@@ -959,27 +959,27 @@ def _get_xmls_path(xmlpath=None, logdir=None):
 def parse_options():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--logfile", action="store", dest="log_file", default=None,
-                      help="Path to log file created by buildbot.")
+                        help="Path to log file created by buildbot.")
     parser.add_argument("--logdir", action="store", dest="log_dir", default=None,
-                      help="Path to directory with log files created by buildbot.")
+                        help="Path to directory with log files created by buildbot.")
     parser.add_argument("--type", action="store", dest="attype", default='none',
-                      help="Type of the attachment (html|text|none).")
+                        help="Type of the attachment (html|text|none).")
     parser.add_argument("--html", action="store", dest="html", default=None,
-                      help="Path to save html report.")
+                        help="Path to save html report.")
     parser.add_argument("--addtest", action="store", dest="addtest", default=None,
-                      help="Add test if it not exists.")
+                        help="Add test if it not exists.")
     parser.add_argument("--htmlres", action="store", dest="html_res", default=None,
-                      help="Path to html resources (css, js, images).")
+                        help="Path to html resources (css, js, images).")
     parser.add_argument("--xmlpath", action="store", dest="xml_path", default=None,
-                      help="Path to xml files for html report.")
+                        help="Path to xml files for html report.")
     parser.add_argument("--xsltstyle", action="store", dest="xslt_style", default="junit_full.xsl",
-                      help="Path to xslt style sheet.")
+                        help="Path to xslt style sheet.")
     parser.add_argument("--xsltconcat", action="store", dest="xslt_concat", default="junit_concat.xsl",
-                      help="Path to xslt concatenation style.")
+                        help="Path to xslt concatenation style.")
     parser.add_argument("--maillist", action="store", dest="mail_list", default=None,
-                      help="Path to file with email list.")
+                        help="Path to file with email list.")
     parser.add_argument("--info", action="store", dest="info", default="",
-                      help="Additional info for subject.")
+                        help="Additional info for subject.")
     options = parser.parse_args()
 
     allowed_report_types = ['html', 'text', 'none']

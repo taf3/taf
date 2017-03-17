@@ -358,7 +358,7 @@ class UiDcrpShell(UiHelperMixin):
             services = services if services else self.dcrp_service_list
 
             # Get all processes launched on the node
-            cmd = 'ps {} co command --no-headers'.format(' '.join('-C '+x for x in services))
+            cmd = 'ps {} co command --no-headers'.format(' '.join('-C ' + x for x in services))
             processes = instance.cli_send_command(cmd, expected_rcs={0, 1}).stdout.splitlines()
 
             return set(processes) == set(services)
@@ -613,7 +613,7 @@ class UiDcrpShell(UiHelperMixin):
 
             discovered_list = re.findall(r'([a-f0-9.]{14})', discovered, re.MULTILINE)
             discovered_list = [":".join(
-                [mac.replace(".", "")[x:x+2] for x in range(0, 12, 2)]) for mac in discovered_list]
+                [mac.replace(".", "")[x: x + 2] for x in range(0, 12, 2)]) for mac in discovered_list]
 
             if set(nodes_macs) == set(discovered_list):
                 return True
@@ -755,7 +755,7 @@ class UiDcrpShell(UiHelperMixin):
 
         """
         ports = env.get_ports()
-        res = {'tg_obj': {}, 'tg_ports': {}, 'sw_ports':{}}
+        res = {'tg_obj': {}, 'tg_ports': {}, 'sw_ports': {}}
         tg_id = 1
         for dev, links in ports.items():
             for key, nodes in links.items():

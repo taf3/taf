@@ -315,7 +315,7 @@ class VirtualEnv(object):
         return False
 
     def create_loginable_secgroup_rule(self):
-        return self.handle._create_loginable_secgroup_rule()
+        return self.handle._create_loginable_secgroup_rule()  # pylint: disable=protected-access
 
     def wait_for_server_status(self, vm_id, status):
         # waiters wrapper method
@@ -397,14 +397,14 @@ class VirtualEnv(object):
             assert public_router
             _net_cfg.public_router_id = public_router['id']
 
-        return  _net_cfg.public_network_id and (not create_external_router or _net_cfg.public_router_id)
+        return _net_cfg.public_network_id and (not create_external_router or _net_cfg.public_router_id)
 
     def _get_external_elements(self, routers_client=None):
         if not routers_client:
             routers_client = self.handle.os_adm.routers_client
 
         net_filter = {'router:external': True}
-        nets = [net['id'] for net in self.handle._list_networks(**net_filter)]
+        nets = [net['id'] for net in self.handle._list_networks(**net_filter)]  # pylint: disable=protected-access
         router_2_net_map = {}
         routers_resp = routers_client.list_routers()
         for router in routers_resp['routers']:
@@ -595,7 +595,7 @@ class VirtualEnv(object):
             assert subnet
 
         if with_router:
-            router = self.handle._get_router(tenant_id=tenant_id)
+            router = self.handle._get_router(tenant_id=tenant_id)  # pylint: disable=protected-access
             self.add_router_interface(router['id'], subnet_id=subnet['id'])
 
         return network, subnet, router
@@ -737,7 +737,7 @@ class VirtualEnv(object):
                 mask_bits = tenant_cidr.prefixlen
 
         def cidr_in_use(cidr, tenant_id):
-            cidr_in_use = self.handle._list_subnets(tenant_id=tenant_id, cidr=cidr)
+            cidr_in_use = self.handle._list_subnets(tenant_id=tenant_id, cidr=cidr)  # pylint: disable=protected-access
             return len(cidr_in_use) != 0
 
         def alloc_pools(cidr, start, end):
@@ -973,7 +973,7 @@ class VirtualEnv(object):
             return self.create_flavor(name=name, **flavor_spec)
 
     def get_server_port_map(self, server, ip_addr=None):
-        ports = self.handle._list_ports(device_id=server['id'], fixed_ip=ip_addr)
+        ports = self.handle._list_ports(device_id=server['id'], fixed_ip=ip_addr)  # pylint: disable=protected-access
 
         port_map = [
             (p['id'], fxip['ip_address'])
@@ -1262,7 +1262,7 @@ class VirtualEnv(object):
 
         if management:
             host.nated_mgmt = ip_address
-            host._set_ssh(floating_ip['floating_ip_address'])
+            host._set_ssh(floating_ip['floating_ip_address'])  # pylint: disable=protected-access
 
         return floating_ip['floating_ip_address']
 
@@ -1345,7 +1345,7 @@ class VirtualEnv(object):
         services = client.list_services()['services']
         if service_filter is None:
             return services
-        return filter(service_filter, services)  # pylint: disable=bad-builtin
+        return filter(service_filter, services)
 
     def enable_service(self, service):
         client = self.handle.admin_manager.services_client

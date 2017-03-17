@@ -26,7 +26,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..',
 from pytest_helpers import get_failure_reason
 
 
-
 class ReportingServerConfig(object):
     """Reporting Server configuration.
 

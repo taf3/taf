@@ -195,7 +195,8 @@ class PacketProcessor(object):
 
         """
         # Get header fields
-        fields = {field.strip('_') for field in packet._header_field_names if not field.endswith("_s")}
+        fields = {field.strip('_') for field in
+                  packet._header_field_names if not field.endswith("_s")}  # pylint: disable=protected-access
         # Get subfields that value is less than 1 byte
         sub_fields = {f for f, v in packet.__class__.__dict__.items() if isinstance(v, property) and not f.endswith("_s")}
         return fields.union(sub_fields)
@@ -297,7 +298,7 @@ class PacketProcessor(object):
         except PypackerException:
             return False
 
-     def get_packet_field(self, packet=None, layer=None, field=None):
+    def get_packet_field(self, packet=None, layer=None, field=None):
         """Returns field value (for specified layer) from specified packet.
 
         Args:

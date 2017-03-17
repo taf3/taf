@@ -43,7 +43,7 @@ def get_env_prop(env):
     env_dict = {
         'switchppVersion': get_param("switchppVersion"),
         'chipName': get_param("chipName"),
-        'cpuArchitecture': get_param("cpuArchitecture")
+        'cpuArchitecture': get_param("cpuArchitecture"),
     }
     # Get params from devices
     return env_dict
@@ -54,9 +54,9 @@ def setup_teardown(function):
 
     """
     def wrapper(*args, **kwargs):
-        args[0]._setup()
+        args[0]._setup()  # pylint: disable=protected-access
         result = function(*args, **kwargs)
-        args[0]._teardown()
+        args[0]._teardown()  # pylint: disable=protected-access
         return result
     return wrapper
 

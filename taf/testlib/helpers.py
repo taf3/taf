@@ -95,8 +95,8 @@ def run_on_tg(x, y=skip_reason):
 
 def run_on_ixnetwork(y="Run on IxNetwork setup only"):
     return pytest.mark.skipif(
-            "all(not x.is_protocol_emulation_present for x in config.env.tg.values())",
-            reason=y)
+        "all(not x.is_protocol_emulation_present for x in config.env.tg.values())",
+        reason=y)
 
 
 def get_attribute_from_argvalue(argvalue, item):
@@ -340,7 +340,7 @@ def set_ports_admin_enabled(switches, ports, wait_status=True, fail_func=None):
         try:
             wait_for_port_status(xmlproxy, port, "Up", timeout=timeout)
         except CustomException:
-            mod_logger.warning("Port %s on switch %s does not pass to Up state. Retry..." % (port, xmlproxy.ipaddr))
+            mod_logger.warning("Port %s on switch %s does not pass to Up state. Retry...", port, xmlproxy.ipaddr)
             xmlproxy.ui.modify_ports([port, ], adminMode='Down')
             if op_xmlproxy is not None:
                 op_xmlproxy.ui.modify_ports([op_port, ], adminMode='Down')
@@ -351,8 +351,8 @@ def set_ports_admin_enabled(switches, ports, wait_status=True, fail_func=None):
             try:
                 wait_for_port_status(xmlproxy, port, "Up")
             except CustomException:
-                mod_logger.error("Port %s on switch %s does not pass to Up state after retry." %
-                                 (port, xmlproxy.ipaddr))
+                mod_logger.error("Port %s on switch %s does not pass to Up state after retry.",
+                                 port, xmlproxy.ipaddr)
                 if fail_func is None:
                     raise
                 else:
@@ -367,7 +367,7 @@ def set_ports_admin_enabled(switches, ports, wait_status=True, fail_func=None):
 
     # WORKAROUND END
 
-    mod_logger.debug("Setting admin mode up for ports: %s." % (ports, ))
+    mod_logger.debug("Setting admin mode up for ports: %s.", ports)
     # TAFv2
     if isinstance(ports, dict):
         for link_key in list(ports.keys()):
@@ -375,8 +375,8 @@ def set_ports_admin_enabled(switches, ports, wait_status=True, fail_func=None):
             if link_key[0][:2] == "sw":
                 sw_id = int(link_key[0][2:])
                 for port_id in list(ports[link_key].keys()):
-                    mod_logger.debug("Setting admin mode up for port %s of %s device." %
-                                     (ports[link_key][port_id], switches[sw_id].ipaddr))
+                    mod_logger.debug("Setting admin mode up for port %s of %s device.",
+                                     ports[link_key][port_id], switches[sw_id].ipaddr)
                     # Additional check for LAGs
                     port_info = switches[sw_id].ui.get_table_ports([ports[link_key][port_id]])[0]
                     if port_info['type'] == 'LAG':
@@ -398,8 +398,8 @@ def set_ports_admin_enabled(switches, ports, wait_status=True, fail_func=None):
                     else:
                         op_switch = None
                     for port_id in list(ports[link_key].keys()):
-                        mod_logger.debug("Verify operational status of port %s of %s device." %
-                                         (ports[link_key][port_id], switches[sw_id].ipaddr))
+                        mod_logger.debug("Verify operational status of port %s of %s device.",
+                                         ports[link_key][port_id], switches[sw_id].ipaddr)
                         if op_switch is not None:
                             op_port = ports[_link_key_left][port_id]
                         else:
@@ -450,7 +450,7 @@ def wait_until_fdb_entry_is_added(mac_address=None, port_id=1, timeout=5, vlan_i
                     break
         else:
             raise Exception("Timeout exceeded: Entry with %s MAC-address, %s Port Id and %s Vlan Id is not added during timeout" %
-                                (mac_address, port_id, vlan_id))
+                            (mac_address, port_id, vlan_id))
 
 
 def is_entry_added_to_fdb(mac_address=None, port_id=1, vlan_id=1, switch_instance=None):
@@ -527,13 +527,13 @@ def is_entry_added_to_acl_expressions_table(field=None, mask=None, data=None, sw
 
     """
     table = switch_instance.nb.ACLExpressions.getTable()
-    row_count = 0
+    one_match = False
     for row in table:
         if row['field'] == field and row['mask'] == mask and row['data'] == data:
-            row_count += 1
-    if row_count == 1:
-        return True
-    return False
+            if one_match:
+                return False
+            one_match = True
+    return one_match
 
 
 def is_entry_added_to_acl_actions_table(action=None, param=None, switch_instance=None):
@@ -553,13 +553,13 @@ def is_entry_added_to_acl_actions_table(action=None, param=None, switch_instance
 
     """
     table = switch_instance.nb.ACLActions.getTable()
-    row_count = 0
+    one_match = False
     for row in table:
         if row['action'] == action and row['param'] == param:
-            row_count += 1
-    if row_count == 1:
-        return True
-    return False
+            if one_match:
+                return False
+            one_match = True
+    return one_match
 
 
 def is_entry_added_to_rules_table(rule_id=1, expression_id=1, action_id=1, stage=None, enabled="Disabled", priority=1, switch_instance=None):
@@ -585,15 +585,15 @@ def is_entry_added_to_rules_table(rule_id=1, expression_id=1, action_id=1, stage
 
     """
     table = switch_instance.nb.ACLRules.getTable()
-    row_count = 0
+    one_match = False
     for row in table:
         if row['ruleId'] == rule_id and row['expressionId'] == expression_id and \
            row['actionId'] == action_id and row['stage'] == stage and \
            row['enabled'] == enabled and row['priority'] == priority:
-            row_count += 1
-    if row_count == 1:
-        return True
-    return False
+            if one_match:
+                return False
+        one_match = True
+    return one_match
 
 
 def set_invalid_value(switch_instance=None, method=None, params=None):
@@ -618,10 +618,10 @@ def set_invalid_value(switch_instance=None, method=None, params=None):
             raise Exception("Cannot set invalid parameter: %s(%s)" % (method, str(params)[1:][:-1]))
         if return_code == 0:
             bad_value_set_successfully = True
-            mod_logger.debug("Invalid parameter was set: %s(%s)" % (method, str(params)[1:][:-1]))
+            mod_logger.debug("Invalid parameter was set: %s(%s)", method, str(params)[1:][:-1])
     except Exception as err:
         bad_value_set_successfully = False
-        mod_logger.debug("Error: %s" % err)
+        mod_logger.debug("Error: %s", err)
     finally:
         assert not bad_value_set_successfully
 
@@ -769,8 +769,8 @@ def wait_until_value_is_changed(switch_instance=None, table_name=None, parameter
                 parameter = switch_instance.getprop(table_name, parameter_name, row_id)
             else:
                 parameter = getattr(switch_instance, "nb.%s.get.%s" % (table_name, parameter_name))(row_id)
-            mod_logger.debug("table_name %s row_id %s parameter_name %s = %s; iterated %s times, time to leave = %s" %
-                             (table_name, row_id, parameter_name, parameter, iter_counter, (end_time - time.time())))
+            mod_logger.debug("table_name %s row_id %s parameter_name %s = %s; iterated %s times, time to leave = %s",
+                             table_name, row_id, parameter_name, parameter, iter_counter, (end_time - time.time()))
             if parameter == value:
                 mod_logger.debug("Function wait_until_value_is_changed finished.")
                 break
@@ -814,14 +814,14 @@ def send_receive_packets(packet_definition=None, count=5, src_port=None, dst_por
                 count += 1
         return count
 
-    mod_logger.debug("Verify packets forwarding. %s -> %s" % (src_port, dst_port, ))
+    mod_logger.debug("Verify packets forwarding. %s -> %s", src_port, dst_port)
     stream_id = tg.set_stream(packet_definition, count=count, iface=src_port)
     tg.start_sniff([dst_port, ], sniffing_time=sniff_time, filter_layer=sniff_filter,
                    packets_count=count)
     tg.send_stream(stream_id)
 
     data = tg.stop_sniff([dst_port, ])
-    mod_logger.debug("Got data %s" % data)
+    mod_logger.debug("Got data %s", data)
 
     all_rcvd = _count_packets_by_definition(data[dst_port], packet_definition, tg) == count
 
@@ -875,7 +875,7 @@ def waiting_table_is_loaded(switch_instance, table_name, expected_table_length, 
             right_margin = expected_table_length + 1
 
     mod_logger.debug("waiting_table_is_loaded - received parameters: table_name: %s, expected table length range: %s, watch_interval: %s, timeout: %s,\
-                      deviation: %s, direction: %s" % (table_name, list(range(left_margin, right_margin)), watch_interval, timeout, deviation, direction))
+                      deviation: %s, direction: %s", table_name, list(range(left_margin, right_margin)), watch_interval, timeout, deviation, direction)
 
     end_time = time.time() + timeout
 
@@ -883,19 +883,19 @@ def waiting_table_is_loaded(switch_instance, table_name, expected_table_length, 
 
     while table_length not in list(range(left_margin, right_margin)):
         if time.time() >= end_time:
-            mod_logger.error("Timeout exceeded: %s table length %s wasn't changed to %s during %s" %
-                             (table_name, table_length, list(range(left_margin, right_margin)), timeout))
+            mod_logger.error("Timeout exceeded: %s table length %s wasn't changed to %s during %s",
+                             table_name, table_length, list(range(left_margin, right_margin)), timeout)
             mod_logger.debug("Function 'waiting_table_is_loaded' is finished.")
             return False
         table_length = switch_instance.getprop_size(table_name)
-        mod_logger.debug("%s table length = %s, time left %s" % (table_name, table_length, end_time - time.time()))
+        mod_logger.debug("%s table length = %s, time left %s", table_name, table_length, (end_time - time.time()))
         if verbose:
             table = switch_instance.getprop_table(table_name)
-            mod_logger.debug("%s table content: %s" % (table_name, table))
-        mod_logger.debug("Waiting for %s seconds for next iteration" % watch_interval)
+            mod_logger.debug("%s table content: %s", table_name, table)
+        mod_logger.debug("Waiting for %s seconds for next iteration", watch_interval)
         time.sleep(watch_interval)
-    mod_logger.debug("Exit parameters: table_name: %s, expected table length range: %s, current table length: %s" %
-                     (table_name, list(range(left_margin, right_margin)), table_length))
+    mod_logger.debug("Exit parameters: table_name: %s, expected table length range: %s, current table length: %s",
+                     table_name, list(range(left_margin, right_margin)), table_length)
     mod_logger.debug("Function 'waiting_table_is_loaded' is finished.")
     return True
 
@@ -934,7 +934,7 @@ def generate_random_mac(mac_exclusions=None, quantity=1):
             mac_pool.append(mac_addr)
             mac_exclusions.append(mac_addr)
             count += 1
-    mod_logger.debug("Generated MAC addresses list %s" % mac_pool)
+    mod_logger.debug("Generated MAC addresses list %s", mac_pool)
     mod_logger.debug("Function 'generate_random_mac' is finished.")
     return mac_pool
 
@@ -977,7 +977,7 @@ def generate_random_ip(ip_exclusions=None, prefix=None, quantity=1):
             ip_pool.append(ip)
             ip_exclusions.append(ip)
             count += 1
-    mod_logger.debug("Generated IP addresses list %s" % ip_pool)
+    mod_logger.debug("Generated IP addresses list %s", ip_pool)
     mod_logger.debug("Function 'generate_random_ip' is finished.")
     return ip_pool
 
@@ -1010,7 +1010,7 @@ def stat_counters_clear(switch_instances=None, ports=None, counter_name="EtherSt
         return False
     for switch in switch_instances:
         for port in ports:
-            mod_logger.debug("clear statistics on port %s" % port)
+            mod_logger.debug("clear statistics on port %s", port)
             switch.xmlproxy.nb.Methods.clearPortStats(port)
             wait_until_value_is_changed(switch, table_name="Statistics", parameter_name=counter_name,
                                         value=0, row_id=port, timeout=90)
@@ -1051,7 +1051,7 @@ def stat_counters_read(switch_instances=None, ports=None, counter_name="EtherSta
             for port in ports:
                 current_result = switch.getprop("Statistics", counter_name, port)
                 current_results.append(current_result)
-                mod_logger.debug("Port %s counter %s = %s" % (port, counter_name, current_result))
+                mod_logger.debug("Port %s counter %s = %s", port, counter_name, current_result)
         return current_results
 
     mod_logger.debug("Starting stat_counters_read function.")
@@ -1073,9 +1073,9 @@ def stat_counters_read(switch_instances=None, ports=None, counter_name="EtherSta
         mod_logger.debug("Checking for any updated counters")
         while (sum(current_results) - sum(previous_results)) == 0:
             current_results = reading_counters(switch_instances, ports, counter_name)
-            mod_logger.debug("Reading counters again and compare with previous. previous =%s, current =%s" %
-                             (previous_results, current_results))
-            mod_logger.debug("Iteration =%s, time left =%s" % (iteration, (end_time - time.time())))
+            mod_logger.debug("Reading counters again and compare with previous. previous =%s, current =%s",
+                             previous_results, current_results)
+            mod_logger.debug("Iteration =%s, time left =%s", iteration, (end_time - time.time()))
             time.sleep(0.99)
             if time.time() >= end_time:
                 mod_logger.debug("Break re-reading counters on timeout")
@@ -1086,9 +1086,9 @@ def stat_counters_read(switch_instances=None, ports=None, counter_name="EtherSta
         mod_logger.debug("Checking according to Expected results")
         while (sum(current_results) - sum(expected_results)) != 0:
             current_results = reading_counters(switch_instances, ports, counter_name)
-            mod_logger.debug("Reading counters again and compare with expected. expected =%s, current =%s" %
-                             (expected_results, current_results))
-            mod_logger.debug("Iteration =%s, time left =%s" % (iteration, (end_time - time.time())))
+            mod_logger.debug("Reading counters again and compare with expected. expected =%s, current =%s",
+                             expected_results, current_results)
+            mod_logger.debug("Iteration =%s, time left =%s", iteration, (end_time - time.time()))
             time.sleep(0.99)
             if time.time() >= end_time:
                 mod_logger.debug("Break re-reading counters on timeout")
@@ -1140,7 +1140,7 @@ def print_sniffed_data_brief(sniffer_data):
     """
     for _port in list(sniffer_data.keys()):
         _packets_sniffed = {"packets": [], "count": []}
-        mod_logger.debug("Sniffer port: %s" % (_port, ))
+        mod_logger.debug("Sniffer port: %s", _port)
         for _pack in sniffer_data[_port]:
             if _pack not in _packets_sniffed["packets"]:
                 _packets_sniffed["packets"].append(_pack)
@@ -1151,7 +1151,7 @@ def print_sniffed_data_brief(sniffer_data):
         for _pack in _packets_sniffed["packets"]:
             pack_index = _packets_sniffed["packets"].index(_pack)
             mod_logger.debug(_pack.__str__)
-            mod_logger.debug("count %s" % _packets_sniffed["count"][pack_index])
+            mod_logger.debug("count %s", _packets_sniffed["count"][pack_index])
 
 
 def is_packet_received(data=None, iface_1=None, iface_2=None, layer_1="Ether", field_1="dst", value_1=None,
@@ -1267,18 +1267,18 @@ def is_row_added_to_arp_table(timeout=60, switch_instance=None, net_address=None
     while True:
         if time.time() < end_time:
             table = switch_instance.getprop_table("ARP")
-            mod_logger.debug("ARP table for switch is :%s" % table)
+            mod_logger.debug("ARP table for switch is :%s", table)
             for row in table:
                 if row['netAddress'] == net_address and row["ifId"] == if_id:
                     is_entry_added_to_arp_table = True
-                    mod_logger.debug("ARP table for switch is :%s" % table)
+                    mod_logger.debug("ARP table for switch is :%s", table)
                     return True
             # Need to wait until proper row will be added to ARP table.
             time.sleep(1)
         elif is_entry_added_to_arp_table == result:
             break
         else:
-            mod_logger.debug("ARP table for switch is :%s" % table)
+            mod_logger.debug("ARP table for switch is :%s", table)
             pytest.fail("Timeout exceeded: Row with netAddress %s wasn't added to ARP table during timeout" % net_address)
 
 
@@ -1325,7 +1325,7 @@ def wait_until_row_is_added_to_routes_table(timeout=60, switch_instance=None, ne
     while True:
         if time.time() < end_time:
             table = switch_instance.getprop_table("Route")
-            mod_logger.debug("Route table: %s" % table)
+            mod_logger.debug("Route table: %s", table)
             for row in table:
                 if row['network'] == network_ip and row['nexthop'] == nexthop:
                     result = True
@@ -1368,7 +1368,7 @@ def wait_until_entry_is_expired(expected_timeout=1, switch_instance=None, table_
                switch_instance.getprop("IGMPSnoopingGlobalAdmin", "querierRobustness", 1) + max_response_time)
     end_time = time.time() + timeout
     table = switch_instance.getprop_table("L2Multicast")
-    mod_logger.debug("%s table for switch is :%s" % (table_name, table))
+    mod_logger.debug("%s table for switch is :%s", table_name, table)
     if not table:
         assert switch_instance.setprop("IGMPSnoopingGlobalAdmin", "queryInterval", [1, default_interval]) == 0
         assert switch_instance.setprop("IGMPSnoopingGlobalAdmin", "querierRobustness", [1, default_robustness]) == 0
@@ -1380,7 +1380,7 @@ def wait_until_entry_is_expired(expected_timeout=1, switch_instance=None, table_
                 # Need to wait untill entry will be expired from table.
                 time.sleep(1)
                 table = switch_instance.getprop_table("L2Multicast")
-                mod_logger.debug("%s table for switch is :%s" % (table_name, table))
+                mod_logger.debug("%s table for switch is :%s", table_name, table)
                 if table:
                     assert switch_instance.setprop("IGMPSnoopingGlobalAdmin", "queryInterval", [1, default_interval]) == 0
                     assert switch_instance.setprop("IGMPSnoopingGlobalAdmin", "querierRobustness", [1, default_robustness]) == 0
@@ -1545,7 +1545,7 @@ def xmlrpc_raises(expected_exception, fail_message, *args, **kwargs):
             pytest.fail(py.code.ExceptionInfo())  # pylint: disable=no-member
     else:
         if rc == -1:
-            mod_logger.warning("Unexpected xmlrpc returncode -1: %s, %s, %s" % (args[0].__name__, args[1:], kwargs))
+            mod_logger.warning("Unexpected xmlrpc returncode -1: %s, %s, %s", args[0].__name__, args[1:], kwargs)
             return rc
     pytest.fail(fail_message + " Return Code: " + str(rc))
 
@@ -1797,7 +1797,7 @@ def verify_port_params_in_table(switch_inst, table_name, params, find_params=Non
                 time.sleep(interval)
             else:
                 if row_id == -1:
-                    mod_logger.debug("Content of '%s' table:\n%s" % (table_name, switch_inst.getprop_table(table_name)))
+                    mod_logger.debug("Content of '%s' table:\n%s", table_name, switch_inst.getprop_table(table_name))
                 pytest.fail("%s" % err)
 
 

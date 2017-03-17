@@ -41,7 +41,6 @@ UI_MAP = {
 }
 
 
-
 class NICHelper(object):
     @staticmethod
     def NICS_IF_NO_LO(nic):
@@ -295,7 +294,6 @@ class GenericLinuxHost(entry_template.GenericEntry):
                     for i, v in enumerate(raw_stat_params):
                         stats[port][raw_stat_params[i]] = raw_stat_values[i]
             return stats
-
 
     @autologin
     def routes(self, mode=None, netwrk=None, netwrk6=None, ports=None, next_hop=None,
@@ -789,7 +787,7 @@ class GenericLinuxHost(entry_template.GenericEntry):
                 self.waiton()
         except KeyboardInterrupt as ex:
             message = "KeyboardInterrupt while checking device {0}({1})...".format(
-                    self.name, self.ipaddr)
+                self.name, self.ipaddr)
             self.class_logger.info(message)
             self.sanitize()
             pytest.exit(message)
@@ -832,7 +830,7 @@ class GenericLinuxHost(entry_template.GenericEntry):
                     status = self.probe()
                 except KeyboardInterrupt:
                     message = "KeyboardInterrupt while checking switch {0}({1})...".format(
-                            self.name, self.ipaddr)
+                        self.name, self.ipaddr)
                     self.class_logger.info(message)
                     self.sanitize()
                     pytest.exit(message)
@@ -861,7 +859,7 @@ class GenericLinuxHost(entry_template.GenericEntry):
         _object = {
             'isup': False,
             'type': "unknown",
-            'prop': {}
+            'prop': {},
         }
 
         if clissh.probe_port(self.ipaddr, self._get_port_for_probe(), self.class_logger):

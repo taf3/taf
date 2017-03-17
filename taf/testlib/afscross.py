@@ -149,15 +149,15 @@ if __name__ == "__main__":
         """
         parser = argparse.ArgumentParser()
         parser.add_argument("--env", action="store", default=None, dest="env",
-                          help="Testing environment. None by default.")
+                            help="Testing environment. None by default.")
         parser.add_argument("--setup_file", action="store", default=None, dest="setup",
-                          help="Environment cross configuration. None by default.")
+                            help="Environment cross configuration. None by default.")
         parser.add_argument("--loglevel", action="store", default="INFO", dest="loglevel",
-                          help="Logging level, 'INFO' by default.")
+                            help="Logging level, 'INFO' by default.")
         parser.add_argument("--leave_on", action="store_true", default=True,
-                          help="Do not shutdown environment after the end of tests (affect only virtual environment). False by default.")
+                            help="Do not shutdown environment after the end of tests (affect only virtual environment). False by default.")
         parser.add_argument("--get_only", action="store_true", default=False,
-                          help="Do not start cross device, connect to exists one (affect only virtual environment). False by default.")
+                            help="Do not start cross device, connect to exists one (affect only virtual environment). False by default.")
         options = parser.parse_args()
         if options.setup is None:
             raise CrossException("Option --setup_file is obligatory!")

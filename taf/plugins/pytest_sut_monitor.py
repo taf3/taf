@@ -52,7 +52,7 @@ SUPPORTED_GRAPHS = {
     # 'INTERFACE': 'interface-',
     'INTERFACE_BYTES': 'interface-',
     'LOAD': 'load',
-    'DISK': 'disk-'
+    'DISK': 'disk-',
 }
 
 

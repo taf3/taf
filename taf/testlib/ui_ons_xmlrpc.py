@@ -37,7 +37,7 @@ STAT_MAP = {
     "RxUcstPktsIPv4": "IfInUcastPkts",
     "RxUcstPktsIPv6": "IfInUcastPkts",
     "RxUcstPktsNonIP": "IfInUcastPkts",
-    "TxUcstPktsIPv4": "IfOutUcastPkts"
+    "TxUcstPktsIPv4": "IfOutUcastPkts",
 }
 
 
@@ -52,13 +52,13 @@ class UiOnsXmlrpc(UiHelperMixin, UiInterface):
         self.areas = {}
         self.static_routes = {}
         self.switch.cli = clicmd_ons.CLICmd(
-                    self.switch.ipaddr, self.switch._sshtun_port,
-                    self.switch.config['cli_user'],
-                    self.switch.config['cli_user_passw'],
-                    self.switch.config['cli_user_prompt'], self.switch.type)
+            self.switch.ipaddr, self.switch._sshtun_port,  # pylint: disable=protected-access
+            self.switch.config['cli_user'],
+            self.switch.config['cli_user_passw'],
+            self.switch.config['cli_user_prompt'], self.switch.type)
 
     def connect(self):
-        if self.switch._use_sshtun:
+        if self.switch._use_sshtun:  # pylint: disable=protected-access
             self.switch.open_sshtun()
 
     def disconnect(self):
@@ -67,7 +67,7 @@ class UiOnsXmlrpc(UiHelperMixin, UiInterface):
 
     def restart(self):
         try:
-            server, port = self.switch.xmlproxy._ServerProxy__host.split(":")
+            server, port = self.switch.xmlproxy._ServerProxy__host.split(":")  # pylint: disable=protected-access
             xmlproxy_new = xmlrpcProxy("http://%s:%s/RPC2" % (server, port), timeout=1)
             xmlproxy_new.nb.Methods.rebootSystem()
             del xmlproxy_new
@@ -506,7 +506,8 @@ class UiOnsXmlrpc(UiHelperMixin, UiInterface):
         """
         # define ports directly from the switch
         ports_table = self.switch.getprop_table('Ports')
-        assert ports_table, "Ports table is empty on device %s" % (self.switch.xmlproxy._ServerProxy__host, )
+        assert ports_table, "Ports table is empty on device %s" % \
+                            (self.switch.xmlproxy._ServerProxy__host, )  # pylint: disable=protected-access
         # define multicall params for Ports.find method
         port_ids = [(x["portId"], ) for x in ports_table if x["operationalStatus"] != 'NotPresent' and
                     x["type"] == 'Physical' and

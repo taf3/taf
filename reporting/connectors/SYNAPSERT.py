@@ -304,7 +304,7 @@ class SYNAPSERT(object):
         suite_data = {
             "action": "create",
             "testSuiteName": ts_name,
-            "projectKey": "%s" % self.project
+            "projectKey": "%s" % self.project,
         }
 
         params = urllib.parse.urlencode(suite_data)
@@ -552,14 +552,14 @@ class SYNAPSERT(object):
                 for defect in defect_keys:
                     data = json.dumps({
                         "type": {
-                            "name": "Automated Testing"
+                            "name": "Automated Testing",
                         },
                         "inwardIssue": {
-                            "key": test_case.key
+                            "key": test_case.key,
                         },
                         "outwardIssue": {
-                            "key": defect
-                        }
+                            "key": defect,
+                        },
                     })
                     url = '%s/rest/api/2/issueLink' % self.host
                     conn = urllib.request.Request(url, data)

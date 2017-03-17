@@ -38,6 +38,8 @@ from testlib.xmlrpc_proxy import TimeoutServerProxy as XMLRPCProxy
 
 
 MODULES = {}
+
+
 def imp_plugins(dest):
     """Import all py modules from <dest> subfolder.
 
@@ -49,6 +51,7 @@ def imp_plugins(dest):
     for _m in _list:
         _module = "{0}.{1}".format(dest, _m)
         MODULES[_module] = __import__(_m)
+
 
 imp_plugins("reports_conf")
 
@@ -70,7 +73,7 @@ def pytest_addoption(parser):
     """Plugin specific options.
 
     """
-    [MODULES[_var].ReportingServerConfig._additional_option(parser) for _var in MODULES if "reports_conf." in _var]
+    [MODULES[_var].ReportingServerConfig._additional_option(parser) for _var in MODULES if "reports_conf." in _var]  # pylint: disable=protected-access
 
     group = parser.getgroup("Reporting server", "plugin: reporting server")
     group.addoption("--tc_duration", action="store_true",
@@ -87,7 +90,8 @@ def pytest_configure(config):
         Exception: not able to connect to the reporting server.
 
     """
-    if_start_server = any([MODULES[_var].ReportingServerConfig._configure(config) for _var in MODULES if "reports_conf." in _var])
+    if_start_server = any([MODULES[_var].ReportingServerConfig._configure(config) for _var in  # pylint: disable=protected-access
+                           MODULES if "reports_conf." in _var])
     if if_start_server:
         config.reportingserver = ReportingServer(config.option)
         config.pluginmanager.register(config.reportingserver, "reportingserver")
@@ -175,8 +179,8 @@ class ReportingServer(object):
         else:
             self.platform = platform
             self.build = build
-            name_iter = (MODULES[_var].ReportingServerConfig._get_build_name(self._opts) for _var in MODULES if
-                         'reports_conf.' in _var)
+            name_iter = (MODULES[_var].ReportingServerConfig._get_build_name(self._opts) for _var in  # pylint: disable=protected-access
+                         MODULES if 'reports_conf.' in _var)
             with suppress(StopIteration):  # retain build name from env_prop
                 build = next(name for name in name_iter if name is not None)
             self._buildname = '{0}-{1}'.format(build, platform)
@@ -505,8 +509,8 @@ class ReportingServer(object):
         self.server_cmd("open", [self.self_name])
         for _var in MODULES:
             if "reports_conf." in _var:
-                commands = MODULES[_var].ReportingServerConfig._sessionstart(self.class_logger, item, self.self_name,
-                                                                               self.buildname(item.config.env.env_prop))
+                commands = MODULES[_var].ReportingServerConfig._sessionstart(  # pylint: disable=protected-access
+                    self.class_logger, item, self.self_name, self.buildname(item.config.env.env_prop))
                 for comm in commands:
                     self.server_cmd(*comm)
         # Order TM reporting to server.

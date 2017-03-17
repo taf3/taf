@@ -108,7 +108,7 @@ class UiOnpssJsonrpc(UiOnpssShell):
             # get Ports collection
             ports_uuid = self.request("getCollection", {
                 "component": self.uuid_collections["Switch"],
-                "name": "Ports"
+                "name": "Ports",
             })
             request_params = ({"port": p['subcomponent']} for p in ports_uuid)
             ports_info_request = {"method": "getEthernetSwitchPortInfo",
@@ -120,7 +120,7 @@ class UiOnpssJsonrpc(UiOnpssShell):
                     self.parse_port_name(p_info["portIdentifier"]): {
                         "uuid": p_uuid["subcomponent"],
                         "Vlans": {},
-                    }
+                    },
                 })
         except KeyError:
             raise UIException("PSME command 'getCollection'/'getEthernetSwitchPortInfo' returned incorrect reply")
@@ -140,12 +140,12 @@ class UiOnpssJsonrpc(UiOnpssShell):
             for port_id, port_value in self.uuid_collections["Ports"].items():
                 port_vlans_request = self.request("getCollection", {
                     "component": port_value["uuid"],
-                    "name": "Vlans"
+                    "name": "Vlans",
                 })
                 for vlan in port_vlans_request:
                     subcomponent = vlan["subcomponent"]
                     vlan_info = self.request("getPortVlanInfo", {
-                        "portVlan": subcomponent
+                        "portVlan": subcomponent,
                     })
                     self.uuid_collections["Ports"][port_id]["Vlans"][
                         vlan_info["vlanId"]] = subcomponent
@@ -193,7 +193,7 @@ class UiOnpssJsonrpc(UiOnpssShell):
         if params is None:
             params = {}
         try:
-            result = self.jsonrpc._request(method, params)
+            result = self.jsonrpc._request(method, params)  # pylint: disable=protected-access
         except jsonrpclib.ProtocolError as err:
             message = "{0} command with parameters {1} returned error {2[0]}: {2[1]}".format(method, params, err.args[0])
             raise UIException(message)
@@ -323,7 +323,7 @@ class UiOnpssJsonrpc(UiOnpssShell):
         while time.time() < end_time:
             try:
                 reply = self.request("getEthernetSwitchInfo", {
-                    "switch": self.uuid_collections["Switch"]
+                    "switch": self.uuid_collections["Switch"],
                 })
             except UIException:
                 raise
@@ -671,12 +671,12 @@ class UiOnpssJsonrpc(UiOnpssShell):
                 admin_mode = port_attr.pop("adminMode")
                 params["attributes"]["administrativeState"] = admin_mode
                 port_info = self.request("getEthernetSwitchPortInfo", {
-                    "port": port
+                    "port": port,
                 })
                 if port_info["portClass"] == "Logical":
                     lag_members = self.request("getCollection", {
                         "component": port,
-                        "name": "Members"
+                        "name": "Members",
                     })
                     request_params = ({"component": member["subcomponent"],
                                        "attributes": {"administrativeState": admin_mode}}
@@ -977,10 +977,10 @@ class UiOnpssJsonrpc(UiOnpssShell):
         for port in self.uuid_collections["Ports"]:
             for vlan in self.uuid_collections["Ports"][port]["Vlans"]:
                 vlan_info = self.request("getPortVlanInfo", {
-                    "portVlan": self.uuid_collections["Ports"][port]["Vlans"][vlan]
+                    "portVlan": self.uuid_collections["Ports"][port]["Vlans"][vlan],
                 })
                 port_info = self.request("getEthernetSwitchPortInfo", {
-                    "port": self.uuid_collections["Ports"][port]["uuid"]
+                    "port": self.uuid_collections["Ports"][port]["uuid"],
                 })
                 pvid = port_info["defaultVlan"] == self.uuid_collections["Ports"][port]["Vlans"][vlan]
                 try:
@@ -1287,7 +1287,7 @@ class UiOnpssJsonrpc(UiOnpssShell):
             'lagId': lag,
             'hashMode': hash_mode,
             'name': 'lag3801',
-            'actorAdminLagKey': key
+            'actorAdminLagKey': key,
         }
         self.lags.append(lag_info)
         # Add value to lag_map if it isn't there
@@ -1407,7 +1407,7 @@ class UiOnpssJsonrpc(UiOnpssShell):
                 params = {
                     "port": self.uuid_collections["Ports"][lag]["uuid"],
                     "oem": {},
-                    "members": [self.uuid_collections["Ports"][p]["uuid"] for p in ports]
+                    "members": [self.uuid_collections["Ports"][p]["uuid"] for p in ports],
                 }
                 self.request("addEthernetSwitchPortMembers", params)
             # Creates new LAG
@@ -1418,7 +1418,7 @@ class UiOnpssJsonrpc(UiOnpssShell):
                     "type": "LinkAggregation",
                     "mode": "LinkAggregationStatic",
                     "members": [self.uuid_collections["Ports"][p]["uuid"] for p in ports],
-                    "oem": {}
+                    "oem": {},
                 }
                 self.request("addEthernetSwitchPort", params)
                 # update Ports uuid
@@ -1449,7 +1449,7 @@ class UiOnpssJsonrpc(UiOnpssShell):
             if ports_found == set(ports):
                 params = {
                     "port": self.uuid_collections["Ports"][lag]["uuid"],
-                    "oem": {}
+                    "oem": {},
                 }
                 self.request("deleteEthernetSwitchPort", params)
                 # update Ports uuid
@@ -1459,7 +1459,7 @@ class UiOnpssJsonrpc(UiOnpssShell):
                 params = {
                     "port": self.uuid_collections["Ports"][lag]["uuid"],
                     "oem": {},
-                    "members": [self.uuid_collections["Ports"][p]["uuid"] for p in ports]
+                    "members": [self.uuid_collections["Ports"][p]["uuid"] for p in ports],
                 }
                 self.request("deleteEthernetSwitchPortMembers", params)
         else:
@@ -1488,13 +1488,13 @@ class UiOnpssJsonrpc(UiOnpssShell):
                 lag_uuid = self.uuid_collections["Ports"][lad_id]["uuid"]
                 lag_members = self.request("getCollection", {
                     "component": lag_uuid,
-                    "name": "Members"
+                    "name": "Members",
                 })
                 members_uuid = ({"port": port["subcomponent"]} for port in lag_members)
                 members_info = self.multicall([{"method": "getEthernetSwitchPortInfo",
                                                 "params": members_uuid}])
                 lags_info = ({"lagId": lad_id, "actorPortPriority": None,
-                              "portId": self.parse_port_name(member["portIdentifier"])
+                              "portId": self.parse_port_name(member["portIdentifier"]),
                               } for member in members_info)
                 for lag_info in lags_info:
                     table_ports2lag.append(lag_info)

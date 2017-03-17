@@ -295,7 +295,7 @@ class XML(object):
             value(str):  Failure reason
 
         """
-        res = self.Junit.results(message="Failure Reason")
+        res = self.Junit.results(message="Failure Reason")  # pylint: disable=no-member
         res.append(value)
         self.append(res)
 
@@ -410,7 +410,7 @@ class XML(object):
                                     (self.host, self.project, _platform, tcname)
         # Creating TC xml element
         if 'when' in list(report.keys()) and not report['when'] == "teardown":
-            self.tests.append(self.Junit.testcase(**attrs))
+            self.tests.append(self.Junit.testcase(**attrs))  # pylint: disable=no-member
             self.total += 1
             self.fail_traceback = None
         if status == "Passed":
@@ -471,8 +471,10 @@ class XML(object):
         for file_name in images:
             with open(file_name, 'rb') as f:
                 image_src = base64.b64encode(f.read()).decode('utf-8')
-                file_nodes.append(self.Junit.file(src="data:image/png;base64,{}".format(image_src)))
-        monitor = self.Junit.monitor(file_nodes)
+                file_nodes.append(
+                    self.Junit.file(src="data:image/png;base64,{}".format(image_src)),  # pylint: disable=no-member
+                )
+        monitor = self.Junit.monitor(file_nodes)  # pylint: disable=no-member
         self.append(monitor)
 
     def append_error(self, report, when=""):
@@ -496,13 +498,17 @@ class XML(object):
                         self.tests[-1].pop()
                     except IndexError:
                         pass
-                self.append(self.Junit.error(longrepr, message="Test error on %s and Test failure" % (when, )))
+                self.append(
+                    self.Junit.error(longrepr,  # pylint: disable=no-member
+                                     message="Test error on %s and Test failure" % (when, )))
                 if hasattr(failure_reason.attr, "message") and failure_reason.attr.message == "Failure Reason":
                     self.tests[-1].append(failure_reason)
                 self.tests[-1][0].extend("\n" + "-" * 80 + "\nTest Case Failure\n" + "-" * 80 + "\n")
                 self.tests[-1][0].extend(self.fail_traceback)
             else:
-                self.append(self.Junit.error(longrepr, message="Test error on %s" % (when, )))
+                self.append(
+                    self.Junit.error(longrepr,  # pylint: disable=no-member
+                                     message="Test error on %s" % (when, )))
         self.errors += 1
         self.failed += 1
 
@@ -514,7 +520,9 @@ class XML(object):
 
         """
         self.class_logger.info("Appending XML report with xfail.")
-        self.append(self.Junit.skipped(str(xml_unescape(report['keywords']['xfail'])), message="expected test failure"))
+        self.append(
+            self.Junit.skipped(str(xml_unescape(report['keywords']['xfail'])),  # pylint: disable=no-member
+                               message="expected test failure"))
 
     def append_skipped(self, report):
         """Append xml reports with skipped TC.
@@ -529,7 +537,8 @@ class XML(object):
         longrepr = xml_unescape(report['longrepr'])
         # TODO: fixed bug with longrepr crashing
         skipreason = get_skipped_reason(report['longrepr'])
-        self.append(self.Junit.skipped("%s" % longrepr, type="pytest.skip", message=skipreason))
+        self.append(self.Junit.skipped("%s" % longrepr,  # pylint: disable=no-member
+                                       type="pytest.skip", message=skipreason))
 #        self.append(self.Junit.skipped("%s:%s: %s" % longrepr, type="pytest.skip", message=skipreason))
         self.skipped += 1
 
@@ -541,7 +550,7 @@ class XML(object):
 
         """
         self.class_logger.info("Appending XML report with pass.")
-        self.append(self.Junit.passed(message="Test passed"))
+        self.append(self.Junit.passed(message="Test passed"))  # pylint: disable=no-member
         self.passed += 1
 
     def append_failure(self, report):
@@ -553,9 +562,9 @@ class XML(object):
         """
         self.class_logger.info("Appending XML report with fail.")
         for i in range(len(report['sections'])):
-            report['sections'][i] = xml_unescape(report['sections'][i])
+            report['sections'][i] = xml_unescape(report['sections'][i])  # pylint: disable=no-member
         sec = dict(report['sections'])
-        self.fail_traceback = self.Junit.failure(message="Test failure")
+        self.fail_traceback = self.Junit.failure(message="Test failure")  # pylint: disable=no-member
         # Removing BASH escape symbols (decolorizing)
         # longrepr = xml_unescape(re_sub(r"\x1b.*?m", "", report['longrepr']))
         longrepr = xml_unescape(report['longrepr'])
@@ -591,7 +600,7 @@ class XML(object):
             _host = config[0]
 
         for defect_id in defect_ids:
-            self.append(self.Junit.defect(d_id=defect_id, d_host=_host))
+            self.append(self.Junit.defect(d_id=defect_id, d_host=_host))  # pylint: disable=no-member
 
     def dump_xmllog(self, totaltime=None, detailed_duration=None):
         """Generating xml file.
@@ -627,10 +636,12 @@ class XML(object):
         if self.infodict:
             info_nodes = []
             for info_node in list(self.infodict.keys()):
-                info_nodes.append(self.Junit.info_node(self.infodict[info_node], name=info_node))
-            self.tests.append(self.Junit.header(info_nodes))
+                info_nodes.append(
+                    self.Junit.info_node(self.infodict[info_node],  # pylint: disable=no-member
+                                         name=info_node))
+            self.tests.append(self.Junit.header(info_nodes))  # pylint: disable=no-member
         try:
-            logfile.write(self.Junit.testsuite(self.tests,
+            logfile.write(self.Junit.testsuite(self.tests,  # pylint: disable=no-member
                                                name="",
                                                errors=self.errors,
                                                failures=self.failed,

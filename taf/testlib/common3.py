@@ -194,7 +194,7 @@ class Environment(dict):
             if new_module.ENTRY_TYPE and new_module.ENTRY_TYPE not in self.__dev:
                 self.__dev[new_module.ENTRY_TYPE] = {
                     "NAME": new_module.NAME,
-                    "LINK_NAME": getattr(new_module, 'LINK_NAME', new_module.NAME)
+                    "LINK_NAME": getattr(new_module, 'LINK_NAME', new_module.NAME),
                 }
             for instance_name, entry_class in new_module.INSTANCES.items():
                 if issubclass(entry_class, entry_template.GenericEntry):

@@ -102,6 +102,7 @@ class GenericEntry(object, metaclass=ABCMeta):
     def get_env_prop(self, param):
         pass
 
+
 # Obligatory constants for any entry module.
 # This is a template so those constants are empty.
 ENTRY_TYPE = ""

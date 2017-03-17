@@ -18,7 +18,6 @@
 
 import itertools
 from contextlib import suppress
-import time
 
 import etcd
 from plugins import loggers
@@ -43,7 +42,7 @@ class EtcdHelper(object):
             self.etcd_config = {
                 'host': etcd_address,
                 'port': int(etcd_port),
-                'protocol': etcd_protocol
+                'protocol': etcd_protocol,
             }
         elif isinstance(endpoint, dict):
             self.etcd_config = endpoint
@@ -87,14 +86,14 @@ class EtcdHelper(object):
     @property
     def latest_id(self):
         with suppress(AttributeError):
-            return self._latest_id
+            return self._latest_id  # NOQA pylint: disable=access-member-before-definition
         for _ in range(2):
             with suppress(etcd.EtcdKeyNotFound):
-                self._latest_id = int(self.etcd.read(self._latest_id_key).value)  # pylint: disable=no-member
+                self._latest_id = int(self.etcd.read(  # pylint: disable=no-member, attribute-defined-outside-init
+                    self._latest_id_key).value)
                 return self._latest_id
             self.init_etcd()
         raise EtcdHelperException("Failed to find test_id")
-
 
     def read_list(self, key):
         return self.etcd.read(key).leaves

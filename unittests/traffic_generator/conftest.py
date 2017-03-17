@@ -23,10 +23,7 @@ import pytest
 from testlib import dev_ixia
 from testlib import dev_pypacker
 from testlib import dev_rpypacker
-a = '''lkjh
-;klj
-joiu
-'''
+
 IXIA_CONFIGURATION_SCRIPT = """\
 ixClearPortStats {chassis} {card} {port}
 port get {chassis} {card} {port}

@@ -137,7 +137,7 @@ class RemoteIperfTG(tg_template.GenericTG):
             self._lhost = HOST_MAP[self.type](self.config, self.opts)
             self._lhost.start()
 
-        self.status = True
+        self.status = True  # pylint: disable=attribute-defined-outside-init
 
     def stop(self):
         """Shutdown Iperf TG device.
@@ -149,7 +149,7 @@ class RemoteIperfTG(tg_template.GenericTG):
         if self.init_lhost:
             self._lhost.stop()
 
-        self.status = False
+        self.status = False  # pylint: disable=attribute-defined-outside-init
 
     def create(self):
         """Start Iperf TG device or get running one.
@@ -250,7 +250,7 @@ class RemoteIperfTG(tg_template.GenericTG):
             'format': units,
             'port': l4_port,
             'bind': src_ip,
-            'udp': 'udp' in l4_proto
+            'udp': 'udp' in l4_proto,
         }
 
         cmd = iperf_cmd.CmdIperf(**kwargs)
@@ -267,7 +267,7 @@ class RemoteIperfTG(tg_template.GenericTG):
 
         self.streams[stream_id] = {
             'iface': iface,
-            'iperf_cmd': cmd
+            'iperf_cmd': cmd,
         }
 
         # Add src_ip address to specific TG port

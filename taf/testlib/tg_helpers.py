@@ -84,13 +84,13 @@ class TGHelperMixin(object):
 
         # Get values from received IS-IS Hello to create an appropriate IS-IS packets
         neighbor_id = sniffed[tg_port][0].sourceid + ".00"
-        area_id = sniffed[tg_port][0].getlayer(pypacker.ISIS_AreaEntry).areaid
+        area_id = sniffed[tg_port][0].getlayer(pypacker.ISIS_AreaEntry).areaid  # pylint: disable=no-member
 
         # Prepare other required variables for IS-IS packets
-        mac_address = mac_address if mac_address else str(pypacker.RandMAC())
+        mac_address = mac_address if mac_address else str(pypacker.RandMAC())  # pylint: disable=no-member
         system_id = system_id if system_id else str(EUI(mac_address, dialect=mac_cisco))
         all_is_mac_address = "09:00:2b:00:00:05"
-        ipv4_address = IPAddress(ipv4_address) if ipv4_address else IPAddress(str(pypacker.RandIP()))
+        ipv4_address = IPAddress(ipv4_address) if ipv4_address else IPAddress(str(pypacker.RandIP()))  # pylint: disable=no-member
         ipv6_address = ipv6_address if ipv6_address else str(EUI(mac_address).ipv6_link_local())
         hostname = hostname if hostname else "isis_host_on_{}".format(tg_port)
 
@@ -110,17 +110,17 @@ class TGHelperMixin(object):
         # Prepare Padding TLVs
         tlvs.extend([{"ISIS_PaddingTlv":
                       {"len": 255, "padding": "\x00" * 255}}] * max_sized_padding_count)
-        tlvs.append({"ISIS_PaddingTlv":  {"len": rest_padding, "padding": "\x00" * rest_padding}})
+        tlvs.append({"ISIS_PaddingTlv": {"len": rest_padding, "padding": "\x00" * rest_padding}})
 
         # Prepare IS-IS Hello packet
         isis_hello = ({"Dot3": {"dst": all_is_mac_address, "src": mac_address,
                                 'len': tg_port_mtu}},
-                       {"LLC": {"dsap": 254, "ssap": 254, "ctrl": 3}},
-                       {"ISIS_CommonHdr": {}},
-                       {"ISIS_P2P_Hello": {"circuittype": "L1",
-                                           "sourceid": system_id,
-                                           "localcircuitid": 10,
-                                           "tlvs": tlvs}})
+                      {"LLC": {"dsap": 254, "ssap": 254, "ctrl": 3}},
+                      {"ISIS_CommonHdr": {}},
+                      {"ISIS_P2P_Hello": {"circuittype": "L1",
+                                          "sourceid": system_id,
+                                          "localcircuitid": 10,
+                                          "tlvs": tlvs}})
 
         # Prepare base IS-IS LSP packet
         isis_lsp_host = (
@@ -199,7 +199,7 @@ class TGHelperMixin(object):
                 neigh_id_n = []
                 isis_lsp_host1 = deepcopy(isis_lsp_host)
                 isis_lsp_host1[3]["ISIS_L1_LSP"]["lspid"] = "{0}.00-{1:02}".format(
-                    EUI(mac_address, dialect=mac_cisco), (ix-1)/MAX_ISISLSP_NEIGHBOR_TLV)
+                    EUI(mac_address, dialect=mac_cisco), (ix - 1) / MAX_ISISLSP_NEIGHBOR_TLV)
             neigh_id_n.append(
                 {"ISIS_ExtendedIsNeighbourEntry": {
                     "metric": 11,

@@ -91,7 +91,7 @@ class ArgumentBuilder(object):
             _key_out = _val_out = _out = None
             arg_kwargs = {
                 'arg_name': arg_name,
-                'arg_val': arg_val
+                'arg_val': arg_val,
             }
             if key:
                 _key_out = key(params, **arg_kwargs)
@@ -157,7 +157,7 @@ class ArgumentBuilder(object):
 
                 _fmt_kwargs = {
                     'arg_name': arg_name,
-                    'arg_val': arg_val
+                    'arg_val': arg_val,
                 }
                 _out = _fmt(*_fmt_args, **_fmt_kwargs)
                 if _out:
@@ -175,15 +175,15 @@ class ArgumentBuilder(object):
                 {
                     cls.__TRUE__: cls.FORMAT_KEY_FIRST,
                     cls.__FALSE__: cls.FORMAT_NONE,
-                    None: cls.FORMAT_NONE
+                    None: cls.FORMAT_NONE,
                 },
                 default=cls.FORMATTER_JOIN_KEY_VAL(
                     key=cls.FORMAT_KEY_FIRST,
                     joiner=cls.FORMAT_ARG_APPEND_LIST,
                     val=cls.FORMAT_VAL_TRANSFORM(str),
-                )
+                ),
             ),
-            'positional': cls.FORMAT_VAL_TRANSFORM(str)
+            'positional': cls.FORMAT_VAL_TRANSFORM(str),
         }
         return _formatter
 
@@ -192,10 +192,10 @@ class ArgumentBuilder(object):
 
 ArgumentBuilder.__BOOL_MAP__ = {
     False: ArgumentBuilder.__FALSE__,
-    True: ArgumentBuilder.__TRUE__
+    True: ArgumentBuilder.__TRUE__,
 }
 
-ArgumentBuilder.__DEFAULT_FORMATTER = ArgumentBuilder.get_formatter()
+ArgumentBuilder.__DEFAULT_FORMATTER = ArgumentBuilder.get_formatter()  # pylint: disable=protected-access
 
 
 class CommandHelper(object):
@@ -288,7 +288,7 @@ class CommandHelper(object):
 
         assert args_in is not None
         if isinstance(args_in, Command):
-            args_in = args_in._ns
+            args_in = args_in._ns  # pylint: disable=protected-access
         if isinstance(args_in, argparse.Namespace):
             args_in = args_in.__dict__
 
@@ -383,7 +383,7 @@ class Command(Mapping):
 
     def _init_cmd(self, cmd_rep):
         if isinstance(cmd_rep, Command):
-            self._ns = copy.deepcopy(cmd_rep._ns)
+            self._ns = copy.deepcopy(cmd_rep._ns)  # pylint: disable=protected-access
         elif isinstance(cmd_rep, argparse.Namespace):
             self._ns = copy.deepcopy(cmd_rep)
         elif isinstance(cmd_rep, dict):
@@ -436,7 +436,7 @@ class Command(Mapping):
 
     @classmethod
     def cmd_2_str(cls, cmd):
-        return cls._ns_2_str(cmd._ns)
+        return cls._ns_2_str(cmd._ns)  # pylint: disable=protected-access
 
     def to_args_list(self):
         return self._ns_2_list(self._ns)
@@ -445,7 +445,7 @@ class Command(Mapping):
     def _to_dict(cls, cmd_rep):
         _cmd_dict = None
         if isinstance(cmd_rep, Command):
-            _cmd_dict = cmd_rep._ns.__dict__
+            _cmd_dict = cmd_rep._ns.__dict__  # pylint: disable=protected-access
         elif isinstance(cmd_rep, argparse.Namespace):
             _cmd_dict = cmd_rep.__dict__
         elif isinstance(cmd_rep, dict):
@@ -580,7 +580,7 @@ class Command(Mapping):
 
     def __eq__(self, other):
         if isinstance(other, Command):
-            return self._ns == other._ns
+            return self._ns == other._ns  # pylint: disable=protected-access
         elif isinstance(other, argparse.Namespace):
             return self._ns == other
         elif isinstance(other, dict):

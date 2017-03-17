@@ -37,17 +37,17 @@ class GeneralPortServer(clitelnet.TelnetCMD):
             config(dict):  Configuration information.
 
         """
-        self.config = config
-        self.sw_user = config["telnet_user"]
-        self.sw_pass = config["telnet_pass"]
-        self.sw_loginprompt = config["telnet_loginprompt"]
-        self.sw_passprompt = config["telnet_passprompt"]
-        self.sw_prompt = config["telnet_prompt"]
-        self.ps_port = config["portserv_tty"]
-        self.ps_host = config["portserv_host"]
-        self.ps_user = config["portserv_user"]
-        self.ps_pass = config["portserv_pass"]
-        self.name = config.get('name', 'noname')
+        self.config = config  # pylint: disable=attribute-defined-outside-init
+        self.sw_user = config["telnet_user"]  # pylint: disable=attribute-defined-outside-init
+        self.sw_pass = config["telnet_pass"]  # pylint: disable=attribute-defined-outside-init
+        self.sw_loginprompt = config["telnet_loginprompt"]  # pylint: disable=attribute-defined-outside-init
+        self.sw_passprompt = config["telnet_passprompt"]  # pylint: disable=attribute-defined-outside-init
+        self.sw_prompt = config["telnet_prompt"]  # pylint: disable=attribute-defined-outside-init
+        self.ps_port = config["portserv_tty"]  # pylint: disable=attribute-defined-outside-init
+        self.ps_host = config["portserv_host"]  # pylint: disable=attribute-defined-outside-init
+        self.ps_user = config["portserv_user"]  # pylint: disable=attribute-defined-outside-init
+        self.ps_pass = config["portserv_pass"]  # pylint: disable=attribute-defined-outside-init
+        self.name = config.get('name', 'noname')  # pylint: disable=attribute-defined-outside-init
 
     def telnet_connect(self, timeout=45, with_login=None, wait_login=0):
         """Perform telnet connection to the device.
@@ -262,5 +262,5 @@ class PortServer(ConsoleServer):
 # define this here to avoid referring before definition
 _console_server_classes = {
     "kvm": KVMServer,
-    "portserver": PortServer
+    "portserver": PortServer,
 }

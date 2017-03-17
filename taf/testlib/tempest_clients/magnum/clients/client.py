@@ -35,7 +35,7 @@ class MagnumClient(rest_client.RestClient):
             auth_provider=auth_provider,
             service='container-infra',
             region=config.network.region or config.identity.region,
-            disable_ssl_certificate_validation=True
+            disable_ssl_certificate_validation=True,
         )
 
     @classmethod

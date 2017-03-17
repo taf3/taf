@@ -103,7 +103,7 @@ class RemotePypackerTG(PacketProcessor, TGHelperMixin, GenericEntry):
         self.ssh = self._lhost.ssh
         self.ltestlib_path = os.path.dirname(__file__)
         self.rpypacker_path = os.path.join('/tmp', 'rpypacker_{0}_{1}_{2}'.format(
-                        os.uname()[1], os.getpid(), self.id))
+            os.uname()[1], os.getpid(), self.id))
         self.logdir = os.path.join(self.rpypacker_path, 'rpypacker_{0}_log'.format(self.id))
         self.xmlproxy = None
         self.status = None

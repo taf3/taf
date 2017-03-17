@@ -72,6 +72,6 @@ INSTANCES = {"settings": GenericSettings,
              "syslog_settings": GenericSettings,
              "ntp": GenericSettings,
              "radius_tacacs_settings": GenericSettings,
-             "collectd_settings": GenericSettings
+             "collectd_settings": GenericSettings,
              }
 NAME = "settings"

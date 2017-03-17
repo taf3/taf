@@ -44,7 +44,7 @@ def parameterized_class(cls):
         delattr(cls, name)
 
         # add a new test function to the class for each entry in f._test_data
-        for tag, args in f._test_data.items():
+        for tag, args in f._test_data.items():  # pylint: disable=protected-access
             new_name = "{0}_{1}".format(f.__name__, tag)
             if hasattr(cls, new_name):
                 raise Exception(
@@ -84,7 +84,7 @@ def parameterized(data):
 
     """
     def wrapped(f):
-        f._test_data = data
+        f._test_data = data  # pylint: disable=protected-access
         return f
     return wrapped
 

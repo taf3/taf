@@ -538,7 +538,7 @@ class TrexMixin(object):
         trex_streams = profile.get_streams()
         stream_id_list = [x for x in range(initial_id, len(trex_streams) + 1)]
         for stream_id, trex_stream in zip(stream_id_list, trex_streams):
-            self.stream_ids[stream_id] = {"trex_stream":  trex_stream, "iface": iface}
+            self.stream_ids[stream_id] = {"trex_stream": trex_stream, "iface": iface}
         # Add and start streams
         self.trex.add_streams(trex_streams, ports=[iface])
         self.trex.start(ports=[iface])

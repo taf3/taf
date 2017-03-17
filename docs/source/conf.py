@@ -73,7 +73,7 @@ master_doc = 'index'
 project = 'taf'
 author = 'Intel Corporation'
 current_year = datetime.datetime.now().year
-copyright = '2011-{0}, {1}'.format(current_year, author)
+copyright = '2011-{0}, {1}'.format(current_year, author)  # pylint: disable=redefined-builtin
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

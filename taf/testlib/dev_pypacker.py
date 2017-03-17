@@ -489,9 +489,9 @@ class PypackerTG(PacketProcessor, GenericTG):
             stop_lock = threading.Lock()
             thr = StoppableThread(target=self._sniffer, args=(sniff_port, packets_count, sniffing_time, filter_layer, src_filter, dst_filter, stop_lock))
             thr.daemon = True
-            thr.sniff_port = sniff_port
-            thr._thr_lock = stop_lock
-            thr._stop_exception = KeyboardInterrupt
+            thr.sniff_port = sniff_port  # pylint: disable=attribute-defined-outside-init
+            thr._thr_lock = stop_lock  # pylint: disable=attribute-defined-outside-init
+            thr._stop_exception = KeyboardInterrupt  # pylint: disable=attribute-defined-outside-init, protected-access
             self._sniff_threads.append(thr)
             thr.start()
 
@@ -553,9 +553,9 @@ class PypackerTG(PacketProcessor, GenericTG):
         for stream_id in stream_list:
             thr = StoppableThread(target=self.send_stream, args=(stream_id,))
             thr.daemon = True
-            thr.stream_id = stream_id
-            thr._thr_lock = threading.Lock()
-            thr._stop_exception = SystemExit
+            thr.stream_id = stream_id  # pylint: disable=attribute-defined-outside-init
+            thr._thr_lock = threading.Lock()  # pylint: disable=attribute-defined-outside-init, protected-access
+            thr._stop_exception = SystemExit  # pylint: disable=attribute-defined-outside-init, protected-access
             self._send_threads[stream_id] = {}
             self._send_threads[stream_id]['thread'] = thr
             self._send_threads[stream_id]['active'] = False
@@ -678,7 +678,7 @@ class PypackerTG(PacketProcessor, GenericTG):
             lambda_filter = PacketProcessor.flt_patterns.get(filter_layer, {}).get('lfilter')
             if lambda_filter is None and filter_layer is not None:
                 try:
-                    self.filter_offset, self.filter_data, self.filter_mask = filter_layer
+                    self.filter_offset, self.filter_data, self.filter_mask = filter_layer  # pylint: disable=attribute-defined-outside-init
                     lambda_filter = self.custom_packet_filter
                 except (TypeError, IndexError):
                     message = "Unknown filter_layer '{0}'. Supported layers: {1}".format(filter_layer,
@@ -915,7 +915,7 @@ class StoppableThread(threading.Thread):
         """
         if not self.isAlive():
             return
-        tid = next((k for k, v in threading._active.items() if v is self), None)
+        tid = next((k for k, v in threading._active.items() if v is self), None) # pylint: disable=protected-access
         if tid is None:
             return
         with self._thr_lock:

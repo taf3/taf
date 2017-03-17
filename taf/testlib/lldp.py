@@ -291,7 +291,7 @@ class Tlv(object):
         row = {
             # default '' for OID because it might not be present
             'remManAddrOID': '',
-            }
+        }
         for sub_tlv, value in tlv:
             if sub_tlv.endswith("OID"):
                 row['remManAddrOID'] = value
@@ -307,7 +307,7 @@ class Tlv(object):
             elif sub_tlv.startswith("Network Address Type"):
                 # convert to int for test cases
                 subtype = int(re.search(r'Network Address Type (\d+)',
-                                    sub_tlv).group(1))
+                                        sub_tlv).group(1))
                 row['remManAddrSubtype'] = subtype
                 row['remManAddr'] = value
             elif sub_tlv == 'Ifindex':

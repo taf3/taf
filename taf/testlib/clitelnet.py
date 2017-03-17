@@ -149,7 +149,7 @@ class TelnetCMD(CLIGenericMixin):
                 # Skip reading output. Just connect.
                 pass
         self.connect_status = True
-        self.telnet_obj_prep = self.prepare_telnet_obj(self.telnet_obj)
+        self.telnet_obj_prep = self.prepare_telnet_obj(self.telnet_obj)  # pylint: disable=attribute-defined-outside-init
         return telnet_output
 
     def _check_telnet_obj(self):

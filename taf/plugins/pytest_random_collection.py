@@ -54,6 +54,7 @@ def pytest_unconfigure(config):
         del config._random
         config.pluginmanager.unregister(random_class)
 
+
 RANDOM_MAP = {
     "Class": "cls",
     "Module": "module",

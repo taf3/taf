@@ -76,11 +76,11 @@ def pytest_addoption(parser):
     group.addoption("--workload", action="store_true", default=False,
                     help="Add workload on SUT using stress tool")
     group.addoption("--workload_type", action="store", default="continuous",
-                     choices=["continuous", "interrupted"],
-                     help="Workload type.")
+                    choices=["continuous", "interrupted"],
+                    help="Workload type.")
     group.addoption("--workload_workers", action="store", default=None,
-                     help="Number of workload workers in format "
-                     "[cpu_workers, vm_workers, vm_bytes, io_workers, hdd_workers, time].")
+                    help="Number of workload workers in format "
+                         "[cpu_workers, vm_workers, vm_bytes, io_workers, hdd_workers, time].")
 
 
 def pytest_configure(config):
@@ -221,12 +221,12 @@ class WorkloadInterrupted(object):
         """
         try:
             self.pool.map_async(device_workload,
-                            [ARGS(type(dev),
-                                  dev.config,
-                                  dev.opts,
-                                  self.workload_results[dev.id],
-                                  self.workers)
-                             for dev in self.devices])
+                                [ARGS(type(dev),
+                                      dev.config,
+                                      dev.opts,
+                                      self.workload_results[dev.id],
+                                      self.workers)
+                                 for dev in self.devices])
         except Exception as err:
             self.class_logger.debug("Workload error: {0}".format(err))
             raise
@@ -267,7 +267,7 @@ class WorkloadInterrupted(object):
 
 WORKLOADS = {
     'continuous': WorkloadContinuous,
-    'interrupted': WorkloadInterrupted
+    'interrupted': WorkloadInterrupted,
 }
 
 
@@ -287,7 +287,7 @@ class WorkloadPlugin(object):
             env_init(testlib.common3.Environment): 'env_init' pytest fixture from pytest_onsenv.py
 
         """
-        self._workload = WORKLOADS[self.workload_type](env_init, self.workers)
+        self._workload = WORKLOADS[self.workload_type](env_init, self.workers)  # pylint: disable=attribute-defined-outside-init
         return self._workload
 
     @pytest.fixture(scope=setup_scope(), autouse=True)

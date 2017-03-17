@@ -409,9 +409,9 @@ class IxiaHALMixin(object):
         # Get initial stream statistics
         self.tcl("streamTransmitStats get {chassis} {card} {port} {stream_id} {stream_id}; "
                  "set startCount{stream_id} [streamTransmitStats cget -framesSent]".format(chassis=chassis,
-                                                                                             card=card,
-                                                                                             port=port,
-                                                                                             stream_id=ix_stream_id))
+                                                                                           card=card,
+                                                                                           port=port,
+                                                                                           stream_id=ix_stream_id))
 
         # Enable stream.
         self._enable_stream(chassis, card, port, ix_stream_id)
@@ -1374,7 +1374,7 @@ class IxiaHALMixin(object):
         if dhcp_si_increment is not None:
             dhcp_si_increment_step, dhcp_si_increment_count = self._check_increment(dhcp_si_increment, "dhcp_si_increment")
             udf_id = len(self.udf_dict) + 1
-            dhcp_si = packet.getlayer(pypacker.BOOTP).siaddr.split('.')
+            dhcp_si = packet.getlayer(pypacker.BOOTP).siaddr.split('.')  # pylint: disable=no-member
             dhcp_si_initval = str(hex(int(dhcp_si[0])))[2:].zfill(2) + str(hex(int(dhcp_si[1])))[2:].zfill(2) + \
                 str(hex(int(dhcp_si[2])))[2:].zfill(2) + str(hex(int(dhcp_si[3])))[2:].zfill(2)
             if packet.vlan:
@@ -1397,7 +1397,7 @@ class IxiaHALMixin(object):
             else:
                 offset = 14
             self.udf_dict["ipv6_tc"] = {"udf_id": udf_id, "initval": tc_initval, "offset": offset, "counter_type": 'c8', "bit_offset": bit_offset,
-                                                        "step": tc_increment_step, "count": tc_increment_count, "continuous": continuous}
+                                        "step": tc_increment_step, "count": tc_increment_count, "continuous": continuous}
             tcl_commands.extend(self._set_ixia_udf_field(**self.udf_dict["ipv6_tc"]))
 
         # Set IPv6 NH increment
@@ -1411,7 +1411,7 @@ class IxiaHALMixin(object):
             else:
                 offset = 20
             self.udf_dict["ipv6_nh"] = {"udf_id": udf_id, "initval": nh_initval, "offset": offset, "counter_type": 'c8',
-                                                        "step": nh_increment_step, "count": nh_increment_count, "continuous": continuous}
+                                        "step": nh_increment_step, "count": nh_increment_count, "continuous": continuous}
             tcl_commands.extend(self._set_ixia_udf_field(**self.udf_dict["ipv6_nh"]))
 
         # Set LSP ID increment
@@ -1430,7 +1430,6 @@ class IxiaHALMixin(object):
             self.udf_dict["lspid"] = {"udf_id": udf_id, "initval": lid_init, "offset": offset, "counter_type": 'c16',
                                                         "step": lspid_increment_step, "count": lspid_increment_count, "continuous": continuous}
             tcl_commands.extend(self._set_ixia_udf_field(**self.udf_dict["lspid"]))
-
 
         # self.stream_ids[stream_id]['size'] = packet_size
         tcl_commands.append("stream config -dataPattern userpattern;")
@@ -1715,7 +1714,7 @@ class IxiaHALMixin(object):
         kwargs.pop("is_valid")
         kwargs.pop("build_packet")
         if fragsize is not None:
-            fragments = pypacker.fragment(packet, fragsize)
+            fragments = pypacker.fragment(packet, fragsize)  # pylint: disable=no-member
             for fragment in fragments:
                 kwargs['packet'] = fragment
                 self.stream_ids[stream_id]['ix_stream_id'].append(self._set_ixia_stream(**kwargs))
@@ -1811,7 +1810,6 @@ class IxiaHALMixin(object):
             raise IxiaException("Link is Down.")
         # Start transmission
         assert self.tcl("ixStartTransmit txPortIdList") == "0"
-
 
     def stop_streams(self, stream_list=None):
         """ Disable streams from the list.

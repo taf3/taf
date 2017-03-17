@@ -199,7 +199,7 @@ class SwitchGeneral(entry_template.GenericEntry):
         _object = {
             'isup': False,
             'type': "unknown",
-            'prop': {}
+            'prop': {},
         }
 
         if clissh.probe_port(self.ipaddr, self._get_port_for_probe(), self.class_logger):
@@ -527,7 +527,7 @@ class SwitchGeneral(entry_template.GenericEntry):
             passw(str):  ssh password
 
         """
-        self.ssh_conn = clissh.CLISSH(host, port=port, username=login, password=passw)
+        self.ssh_conn = clissh.CLISSH(host, port=port, username=login, password=passw)  # pylint: disable=attribute-defined-outside-init
         self.ssh_conn.login()
         self.ssh_conn.open_shell()
 

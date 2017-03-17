@@ -35,7 +35,7 @@ class SwitchRR(SwitchReal):
 
     # Platform specific HW values
     class Attributes(namedtuple("Attributes", (
-        'default', 'cpu_default', 'min', 'max', 'step', 'cpu_port', 'is_perlag')
+        'default', 'cpu_default', 'min', 'max', 'step', 'cpu_port', 'is_perlag'),
     )):
         # See si_fm10k for more information on attributes
         pass

@@ -37,6 +37,8 @@ from testlib import loggers
 
 
 MODULES = {}
+
+
 def imp_plugins(dest):
     """Import all py modules from <dest> subfolder.
 
@@ -480,7 +482,7 @@ class XMLReportingServer(xmlrpc.XMLRPC):
         self.start_queue_watchdog()
 
         # Multiuser
-        self.multiuser = opts.multiuser
+        self.multiuser = opts.multiuser  # pylint: disable=attribute-defined-outside-init
 
     def xmlrpc_shutdown(self, trycount=0, lasttry=0):
         """Store shutdown server command.
@@ -842,8 +844,8 @@ class XMLReportingServer(xmlrpc.XMLRPC):
             dict{bool}: CommandCollector and ClientCollector lock statuses.
 
         """
-        return {"ClientCollector": self.clients._lock._is_owned(),
-                "CommandCollector": self.queue._lock._is_owned()}
+        return {"ClientCollector": self.clients._lock._is_owned(),  # pylint: disable=protected-access
+                "CommandCollector": self.queue._lock._is_owned()}  # pylint: disable=protected-access
 
     @update_timestamp
     def xmlrpc_post(self, client, build, suite, tc, status, report=None, info=None, build_info=None, **kwargs):
@@ -1055,17 +1057,17 @@ def parse_options():
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--port", action="store", default=None,
-                      help="Local port to listen. Use random if not set.")
+                        help="Local port to listen. Use random if not set.")
     parser.add_argument("--multiuser", action="store_true",
-                      help="Ignore shutdown command from clients.")
+                        help="Ignore shutdown command from clients.")
     parser.add_argument("--loglevel", action="store", default="DEBUG",
-                      help="Logging level.")
+                        help="Logging level.")
     parser.add_argument("--logdir", action="store", default=os.curdir, dest="logdir",
-                      help="Path to dir for log files.")
+                        help="Path to dir for log files.")
     parser.add_argument("--logprefix", dest="logprefix", default="main",
-                      help="Log files prefix.")
+                        help="Log files prefix.")
     parser.add_argument("--silent", action="store_true", dest="silent",
-                      help="Do not print logging to console.")
+                        help="Do not print logging to console.")
 
     options = parser.parse_args()
     return options
@@ -1134,6 +1136,7 @@ def main(ppid):
     reactor.listenTCP(int(port), server.Site(xmlrpcsrv))  # pylint: disable=no-member
     mod_logger.info("Listen on localhost:{0}".format(port))
     reactor.run()  # pylint: disable=no-member
+
 
 if __name__ == "__main__":
 
