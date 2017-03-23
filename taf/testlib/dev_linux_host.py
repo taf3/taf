@@ -751,8 +751,6 @@ class GenericLinuxHost(entry_template.GenericEntry):
         @param retry_count:  Number of retries to start(restart) linux host
         @type  retry_count:  int
         @return None or raise an exception.
-        @note  Also self.opts.fail_ctrl attribute affects logic of this method.
-               fail_ctrl is set in py.test command line options (read py.test --help for more information).
         """
         # If fail_ctrl != "restart", restart retries won't be performed
         # as restart is not implemented for lhosts, retries makes no sense.
@@ -779,10 +777,7 @@ class GenericLinuxHost(entry_template.GenericEntry):
                 self.name, self.ipaddr, "".join(traceback_message))
             sys.stderr.write(message)
             sys.stderr.flush()
-            if self.opts.fail_ctrl != "ignore":
-                pytest.exit(message)
-            else:
-                pytest.fail(message)
+            pytest.fail(message)
 
     def waiton(self, timeout=DEFAULT_SERVER_WAIT_ON_TIMEOUT):
         """
