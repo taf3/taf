@@ -49,5 +49,5 @@ class TestCollectd(object):
     def test_collect_no_plugins_config(self):
         self.collectd_instance = collectd.Collectd(self.cli_send_mock, self.collectd_conf)
         self.collectd_instance.plugins_config = {}
-        with pytest.raises(CustomException, 'CustomException not raised in case of empty plugins config.'):
+        with pytest.raises(CustomException, message='CustomException not raised in case of empty plugins config.'):
             self.collectd_instance.update_config_file()
