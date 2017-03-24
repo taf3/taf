@@ -48,7 +48,8 @@ def pytest_addoption(parser):
         },
         '--reuse_venv': {
             'action': 'store',
-            'default': True,
+            'default': 'True',
+            'choices': ['True', 'False'],
             'help': "Reuse(=True) or Delete(=False) existing public networks/routers\
             , '%default' by default.",
         },
