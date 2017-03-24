@@ -939,11 +939,17 @@ class VirtualEnv(object):
         if 'name' in flavor_spec:
             name = flavor_spec.pop('name')
 
+        standard_flv_keys = {'ram', 'disk', 'vcpus'}
+        extra_flv_keys = set(flavor_spec.keys()) - standard_flv_keys
+
         def cmp_spec(f):
             _not_found = object()
-            for k, v in flavor_spec.items():
-                if v != f.get(k, _not_found):
-                    return False
+            comp = f
+            for keys_set in [set(flavor_spec.keys()) - extra_flv_keys, extra_flv_keys]:
+                for k in keys_set:
+                    if flavor_spec[k] != comp.get(k, _not_found):
+                        return False
+                comp = f.get('extra_specs', {})
             return True
 
         matching_specs = list(filter(cmp_spec, flavors_map.values()))
