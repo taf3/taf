@@ -1,23 +1,24 @@
 #!/usr/bin/env python
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``test_commands.py``
+
+`Command helpers Unittests`
+
 """
-@copyright Copyright (c) 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  test_commands.py
-
-@summary  Command helpers Unittests
-"""
 from collections import OrderedDict
 
 import pytest
@@ -117,7 +118,7 @@ class TestCommandHelper(object):
             'context': 'CTX',
             'help': True,
             'version': True,
-            'name': 'some/dir/name'
+            'name': 'some/dir/name',
         }
         cmd = mkdir_cmd.CmdMkdir(**mkdir_kwargs)
         cmd.check_args()
@@ -130,7 +131,7 @@ class TestCommandHelper(object):
             'context': '-Z=CTX',
             'help': '--help',
             'version': '--version',
-            'name': ['some/dir/name']
+            'name': ['some/dir/name'],
         }
         _args_list = self._build_args_list(output_list, output_dict)
 
@@ -147,7 +148,7 @@ class TestCommandHelper(object):
             'context': 'CTX',
             'help': True,
             'version': True,
-            'name': 'some/dir/name'
+            'name': 'some/dir/name',
         }
         cmd = mkdir_cmd.CmdMkdir(**mkdir_kwargs)
         cmd.check_args()
@@ -163,7 +164,7 @@ class TestCommandHelper(object):
             'context': '-Z=CTX',
             'help': '--help',
             'version': None,
-            'name': ['some/dir/name']
+            'name': ['some/dir/name'],
         }
         _args_list = self._build_args_list(output_list, output_dict)
 
@@ -180,7 +181,7 @@ class TestCommandHelper(object):
             'context': 'CTX',
             'help': True,
             'version': True,
-            'name': 'some/dir/name'
+            'name': 'some/dir/name',
         }
         cmd = mkdir_cmd.CmdMkdir(**mkdir_kwargs)
         cmd.check_args()
@@ -196,7 +197,7 @@ class TestCommandHelper(object):
             'context': '-Z=CTX',
             'help': '--help',
             'version': '--version',
-            'name': ['some/dir/name']
+            'name': ['some/dir/name'],
         }
         _args_list = self._build_args_list(output_list, output_dict)
 
@@ -213,7 +214,7 @@ class TestCommandHelper(object):
             'context': 'CTX',
             'help': True,
             'version': True,
-            'name': 'some/dir/name'
+            'name': 'some/dir/name',
         }
         cmd = mkdir_cmd.CmdMkdir(**mkdir_kwargs)
         cmd.check_args()
@@ -223,7 +224,7 @@ class TestCommandHelper(object):
 
         output_list = mkdir_cmd.MkdirArgumentBuilder.ARGS_ORDERED
         output_dict = {
-            'name': 'some/dir/name'
+            'name': 'some/dir/name',
         }
         _args_list = self._build_args_list(output_list, output_dict)
 
@@ -240,7 +241,7 @@ class TestCommandHelper(object):
             'context': 'CTX',
             'help': True,
             'version': True,
-            'name': 'lhs'
+            'name': 'lhs',
         }
         cmd_lhs = mkdir_cmd.CmdMkdir(**mkdir_kwargs_lhs)
         cmd_lhs.check_args()
@@ -252,7 +253,7 @@ class TestCommandHelper(object):
             'context': 'CTX',
             'help': False,
             'version': False,
-            'name': 'rhs'
+            'name': 'rhs',
         }
         cmd_rhs = mkdir_cmd.CmdMkdir(**mkdir_kwargs_rhs)
         cmd_rhs.check_args()

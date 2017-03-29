@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_reporting_server.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Unittests for reporting server functions`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file test_reporting_server.py
-
-@summary Unittests for reporting server functions.
 """
 
 import sys
@@ -65,8 +65,8 @@ def reporting_server_with_config(reporting_server):
 
 
 def test_client_config(reporting_server):
-    """
-    @brief Verify that client config can be created and reports can be removed
+    """Verify that client config can be created and reports can be removed.
+
     """
     reporting_server.xmlrpc_open("test_client-1")
     # check if status of client is Active
@@ -81,8 +81,8 @@ def test_client_config(reporting_server):
 
 
 def test_post(reporting_server_with_config):
-    """
-    @brief Verify that post command is True
+    """Verify that post command is True.
+
     """
     post_data1 = ["test_client-1", "SomeSwitch", "test.test_suite", "test_tcname",
                   "Run", ['Simple brief of test case', '-# First step\n-# Second step'],
@@ -93,8 +93,8 @@ def test_post(reporting_server_with_config):
 
 
 def test_queue(reporting_server_with_config):
-    """
-    @brief Verify that operation with queue is working
+    """Verify that operation with queue is working.
+
     """
     expected_queuelist = [{'status': 'Run', 'info': {'platform': 'SomeSwitch',
                            'build': '1.2.3.4-SomeSwitch'}, 'client': 'test_client-1',
@@ -121,8 +121,8 @@ def test_queue(reporting_server_with_config):
 
 
 def test_cmdproc(reporting_server_with_config):
-    """
-    @brief Verify that operation with cmdproc is work
+    """Verify that operation with cmdproc is work.
+
     """
     reporting_server_with_config.xmlrpc_cmdprocdisable()
     assert reporting_server_with_config.xmlrpc_cmdproccheck() == "Watchdog is False and cmdproc is True", "Watchdog is False. cmdprocdisable doesn't work."

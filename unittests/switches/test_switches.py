@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_switches.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Switch's unittests`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file test_switches.py
-
-@summary Switch's unittests.
 """
 import xmlrpc.client
 
@@ -80,8 +80,8 @@ def test_switch_init(switch):
 
 
 def test_get_speed_ports_1(switch):
-    """
-    @brief  Test _get_speed_ports function if 'ports' in config
+    """Test _get_speed_ports function if 'ports' in config.
+
     """
     switch.config["ports"] = [1, 2, 3]
     ports, speed_ports, ports_map = switch._get_speed_ports()
@@ -91,8 +91,8 @@ def test_get_speed_ports_1(switch):
 
 
 def test_get_speed_ports_2(switch):
-    """
-    @brief  Test _get_speed_ports function if 'port_list' in config
+    """Test _get_speed_ports function if 'port_list' in config.
+
     """
     switch.config["port_list"] = [[1, 10000], [2, 40000], [3, 2500]]
     ports, speed_ports, ports_map = switch._get_speed_ports()
@@ -102,8 +102,8 @@ def test_get_speed_ports_2(switch):
 
 
 def test_get_speed_ports_3(switch):
-    """
-    @brief  Test _get_speed_ports function if 'ports' and 'port_list' in config
+    """Test _get_speed_ports function if 'ports' and 'port_list' in config.
+
     """
     switch.config["ports"] = [5, 6, 7]
     switch.config["port_list"] = [[1, 10000], [2, 40000], [3, 2500]]
@@ -114,8 +114,8 @@ def test_get_speed_ports_3(switch):
 
 
 def test_get_speed_ports_4(switch):
-    """
-    @brief  Test _get_speed_ports function if 'ports_map' in config
+    """Test _get_speed_ports function if 'ports_map' in config.
+
     """
     switch.config["ports"] = [5, 6, 7]
     switch.config["port_list"] = [[1, 10000], [2, 40000], [3, 2500]]
@@ -127,8 +127,8 @@ def test_get_speed_ports_4(switch):
 
 
 def test_set_app_log_level_1(switch):
-    """
-    @brief  Test set_app_log_level function
+    """Test set_app_log_level function.
+
     """
     sw = switch.xmlproxy.nb.Applications.getTable()
     for row in sw:
@@ -144,8 +144,8 @@ def test_set_app_log_level_1(switch):
 
 
 def test_set_app_log_level_2(switch):
-    """
-    @brief  Test set_app_log_level function negative
+    """Test set_app_log_level function negative.
+
     """
     sw = switch.xmlproxy.nb.Applications.getTable()
     for row in sw:
@@ -158,8 +158,8 @@ def test_set_app_log_level_2(switch):
 
 
 def test_get_port_for_probe(switch):
-    """
-    @brief  Test _get_port_for_probe function
+    """Test _get_port_for_probe function.
+
     """
     use_tun = switch._use_sshtun
     ssh_port = switch._sshtun_port
@@ -174,15 +174,15 @@ def test_get_port_for_probe(switch):
 
 
 def test_check_app_table_1(switch):
-    """
-    @brief  Test check_app_table function
+    """Test check_app_table function.
+
     """
     assert switch.check_app_table() is True
 
 
 def test_check_app_table_2(switch):
-    """
-    @brief  Test check_app_table function negative
+    """Test check_app_table function negative.
+
     """
     apps = switch.fake_server.applications
     switch.fake_server.applications = [{'name': 'ONSApplicationServer', 'logLevel': 'test level', 'adminState': 'Run', 'appId': 1, 'operationalState': 'Stop'},
@@ -212,8 +212,8 @@ def test_check_app_table_2(switch):
 
 
 def test_check_app_table_3(switch):
-    """
-    @brief  Test check_app_table function negative
+    """Test check_app_table function negative.
+
     """
     apps = switch.fake_server.applications
     switch.fake_server.applications = [{'name': 'SimSwitchApp', 'logLevel': 'test level', 'adminState': 'Run', 'appId': 2, 'operationalState': 'Run'},
@@ -242,8 +242,8 @@ def test_check_app_table_3(switch):
 
 
 def test_probe_1(switch):
-    """
-    @brief  Test probe function negative
+    """Test probe function negative.
+
     """
     switch.ipaddr = '127.0.0.1'
     switch.port = 22
@@ -255,8 +255,8 @@ def test_probe_1(switch):
 
 
 def test_probe_2(switch):
-    """
-    @brief  Test probe function
+    """Test probe function.
+
     """
     switch.fake_server.server.register_function(switch.fake_server.platform_get_table, 'nb.Platform.getTable')
     switch.fake_server.server.register_function(switch.fake_server.ports_gettable, 'nb.Ports.getTable')
@@ -270,8 +270,8 @@ def test_probe_2(switch):
 
 
 def test_waiton_1(switch):
-    """
-    @brief  Test waiton function
+    """Test waiton function.
+
     """
     switch.ipaddr = '127.0.0.1'
     switch.port = 22
@@ -283,8 +283,8 @@ def test_waiton_1(switch):
 
 
 def test_waiton_2(switch):
-    """
-    @brief  Test waiton function negative
+    """Test waiton function negative.
+
     """
     apps = switch.fake_server.applications
     switch.fake_server.applications = [{'name': 'SimSwitchApp', 'logLevel': 'test level', 'adminState': 'Run', 'appId': 2, 'operationalState': 'Run'},
@@ -317,8 +317,8 @@ def test_waiton_2(switch):
 
 
 def test_waitoff_1(switch):
-    """
-    @brief  Test waitoff function
+    """Test waitoff function.
+
     """
     switch.ipaddr = '8.8.8.8'
     switch.port = 22
@@ -328,8 +328,8 @@ def test_waitoff_1(switch):
 
 
 def test_waitoff_2(switch):
-    """
-    @brief  Test waitoff function negative
+    """Test waitoff function negative.
+
     """
     switch.ipaddr = '127.0.0.1'
     switch.port = 22
@@ -339,88 +339,88 @@ def test_waitoff_2(switch):
 
 
 def test_clearconfig_1(switch):
-    """
-    @brief  Test clearconfig function negative
+    """Test clearconfig function negative.
+
     """
     with pytest.raises(Exception):
         switch.clearconfig()
 
 
 def test_clearconfig_2(switch):
-    """
-    @brief  Test clearconfig function
+    """Test clearconfig function.
+
     """
     switch.fake_server.server.register_function(switch.fake_server.clear_config, 'nb.clearConfig')
     switch.clearconfig()
 
 
 def test_getprop(switch):
-    """
-    @brief  Test getprop function
+    """Test getprop function.
+
     """
     name = switch.getprop('Ports', 'name', 1)
     assert name == switch.fake_server.ports[0]['name']
 
 
 def test_getprop_row(switch):
-    """
-    @brief  Test getprop_row function
+    """Test getprop_row function.
+
     """
     row = switch.getprop_row('Platform', 1)
     assert row == switch.fake_server.platform[0]
 
 
 def test_getprop_table(switch):
-    """
-    @brief  Test getprop_table function
+    """Test getprop_table function.
+
     """
     table = switch.getprop_table('Ports')
     assert table == switch.fake_server.ports
 
 
 def test_getprop_size(switch):
-    """
-    @brief  Test getprop_size function
+    """Test getprop_size function.
+
     """
     size = switch.getprop_size('Ports')
     assert size == len(switch.fake_server.ports)
 
 
 def test_getprop_table_info(switch):
-    """
-    @brief  Test getprop_table_info function
+    """Test getprop_table_info function.
+
     """
     info = switch.getprop_table_info('Ports')
     assert info == switch.fake_server.ports_info
 
 
 def test_getprop_field_info(switch):
-    """
-    @brief  Test getprop_field_info function
+    """Test getprop_field_info function.
+
     """
     info = switch.getprop_field_info('Ports', 'name')
     assert info == switch.fake_server.ports_name_info
 
 
 def test_getprop_method_help_1(switch):
-    """
-    @brief  Test getprop_method_help function
+    """Test getprop_method_help function.
+
     """
     info = switch.getprop_method_help('nb.Ports.getRow')
     assert info == switch.fake_server.ports_get_row_help
 
 
 def test_getprop_method_help_2(switch):
-    """
-    @brief  Test getprop_method_help function negative
+    """Test getprop_method_help function negative.
+
     """
     with pytest.raises(Exception):
         switch.getprop_method_help('nb.Ports.addRow')
 
 
 def test_setprop(switch):
-    """
-    @brief  Test setprop function
+    """Test setprop function.
+
     """
     sw = switch.xmlproxy.nb.Applications.getTable()
     assert sw[0]['logLevel'] == 'test level'
@@ -433,8 +433,8 @@ def test_setprop(switch):
 
 
 def test_setprop_row(switch):
-    """
-    @brief  Test setprop_row function
+    """Test setprop_row function.
+
     """
     size = switch.getprop_size('Ports')
     assert switch.setprop_row('Ports', [11, 'Up', 1, 'Physical', 'Down', 10000, 'xe10']) == 0
@@ -443,8 +443,8 @@ def test_setprop_row(switch):
 
 
 def test_delprop_row(switch):
-    """
-    @brief  Test delprop_row function
+    """Test delprop_row function.
+
     """
     size = switch.getprop_size('Ports')
     assert switch.delprop_row('Ports', 11) == 0
@@ -453,24 +453,24 @@ def test_delprop_row(switch):
 
 
 def test_findprop(switch):
-    """
-    @brief  Test findprop function
+    """Test findprop function.
+
     """
     row = switch.findprop('Applications', [1, 1, 'L2StpControlApp'])
     assert row == 22
 
 
 def test_existsprop(switch):
-    """
-    @brief  Test existsprop function
+    """Test existsprop function.
+
     """
     row = switch.existsprop('Applications', [1, 1, 'L2StpControlApp'])
     assert row == 22
 
 
 def test_multicall_1(switch):
-    """
-    @brief  Test multicall function
+    """Test multicall function.
+
     """
     calls = [{'methodName': 'nb.Vlans.addRow', 'params': [(10, 'Vlan_10'), (20, 'Vlan_20'), (30, 'Vlan_30'), (40, 'Vlan_40'), ]}, ]
     results = switch.multicall(calls)
@@ -478,8 +478,8 @@ def test_multicall_1(switch):
 
 
 def test_multicall_2(switch):
-    """
-    @brief  Test multicall function negative
+    """Test multicall function negative.
+
     """
     calls = [{'methodName1': 'nb.Vlans.addRow', 'params': [(10, 'Vlan_10'), (20, 'Vlan_20'), (30, 'Vlan_30'), (40, 'Vlan_40'), ]}, ]
     with pytest.raises(Exception):
@@ -487,8 +487,8 @@ def test_multicall_2(switch):
 
 
 def test_multicall_3(switch):
-    """
-    @brief  Test multicall function negative
+    """Test multicall function negative.
+
     """
     switch.fake_server.error_multicall = True
     _calls = [{'methodName': 'nb.Vlans.addRow', 'params': [(10, 'Vlan_10'), (20, 'Vlan_20'), (30, 'Vlan_30'), (40, 'Vlan_40'), ]}, ]

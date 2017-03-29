@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2017, Intel Corporation.
+# Copyright (c) 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``packet_constants.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Packet constants`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file packet_constants.py
-
-@summary Packet constants
 """
 
 # Constants for different packet fields
@@ -71,7 +71,7 @@ PACKET_DEFS = [
     ({"Ethernet": {"dst": BROADCAT_MAC, "src": "00:00:00:00:00:02"}}, {"IP": {"p": IP_PROTO_UDP}}, {"UDP": {}}),
     ({"Ethernet": {"dst": BROADCAT_MAC, "src": "00:00:00:00:00:03"}}, {"IP": {"p": IP_PROTO_ICMP}}, {"ICMP": {}}),
     ({"Ethernet": {"dst": BROADCAT_MAC, "src": "00:00:00:00:00:04"}}, {"IP": {}}, {"TCP": {}}),
-    ]
+]
 
 ARP = ({"Ethernet": {"src": SRC_MAC, "dst": DST_MAC, "type": ETHER_TYPE_ARP}},
        {"ARP": {"sha": SRC_MAC, "spa": "1.1.1.1", "tha": "00:00:00:00:00:00", "tpa": "1.1.1.2"}},

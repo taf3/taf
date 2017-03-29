@@ -1,23 +1,24 @@
 #!/usr/bin/env python
+# Copyright (c) 2015 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``test_iperf.py``
+
+`IPerfRunner Unittests`
+
 """
-@copyright Copyright (c) 2015-2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  test_iperf.py
-
-@summary  IPerfRunner Unittests
-"""
 from unittest.mock import MagicMock
 
 import pytest
@@ -306,8 +307,8 @@ class TestIperf(object):
 
     @classmethod
     def _parse_linux_cmd(cls, cmd_str, name=None):
-        """
-        Extract the command arguments from a linux command line string
+        """Extract the command arguments from a linux command line string.
+
         """
         # TODO employ regexp parsing instead of the str operations
         # remove first 4 words
@@ -337,7 +338,7 @@ class TestIperf(object):
 
     def test_iperf_runner_start_server_empty(self, runner):
         iperf_kwargs = {
-            'server': True
+            'server': True,
         }
         runner_kwargs = dict(iperf_kwargs)
 
@@ -351,7 +352,7 @@ class TestIperf(object):
             'bind': '192.168.1.10',
             'format': 'g',
             'interval': 1,
-            'udp': True
+            'udp': True,
         }
         runner_kwargs = dict(iperf_kwargs)
 
@@ -361,14 +362,14 @@ class TestIperf(object):
             'bind': '192.168.1.10',
             'format': 'g',
             'interval': 1,
-            'udp': None
+            'udp': None,
         }
         output_map = {
             'server': '--server',
             'bind': '--bind',
             'format': '--format',
             'interval': '--interval',
-            'udp': '--udp'
+            'udp': '--udp',
         }
 
         _expected_args_list = self._build_args_list(output_list, output_dict, output_map)
@@ -382,9 +383,9 @@ class TestIperf(object):
                 # 'bind': '192.168.1.10',
                 'format': 'g',
                 'interval': 1,
-                'udp': True
+                'udp': True,
             },
-            options=['--bind', '192.168.1.10']
+            options=['--bind', '192.168.1.10'],
         )
         runner_kwargs = dict(iperf_kwargs)
 
@@ -394,14 +395,14 @@ class TestIperf(object):
             'bind': '192.168.1.10',
             'format': 'g',
             'interval': 1,
-            'udp': None
+            'udp': None,
         }
         output_map = {
             'server': '--server',
             'bind': '--bind',
             'format': '--format',
             'interval': '--interval',
-            'udp': '--udp'
+            'udp': '--udp',
         }
 
         _expected_args_list = self._build_args_list(output_list, output_dict, output_map)
@@ -414,7 +415,7 @@ class TestIperf(object):
             'bind': '192.168.1.10',
             'format': 'g',
             'interval': 1,
-            'udp': True
+            'udp': True,
         }
         runner_kwargs = dict(command=iperf_cmd.CmdIperf(**iperf_cmd_kwargs))
 
@@ -424,14 +425,14 @@ class TestIperf(object):
             'bind': '192.168.1.10',
             'format': 'g',
             'interval': 1,
-            'udp': None
+            'udp': None,
         }
         output_map = {
             'server': '--server',
             'bind': '--bind',
             'format': '--format',
             'interval': '--interval',
-            'udp': '--udp'
+            'udp': '--udp',
         }
 
         _expected_args_list = self._build_args_list(output_list, output_dict, output_map)
@@ -444,7 +445,7 @@ class TestIperf(object):
             'bind': '192.168.2.20',
             'format': 'g',
             'interval': 10,
-            'udp': True
+            'udp': True,
         }
         iperf_kwargs = dict(
             iperf_cmd_kwargs,
@@ -452,7 +453,7 @@ class TestIperf(object):
                      '--interval', '100'],
             command=iperf_cmd.CmdIperf(server=True,
                                        interval=1000,
-                                       bind='192.168.2.2')
+                                       bind='192.168.2.2'),
         )
         runner_kwargs = dict(iperf_kwargs)
 
@@ -462,14 +463,14 @@ class TestIperf(object):
             'bind': '192.168.2.2',
             'format': 'k',
             'interval': 1000,
-            'udp': None
+            'udp': None,
         }
         output_map = {
             'server': '--server',
             'bind': '--bind',
             'format': '--format',
             'interval': '--interval',
-            'udp': '--udp'
+            'udp': '--udp',
         }
 
         _expected_args_list = self._build_args_list(output_list, output_dict, output_map)
@@ -478,7 +479,7 @@ class TestIperf(object):
 
     def test_iperf_runner_start_client_empty(self, runner):
         iperf_kwargs = {
-            'client': '192.168.1.11'
+            'client': '192.168.1.11',
         }
         runner_kwargs = dict(iperf_kwargs)
 
@@ -493,7 +494,7 @@ class TestIperf(object):
             'bind': '192.168.1.10',
             'format': 'k',
             'interval': 1,
-            'udp': True
+            'udp': True,
         }
         runner_kwargs = dict(iperf_kwargs)
 
@@ -504,7 +505,7 @@ class TestIperf(object):
             'bind': '192.168.1.10',
             'format': 'k',
             'interval': 1,
-            'udp': None
+            'udp': None,
         }
         output_map = {
             'client': '--client',
@@ -512,7 +513,7 @@ class TestIperf(object):
             'bind': '--bind',
             'format': '--format',
             'interval': '--interval',
-            'udp': '--udp'
+            'udp': '--udp',
         }
 
         _expected_args_list = self._build_args_list(output_list, output_dict, output_map)
@@ -527,7 +528,7 @@ class TestIperf(object):
             iperf_cmd_kwargs,
             options=['--udp',
                      '--format', 'k',
-                     '--bind', '192.168.1.10']
+                     '--bind', '192.168.1.10'],
         )
         runner_kwargs = dict(iperf_kwargs)
 
@@ -536,7 +537,7 @@ class TestIperf(object):
             'client': '192.168.1.11',
             'bind': '192.168.1.10',
             'format': 'k',
-            'udp': None
+            'udp': None,
         }
         output_map = {
             'client': '--client',
@@ -544,7 +545,7 @@ class TestIperf(object):
             'bind': '--bind',
             'format': '--format',
             'interval': '--interval',
-            'udp': '--udp'
+            'udp': '--udp',
         }
 
         _expected_args_list = self._build_args_list(output_list, output_dict, output_map)
@@ -559,10 +560,10 @@ class TestIperf(object):
             'bind': '192.168.1.10',
             'format': 'g',
             'interval': 1,
-            'udp': True
+            'udp': True,
         }
         runner_kwargs = dict(
-            command=iperf_cmd.CmdIperf(**iperf_cmd_kwargs)
+            command=iperf_cmd.CmdIperf(**iperf_cmd_kwargs),
         )
 
         output_list = ['client', 'parallel', 'time', 'bind', 'format', 'interval', 'udp']
@@ -573,7 +574,7 @@ class TestIperf(object):
             'bind': '192.168.1.10',
             'format': 'g',
             'interval': 1,
-            'udp': None
+            'udp': None,
         }
         output_map = {
             'client': '--client',
@@ -582,7 +583,7 @@ class TestIperf(object):
             'bind': '--bind',
             'format': '--format',
             'interval': '--interval',
-            'udp': '--udp'
+            'udp': '--udp',
         }
 
         _expected_args_list = self._build_args_list(output_list, output_dict, output_map)
@@ -603,7 +604,7 @@ class TestIperf(object):
 
     def test_iperf_runner_parse(self, runner):
         iperf_kwargs = {
-            'server': True
+            'server': True,
         }
         runner_kwargs = dict(iperf_kwargs)
         iperf_instance = runner.start(**runner_kwargs)
@@ -628,7 +629,7 @@ class TestIperf(object):
     def test_iperf_runner_parse_gbytes_format(self, runner):
         iperf_kwargs = {
             'server': True,
-            'format': 'G'
+            'format': 'G',
         }
         runner_kwargs = dict(iperf_kwargs)
         iperf_instance = runner.start(**runner_kwargs)

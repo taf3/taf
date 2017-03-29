@@ -1,24 +1,25 @@
 # coding=utf-8
 
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``test_ui_onpss_shell.py``
+
+`Unittests for UI ONPSS Shell`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file test_ui_onpss_shell.py
-
-@summary Unittests for UI ONPSS Shell.
-"""
 from unittest.mock import MagicMock
 
 import pytest
@@ -60,7 +61,7 @@ class OnpssRawOutput(object):
         '70: teamempty@NONE: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default \n',
         '    link/ether 1e:2f:f0:ed:f1:a1 brd ff:ff:ff:ff:ff:ff \n',
         '71: team2@NONE: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default \n',
-        '    link/ether 0a:e1:f0:b5:56:0a brd ff:ff:ff:ff:ff:ff \n'
+        '    link/ether 0a:e1:f0:b5:56:0a brd ff:ff:ff:ff:ff:ff \n',
     ]
 
     RAW_IPLINK_DETAIL_OUTPUT = (
@@ -265,6 +266,7 @@ class OnpssRawOutput(object):
         '2001::2000 dev sw0p6 lladdr 00:12:12:12:12:12 STALE\n'
     )
 
+
 @pytest.fixture
 def ui():
     return ui_onpss_shell.UiOnpssShell(MagicMock(**{"hw": type("SiliconFM10K", (object,), {})()}))
@@ -372,7 +374,7 @@ def test_get_table_lags(ui):
     assert table == [
         {'lagControlType': 'Static', 'lagId': 'team1', 'hashMode': 'None', 'name': 'team1', 'actorAdminLagKey': 0},
         {'lagControlType': 'Static', 'lagId': 'team2', 'hashMode': 'None', 'name': 'team2', 'actorAdminLagKey': 0},
-        {'lagControlType': 'Static', 'lagId': 1234, 'hashMode': 'None', 'name': 'lag1234', 'actorAdminLagKey': 0}
+        {'lagControlType': 'Static', 'lagId': 1234, 'hashMode': 'None', 'name': 'lag1234', 'actorAdminLagKey': 0},
     ]
 
 
@@ -387,7 +389,7 @@ def test_get_table_ports2lag(ui):
         {'actorPortPriority': 0, 'lagId': 'team1', 'portId': 5},
         {'actorPortPriority': 0, 'lagId': 'team1', 'portId': 6},
         {'actorPortPriority': 0, 'lagId': 'team2', 'portId': 7},
-        {'actorPortPriority': 0, 'lagId': 1234, 'portId': 8}
+        {'actorPortPriority': 0, 'lagId': 1234, 'portId': 8},
     ]
 
 
@@ -464,7 +466,7 @@ def test_get_table_fdb(ui):
         {'macAddress': '55:44:33:22:11:00', 'portId': 6, 'vlanId': 3, 'type': 'Static'},
         {'macAddress': '55:44:33:22:11:00', 'portId': 6, 'vlanId': 33, 'type': 'Static'},
         {'macAddress': '55:44:33:22:11:00', 'portId': 6, 'vlanId': 333, 'type': 'Dynamic'},
-        {'macAddress': '55:44:33:22:11:00', 'portId': 6, 'vlanId': 3333, 'type': 'Static'}
+        {'macAddress': '55:44:33:22:11:00', 'portId': 6, 'vlanId': 3333, 'type': 'Static'},
     ]
 
     table = ui.get_table_fdb('static')
@@ -475,14 +477,14 @@ def test_get_table_fdb(ui):
         {'macAddress': '00:11:22:33:44:55', 'portId': 5, 'vlanId': 2222},
         {'macAddress': '55:44:33:22:11:00', 'portId': 6, 'vlanId': 3},
         {'macAddress': '55:44:33:22:11:00', 'portId': 6, 'vlanId': 33},
-        {'macAddress': '55:44:33:22:11:00', 'portId': 6, 'vlanId': 3333}
+        {'macAddress': '55:44:33:22:11:00', 'portId': 6, 'vlanId': 3333},
     ]
 
     table = ui.get_table_fdb('dynamic')
 
     assert table == [
         {'macAddress': '00:11:22:33:44:55', 'portId': 5, 'vlanId': 222, 'type': 'Dynamic'},
-        {'macAddress': '55:44:33:22:11:00', 'portId': 6, 'vlanId': 333, 'type': 'Dynamic'}
+        {'macAddress': '55:44:33:22:11:00', 'portId': 6, 'vlanId': 333, 'type': 'Dynamic'},
     ]
 
 
@@ -556,11 +558,11 @@ def test_modify_vlan_ports_pvid(ui):
 
     call_list = [arg[0][0] for arg in ui.switch.ssh.exec_command.call_args_list]
     assert set(call_list) == set(['bridge vlan show',  # Get Ports2Vlans table
-                         'bridge vlan del vid 3 dev sw0p5 self ',  # Delete existing record for sw0p5
-                         'bridge vlan del vid 3 dev sw0p6 self ',  # Delete existing record for sw0p5
-                         'bridge vlan add vid 3 dev sw0p6 self pvid',  # Add new record for sw0p6 with old 'tagged' value
-                         'bridge vlan add vid 3 dev sw0p5 self pvid untagged',  # Add new record for sw0p5 with old 'tagged' value
-                         'bridge vlan add vid 3 dev sw0p12 self pvid'])  # Add new record for sw0p12
+                                  'bridge vlan del vid 3 dev sw0p5 self ',  # Delete existing record for sw0p5
+                                  'bridge vlan del vid 3 dev sw0p6 self ',  # Delete existing record for sw0p5
+                                  'bridge vlan add vid 3 dev sw0p6 self pvid',  # Add new record for sw0p6 with old 'tagged' value
+                                  'bridge vlan add vid 3 dev sw0p5 self pvid untagged',  # Add new record for sw0p5 with old 'tagged' value
+                                  'bridge vlan add vid 3 dev sw0p12 self pvid'])  # Add new record for sw0p12
 
 
 def test_modify_vlan_ports_tagged(ui):
@@ -573,11 +575,11 @@ def test_modify_vlan_ports_tagged(ui):
 
     call_list = [arg[0][0] for arg in ui.switch.ssh.exec_command.call_args_list]
     assert set(call_list) == set(['bridge vlan show',  # Get Ports2Vlans table
-                         'bridge vlan del vid 3333 dev sw0p5 self ',  # Delete existing record for sw0p5
-                         'bridge vlan del vid 3333 dev sw0p6 self ',  # Delete existing record for sw0p5
-                         'bridge vlan add vid 3333 dev sw0p5 self untagged',  # Add new record for sw0p5 with old 'pvid' value
-                         'bridge vlan add vid 3333 dev sw0p6 self pvid untagged',  # Add new record for sw0p6 with old 'pvid' value
-                         'bridge vlan add vid 3333 dev sw0p12 self untagged'])  # Add new record for sw0p12
+                                  'bridge vlan del vid 3333 dev sw0p5 self ',  # Delete existing record for sw0p5
+                                  'bridge vlan del vid 3333 dev sw0p6 self ',  # Delete existing record for sw0p5
+                                  'bridge vlan add vid 3333 dev sw0p5 self untagged',  # Add new record for sw0p5 with old 'pvid' value
+                                  'bridge vlan add vid 3333 dev sw0p6 self pvid untagged',  # Add new record for sw0p6 with old 'pvid' value
+                                  'bridge vlan add vid 3333 dev sw0p12 self untagged'])  # Add new record for sw0p12
 
 
 class TestGenerateVlanCommand(object):
@@ -600,7 +602,7 @@ class TestGenerateVlanCommand(object):
 
         assert result == [
             "bridge vlan add vid 0 dev p0 self Tagged",
-            "bridge vlan add vid 0 dev p1 self Tagged"
+            "bridge vlan add vid 0 dev p1 self Tagged",
         ]
 
     def test_generate_bridge_vlan_commands_add_singleport_multiplevlan(self):
@@ -615,7 +617,7 @@ class TestGenerateVlanCommand(object):
 
         result = self.ui._generate_bridge_vlan_commands("del", self. port_names[1:], [0])
         assert result == [
-            "bridge vlan del vid 0 dev p1 self "
+            "bridge vlan del vid 0 dev p1 self ",
         ]
 
     def test_generate_bridge_vlan_commands_del_multiport_multivlan(self):
@@ -642,7 +644,7 @@ def test_get_icmp_ping_result(ui):
         'lost': 0,
         'time': 4000,
         'time_stamp': '3812901',
-        'pattern': '0xff'
+        'pattern': '0xff',
     }
 
 
@@ -659,7 +661,7 @@ def test_get_table_arp(ui):
         {'ifName': 5, 'phyAddress': '00:AA:AA:AA:AA:12', 'netAddress': '10.20.30.40', 'type': 'None'},
         {'ifName': 6, 'phyAddress': '00:BB:BB:BB:BB:13', 'netAddress': '192.168.10.60', 'type': 'None'},
         {'ifName': 5, 'phyAddress': '00:BB:BB:BB:BB:AA', 'netAddress': '192.168.10.65', 'type': 'Static'},
-        {'ifName': 6, 'phyAddress': '00:12:12:12:12:12', 'netAddress': '2001::2000', 'type': 'None'}
+        {'ifName': 6, 'phyAddress': '00:12:12:12:12:12', 'netAddress': '2001::2000', 'type': 'None'},
     ]
 
 
@@ -790,7 +792,7 @@ class TestNetworkCtl(object):
                 'Type': 'ether', 'State': 'degraded (configured)',
                 'Path': 'pci-0000:00:1d.0-usb-0:1.7.1:1.0', 'Driver': 'asix',
                 'Vendor': 'ASIX Electronics Corp.', 'HW Address': '0:60:63:43:78:95',
-            }
+            },
         }
         assert d[port] == sample_1_good[port]
 
@@ -815,7 +817,7 @@ class TestNetworkCtl(object):
                 'HW Address': 'a0:36:9f:5c:ff:8e',
                 'MTU': '1500',
                 'Address': '192.168.1.1 fe80::a236:9fff:fe5c:ff8e',
-            }
+            },
         }
         assert d[port] == sample_2_good[port]
 

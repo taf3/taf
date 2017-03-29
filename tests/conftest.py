@@ -1,22 +1,22 @@
 #! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``conftest.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Global configuration for test suites``
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  conftest.py
-
-@summary  Global configuration for test suites.
 """
 
 import os
@@ -32,8 +32,8 @@ pytest_plugins = ["plugins.pytest_returnvalues", ]
 
 
 def pytest_addoption(parser):
-    """
-    @brief  TAF specific options
+    """TAF specific options.
+
     """
     parser.addoption("--env", action="store", default=None,
                      help="Testing environment, '%default' by default.")
@@ -66,8 +66,8 @@ def pytest_addoption(parser):
 
 
 def setup_scope():
-    """
-    @brief  Return setup_scope option value in global namespace.
+    """Return setup_scope option value in global namespace.
+
     """
     try:
         _setup_scope = filter(lambda x: x.startswith("--setup_scope"), sys.argv)[0].split("=")[1]
@@ -89,8 +89,8 @@ def pytest_configure(config):
 
 
 def _get_entries_list(item, step, action):
-    """
-    @brief  Returns list of entries which need the action to be applied on step (runtest_call/teardown).
+    """Returns list of entries which need the action to be applied on step (runtest_call/teardown).
+
     """
     entries_dict = {}
     entries_list = []

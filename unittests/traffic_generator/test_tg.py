@@ -1,22 +1,23 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``test_tg.py``
+
+`Traffic generator's unittests`
+
 """
-@copyright Copyright (c) 2011 - 2017, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file test_tg.py
-
-@summary Traffic generator's unittests.
-"""
 import time
 import copy
 import random
@@ -45,7 +46,9 @@ class TestTGs(object):
 
     @staticmethod
     def verify_packets_data(initial_packet_def, received_packet_def):
-        """ Check 2 packet definitions """
+        """Check 2 packet definitions.
+
+        """
 
         initial_packet_layers = [layer for p in initial_packet_def for layer in p]
         received_packet_layers = [layer for p in received_packet_def for layer in p]
@@ -65,7 +68,9 @@ class TestTGs(object):
                 "layer '{packet.layer}' is not found in received packet".format(packet=init_param)
 
     def test_stream(self, tg):
-        """ Verify that send stream send exact packets count. """
+        """Verify that send stream send exact packets count.
+
+        """
         iface = tg.ports[0]
         packet_count = 100
         src_mac = PACKET_DEFINITION[0]["Ethernet"]["src"]
@@ -80,7 +85,9 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
     def test_single_packet(self, tg):
-        """ Single packet """
+        """Single packet.
+
+        """
         time_stamp = time.time()
         stream_id = tg.set_stream(PACKET_DEFINITION, count=1, iface=tg.ports[0])
         print("Stream set time %2.6fs." % (time.time() - time_stamp))
@@ -90,7 +97,9 @@ class TestTGs(object):
         print("Packet send time %2.6fs." % (time.time() - time_stamp))
 
     def test_single_stream(self, tg):
-        """ Single stream """
+        """Single stream.
+
+        """
         stream_id = tg.set_stream(PACKET_DEFINITION, count=5, inter=1, iface=tg.ports[0], adjust_size=True)
         time_stamp = time.time()
         tg.start_streams([stream_id])
@@ -98,7 +107,9 @@ class TestTGs(object):
         tg.stop_streams([stream_id])
 
     def test_multistreams_and_multifaces(self, tg):
-        """ Multiple streams and multiple ifaces """
+        """Multiple streams and multiple ifaces.
+
+        """
         stream_list = []
         for packet_definition, port in zip(PACKET_DEFS, tg.ports):
             stream_id = tg.set_stream(packet_definition, count=25, inter=0.5, iface=port, adjust_size=True)
@@ -110,7 +121,9 @@ class TestTGs(object):
         tg.stop_streams(stream_list)
 
     def test_multistreams_on_single_iface(self, tg):
-        """ Multiple streams and one iface """
+        """Multiple streams and one iface.
+
+        """
         stream_list = []
         for packet_definition in PACKET_DEFS:
             stream_id = tg.set_stream(packet_definition, count=25, inter=0.5, iface=tg.ports[0], adjust_size=True)
@@ -122,7 +135,9 @@ class TestTGs(object):
         tg.stop_streams(stream_list)
 
     def test_multistreams_and_one(self, tg):
-        """ Multiple streams and one on same iface """
+        """Multiple streams and one on same iface.
+
+        """
         stream_list = []
         for packet_definition in PACKET_DEFS[:2]:
             stream_id = tg.set_stream(packet_definition, count=3, inter=2, iface=tg.ports[0], adjust_size=True)
@@ -135,7 +150,9 @@ class TestTGs(object):
         tg.send_stream(stream_id)
 
     def test_exact_packets_delivery(self, tg):
-        """ Verify that send stream send exact packets count. """
+        """Verify that send stream send exact packets count.
+
+        """
         iface = tg.ports[0]
         packet_count = 1000
         src_mac = PACKET_DEFINITION[0]["Ethernet"]["src"]
@@ -150,7 +167,9 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
     def test_start_stop_parallel_and_independent_set_quantity_streams(self, tg):
-        """ Verify parallel and independent set quantity of streams. """
+        """Verify parallel and independent set quantity of streams.
+
+        """
         iface = tg.ports[0]
         packet_count = 11
         stream_id_1 = tg.set_stream(PACKET_DEFS[0], count=packet_count - 1, iface=iface)
@@ -165,7 +184,9 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
     def test_start_stop_parallel_and_independent_continuous_streams(self, tg):
-        """ Verify parallel and independent streams starts and stops"""
+        """Verify parallel and independent streams starts and stops.
+
+        """
         iface = tg.ports[0]
         # Packet count per stream equals 1 by default
         expected_count = 2
@@ -183,7 +204,9 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), expected_count)
 
     def test_streams_corruption_1(self, tg):
-        """ Verify that set_stream does not corrupt already started streams. """
+        """Verify that set_stream does not corrupt already started streams.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id_1 = tg.set_stream(PACKET_DEFS[0], count=packet_count, inter=0.1, iface=iface)
@@ -199,7 +222,9 @@ class TestTGs(object):
             assert tg.get_packet_field(packet, "Ethernet", "src") != PACKET_DEFS[1][0]['Ethernet']['src']
 
     def test_streams_corruption_2(self, tg):
-        """ Verify that set_stream does not corrupt already started streams. """
+        """Verify that set_stream does not corrupt already started streams.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id_1 = tg.set_stream(PACKET_DEFS[0], count=packet_count, inter=1, iface=iface)
@@ -215,7 +240,9 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
     def test_stop_all_streams(self, tg):
-        """ Verify that stop_streams stop all streams by default. """
+        """Verify that stop_streams stop all streams by default.
+
+        """
         iface = tg.ports[0]
         stream_id_1 = tg.set_stream(PACKET_DEFS[0], count=10, inter=1, iface=iface)
         stream_id_2 = tg.set_stream(PACKET_DEFS[1], count=10, inter=1, iface=iface)
@@ -227,7 +254,9 @@ class TestTGs(object):
         assert data[iface] == []
 
     def test_arp_sniff_pattern(self, tg):
-        """ Verify ARP sniff pattern """
+        """Verify ARP sniff pattern.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(PACKET_DEFINITION, count=1, iface=iface)
@@ -243,7 +272,9 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
     def test_sniffing_negative(self, tg):
-        """ Sniff for one packet, but sniff nothing """
+        """Sniff for one packet, but sniff nothing.
+
+        """
         iface = tg.ports[0]
         stream_id = tg.set_stream(DOT1Q_ARP, count=5, inter=0.02, iface=iface)
         tg.start_sniff([iface], sniffing_time=3, packets_count=1, filter_layer="ARP")
@@ -254,7 +285,9 @@ class TestTGs(object):
         assert data[iface] == []
 
     def test_qinq_packets_sniffer(self, tg):
-        """ Check QinQ packet send """
+        """Check QinQ packet send.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(QINQ, count=packet_count, iface=iface)
@@ -271,7 +304,9 @@ class TestTGs(object):
         self.verify_packets_data(QINQ, received)
 
     def test_check_statistics(self, tg):
-        """ Send 100 packets and check statistics"""
+        """Send 100 packets and check statistics.
+
+        """
         iface = tg.ports[0]
         src_mac = PACKET_DEFINITION[0]["Ethernet"]["src"]
         stream_id_1 = tg.set_stream(PACKET_DEFINITION, count=100, iface=iface)
@@ -287,7 +322,9 @@ class TestTGs(object):
         assert end_sent_statistics == 100
 
     def test_incremented_streams(self, tg):
-        """ Send incremented streams """
+        """Send incremented streams.
+
+        """
         iface = tg.ports[0]
 
         packet1 = ({"Ethernet": {'src': "00:00:00:00:00:04", 'dst': "00:00:00:00:00:02"}}, {"IP": {}})
@@ -458,7 +495,9 @@ class TestTGs(object):
         assert end_sent_statistics > middle_sent_statistics
 
     def test_packet_fragmentation(self, tg):
-        """ Check packet fragmentation """
+        """Check packet fragmentation.
+
+        """
         ix_iface = tg.ports[0]
         packet_count = 2
         stream_id = tg.set_stream(ETH_IP_ICMP, count=1, iface=ix_iface, required_size=200, fragsize=110)
@@ -471,7 +510,9 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
     def test_sa_incrementation_1(self, tg):
-        """ Check SA incrementation. Count == Increment count """
+        """Check SA incrementation. Count == Increment count.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, sa_increment=(1, 5), iface=iface)
@@ -487,7 +528,9 @@ class TestTGs(object):
         assert len(src_mac_set) == packet_count
 
     def test_sa_incrementation_2(self, tg):
-        """ Check SA incrementation.  Count > Increment count """
+        """Check SA incrementation.  Count > Increment count.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, sa_increment=(1, 5), iface=iface)
@@ -503,7 +546,9 @@ class TestTGs(object):
         assert len(src_mac_set) == packet_count // 2
 
     def test_da_incrementation_1(self, tg):
-        """ Check DA incrementation. Count == Increment count """
+        """Check DA incrementation. Count == Increment count.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, da_increment=(1, 5), iface=iface)
@@ -519,7 +564,9 @@ class TestTGs(object):
         assert len(dst_mac_set) == packet_count
 
     def test_da_incrementation_2(self, tg):
-        """ Check DA incrementation.  Count > Increment count """
+        """Check DA incrementation.  Count > Increment count.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, da_increment=(1, 5), iface=iface)
@@ -535,7 +582,9 @@ class TestTGs(object):
         assert len(dst_mac_set) == packet_count // 2
 
     def test_sa_incrementation_and_packet_fragmentation(self, tg):
-        """ Check SA incrementation + packet fragmentation. Count == Increment count """
+        """Check SA incrementation + packet fragmentation. Count == Increment count.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_ICMP, iface=iface,
@@ -554,7 +603,9 @@ class TestTGs(object):
         assert len(src_mac_set) == 5
 
     def test_packet_random_size_1(self, tg):
-        """ Check packet random size setting. Count=1 """
+        """Check packet random size setting. Count=1.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(ETH_IP_ICMP, iface=iface,
@@ -571,7 +622,9 @@ class TestTGs(object):
         assert 100 <= packet_length <= 1500
 
     def test_packet_random_size_2(self, tg):
-        """ Check packet random size setting. Count=5 """
+        """Check packet random size setting. Count=5.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_ICMP, iface=iface,
@@ -588,7 +641,9 @@ class TestTGs(object):
         assert all([1000 <= size <= 1500 for size in size_set])
 
     def test_packet_size_incrementing_1(self, tg):
-        """ Check packet size incrementing. Count=1, increment count=5 """
+        """Check packet size incrementing. Count=1, increment count=5.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         start_size = 70
@@ -604,7 +659,9 @@ class TestTGs(object):
         assert len(packets[0]) == start_size
 
     def test_packet_size_incrementing_2(self, tg):
-        """ Check packet size incrementing. Count=5, increment count=5 """
+        """Check packet size incrementing. Count=5, increment count=5.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         strat_size = 70
@@ -627,7 +684,9 @@ class TestTGs(object):
         assert size_set == expected_size_set
 
     def test_packet_size_decrementing(self, tg):
-        """ Check packet size decrementing. Count=9, decrement count=9 """
+        """Check packet size decrementing. Count=9, decrement count=9.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         start_size = 70
@@ -651,7 +710,9 @@ class TestTGs(object):
         assert sorted(size_set) == expected_size_set
 
     def test_src_ip_incrementation_dot1q_disabled_1(self, tg):
-        """ Check source_ip incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check source_ip incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, sip_increment=(3, 5), iface=iface)
@@ -667,7 +728,9 @@ class TestTGs(object):
         assert len(src_ip_set) == packet_count
 
     def test_src_ip_incrementation_dot1q_disabled_2(self, tg):
-        """ Check source_ip incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check source_ip incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, sip_increment=(3, 5), iface=iface)
@@ -683,7 +746,9 @@ class TestTGs(object):
         assert len(src_ip_set) == packet_count // 2
 
     def test_src_ip_incrementation_dot1q_enabled_1(self, tg):
-        """ Check source_ip incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check source_ip incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, sip_increment=(2, 5), iface=iface)
@@ -699,7 +764,9 @@ class TestTGs(object):
         assert len(src_ip_set) == packet_count
 
     def test_src_ip_incrementation_dot1q_enabled_2(self, tg):
-        """ Check source_ip incrementation. Count = 2*Increment count. Dot1Q enabled. """
+        """Check source_ip incrementation. Count = 2*Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, sip_increment=(2, 5), iface=iface)
@@ -715,7 +782,9 @@ class TestTGs(object):
         assert len(src_ip_set) == packet_count
 
     def test_dst_ip_incrementation_dot1q_disabled_1(self, tg):
-        """ Check destination_ip incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check destination_ip incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, dip_increment=(3, 5), iface=iface)
@@ -731,7 +800,9 @@ class TestTGs(object):
         assert len(dst_ip_set) == packet_count
 
     def test_dst_ip_incrementation_dot1q_disabled_2(self, tg):
-        """ Check destination_ip incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check destination_ip incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, dip_increment=(3, 5), iface=iface)
@@ -747,7 +818,9 @@ class TestTGs(object):
         assert len(dst_ip_set) == packet_count // 2
 
     def test_dst_ip_incrementation_dot1q_enabled_1(self, tg):
-        """ Check destination_ip incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check destination_ip incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, dip_increment=(2, 5), iface=iface)
@@ -763,7 +836,9 @@ class TestTGs(object):
         assert len(dst_ip_set) == packet_count
 
     def test_dst_ip_incrementation_dot1q_enabled_2(self, tg):
-        """ Check destination_ip incrementation. Count = 2*Increment count. Dot1Q enabled. """
+        """Check destination_ip incrementation. Count = 2*Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, dip_increment=(2, 5), iface=iface)
@@ -779,7 +854,9 @@ class TestTGs(object):
         assert len(dst_ip_set) == packet_count // 2
 
     def test_clear_and_check_statistics(self, tg):
-        """ Send 100 packets, clear and check statistics """
+        """Send 100 packets, clear and check statistics.
+
+        """
         iface = tg.ports[0]
         packet_count = 100
         src_mac = PACKET_DEFINITION[0]["Ethernet"]["src"]
@@ -806,7 +883,9 @@ class TestTGs(object):
         assert end_sent_statistics == 0
 
     def test_arp_incrementation_dot1q_disabled_1(self, tg):
-        """ Check arp incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check arp incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ARP, count=packet_count, arp_sa_increment=(3, 5), arp_sip_increment=(3, 5), iface=iface)
@@ -826,7 +905,9 @@ class TestTGs(object):
         assert len(hwsrc_set) == packet_count
 
     def test_arp_incrementation_dot1q_enabled(self, tg):
-        """ Check arp incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check arp incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_ARP, count=packet_count, arp_sa_increment=(3, 5),
@@ -847,7 +928,9 @@ class TestTGs(object):
         assert len(hwsrc_set) == packet_count
 
     def test_arp_incrementation_dot1q_disabled_2(self, tg):
-        """ Check arp incrementation. Count == 2*Increment count. Dot1Q disabled. """
+        """Check arp incrementation. Count == 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ARP, count=packet_count, arp_sa_increment=(3, 5),
@@ -868,7 +951,9 @@ class TestTGs(object):
         assert len(hwsrc_set) == packet_count // 2
 
     def test_vlan_incrementation_increment_count_1(self, tg):
-        """ Check vlan incrementation. Count == Increment count. """
+        """Check vlan incrementation. Count == Increment count.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_TCP, count=packet_count, vlan_increment=(3, 5), iface=iface)
@@ -885,7 +970,9 @@ class TestTGs(object):
         assert len(vlan_set) == packet_count
 
     def test_vlan_incrementation_increment_count_2(self, tg):
-        """ Check vlan incrementation. Count == 2*Increment count. """
+        """Check vlan incrementation. Count == 2*Increment count.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(DOT1Q_IP_TCP, count=packet_count, vlan_increment=(3, 5), iface=iface)
@@ -901,7 +988,9 @@ class TestTGs(object):
         assert len(vlan_set) == packet_count // 2
 
     def test_da_incrementation_continuous_traffic(self, tg):
-        """ Check DA incrementation.  Continuous traffic """
+        """Check DA incrementation.  Continuous traffic.
+
+        """
         iface = tg.ports[0]
         start_mac_val = 1
         end_mac_val = 5
@@ -921,7 +1010,9 @@ class TestTGs(object):
         assert len(dst_mac_set) == min_packet_count
 
     def test_sniffed_packets_timestamp(self, tg):
-        """ Check sniffed packets timestamp. """
+        """Check sniffed packets timestamp.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, inter=0.5, iface=iface)
@@ -937,7 +1028,9 @@ class TestTGs(object):
         assert len(time_set) == packet_count
 
     def test_srcmac_filter(self, tg):
-        """ Check srcMac filter. """
+        """Check srcMac filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sa_increment=(1, 2), iface=iface)
@@ -954,7 +1047,9 @@ class TestTGs(object):
         assert len(src_set) == 1
 
     def test_dstmac_filter(self, tg):
-        """ Check dstMac filter. """
+        """Check dstMac filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, da_increment=(1, 2), iface=iface)
@@ -971,7 +1066,9 @@ class TestTGs(object):
         assert len(dst_set) == 1
 
     def test_srcmac_and_dstmac_filter(self, tg):
-        """ Check srcMac and dstMac filter. """
+        """Check srcMac and dstMac filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sa_increment=(1, 2), da_increment=(1, 2), iface=iface)
@@ -990,7 +1087,9 @@ class TestTGs(object):
         assert len(src_set) == 1
 
     def test_srcmac_and_dstmac_wrong_layer_filter(self, tg):
-        """ Check srcMac and dstMac filter with wrong filter_layer. """
+        """Check srcMac and dstMac filter with wrong filter_layer.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sa_increment=(1, 2), da_increment=(1, 2), iface=iface)
@@ -1006,7 +1105,9 @@ class TestTGs(object):
 
     @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_incrementation_increment_count_1(self, tg):
-        """ Check lldp incrementation. Count == Increment count """
+        """Check lldp incrementation. Count == Increment count.
+
+        """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(LLDP, count=5, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
@@ -1032,7 +1133,9 @@ class TestTGs(object):
 
     @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_incrementation_increment_count_2(self, tg):
-        """ Check lldp incrementation. Count == 2*Increment count """
+        """Check lldp incrementation. Count == 2*Increment count.
+
+        """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(LLDP, count=10, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
@@ -1058,7 +1161,9 @@ class TestTGs(object):
 
     @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_incrementation_continuous_traffic_1(self, tg):
-        """ Check lldp incrementation. Continuous traffic """
+        """Check lldp incrementation. Continuous traffic.
+
+        """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(LLDP, continuous=True, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
@@ -1086,7 +1191,9 @@ class TestTGs(object):
 
     @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_incrementation_continuous_traffic_2(self, tg):
-        """ Check lldp incrementation. Continuous traffic """
+        """Check lldp incrementation. Continuous traffic.
+
+        """
         iface = tg.ports[0]
 
         stream_id = tg.set_stream(LLDP, continuous=True, sa_increment=(1, 0), lldp_sa_increment=(1, 0), iface=iface)
@@ -1113,7 +1220,9 @@ class TestTGs(object):
         assert len(lldp_set) >= 20
 
     def test_src_udp_incrementation_dot1q_disabled_1(self, tg):
-        """ Check source_udp incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check source_udp incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sudp_increment=(3, 5), iface=iface)
@@ -1129,7 +1238,9 @@ class TestTGs(object):
         assert len(src_udp_set) == packet_count
 
     def test_src_tcp_incrementation_dot1q_disabled_1(self, tg):
-        """ Check source_tcp incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check source_tcp incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_TCP, count=packet_count, stcp_increment=(3, 5), iface=iface)
@@ -1145,7 +1256,9 @@ class TestTGs(object):
         assert len(src_tcp_set) == packet_count
 
     def test_src_udp_incrementation_dot1q_disabled_2(self, tg):
-        """ Check source_udp incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check source_udp incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sudp_increment=(3, 5), iface=iface)
@@ -1162,7 +1275,9 @@ class TestTGs(object):
         assert len(src_udp_set) == packet_count // 2
 
     def test_src_tcp_incrementation_dot1q_disabled_2(self, tg):
-        """ Check source_tcp incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check source_tcp incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_TCP, count=packet_count, stcp_increment=(3, 5), iface=iface)
@@ -1178,7 +1293,9 @@ class TestTGs(object):
         assert len(src_tcp_set) == packet_count // 2
 
     def test_src_udp_incrementation_dot1q_enabled(self, tg):
-        """ Check source_udp incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check source_udp incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, sudp_increment=(3, 5), iface=iface)
@@ -1194,7 +1311,9 @@ class TestTGs(object):
         assert len(src_udp_set) == packet_count
 
     def test_src_tcp_incrementation_dot1q_enabled(self, tg):
-        """ Check source_tcp incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check source_tcp incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_TCP, count=packet_count, stcp_increment=(3, 5), iface=iface)
@@ -1210,7 +1329,9 @@ class TestTGs(object):
         assert len(src_tcp_set) == packet_count
 
     def test_dst_udp_incrementation_dot1q_disabled_1(self, tg):
-        """ Check destination_udp incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check destination_udp incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, dudp_increment=(3, 5), iface=iface)
@@ -1226,7 +1347,9 @@ class TestTGs(object):
         assert len(dst_udp_set) == packet_count
 
     def test_dst_udp_incrementation_dot1q_disabled_2(self, tg):
-        """ Check destination_udp incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check destination_udp incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, dudp_increment=(3, 5), iface=iface)
@@ -1242,7 +1365,9 @@ class TestTGs(object):
         assert len(dst_udp_set) == packet_count // 2
 
     def test_dst_udp_incrementation_dot1q_enabled(self, tg):
-        """ Check destination_udp incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check destination_udp incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, dudp_increment=(3, 5), iface=iface)
@@ -1259,7 +1384,9 @@ class TestTGs(object):
         assert len(dst_udp_set) == packet_count
 
     def test_src_udp_and_dst_udp_incrementation_dot1q_disabled_1(self, tg):
-        """ Check source_udp and destination_udp incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check source_udp and destination_udp incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sudp_increment=(3, 5), dudp_increment=(3, 5), iface=iface)
@@ -1277,7 +1404,9 @@ class TestTGs(object):
         assert len(src_udp_set) == packet_count
 
     def test_src_tcp_and_dst_tcp_incrementation_dot1q_disabled_1(self, tg):
-        """ Check source_tcp and destination_tcp incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check source_tcp and destination_tcp incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_TCP, count=packet_count, stcp_increment=(3, 5),
@@ -1296,7 +1425,9 @@ class TestTGs(object):
         assert len(src_tcp_set) == packet_count
 
     def test_src_udp_and_dst_udp_incrementation_dot1q_disabled_2(self, tg):
-        """ Check source_udp and destination_udp incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check source_udp and destination_udp incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sudp_increment=(3, 5), dudp_increment=(3, 5), iface=iface)
@@ -1315,7 +1446,9 @@ class TestTGs(object):
         assert len(src_udp_set) == packet_count // 2
 
     def test_src_tcp_and_dst_tcp_incrementation_dot1q_disabled_2(self, tg):
-        """ Check source_tcp and destination_tcp incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check source_tcp and destination_tcp incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_TCP, count=packet_count, stcp_increment=(3, 5), dtcp_increment=(3, 5), iface=iface)
@@ -1333,7 +1466,9 @@ class TestTGs(object):
         assert len(src_tcp_set) == packet_count // 2
 
     def test_src_udp_and_dst_udp_incrementation_dot1q_enabled(self, tg):
-        """ Check source_udp and destination_udp incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check source_udp and destination_udp incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, sudp_increment=(3, 5), dudp_increment=(3, 5), iface=iface)
@@ -1351,7 +1486,9 @@ class TestTGs(object):
         assert len(src_udp_set) == packet_count
 
     def test_src_tcp_and_dst_tcp_incrementation_dot1q_enabled(self, tg):
-        """ Check source_tcp and destination_tcp incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check source_tcp and destination_tcp incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_TCP, count=packet_count, stcp_increment=(3, 5), dtcp_increment=(3, 5), iface=iface)
@@ -1369,7 +1506,9 @@ class TestTGs(object):
         assert len(src_tcp_set) == packet_count
 
     def test_ip_protocol_incrementation_dot1q_disabled(self, tg):
-        """ Check ip protocol incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check ip protocol incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, protocol_increment=(3, 5), iface=iface)
@@ -1385,7 +1524,9 @@ class TestTGs(object):
         assert len(proto_ip_set) == packet_count
 
     def test_ip_protocol_incrementation_dot1q_disabled_2(self, tg):
-        """ Check ip protocol incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check ip protocol incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, protocol_increment=(3, 5), iface=iface)
@@ -1401,7 +1542,9 @@ class TestTGs(object):
         assert len(proto_ip_set) == packet_count // 2
 
     def test_ip_protocol_incrementation_dot1q_enabled(self, tg):
-        """ Check destination_udp incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check destination_udp incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, protocol_increment=(3, 5), iface=iface)
@@ -1417,7 +1560,9 @@ class TestTGs(object):
         assert len(proto_ip_set) == packet_count
 
     def test_ip_protocol_and_sip_increment_dot1q_disabled(self, tg):
-        """ Check ip protocol and sip_increment incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check ip protocol and sip_increment incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sip_increment=(3, 5), protocol_increment=(3, 5), iface=iface)
@@ -1435,7 +1580,9 @@ class TestTGs(object):
         assert len(src_ip_set) == packet_count // 2
 
     def test_ip_protocol_and_sip_increment_dot1q_enabled(self, tg):
-        """ Check ip protocol and sip_increment incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check ip protocol and sip_increment incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, sip_increment=(3, 5), protocol_increment=(3, 5), iface=iface)
@@ -1453,7 +1600,9 @@ class TestTGs(object):
         assert len(src_ip_set) == packet_count
 
     def test_ether_incrementation_dot1q_disabled_1(self, tg):
-        """ Check ether type incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check ether type incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, eth_type_increment=(3, 5), iface=iface)
@@ -1469,7 +1618,9 @@ class TestTGs(object):
         assert len(eth_type_set) == packet_count
 
     def test_ether_incrementation_dot1q_disabled_2(self, tg):
-        """ Check ip protocol incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check ip protocol incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, eth_type_increment=(3, 5), iface=iface)
@@ -1485,7 +1636,9 @@ class TestTGs(object):
         assert len(eth_type_set) == packet_count // 2
 
     def test_dscp_incrementation_dot1q_disabled_1(self, tg):
-        """ Check dscp incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check dscp incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, dscp_increment=(3, 5), iface=iface)
@@ -1501,7 +1654,9 @@ class TestTGs(object):
         assert len(dscp_set) == packet_count
 
     def test_dscp_incrementation_dot1q_disabled_2(self, tg):
-        """ Check dscp incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check dscp incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, dscp_increment=(3, 5), iface=iface)
@@ -1517,7 +1672,9 @@ class TestTGs(object):
         assert len(dscp_set) == packet_count // 2
 
     def test_ip_dscp_incrementation_dot1q_enabled(self, tg):
-        """ Check ip dscp incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check ip dscp incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, dscp_increment=(3, 5), iface=iface)
@@ -1533,7 +1690,9 @@ class TestTGs(object):
         assert len(dscp_set) == packet_count
 
     def test_ip_dscp_and_sip_increment_dot1q_disabled_1(self, tg):
-        """ Check ip dscp and sip_increment incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check ip dscp and sip_increment incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sip_increment=(3, 5), dscp_increment=(3, 5), iface=iface)
@@ -1551,7 +1710,9 @@ class TestTGs(object):
         assert len(src_ip_set) == packet_count
 
     def test_ip_dscp_and_sip_increment_dot1q_disabled_2(self, tg):
-        """ Check ip dscp and sip_increment incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check ip dscp and sip_increment incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sip_increment=(3, 15), dip_increment=(3, 10),
@@ -1574,7 +1735,9 @@ class TestTGs(object):
         assert len(proto_ip_set) == packet_count
 
     def test_ip_dip_and_sip_increment_udf_dependant(self, tg):
-        """ Check ip dip and sip_increment incrementation. Dip increment dependant from sip increment. """
+        """Check ip dip and sip_increment incrementation. Dip increment dependant from sip increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 18
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sip_increment=(3, 3), dip_increment=(3, 3),
@@ -1597,7 +1760,9 @@ class TestTGs(object):
         assert len(packet_set) == 9
 
     def test_ip_dscp_dip_sip_increment_udf_dependant(self, tg):
-        """ Check ip dscp, dip and sip_increment incrementation. Dependant increments. """
+        """Check ip dscp, dip and sip_increment incrementation. Dependant increments.
+
+        """
         iface = tg.ports[0]
         packet_count = 54
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sip_increment=(3, 3),
@@ -1621,7 +1786,9 @@ class TestTGs(object):
         assert len(packet_set) == 27
 
     def test_ip_dscp_dip_sip_increment_udf_one_dependant(self, tg):
-        """ Check ip dscp, dip and sip_increment incrementation. Dependant increments form sip. """
+        """Check ip dscp, dip and sip_increment incrementation. Dependant increments form sip.
+
+        """
         iface = tg.ports[0]
         packet_count = 54
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sip_increment=(3, 3),
@@ -1645,7 +1812,9 @@ class TestTGs(object):
         assert len(packet_set) == 9
 
     def test_src_ipv6_incrementation_dot1q_disabled_1(self, tg):
-        """ Check SRC IPv6 incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check SRC IPv6 incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(IP6, count=packet_count, sipv6_increment=(3, 5), iface=iface)
@@ -1661,7 +1830,9 @@ class TestTGs(object):
         assert len(sipv6_set) == packet_count
 
     def test_src_ipv6_incrementation_dot1q_disabled_2(self, tg):
-        """ Check SRC IPv6 incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check SRC IPv6 incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(IP6, count=packet_count, sipv6_increment=(3, 5), iface=iface)
@@ -1677,7 +1848,9 @@ class TestTGs(object):
         assert len(sipv6_set) == packet_count // 2
 
     def test_src_ipv6_incrementation_dot1q_enabled_1(self, tg):
-        """ Check SRC IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check SRC IPv6 incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, sipv6_increment=(3, 5), iface=iface)
@@ -1693,7 +1866,9 @@ class TestTGs(object):
         assert len(sipv6_set) == packet_count
 
     def test_src_ipv6_incrementation_dot1q_enabled_2(self, tg):
-        """ Check SRC IPv6 incrementation. Count > Increment count. Dot1Q enabled. """
+        """Check SRC IPv6 incrementation. Count > Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, sipv6_increment=(3, 5), iface=iface)
@@ -1709,7 +1884,9 @@ class TestTGs(object):
         assert len(sipv6_set) == packet_count // 2
 
     def test_src_and_dst_ipv6_incrementation_dot1q_disabled(self, tg):
-        """ Check SRC and DST IPv6 incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check SRC and DST IPv6 incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(IP6, count=packet_count, sipv6_increment=(3, 5),
@@ -1728,7 +1905,9 @@ class TestTGs(object):
         assert len(dipv6_set) == packet_count
 
     def test_src_and_dst_ipv6_incrementation_dot1q_enabled(self, tg):
-        """ Check SRC and DST IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check SRC and DST IPv6 incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, sipv6_increment=(3, 5), dipv6_increment=(3, 5), iface=iface)
@@ -1746,7 +1925,9 @@ class TestTGs(object):
         assert len(dipv6_set) == packet_count
 
     def test_dst_ipv6_incrementation_dot1q_disabled_1(self, tg):
-        """ Check DST IPv6 incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check DST IPv6 incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(IP6, count=packet_count, dipv6_increment=(3, 5), iface=iface)
@@ -1762,7 +1943,9 @@ class TestTGs(object):
         assert len(dipv6_set) == packet_count
 
     def test_dst_ipv6_incrementation_dot1q_disabled_2(self, tg):
-        """ Check DST IPv6 incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check DST IPv6 incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(IP6, count=packet_count, dipv6_increment=(3, 5), iface=iface)
@@ -1778,7 +1961,9 @@ class TestTGs(object):
         assert len(dipv6_set) == packet_count // 2
 
     def test_dst_ipv6_incrementation_dot1q_enabled_1(self, tg):
-        """ Check DST IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check DST IPv6 incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, dipv6_increment=(3, 5), iface=iface)
@@ -1794,7 +1979,9 @@ class TestTGs(object):
         assert len(dipv6_set) == packet_count
 
     def test_dst_ipv6_incrementation_dot1q_enabled_2(self, tg):
-        """ Check DST IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check DST IPv6 incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, dipv6_increment=(3, 5), iface=iface)
@@ -1810,7 +1997,9 @@ class TestTGs(object):
         assert len(dipv6_set) == packet_count // 2
 
     def test_flow_label_ipv6_incrementation_dot1q_disabled_1(self, tg):
-        """ Check Flow Label IPv6 incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check Flow Label IPv6 incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(IP6, count=packet_count, fl_increment=(3, 5), iface=iface)
@@ -1826,7 +2015,9 @@ class TestTGs(object):
         assert len(fl_set) == packet_count
 
     def test_flow_label_ipv6_incrementation_dot1q_disabled_2(self, tg):
-        """ Check Flow Label incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check Flow Label incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(IP6, count=packet_count, fl_increment=(3, 5), iface=iface)
@@ -1842,7 +2033,9 @@ class TestTGs(object):
         assert len(fl_set) == packet_count // 2
 
     def test_flow_label_ipv6_incrementation_dot1q_enabled(self, tg):
-        """ Check Flow Label IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check Flow Label IPv6 incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, fl_increment=(3, 5), iface=iface)
@@ -1858,7 +2051,9 @@ class TestTGs(object):
         assert len(fl_set) == packet_count
 
     def test_flow_label_src_ipv6_incrementation(self, tg):
-        """ Check Flow Label with SRC IPv6 incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check Flow Label with SRC IPv6 incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(IP6, count=packet_count, fl_increment=(3, 5), sipv6_increment=(3, 5), iface=iface)
@@ -1876,7 +2071,9 @@ class TestTGs(object):
         assert len(sipv6_set) == packet_count // 2
 
     def test_flow_label_dst_ipv6_incrementation(self, tg):
-        """ Check Flow Label and DST IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check Flow Label and DST IPv6 incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, fl_increment=(3, 5), dipv6_increment=(3, 5), iface=iface)
@@ -1894,7 +2091,9 @@ class TestTGs(object):
         assert len(dipv6_set) == packet_count
 
     def test_next_header_ipv6_incrementation_dot1q_disabled(self, tg):
-        """ Check next header incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check next header incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(IP6, count=packet_count, nh_increment=(3, 5), iface=iface)
@@ -1910,7 +2109,9 @@ class TestTGs(object):
         assert len(nxt_set) == packet_count
 
     def test_next_header_ipv6_incrementation_dot1q_disabled_2(self, tg):
-        """ Check next header incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check next header incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(IP6, count=packet_count, nh_increment=(3, 5), iface=iface)
@@ -1926,7 +2127,9 @@ class TestTGs(object):
         assert len(nxt_set) == packet_count // 2
 
     def test_next_header_ipv6_incrementation_dot1q_enabled(self, tg):
-        """ Check next header IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check next header IPv6 incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, nh_increment=(3, 5), iface=iface)
@@ -1942,7 +2145,9 @@ class TestTGs(object):
         assert len(nxt_set) == packet_count
 
     def test_traffic_class_ipv6_incrementation_dot1q_disabled(self, tg):
-        """ Check traffic class incrementation. Count == Increment count. Dot1Q disabled. """
+        """Check traffic class incrementation. Count == Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(IP6, count=packet_count, tc_increment=(3, 5), iface=iface)
@@ -1958,7 +2163,9 @@ class TestTGs(object):
         assert len(tc_set) == packet_count
 
     def test_traffic_class_ipv6_incrementation_dot1q_disabled_2(self, tg):
-        """ Check traffic class incrementation. Count = 2*Increment count. Dot1Q disabled. """
+        """Check traffic class incrementation. Count = 2*Increment count. Dot1Q disabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 10
         stream_id = tg.set_stream(IP6, count=packet_count, tc_increment=(3, 5), iface=iface)
@@ -1974,7 +2181,9 @@ class TestTGs(object):
         assert len(tc_set) == packet_count // 2
 
     def test_traffic_class_ipv6_incrementation_dot1q_enabled(self, tg):
-        """ Check traffic class IPv6 incrementation. Count == Increment count. Dot1Q enabled. """
+        """Check traffic class IPv6 incrementation. Count == Increment count. Dot1Q enabled.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         stream_id = tg.set_stream(DOT1Q_IP6, count=packet_count, tc_increment=(3, 5), iface=iface)
@@ -1990,7 +2199,9 @@ class TestTGs(object):
         assert len(tc_set) == packet_count
 
     def test_qos_vlan_stat(self, tg):
-        """ Check Ixia QoS vlan stat reading. """
+        """Check Ixia QoS vlan stat reading.
+
+        """
         if tg.type != "ixiahl":
             pytest.skip("Get Qos Frames count increment isn't supported by Pypacker TG")
         iface = tg.ports[0]
@@ -2056,7 +2267,9 @@ class TestTGs(object):
         assert tg.get_qos_frames_count(iface, 7) == 8
 
     def test_qos_iptos_stat(self, tg):
-        """Check Ixia QoS IP TOS stat reading."""
+        """Check Ixia QoS IP TOS stat reading.
+
+        """
         if tg.type != "ixiahl":
             pytest.skip("Get Qos Frames count increment isn't supported by Pypacker TG")
         iface = tg.ports[0]
@@ -2119,7 +2332,9 @@ class TestTGs(object):
             assert tg.get_qos_frames_count(iface, prio) == 3
 
     def test_get_rate_stat(self, tg):
-        """ Check transmit rate reading """
+        """Check transmit rate reading.
+
+        """
         if tg.type != "ixiahl":
             pytest.skip("Get port txrate increment isn't supported by Pypacker TG.")
         iface = tg.ports[0]
@@ -2146,7 +2361,9 @@ class TestTGs(object):
         tg.stop_streams([stream_id_1, stream_id_2])
 
     def test_check_increment_ip_src(self, tg):
-        """  Check all fields in incremented packet. IP.src increment """
+        """Check all fields in incremented packet. IP.src increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 5
         src_mac = DOT1Q_IP_UDP[0]["Ethernet"]["src"]
@@ -2163,7 +2380,9 @@ class TestTGs(object):
         self.verify_packets_data(DOT1Q_IP_UDP, received)
 
     def test_check_increment_ip_dst(self, tg):
-        """  Check all fields in incremented packet. IP.dst increment """
+        """Check all fields in incremented packet. IP.dst increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         src_mac = DOT1Q_IP_UDP[0]["Ethernet"]["src"]
@@ -2180,7 +2399,9 @@ class TestTGs(object):
         self.verify_packets_data(DOT1Q_IP_UDP, received)
 
     def test_check_increment_ip_dscp(self, tg):
-        """  Check all fields in incremented packet. IP.tos increment"""
+        """Check all fields in incremented packet. IP.tos increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         src_mac = DOT1Q_IP_UDP[0]["Ethernet"]["src"]
@@ -2197,7 +2418,9 @@ class TestTGs(object):
         self.verify_packets_data(DOT1Q_IP_UDP, received)
 
     def test_check_increment_ip_proto(self, tg):
-        """  Check all fields in incremented packet. IP.proto increment """
+        """Check all fields in incremented packet. IP.proto increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         src_mac = DOT1Q_IP_UDP[0]["Ethernet"]["src"]
@@ -2214,7 +2437,9 @@ class TestTGs(object):
         self.verify_packets_data(DOT1Q_IP_UDP, received)
 
     def test_check_increment_arp_hwsrc(self, tg):
-        """  Check all fields in incremented packet. APR.hwsrc increment """
+        """Check all fields in incremented packet. APR.hwsrc increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 3
         src_mac = DOT1Q_ARP[0]["Ethernet"]["src"]
@@ -2231,7 +2456,9 @@ class TestTGs(object):
         self.verify_packets_data(DOT1Q_ARP, received)
 
     def test_check_increment_arp_psrc(self, tg):
-        """  Check all fields in incremented packet. APR.psrc increment """
+        """Check all fields in incremented packet. APR.psrc increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         src_mac = DOT1Q_ARP[0]["Ethernet"]["src"]
@@ -2248,7 +2475,9 @@ class TestTGs(object):
         self.verify_packets_data(DOT1Q_ARP, received)
 
     def test_check_increment_igmp_ip(self, tg):
-        """  Check all fields in incremented packet. IGMP.ip increment """
+        """Check all fields in incremented packet. IGMP.ip increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(ETH_IP_IGMP, count=packet_count, igmp_ip_increment=(2, 5), iface=iface)
@@ -2322,7 +2551,9 @@ class TestTGs(object):
         self.verify_packets_data(packet, received)
 
     def test_check_increment_ip_icmp(self, tg):
-        """  Check all fields in incremented packet. IP.src increment """
+        """Check all fields in incremented packet. IP.src increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(ETH_IP_ICMP, count=packet_count, sip_increment=(2, 5), iface=iface)
@@ -2338,7 +2569,9 @@ class TestTGs(object):
         self.verify_packets_data(ETH_IP_ICMP, received)
 
     def test_check_increment_udp_sport(self, tg):
-        """  Check all fields in incremented packet. UDP.sport increment """
+        """Check all fields in incremented packet. UDP.sport increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, sudp_increment=(2, 5), iface=iface)
@@ -2354,7 +2587,9 @@ class TestTGs(object):
         self.verify_packets_data(ETH_IP_UDP, received)
 
     def test_check_increment_udp_dport(self, tg):
-        """  Check all fields in incremented packet. UDP.dport increment """
+        """Check all fields in incremented packet. UDP.dport increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(ETH_IP_UDP, count=packet_count, dudp_increment=(2, 5), iface=iface)
@@ -2370,7 +2605,9 @@ class TestTGs(object):
         self.verify_packets_data(ETH_IP_UDP, received)
 
     def test_check_increment_dot1q_vlan_single(self, tg):
-        """  Check all fields in incremented packet. Dot1Q.vlan increment """
+        """Check all fields in incremented packet. Dot1Q.vlan increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, vlan_increment=(2, 5), iface=iface)
@@ -2386,7 +2623,9 @@ class TestTGs(object):
         self.verify_packets_data(DOT1Q_IP_UDP, received)
 
     def test_check_increment_dot1q_vlan_double(self, tg):
-        """  Check all fields in incremented packet. Dot1Q.vlan increment"""
+        """Check all fields in incremented packet. Dot1Q.vlan increment.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id = tg.set_stream(QINQ, count=packet_count, vlan_increment=(2, 5), iface=iface)
@@ -2402,7 +2641,9 @@ class TestTGs(object):
         self.verify_packets_data(QINQ, received)
 
     def test_stop_sniffing(self, tg):
-        """ Start continuous stream and stop sniffing """
+        """Start continuous stream and stop sniffing.
+
+        """
         iface = tg.ports[0]
         stream_id_1 = tg.set_stream(PACKET_DEFINITION, continuous=True, iface=iface)
 
@@ -2416,8 +2657,8 @@ class TestTGs(object):
         assert start_receive_statistics == end_receive_statistics
 
     def test_packet_with_ipoption(self, tg):
-        """
-        @brief  Test building packet with IPOption.
+        """Test building packet with IPOption.
+
         """
         iface = tg.ports[0]
         packet_count = 1
@@ -2434,7 +2675,9 @@ class TestTGs(object):
         self.verify_packets_data(ETH_IP_IGMP, received)
 
     def test_dot1q_arp_filter(self, tg):
-        """ Check Dot1Q.ARP filter """
+        """Check Dot1Q.ARP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_ARP, count=packet_count, iface=iface)
@@ -2454,7 +2697,9 @@ class TestTGs(object):
         self.verify_packets_data(DOT1Q_ARP, received)
 
     def test_dot1q_arp_custom_filter(self, tg):
-        """ Check Dot1Q.ARP filter """
+        """Check Dot1Q.ARP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         filter_dot1q_arp = (12, "81 00 00 00 08 06", "00 00 FF FF 00 00")
@@ -2485,7 +2730,9 @@ class TestTGs(object):
         assert p1.bin() == p2.bin()
 
     def test_not_arp_filter(self, tg):
-        """ Check notARP filter """
+        """Check notARP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, iface=iface)
@@ -2505,7 +2752,9 @@ class TestTGs(object):
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
     def test_dot1q_filter(self, tg):
-        """ Check Dot1Q filter """
+        """Check Dot1Q filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_ARP, count=packet_count, iface=iface)
@@ -2523,7 +2772,9 @@ class TestTGs(object):
         assert tg.get_packet_field(packets[0], "Ethernet", "vlan")
 
     def test_dot1q_custom_filter(self, tg):
-        """ Check Dot1Q filter """
+        """Check Dot1Q filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         filter_dot1q_arp = (12, "81 00 00 00 08 06", "00 00 FF FF 00 00")
@@ -2555,7 +2806,9 @@ class TestTGs(object):
         assert p1.bin() == p2.bin()
 
     def test_ip_filter(self, tg):
-        """ Check IP filter """
+        """Check IP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, iface=iface)
@@ -2575,7 +2828,9 @@ class TestTGs(object):
         self.verify_packets_data(ETH_IP_UDP, received)
 
     def test_ip_custom_filter(self, tg):
-        """ Check IP filter """
+        """Check IP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         filter_ip = (12, "08 00", "00 00")
@@ -2605,7 +2860,9 @@ class TestTGs(object):
         assert p1.bin() == p2.bin()
 
     def test_dot1q_ip_filter(self, tg):
-        """ Check Dot1Q.IP filter """
+        """Check Dot1Q.IP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, iface=iface)
@@ -2624,7 +2881,9 @@ class TestTGs(object):
         self.verify_packets_data(DOT1Q_IP_UDP, received)
 
     def test_dot1q_ip_custom_filter(self, tg):
-        """ Check Dot1Q.IP filter """
+        """Check Dot1Q.IP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         filter_dot1q_ip = (12, "81 00 00 00 08 00", "00 00 FF FF 00 00")
@@ -2655,7 +2914,9 @@ class TestTGs(object):
 
     @pytest.mark.skip("STP is not integrated yet")
     def test_stp_filter(self, tg):
-        """ Check STP filter """
+        """Check STP filter.
+
+        """
         iface = tg.ports[0]
         stream_id_1 = tg.set_stream(STP, count=1, iface=iface)
         stream_id_2 = tg.set_stream(ETH_IP_UDP, count=1, iface=iface)
@@ -2672,7 +2933,9 @@ class TestTGs(object):
 
     @pytest.mark.skip("STP is not integrated yet")
     def test_stp_custom_filter(self, tg):
-        """ Check STP filter """
+        """Check STP filter.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(STP, count=1, iface=iface)
@@ -2702,7 +2965,9 @@ class TestTGs(object):
 
     @pytest.mark.skip("STP is not integrated yet")
     def test_not_stp_filter(self, tg):
-        """ Check notSTP filter """
+        """Check notSTP filter.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(STP, count=1, iface=iface)
@@ -2720,7 +2985,9 @@ class TestTGs(object):
         assert tg.get_packet_layer(data[iface][0], "STP") is None
 
     def test_tcp_filter(self, tg):
-        """ Check TCP filter"""
+        """Check TCP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(ETH_IP_UDP, count=packet_count, iface=iface)
@@ -2739,7 +3006,9 @@ class TestTGs(object):
         self.verify_packets_data(ETH_IP_TCP, received)
 
     def test_tcp_custom_filter(self, tg):
-        """ Check TCP filter"""
+        """Check TCP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         filter_tcp = (12, "08 00 00 00 00 00 00 00 00 00 00 06", "00 00 FF FF FF FF FF FF FF FF FF 00")
@@ -2769,7 +3038,9 @@ class TestTGs(object):
         assert p1.bin() == p2.bin()
 
     def test_dot1q_tcp_filter(self, tg):
-        """ Check Dot1Q.TCP filter"""
+        """Check Dot1Q.TCP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_TCP, count=packet_count, iface=iface)
@@ -2788,7 +3059,9 @@ class TestTGs(object):
         self.verify_packets_data(DOT1Q_IP_TCP, received)
 
     def test_dot1q_tcp_custom_filter(self, tg):
-        """ Check Dot1Q.TCP filter"""
+        """Check Dot1Q.TCP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         filter_dot1q_tcp = (12, "81 00 00 00 08 00 00 00 00 00 00 00 00 00 00 06",
@@ -2819,7 +3092,9 @@ class TestTGs(object):
         assert p1.bin() == p2.bin()
 
     def test_udp_filter(self, tg):
-        """ Check UDP filter"""
+        """Check UDP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, iface=iface)
@@ -2837,7 +3112,9 @@ class TestTGs(object):
         self.verify_packets_data(ETH_IP_UDP, received)
 
     def test_udp_custom_filter(self, tg):
-        """ Check UDP filter"""
+        """Check UDP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         filter_udp = (12, "08 00 00 00 00 00 00 00 00 00 00 11",
@@ -2866,7 +3143,9 @@ class TestTGs(object):
         assert p1.bin() == p2.bin()
 
     def test_dot1q_udp_filter(self, tg):
-        """ Check Dot1Q.UDP filter """
+        """Check Dot1Q.UDP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_UDP, count=packet_count, iface=iface)
@@ -2885,7 +3164,9 @@ class TestTGs(object):
         self.verify_packets_data(DOT1Q_IP_UDP, received)
 
     def test_dot1q_udp_custom_filter(self, tg):
-        """ Check Dot1Q.UDP filter """
+        """Check Dot1Q.UDP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         filter_dot1q_udp = (12, "81 00 00 00 08 00 00 00 00 00 00 00 00 00 00 11",
@@ -2916,7 +3197,9 @@ class TestTGs(object):
         assert p1.bin() == p2.bin()
 
     def test_icmp_filter(self, tg):
-        """ Check ICMP filter """
+        """Check ICMP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, iface=iface)
@@ -2935,7 +3218,9 @@ class TestTGs(object):
         self.verify_packets_data(ETH_IP_ICMP, received)
 
     def test_icmp_custom_filter(self, tg):
-        """ Check ICMP filter """
+        """Check ICMP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         filter_icmp = (12, "08 00 00 00 00 00 00 00 00 00 00 01",
@@ -2966,7 +3251,9 @@ class TestTGs(object):
         assert p1.bin() == p2.bin()
 
     def test_dot1q_icmp_filter(self, tg):
-        """ Check Dot1Q.ICMP filter """
+        """Check Dot1Q.ICMP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=packet_count, iface=iface)
@@ -2985,7 +3272,9 @@ class TestTGs(object):
         self.verify_packets_data(DOT1Q_IP_ICMP, received)
 
     def test_dot1q_icmp_custom_filter(self, tg):
-        """ Check Dot1Q.ICMP filter """
+        """Check Dot1Q.ICMP filter.
+
+        """
         iface = tg.ports[0]
         packet_count = 1
         filter_dot1q_icmp = (12, "81 00 00 00 08 00 00 00 00 00 00 00 00 00 00 01",
@@ -3017,7 +3306,9 @@ class TestTGs(object):
 
     @pytest.mark.skip("BGP is not integrated yet")
     def test_build_bgp_packet_simple(self, tg):
-        """ Check building BGP packet. """
+        """Check building BGP packet.
+
+        """
         iface = tg.ports[0]
 
         src_mac = '00:00:00:00:00:cc'
@@ -3046,7 +3337,9 @@ class TestTGs(object):
 
     @pytest.mark.skip("BGP is not integrated yet")
     def test_build_bgp_packet_as_path(self, tg):
-        """ Check building BGP packet with multiple as_path. """
+        """Check building BGP packet with multiple as_path.
+
+        """
         iface = tg.ports[0]
 
         src_mac = '00:00:00:00:00:aa'
@@ -3113,7 +3406,9 @@ class TestTGs(object):
 
     @pytest.mark.skip("BGP is not integrated yet")
     def test_build_bgp_notification_packet(self, tg):
-        """ Check building BGPNotification packet. """
+        """Check building BGPNotification packet.
+
+        """
         iface = tg.ports[0]
 
         src_mac = '00:00:00:00:00:cc'
@@ -3141,7 +3436,9 @@ class TestTGs(object):
 
     @pytest.mark.skip("STP is not integrated yet")
     def test_xstp_build_capture(self, tg):
-        """ Check stp/rstp/mstp build and detection."""
+        """Check stp/rstp/mstp build and detection.
+
+        """
         iface = tg.ports[0]
 
         pack_rstp_2 = ({"Dot3": {"src": "00:00:00:11:11:11", "dst": DST_MAC}},
@@ -3174,8 +3471,8 @@ class TestTGs(object):
         assert len([x for x in data[iface] if x.get_lfield("STP", "version") == 3 and x.get_lfield("STP", "v3len") > 64 and x.get_lfield("MstiConfigMsg", "rootmac")]) == 2
 
     def test_double_tagged_packet_1(self, tg):
-        """
-        Verify that pypacker can recognize QinQ packets type 0x9100
+        """Verify that pypacker can recognize QinQ packets type 0x9100.
+
         """
         iface = tg.ports[0]
         packet_count = 1
@@ -3198,8 +3495,8 @@ class TestTGs(object):
         assert tg.get_packet_field(packet, "C-Dot1Q", "prio") == DOT1Q_PRIO_2
 
     def test_double_tagged_packet_2(self, tg):
-        """
-        Verify that pypacker can recognize QinQ packets type 0x88A8
+        """Verify that pypacker can recognize QinQ packets type 0x88A8.
+
         """
         iface = tg.ports[0]
         packet_count = 1
@@ -3219,8 +3516,8 @@ class TestTGs(object):
         self.verify_packets_data(packet, received)
 
     def test_default_ether_type(self, tg):
-        """
-        Verify that default Ether type for tagged packets is equal to 0x8100.
+        """Verify that default Ether type for tagged packets is equal to 0x8100.
+
         """
         iface = tg.ports[0]
         packet_count = 1
@@ -3245,8 +3542,8 @@ class TestTGs(object):
         assert tg.check_packet_field(packet, "S-Dot1Q", "prio", DOT1Q_PRIO_2)
 
     def test_pause_frames_0001(self, tg):
-        """
-        Verify that MAC Control Pause frames with opcode 0x0001 are builded and sniffed correctly.
+        """Verify that MAC Control Pause frames with opcode 0x0001 are builded and sniffed correctly.
+
         """
         iface = tg.ports[0]
         packet_count = 1
@@ -3264,8 +3561,8 @@ class TestTGs(object):
         assert tg.get_packet_field(packet, "Pause", "ptime") == PAUSE_TIME
 
     def test_pause_frames_0101(self, tg):
-        """
-        Verify that MAC Control Pause frames with opcode 0x0101 are builded and sniffed correctly.
+        """Verify that MAC Control Pause frames with opcode 0x0101 are builded and sniffed correctly.
+
         """
         iface = tg.ports[0]
         packet_count = 1
@@ -3285,8 +3582,8 @@ class TestTGs(object):
         assert tg.get_packet_field(packet, "PFC", "time_list") == PFC_TIME
 
     def test_pause_frames_ffff(self, tg):
-        """
-        Verify that MAC Control Pause frames with unknown are builded and sniffed correctly.
+        """Verify that MAC Control Pause frames with unknown are builded and sniffed correctly.
+
         """
         iface = tg.ports[0]
         packet_count = 1
@@ -3307,8 +3604,8 @@ class TestTGs(object):
 
     @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_build_capture(self, tg):
-        """
-        @brief  Verify that LLDP packets are builded and sniffed correctly.
+        """Verify that LLDP packets are builded and sniffed correctly.
+
         """
         iface = tg.ports[0]
 
@@ -3380,8 +3677,8 @@ class TestTGs(object):
 
     @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_dcbx(self, tg):
-        """
-        @brief  Verify that DCBX packets are built and captured correctly.
+        """Verify that DCBX packets are built and captured correctly.
+
         """
         iface = tg.ports[0]
 
@@ -3440,8 +3737,8 @@ class TestTGs(object):
 
     @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_dcbx_app_prio_table(self, tg):
-        """
-        @brief  Verify that DCBX packets with Application Priority Tables are built and captured correctly.
+        """Verify that DCBX packets with Application Priority Tables are built and captured correctly.
+
         """
         iface = tg.ports[0]
 
@@ -3487,8 +3784,8 @@ class TestTGs(object):
 
     @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_sys_capabilities(self, tg):
-        """
-        @brief  Verify that LLDP packets with full System capabilities list are built and captured correctly.
+        """Verify that LLDP packets with full System capabilities list are built and captured correctly.
+
         """
         iface = tg.ports[0]
 
@@ -3527,8 +3824,8 @@ class TestTGs(object):
 
     @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_with_padding(self, tg):
-        """
-        @brief  Verify that LLDP packets with with padding are built and captured correctly.
+        """Verify that LLDP packets with with padding are built and captured correctly.
+
         """
         iface = tg.ports[0]
 
@@ -3562,8 +3859,8 @@ class TestTGs(object):
 
     @pytest.mark.skip("Pypacker does not support LACP")
     def test_lacp_layers(self, tg):
-        """
-        @brief  Verify that LACP packets are built and captured correctly.
+        """Verify that LACP packets are built and captured correctly.
+
         """
         iface = tg.ports[0]
 
@@ -3603,17 +3900,23 @@ class TestTGs(object):
         assert data[iface][0].haslayer("LACPReserved")
 
     def test_pproc_packet_fragmentation_1(self, tg):
-        """ Check packet fragmentation """
+        """Check packet fragmentation.
+
+        """
         fragments = tg.packet_fragment(ETH_IP_ICMP, required_size=200, fragsize=110)
         assert len(fragments) == 2
 
     def test_pproc_packet_fragmentation_2(self, tg):
-        """ Check packet fragmentation. fragsize is None"""
+        """Check packet fragmentation. fragsize is None.
+
+        """
         fragments = tg.packet_fragment(ETH_IP_ICMP, required_size=200)
         assert len(fragments) == 1
 
     def test_pproc_packet_dictionary(self, tg):
-        """ Check packet dictionary. fragsize is None"""
+        """Check packet dictionary. Fragsize is None.
+
+        """
         fragments = tg.packet_fragment(DOT1Q_IP_UDP, adjust_size=False, required_size=200)
         assert len(fragments) == 1
         pac = tg.packet_dictionary(fragments[0])
@@ -3671,7 +3974,9 @@ class TestTGs(object):
 
     @pytest.mark.skip("DHCP is not integrated yet")
     def test_dhcp_ip_incrementation(self, tg):
-        """ Check dhcp ip incrementation. Count == Increment count."""
+        """Check dhcp ip incrementation. Count == Increment count.
+
+        """
         iface = tg.ports[0]
 
         dhcp_request = ({"Ether": {"dst": BROADCAT_MAC, "src": '00:00:10:00:01:02'}},
@@ -3699,7 +4004,9 @@ class TestTGs(object):
 
     @pytest.mark.parametrize("padding_size", [26, 1476])
     def test_send_sniff_max_min_packets(self, tg, padding_size):
-        """ Verify sending and sniffing of packets with minimal and maximal size """
+        """Verify sending and sniffing of packets with minimal and maximal size.
+
+        """
         # 26(padding) + 20(ip header) + 14(ether header) + 4(crc) = 64
         # 1476(padding) + 20(ip header) + 14(ether header) + 4(crc) = 1514
         iface = tg.ports[0]
@@ -3730,7 +4037,9 @@ class TestTGs(object):
         assert padding_size + crc == len(received_padding)
 
     def test_incrementation_negative_1(self, tg):
-        """ Verify that method set_stream returns Error message when layer is not defined in packet(1). """
+        """Verify that method set_stream returns Error message when layer is not defined in packet(1).
+
+        """
         if tg.type == 'ixiahl':
             pytest.skip("This behavior isn't supported by IXIA TG")
         iface = tg.ports[0]
@@ -3761,7 +4070,9 @@ class TestTGs(object):
         assert set(exception_message) == set(result)
 
     def test_incrementation_negative_2(self, tg):
-        """ Verify that method set_stream returns Error message when when layer is not defined in packet(2). """
+        """Verify that method set_stream returns Error message when when layer is not defined in packet(2).
+
+        """
         if tg.type == 'ixiahl':
             pytest.skip("This behavior isn't supported by IXIA TG")
         iface = tg.ports[0]
@@ -3784,7 +4095,9 @@ class TestTGs(object):
         assert set(exception_message) == set(result)
 
     def test_send_stream_several_times(self, tg):
-        """ Send stream several times and check statistics"""
+        """Send stream several times and check statistics.
+
+        """
         iface = tg.ports[0]
         packet_count = 10000
         stream_id_1 = tg.set_stream(PACKET_DEFINITION, count=packet_count, rate=0.01, iface=iface)
@@ -3800,7 +4113,9 @@ class TestTGs(object):
         assert end_sent_statistics == 2 * packet_count
 
     def test_send_several_streams(self, tg):
-        """ Send several streams"""
+        """Send several streams.
+
+        """
         iface = tg.ports[0]
         packets_count = 20
         src_mac = PACKET_DEFINITION[0]["Ethernet"]["src"]

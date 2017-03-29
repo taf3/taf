@@ -116,8 +116,8 @@ def get_steps(item, tc_name):
     """
     # Get source of test function
     steps_list = []
-    steps_rules = re.compile(r'@steps([\s\S]*?)@endsteps')
-    step_rules = re.compile('@step (.*?)\n')
+    steps_rules = re.compile(r'Steps\:\:\n\n([\s\S]*?)\n\n')
+    step_rules = re.compile(r'Steps\:\:\n\n(.*?)\n\n')
     data = get_doc_from_item(item)
     # Split and strip steps from docstring
     for line in steps_rules.findall(data):
@@ -155,11 +155,16 @@ def get_brief(item, tc_name):
     """
     brief = ''
     data = get_doc_from_item(item)
-    brief_rules = re.compile('@brief (.*?)\n')
+    # try to find if inner function existent
+    brief_rules = re.compile(r'\"\"\"(.+)\n\n')
     brief_list = brief_rules.findall(str(data))
+    if not brief_list:
+        # try to find if inner function non-existent
+        brief_rules = re.compile(r'^(.+)\n\nSteps')
+        brief_list = brief_rules.findall(str(data))
     try:
         if not brief_list:
-            brief = str(data)[6:]
+            brief = str(data)[:]
         else:
             brief = ('\n'.join(brief_list))
         return brief.strip()[:255]

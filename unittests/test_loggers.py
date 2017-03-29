@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_loggers.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Unittests for logging functionality in TAF`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file test_loggers.py
-
-@summary Unittests for logging functionality in TAF.
 """
 
 import os
@@ -94,19 +94,25 @@ class TestLogger(object):
 
     @classmethod
     def teardown_class(cls):
-        """ Removes all created files and directory on teardown of class"""
+        """Removes all created files and directory on teardown of class.
+
+        """
         if os.path.isfile(DATAFILE):
             os.remove(DATAFILE)
         if os.path.isdir(LOG_DIR):
             os.rmdir(LOG_DIR)
 
     def test_loggers_mkdir(self):
-        """ Verify that method mkdir_p creates directory."""
+        """Verify that method mkdir_p creates directory.
+
+        """
         loggers.mkdir_p(LOG_DIR)
         assert os.path.isdir(LOG_DIR)
 
     def test_loggers_options_and_mkdir(self, request):
-        """ Verify that dictionary of logging options contains correct values and method mkdir_p is not creates directory if it exists."""
+        """Verify that dictionary of logging options contains correct values and method mkdir_p is not creates directory if it exists.
+
+        """
         loggers.mkdir_p(LOG_DIR)
         opts = loggers.parse_options()
         markexpr = request.config.option.markexpr
@@ -121,7 +127,9 @@ class TestLogger(object):
             assert getattr(opts, k) == v
 
     def test_info_log_message(self, skip_if_no_fixture, caplog, simple_log, request):
-        """ Verify that log message for level INFO contains correct values."""
+        """Verify that log message for level INFO contains correct values.
+
+        """
         simple_log.info("test message for info")
         if "." in request.module.__name__:
             mod_name = request.module.__name__.split(".", 1)[1]
@@ -138,7 +146,9 @@ class TestLogger(object):
             assert records.threadName == thread_name
 
     def test_error_log_message(self, skip_if_no_fixture, caplog, simple_log, request):
-        """ Verify that log message for level ERROR contains correct values."""
+        """Verify that log message for level ERROR contains correct values.
+
+        """
         simple_log.error("test message for error")
         if "." in request.module.__name__:
             mod_name = request.module.__name__.split(".", 1)[1]
@@ -155,7 +165,9 @@ class TestLogger(object):
             assert records.threadName == thread_name
 
     def test_debug_log_message(self, skip_if_no_fixture, caplog, simple_log, request):
-        """ Verify that log message for level DEBUG contains correct values."""
+        """Verify that log message for level DEBUG contains correct values.
+
+        """
         simple_log.logger.setLevel("DEBUG")
         simple_log.debug("test message for debug")
         if "." in request.module.__name__:
@@ -173,7 +185,9 @@ class TestLogger(object):
             assert records.threadName == thread_name
 
     def test_warning_log_message(self, skip_if_no_fixture, caplog, simple_log, request):
-        """ Verify that log message for level WARNING contains correct values."""
+        """Verify that log message for level WARNING contains correct values.
+
+        """
         simple_log.warning("test message for warning")
         if "." in request.module.__name__:
             mod_name = request.module.__name__.split(".", 1)[1]
@@ -190,7 +204,9 @@ class TestLogger(object):
             assert records.threadName == thread_name
 
     def test_log_message_from_log_files(self, skip_if_no_fixture, caplog, file_log, request, log_file):
-        """ Verify that log message from log files contains correct values."""
+        """Verify that log message from log files contains correct values.
+
+        """
         file_log.info("test message")
         if "." in request.module.__name__:
             mod_name = request.module.__name__.split(".", 1)[1]
@@ -212,7 +228,9 @@ class TestLogger(object):
             assert lines[0].split("\n")[0] == log_string
 
     def test_log_message_for_exception(self, skip_if_no_fixture, caplog, exception_log, request, log_file):
-        """ Verify that  log message for exception from log files contains correct values."""
+        """Verify that  log message for exception from log files contains correct values.
+
+        """
         exception_log.error("test message from exception")
         # captures and verifies log messages
         for records in caplog.records():
@@ -230,7 +248,9 @@ class TestLogger(object):
             assert lines[0].split("\n")[0] == log_string
 
     def test_module_log_message(self, skip_if_no_fixture, caplog, request, module_log):
-        """ Verify that module level logging contains correct values."""
+        """Verify that module level logging contains correct values.
+
+        """
         if "." in request.module.__name__:
             mod_name = request.module.__name__.split(".", 1)[1]
         else:
@@ -247,7 +267,9 @@ class TestLogger(object):
             assert records.threadName == thread_name
 
     def test_log_message_for_introspection(self, skip_if_no_fixture, caplog, introspection_log, request, log_file):
-        """ Verify that  log message for introspection from log files contains correct values."""
+        """Verify that  log message for introspection from log files contains correct values.
+
+        """
         introspection_log.info("test message")
         mod_name = request.module.__name__
         # captures and verifies log messages
@@ -263,7 +285,9 @@ class TestLogger(object):
             assert lines[0].split("\n")[0] == log_string
 
     def test_log_message_for_exception_with_trace(self, skip_if_no_fixture, caplog, request):
-        """ Verify that log messages for exception with trace contains correct values."""
+        """Verify that log messages for exception with trace contains correct values.
+
+        """
         error = custom_exceptions.CustomException("Test exception!", trace=True)
         assert error.__str__() == "'Test exception!'"
         if "." in request.module.__name__:
@@ -290,7 +314,9 @@ class TestLogger(object):
         assert record_traceback.threadName == thread_name
 
     def test_log_message_from_log_file_for_exception_with_trace(self, skip_if_no_fixture, caplog, request, log_file, exception_log, monkeypatch):
-        """ Verify that log messages for exception with trace from log files contains correct values."""
+        """Verify that log messages for exception with trace from log files contains correct values.
+
+        """
         monkeypatch.setattr(custom_exceptions.CustomException, "class_logger", exception_log)
         custom_exceptions.CustomException("Test exception!", trace=True)
         # captures and verifies log messages for exception

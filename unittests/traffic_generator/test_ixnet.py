@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2017, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_ixnet.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Unittests for IxNetwork`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  test_ixnet.py
-
-@summary  Unittests for IxNetwork.
 """
 
 import time
@@ -65,12 +65,14 @@ class Tg(IxiaHLTMixin, PacketProcessor):
 
     @staticmethod
     def _get_port_to_string(iface):
-        """
-        @brief  Simple helper which allows to get string representation for interface
+        """Simple helper which allows to get string representation for interface
 
-        @param iface: Which IXIA interface to use for packet sending (list in format [chassis_id, card_id, port_id])
+        Args:
+            iface(list): Which IXIA interface to use for packet sending (list in format [chassis_id, card_id, port_id])
 
-        @return  string in format "chassis_id/card_id/port_id"
+        Returns:
+            str: string in format "chassis_id/card_id/port_id"
+
         """
         return "/".join(map(str, iface))
 
@@ -85,12 +87,14 @@ class Tg(IxiaHLTMixin, PacketProcessor):
             self.tcl('port write %s %s %s' % (chassis, card, port))
 
     def _get_speed_ports(self, args):
-        """
-        @brief  Get ports with speed from config.
+        """Get ports with speed from config.
 
-        @note  This function check if port has speed in config file.
+        Notes:
+            This function check if port has speed in config file.
 
-        @return  List of ports used in real config
+        Returns:
+            List of ports used in real config
+
         """
         ports = []
         ports_list = []
@@ -103,10 +107,11 @@ class Tg(IxiaHLTMixin, PacketProcessor):
         return ports, ports_list
 
     def connect_hal(self):
-        """
-        @brief  Logs in to IXIA and takes ports ownership.
+        """Logs in to IXIA and takes ports ownership.
 
-        @return  none
+        Returns:
+            None
+
         """
         try:
             if platform.system() == 'Linux':
@@ -164,10 +169,11 @@ class Tg(IxiaHLTMixin, PacketProcessor):
         self.class_logger.info("Ixia startup complete.")
 
     def disconnect_hal(self, mode='fast'):
-        """
-        @brief  Logs out from IXIA and clears ports ownership.
+        """Logs out from IXIA and clears ports ownership.
 
-        @return  none
+        Returns:
+            None
+
         """
         if self.ownership_state:
             for iface in self.owned_ifaces:
@@ -181,7 +187,28 @@ class Tg(IxiaHLTMixin, PacketProcessor):
             self.connection_state = False
 
     def start_sniff(self, ifaces, sniffing_time=None, packets_count=0, filter_layer=None, src_filter=None, dst_filter=None):
-        """@copydoc testlib::tg_template::GenericTG::start_sniff()"""
+        """Starts sniffing on specified interfaces.
+
+        Args:
+            ifaces(list):  List of TG interfaces for capturing.
+            sniffing_time(int):  Time in seconds for sniffing.
+            packets_count(int):  Count of packets to sniff (no count limitation in case 0).
+            filter_layer(str):  Name of predefined sniffing filter criteria.
+            src_filter(str):  Sniff only packet with defined source MAC.
+            dst_filter(str):  Sniff only packet with defined destination MAC.
+
+        Returns:
+            None
+
+        Notes:
+            This method introduces additional 1.5 seconds timeout after capture enabling.
+            It's required by Ixia sniffer to wait until capturing is started.
+
+        Examples::
+
+            env.tg[1].start_sniff(['eth0', ], filter_layer='IP', src_filter='00:00:00:01:01:01', dst_filter='00:00:00:22:22:22')
+
+        """
         self.class_logger.debug("Starting capturing on ifaces: %s" % (ifaces, ))
         if filter_layer:
             if filter_layer not in self.flt_patterns:
@@ -272,7 +299,18 @@ class Tg(IxiaHLTMixin, PacketProcessor):
         time.sleep(1.5)
 
     def stop_sniff(self, ifaces, force=False, drop_packets=False, sniff_packet_count=1000):
-        """@copydoc testlib::tg_template::GenericTG::stop_sniff()"""
+        """Stops sniffing on specified interfaces and returns captured data.
+
+        Args:
+            ifaces(list):  List of interfaces where capturing has to be stopped.
+            force(bool):  Stop capturing even if time or packet count criteria isn't achieved.
+            drop_packets(bool):  Don't return sniffed data (used in case you need just read statistics).
+            sniff_packet_count(int):  Default number of packets to return (used to avoid test hanging in case storm).
+
+        Returns:
+            dict: Dictionary where key = interface name, value = list of sniffed packets.
+
+        """
         def _stop_capture_on_port(iface):
             chassis, card, port = iface.split("/")
             assert self.tcl("ixStopPortCapture %s %s %s" % (chassis, card, port)) == "0"
@@ -395,12 +433,14 @@ class Tg(IxiaHLTMixin, PacketProcessor):
         return packet_dict
 
     def _set_filter_params(self, layer):
-        """
-        @brief  Configures filter parameters for specified layer
+        """Configures filter parameters for specified layer.
 
-        @param Layer: compatible with pypacker "layers" (string)
+        Args:
+            Layer(str): compatible with pypacker "layers"
 
-        @return  none
+        Returns:
+            None
+
         """
         def _set_user_pattern(ptrn_num, ptrn_cfg):
             _tcl_commands = ""
@@ -424,23 +464,27 @@ class Tg(IxiaHLTMixin, PacketProcessor):
 
 
 def _get_port_to_string(iface):
-    """
-    @brief  Simple helper which allows to get string representation for interface
+    """Simple helper which allows to get string representation for interface.
 
-    @param iface: Which IXIA interface to use for packet sending (list in format [chassis_id, card_id, port_id])
+    Args:
+        iface(list): Which IXIA interface to use for packet sending (list in format [chassis_id, card_id, port_id])
 
-    @return  string in format "chassis_id/card_id/port_id"
+    Returns:
+        str: string in format "chassis_id/card_id/port_id"
+
     """
     return "/".join(map(str, iface))
 
 
 def _get_speed_ports():
-    """
-    @brief  Get ports with speed from config.
+    """Get ports with speed from config.
 
-    @note  This function check if port has speed in config file.
+    Notes:
+        This function check if port has speed in config file.
 
-    @return  List of ports used in real config
+    Returns:
+        list: List of ports used in real config
+
     """
     ports = []
     ports_list = []

@@ -1,22 +1,22 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""``common.py``
+
+`Unittests common functionality`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file common.py
-
-@summary Unittests common functionality.
-"""
 import threading
 from xmlrpc.server import SimpleXMLRPCServer
 
@@ -100,7 +100,7 @@ class FakeXMLRPCServer(object):
             {'name': 'L2LldpControlApp', 'logLevel': 'test level',
              'adminState': 'Run', 'appId': 1, 'operationalState': 'Run'},
             {'name': 'L2StpControlApp', 'logLevel': 'test level',
-             'adminState': 'Run', 'appId': 1, 'operationalState': 'Run'}
+             'adminState': 'Run', 'appId': 1, 'operationalState': 'Run'},
         ]
 
         self.platform = [{'ethernetSwitchType': 'SimSwitch Switch',
@@ -230,7 +230,7 @@ class FakeXMLRPCServer(object):
             'type': row[3],
             'operationalStatus': row[4],
             'speed': row[5],
-            'name': row[6]
+            'name': row[6],
         }
         self.ports.append(port)
         return 0
@@ -273,7 +273,7 @@ class FakeXMLRPCServer(object):
             'name': row[1],
             'lagControlType': row[3],
             'actorAdminLagKey': row[2],
-            'hashMode': row[4]
+            'hashMode': row[4],
         }
         port = {
             'portId': row[0],
@@ -282,7 +282,7 @@ class FakeXMLRPCServer(object):
             'type': 'LAG',
             'operationalStatus': 'Down',
             'speed': 10000,
-            'name': row[1]
+            'name': row[1],
         }
         self.lags.append(lag)
         self.ports.append(port)
@@ -301,7 +301,7 @@ class FakeXMLRPCServer(object):
             'adminCollecting': row[8],
             'adminDistributing': row[9],
             'adminDefaulted': row[10],
-            'adminExpired': row[11]
+            'adminExpired': row[11],
         }
         port = [x for x in self.ports if x['portId'] == row[0]][0]
         port['type'] = 'LagMember'

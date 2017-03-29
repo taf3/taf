@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_pytest_helpers.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Unittests for helpers functions`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file test_pytest_helpers.py
-
-@summary Unittests for helpers functions.
 """
 
 import sys
@@ -40,7 +40,9 @@ def report():
 
 
 def test_tcname_basic(report):
-    '''Test of pytest_helpers.get_tcname() function'''
+    """Test of pytest_helpers.get_tcname() function.
+
+    """
 
     report.nodeid = "ons_tests/test_synapsert.py::test_demo_synapsert1"
     report.keywords = None
@@ -90,8 +92,8 @@ def test_bad_fixture_param_value_is_handled_with_parametrize():
 
 
 def test_get_failure_reason():
-    """
-    @brief: Check if get_failure_reason(data) is work correct
+    """Check if get_failure_reason(data) is work correct.
+
     """
     data1 = '''
 env = {\'switches\': [{\'instance\': &lt;ServerProxy for 10.0.5.102:8082/RPC2&gt;, \'ports_coun...3\', \'vlab4\', \'vlab5\', \'vlab6\', \'vlab7\', \'vlab8\',
@@ -145,21 +147,24 @@ E           Fault: Fault -701: 'Invalid row ID:param1'"""
 
 
 def test_get_suite_name():
-    '''Test of pytest_helpers.get_tcname() function'''
+    """Test of pytest_helpers.get_tcname() function.
 
+    """
     nodeid1 = "ons_tests/test_synapsert.py::test_demo_synapsert2"
     assert get_suite_name(nodeid1) == "ons_tests.test_synapsert"
 
-STEP_STRING = """
-@brief  Verify that ports can be added to LAG.
-@steps
+
+STEP_STRING = """Verify that ports can be added to LAG.
+
+Steps::
+
     -# Delete LAGs table.
     -# Create test LAG.
     -# Assign 2 ports to test LAG.
     -# Verify that there are 2 ports in test LAG.
     -# Remove the ports in test LAG
     -# Delete test LAG.
-@endsteps
+
 """
 
 GOOD_STEPS = """\
@@ -191,16 +196,17 @@ def test_get_steps_callspec():
 
 def test_get_steps_inspect():
     def something():
-        """
-        @brief  Verify that ports can be added to LAG.
-        @steps
+        """Verify that ports can be added to LAG.
+
+        Steps::
+
             -# Delete LAGs table.
             -# Create test LAG.
             -# Assign 2 ports to test LAG.
             -# Verify that there are 2 ports in test LAG.
             -# Remove the ports in test LAG
             -# Delete test LAG.
-        @endsteps
+
         """
         pass
     test_item = MagicMock(
@@ -235,16 +241,17 @@ def test_get_brief_callspec():
 
 def test_get_brief_inspect():
     def something():
-        """
-        @brief  Verify that ports can be added to LAG.
-        @steps
+        """Verify that ports can be added to LAG.
+
+        Steps::
+
             -# Delete LAGs table.
             -# Create test LAG.
             -# Assign 2 ports to test LAG.
             -# Verify that there are 2 ports in test LAG.
             -# Remove the ports in test LAG
             -# Delete test LAG.
-        @endsteps
+
         """
         pass
     test_item = MagicMock(

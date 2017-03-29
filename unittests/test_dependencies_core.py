@@ -1,32 +1,33 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_dependencies_core.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Unittests for dependencies core functions`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  test_dependencies_core.py
-
-@summary  Unittests for dependencies core functions.
 """
 
 import pytest
 
+
 class FakeOpts(object):
-    """
-    @brief  FakeOpts class
+    """FakeOpts class.
+
     """
     def __init__(self):
-        """
-        @brief  Initialize FakeOpts class
+        """Initialize FakeOpts class.
+
         """
         self.setup = "path"
         self.env = None
@@ -35,8 +36,8 @@ class FakeOpts(object):
 
 
 def test_import_afs_module():
-    """
-    @brief  Verify that all modules can be imported within 'afs' module and 'AFS' object can be created
+    """Verify that all modules can be imported within 'afs' module and 'AFS' object can be created.
+
     """
     module_name = "afs"
     try:
@@ -50,8 +51,8 @@ def test_import_afs_module():
 
 
 def test_import_afscross_module():
-    """
-    @brief  Verify that all modules can be imported within 'afs' module and 'AFS' object can be created
+    """Verify that all modules can be imported within 'afs' module and 'AFS' object can be created.
+
     """
     module_name = "afscross"
     try:
@@ -65,8 +66,8 @@ def test_import_afscross_module():
 
 
 def test_import_clicmd_module():
-    """
-    @brief  Verify that all modules can be imported within 'clicmd' module and 'CLICmd' object can be created
+    """Verify that all modules can be imported within 'clicmd' module and 'CLICmd' object can be created.
+
     """
     module_name = "clicmd_ons"
     try:
@@ -77,8 +78,8 @@ def test_import_clicmd_module():
 
 
 def test_import_clissh_module():
-    """
-    @brief  Verify that all modules can be imported within 'clissh' module and 'CLISSH' object can be created
+    """Verify that all modules can be imported within 'clissh' module and 'CLISSH' object can be created.
+
     """
     module_name = "clissh"
     try:
@@ -90,14 +91,13 @@ def test_import_clissh_module():
 
 
 def test_import_common3_module(monkeypatch):
-    """
-    @brief  Verify that all modules can be imported within 'common3' module and 'Cross'/'Environment' objects can be created
-    """
+    """Verify that all modules can be imported within 'common3' module and 'Cross'/'Environment' objects can be created.
 
+    """
 
     def fake_get_conf(env_object, path_string):
-        """
-        @brief  Get config
+        """Get config.
+
         """
         return {'env': []}
 
@@ -114,8 +114,8 @@ def test_import_common3_module(monkeypatch):
 
 
 def test_import_connpool_module():
-    """
-    @brief  Verify that all modules can be imported within 'connpool' module and 'ConnectionPool' object can be created
+    """Verify that all modules can be imported within 'connpool' module and 'ConnectionPool' object can be created.
+
     """
     module_name = "connpool"
     try:
@@ -126,8 +126,8 @@ def test_import_connpool_module():
 
 
 def test_import_custom_exception_module():
-    """
-    @brief  Verify that all modules can be imported within 'custom_exception' module and object of classes can be created
+    """Verify that all modules can be imported within 'custom_exception' module and object of classes can be created.
+
     """
     module_name = "custom_exception"
     try:
@@ -154,8 +154,8 @@ def test_import_custom_exception_module():
 
 
 def test_import_dev_basecross_module():
-    """
-    @brief  Verify that all modules can be imported within 'dev_basecross' module and classes objects can be created
+    """Verify that all modules can be imported within 'dev_basecross' module and classes objects can be created.
+
     """
     module_name = "dev_basecross"
     try:
@@ -170,8 +170,8 @@ def test_import_dev_basecross_module():
 
 
 def test_import_dev_linux_host_module():
-    """
-    @brief  Verify that all modules can be imported within 'dev_linux_host' module and classes objects can be created
+    """Verify that all modules can be imported within 'dev_linux_host' module and classes objects can be created.
+
     """
     module_name = "dev_linux_host"
     try:
