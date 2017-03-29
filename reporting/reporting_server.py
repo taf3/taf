@@ -24,9 +24,11 @@ import socket
 import sys
 import time
 import argparse
+import contextlib
+import traceback
+from functools import wraps
 from threading import RLock
 from threading import Thread
-import traceback
 from collections import OrderedDict
 
 from twisted.web import xmlrpc, server
@@ -37,6 +39,7 @@ from testlib import loggers
 
 
 MODULES = {}
+FIRST_ITEM_IN_QUEUE = 0
 
 
 def imp_plugins(dest):
@@ -55,6 +58,19 @@ def imp_plugins(dest):
             MODULES[_module] = __import__(_module)
 
 
+def log_exception(msg, exc_type=(Exception,)):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            try:
+                return func(self, *args, **kwargs)
+            except exc_type as err:
+                log_message = "Function '{0}' {1}. Error: {2}".format(func.__name__, msg, err)
+                self.class_logger.error(log_message)
+        return wrapper
+    return decorator
+
+
 class CommandCollector(object):
     """Thread safe collector for server command queue.
 
@@ -69,6 +85,7 @@ class CommandCollector(object):
         self._lock = RLock()
         self.queue = []
 
+    @log_exception(msg="failed to add command")
     def add(self, cmd):
         """Add command to collector.
 
@@ -84,17 +101,10 @@ class CommandCollector(object):
             command_collector.add(command)
 
         """
-        _ok = False
-        self._lock.acquire()
-        try:
+        with self._lock:
             self.queue.append(cmd)
-            self.class_logger.info("Command added successfully. CMD keys: {0}".format(list(cmd.keys())))
-            _ok = True
-        except Exception as err:
-            self.class_logger.error("Command addition failed. CMD keys: {0}. Error: {1}".format(list(cmd.keys()), err))
-        finally:
-            self._lock.release()
-        return _ok
+            self.class_logger.info("Command added successfully. CMD keys: %s", list(cmd.keys()))
+            return True
 
     def pop(self):
         """Pop the first item.
@@ -106,14 +116,11 @@ class CommandCollector(object):
             See also get() method.
 
         """
-        self._lock.acquire()
-        try:
-            if len(self.queue) > 0:
-                return self.queue.pop(0)
-            else:
+        with self._lock:
+            try:
+                return self.queue.pop(FIRST_ITEM_IN_QUEUE)
+            except IndexError:
                 return None
-        finally:
-            self._lock.release()
 
     def get(self):
         """Same as pop but does not remove item.
@@ -125,14 +132,11 @@ class CommandCollector(object):
             See pop() method description.
 
         """
-        self._lock.acquire()
-        try:
-            if len(self.queue) > 0:
-                return self.queue[0]
-            else:
+        with self._lock:
+            try:
+                return self.queue[FIRST_ITEM_IN_QUEUE]
+            except IndexError:
                 return None
-        finally:
-            self._lock.release()
 
     def drop(self, index):
         """Remove item by index.
@@ -144,19 +148,17 @@ class CommandCollector(object):
             dict|str: Command or Error message.
 
         """
-        self._lock.acquire()
-        try:
-            return self.queue.pop(index)
-        except IndexError:
-            message = "ERROR: No item with such index: {0}".format(index)
-            self.class_logger.error(message)
-            return message
-        except Exception as err:
-            message = "ERROR: {0}".format(err)
-            self.class_logger.error(message)
-            return message
-        finally:
-            self._lock.release()
+        with self._lock:
+            try:
+                return self.queue.pop(index)
+            except IndexError:
+                message = "ERROR: No item with such index: {0}".format(index)
+                self.class_logger.error(message)
+                return message
+            except Exception as err:
+                message = "ERROR: {0}".format(err)
+                self.class_logger.error(message)
+                return message
 
     def len(self):
         """Return command queue length.
@@ -165,11 +167,8 @@ class CommandCollector(object):
             int: command queue length.
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             return len(self.queue)
-        finally:
-            self._lock.release()
 
     def list(self):
         """Return list of all items.
@@ -178,11 +177,8 @@ class CommandCollector(object):
             list[dict]: All commands list.
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             return self.queue
-        finally:
-            self._lock.release()
 
 
 class ClientCollector(object):
@@ -222,8 +218,7 @@ class ClientCollector(object):
             client_collector.update((client_id, build), ClientCollector.STATUSES[0])
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             if status not in self.STATUSES:
                 raise ValueError("Invalid status - {0}. Acceptable values: {1}.".format(status, self.STATUSES))
             if client not in self.clients:
@@ -232,8 +227,6 @@ class ClientCollector(object):
             self.clients[client]['connect_time'] = time.time()
             if "reports" not in self.clients[client]:
                 self.clients[client]['reports'] = {}
-        finally:
-            self._lock.release()
 
     def addreport(self, client, report_type):
         """Add and open report type.
@@ -255,14 +248,11 @@ class ClientCollector(object):
             client_collector.addreport(client, report_type)
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             if client not in self.clients:
                 raise KeyError("Unknown client: {0}.".format(client))
             self.clients[client]['reports'][report_type] = True
             self.clients[client]['reports'] = OrderedDict(sorted(list(self.clients[client]['reports'].items()), key=lambda t: t[0]))
-        finally:
-            self._lock.release()
 
     def closereport(self, client, report_type):
         """Close report type (set False for existing opened report).
@@ -278,14 +268,11 @@ class ClientCollector(object):
             None
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             if client not in self.clients:
                 raise KeyError("Unknown client: {0}.".format(client))
             self.clients[client]['reports'][report_type] = False
-            self.class_logger.info("Report type - {0} of client - {1} closed".format(report_type, client))
-        finally:
-            self._lock.release()
+            self.class_logger.info("Report type - %s of client - %s closed", report_type, client)
 
     def delreport(self, client, report_type):
         """Remove report type (disabling collecting info for report).
@@ -301,17 +288,15 @@ class ClientCollector(object):
             None
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             if client not in self.clients:
                 raise KeyError("Unknown client: {0}.".format(client))
             try:
                 del self.clients[client]['reports'][report_type.lower()]
             except KeyError:
                 pass
-        finally:
-            self._lock.release()
 
+    @log_exception(msg="failed to get client's attribute")
     def get(self, client, attr):
         """Return client's attribute.
 
@@ -329,16 +314,11 @@ class ClientCollector(object):
             client_collector.get(client, "reports")
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             if client in self.clients and attr in self.clients[client]:
                 return self.clients[client][attr]
             else:
                 return None
-        except Exception as err:
-            self.class_logger.debug("Error occurred: {0}".format(err))
-        finally:
-            self._lock.release()
 
     def getall(self, client):
         """Return all client attributes.
@@ -350,14 +330,11 @@ class ClientCollector(object):
             dict: client dict.
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             if client in self.clients:
                 return self.clients[client]
             else:
                 return None
-        finally:
-            self._lock.release()
 
     def active(self):
         """List of active clients.
@@ -369,12 +346,9 @@ class ClientCollector(object):
             There are can be commands from client in queue when client is disconnected (see inprocess() method).
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             active = [_x for _x in list(self.clients.keys()) if self.clients[_x]['status'] == self.STATUSES[0]]
             return active
-        finally:
-            self._lock.release()
 
     def inprocess(self):
         """List of clients with unprocessed close command.
@@ -386,12 +360,9 @@ class ClientCollector(object):
             On close command server should close (and dump) client's reports.
 
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             active = [_x for _x in list(self.clients.keys()) if True in list(self.clients[_x]['reports'].values())]
             return active
-        finally:
-            self._lock.release()
 
     def all(self):
         """All connected/disconnected client.
@@ -400,11 +371,11 @@ class ClientCollector(object):
             list[dict]: @return:  list of clients.
 
         """
-        self._lock.acquire()
-        try:
-            return list(self.clients.keys())
-        finally:
-            self._lock.release()
+        with self._lock:
+            try:
+                return list(self.clients.keys())
+            except IndexError:
+                return None
 
 
 def update_timestamp(function):
@@ -538,7 +509,7 @@ class XMLReportingServer(xmlrpc.XMLRPC):
             xs.reports.open("py.test-user-1234", "CoolSoftware-0.0.0.1234-1")
 
         """
-        self.class_logger.info("New client {0} has connected to {1}.".format(client_id, self.NAME))
+        self.class_logger.info("New client %s has connected to %s.", client_id, self.NAME)
         self.clients.update(client_id, ClientCollector.STATUSES[0])
         return True
 
@@ -561,13 +532,13 @@ class XMLReportingServer(xmlrpc.XMLRPC):
             xs.reports.close("py.test-user-1234", "CoolSoftware-0.0.0.1234-1")
 
         """
-        self.class_logger.info("Client {0} has disconnected from {1}.".format(client_id, self.NAME))
+        self.class_logger.info("Client %s has disconnected from %s.", client_id, self.NAME)
         connect_time = self.clients.get(client_id, "connect_time")
         if connect_time is not None:
             duration = time.time() - connect_time
         else:
             duration = 0
-        self.class_logger.info("Client {0} session duration = {1}.".format(client_id, duration))
+        self.class_logger.info("Client %s session duration = %s.", client_id, duration)
         cmd = {'client': client_id, 'close': True, 'duration': duration}
         self.queue.add(cmd)
         self.clients.update(client_id, ClientCollector.STATUSES[1])
@@ -590,7 +561,7 @@ class XMLReportingServer(xmlrpc.XMLRPC):
             xs.reports.reportadd("py.test-user-1234", "CoolSoftware-0.0.0.1234-1", "xml")
 
         """
-        self.class_logger.info("Add {1} report type for client {0}.".format(client_id, report_type))
+        self.class_logger.info("Add %s report type for client %s.", report_type, client_id)
         self.clients.addreport(client_id, report_type)
         self.check_report_instance(report_type, client_id)
         return True
@@ -612,8 +583,7 @@ class XMLReportingServer(xmlrpc.XMLRPC):
             xs.reports.delreport("py.test-user-1234", "CoolSoftware-0.0.0.1234-1", "xml")
 
         """
-        self.class_logger.info("Remove {1} report type from client {0}.".
-                               format(client_id, report_type))
+        self.class_logger.info("Remove %s report type from client %s.", report_type, client_id)
         self.clients.delreport(client_id, report_type)
         return True
 
@@ -654,12 +624,11 @@ class XMLReportingServer(xmlrpc.XMLRPC):
         try:
             setattr(self._reports[report_type.upper()][client_id], cfgname, value)
         except Exception as err:
-            self.class_logger.error("Setattr {0} = {1} failed for report '{2}'. Exception occurred: {3}".
-                                    format(cfgname, value, report_type, err))
+            self.class_logger.error("Setattr %s = %s failed for report '%s'. Exception occurred: %s",
+                                    cfgname, value, report_type, err)
             return err
         else:
-            self.class_logger.info("Setattr {0} = {1} is OK for report {2}.".
-                                   format(cfgname, value, report_type))
+            self.class_logger.info("Setattr %s = %s is OK for report %s.", cfgname, value, report_type)
             return True
 
     def xmlrpc_idletime(self):
@@ -868,16 +837,14 @@ class XMLReportingServer(xmlrpc.XMLRPC):
             xs.reports.post("py.test-user-1234", "0.0.0.1234-1/CoolSoftware", "feature_tests.Feature1Test", "test_same_behaviour", "Run")
 
         """
-        self.class_logger.debug("Kwargs: %s" % (str(kwargs), ))
-        try:
-            if info is None:
-                info = {}
-
-            cmd = {'client': client, 'build': build, 'suite': suite, 'tc': tc, 'status': status, 'report': report, 'info': info, 'build_info': build_info}
+        self.class_logger.debug("Kwargs: %s", kwargs)
+        if info is None:
+            info = {}
+        cmd = {'client': client, 'build': build, 'suite': suite, 'tc': tc, 'status': status, 'report': report, 'info': info, 'build_info': build_info}
+        with contextlib.suppress(Exception):
             self.queue.add(cmd)
             return True
-        except Exception:
-            return False
+        return False
 
     def queue_watchdog(self):
         """Send commands from queue to command processor in loop.
@@ -907,8 +874,8 @@ class XMLReportingServer(xmlrpc.XMLRPC):
                     exc_type, exc_value, exc_traceback = sys.exc_info()
                     traceback_message = traceback.format_exception(exc_type, exc_value,
                                                                    exc_traceback)
-                    self.class_logger.error("Exception while processing command: {0}".format(cmd))
-                    self.class_logger.error("Traceback:\n{0}".format("".join(traceback_message)))
+                    self.class_logger.error("Exception while processing command: %s", cmd)
+                    self.class_logger.error("Traceback:\n%s", "".join(traceback_message))
                     raise
             else:
                 time.sleep(0.5)
@@ -928,30 +895,28 @@ class XMLReportingServer(xmlrpc.XMLRPC):
             self.watchdog_thr.start()
 
         self.class_logger.info("Starting queue processing.")
-        if self.watchdog:
-            if self.watchdog_thr is None:
-                # First start
-                self.class_logger.info("Command processor first start.")
-                start_thr()
-            else:
-                if self.watchdog_thr.is_alive() is False:
-                    # Thread is dead
-                    # Try to stop current thread
-                    self.class_logger.info("Command processor has been started but dead.")
-                    self.class_logger.info("Try to wait while thread terminates.")
-                    self.watchdog_thr.join(10)
-                    if self.watchdog_thr.is_alive():
-                        self.class_logger.warning("watchdog_thr didn't terminate after 10 sec.")
-                        self.class_logger.warning("Thread object will be deleted and new one created.")
-                    # Try to restart
-                    self.class_logger.info("Command processor has been started but dead.")
-                    start_thr()
-                else:
-                    self.class_logger.info("Command processor is already running.")
-            return True
-        else:
+        if not self.watchdog:
             self.class_logger.info("Queue processing start canceled. Reason - it is disabled.")
             return False
+        if self.watchdog_thr is None:
+            # First start
+            self.class_logger.info("Command processor first start.")
+            start_thr()
+        elif self.watchdog_thr.is_alive():
+            self.class_logger.info("Command processor is already running.")
+        else:
+            # Thread is dead
+            # Try to stop current thread
+            self.class_logger.info("Command processor has been started but dead.")
+            self.class_logger.info("Try to wait while thread terminates.")
+            self.watchdog_thr.join(10)
+            if self.watchdog_thr.is_alive():
+                self.class_logger.warning("watchdog_thr didn't terminate after 10 sec.")
+                self.class_logger.warning("Thread object will be deleted and new one created.")
+            # Try to restart
+            self.class_logger.info("Command processor has been started but dead.")
+            start_thr()
+        return True
 
     def command_processor(self, cmd):
         """Processing command from queue.
@@ -964,12 +929,8 @@ class XMLReportingServer(xmlrpc.XMLRPC):
 
         """
         # Truncating command for log message
-        cmd1 = cmd.copy()
-        try:
-            cmd1.pop("report")
-        except KeyError:
-            pass
-        self.class_logger.info("Start processing command: {0}.".format(cmd1))
+        cmd1 = {k: v for k, v in cmd.items() if k not in ['report']}
+        self.class_logger.info("Start processing command: %s.", cmd1)
 
         # Processing shutdown command.
         if "shutdown" in cmd:
@@ -989,20 +950,20 @@ class XMLReportingServer(xmlrpc.XMLRPC):
             return
 
         for r_type in self.clients.get(cmd['client'], "reports"):
-            self.class_logger.debug("Processing {0} command.".format(r_type))
+            self.class_logger.debug("Processing %s command.", r_type)
             try:
                 self._reports[r_type.upper()][cmd['client']].process_cmd(cmd)
                 if "close" in cmd:
-                    self.class_logger.info("Closing {0} report.".format(r_type))
+                    self.class_logger.info("Closing %s report.", r_type)
                     self.clients.closereport(cmd['client'], r_type)
 
             except Exception as err:
-                self.class_logger.error("Error while processing command: {0}. ERROR: {1}".format(cmd, err))
+                self.class_logger.error("Error while processing command: %s. ERROR: %s", cmd, err)
 
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 traceback_message = traceback.format_exception(exc_type, exc_value,
                                                                exc_traceback)
-                self.class_logger.error("Traceback:\n{0}".format("".join(traceback_message)))
+                self.class_logger.error("Traceback:\n%s", "".join(traceback_message))
 
     def is_idle(self):
         """Command processor idle status.
@@ -1011,15 +972,12 @@ class XMLReportingServer(xmlrpc.XMLRPC):
             bool: True if command queue is empty and all clients are in closed state
 
         """
-        self.class_logger.info("Last operation time: {0}".format(self.last_operation_time))
+        self.class_logger.info("Last operation time: %s", self.last_operation_time)
         qlen = self.queue.len()
-        self.class_logger.info("Command queue length: {0}".format(qlen))
+        self.class_logger.info("Command queue length: %s", qlen)
         cinprocess = self.clients.inprocess()
-        self.class_logger.info("Clients in process: {0}".format(cinprocess))
-        if qlen == 0 and len(cinprocess) == 0:
-            return True
-        else:
-            return False
+        self.class_logger.info("Clients in process: %s", cinprocess)
+        return qlen == 0 and len(cinprocess) == 0
 
     def check_report_instance(self, r_type, client_id):
         """Create report instance if any for given client_id and build.
@@ -1077,12 +1035,9 @@ def get_local_port():
     """Return free local port.
 
     """
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.bind(("", 0))
-    _port = sock.getsockname()[1]
-    sock.close()
-    del sock
-    return _port
+    with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+        sock.bind(("", 0))
+        return sock.getsockname()[1]
 
 
 def main(ppid):
@@ -1093,7 +1048,7 @@ def main(ppid):
         """Process termination signals.
 
         """
-        mod_logger.info("Caught a signal={0}".format(signum))
+        mod_logger.info("Caught a signal=%s", signum)
         time.sleep(3)
         # 2 is signal of SysExit or Ctrl+C KeyboardInterupt
         if signum != 2:
@@ -1107,7 +1062,7 @@ def main(ppid):
     opts = parse_options()
 
     mod_logger = loggers.module_logger(__name__)
-    mod_logger.info("Log filename: {0}".format(loggers.LOG_FILENAME))
+    mod_logger.info("Log filename: %s", loggers.LOG_FILENAME)
 
     xmlrpcsrv = XMLReportingServer()
     xmlrpcsrv.setup(opts)
@@ -1119,22 +1074,18 @@ def main(ppid):
     # We cannot catch server stdout (because if we do so, we break stdout logger)
     # So we use file for this.
     _vr_path = os.path.join("/tmp", "{0}.pid".format(ppid))
-    _vr = None
     try:
-        _vr = open(_vr_path, "w")
-        _vr.write(str(port))
-    except Exception as err:
-        mod_logger.warning("Failed to create pid/port file {0}. Error:\n{1}".format(_vr_path, err))
+        with open(_vr_path, "w") as _vr:
+            _vr.write(str(port))
+    except OSError as err:
+        mod_logger.warning("Failed to create pid/port file %s. Error:\n%s", _vr_path, err)
         if not opts.port:
             # Raise exception in case RS should be started with random port.
             # Client cannot determinate RS port without file.
             raise
-    finally:
-        if _vr:
-            _vr.close()
 
     reactor.listenTCP(int(port), server.Site(xmlrpcsrv))  # pylint: disable=no-member
-    mod_logger.info("Listen on localhost:{0}".format(port))
+    mod_logger.info("Listen on localhost: %s", port)
     reactor.run()  # pylint: disable=no-member
 
 

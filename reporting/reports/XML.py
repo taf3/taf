@@ -170,29 +170,29 @@ class XML(object):
         if name == "logfile" and value is not None:
             self.__dict__[name] = os.path.normpath(os.path.join(os.path.realpath(os.curdir),
                                                                 os.path.expanduser(os.path.expandvars(value))))
-            self.class_logger.info("Set XML logfile: {0}.".format(self.__dict__[name]))
+            self.class_logger.info("Set XML logfile: %s.", self.__dict__[name])
 
         elif name == "cfgfile":
             if value is None:
                 value = os.path.join(os.path.dirname(__file__), "xmlreport_cfg.json")
             self.__dict__[name] = value
-            self.class_logger.info("Set config file: {0}.".format(value))
+            self.class_logger.info("Set config file: %s.", value)
             self.__configinit(value)
 
         elif name == "info_dict" and isinstance(value, list):
             self.__dict__["infodict"][value[0]] = value[1]
-            self.class_logger.info("Appending InfoDict: {0} - {1}.".format(value[0], value[1]))
+            self.class_logger.info("Appending InfoDict: %s - %s.", value[0], value[1])
 
         elif name == "htmlcfg":
             self.__dict__[name] = value
             if value is None:
                 value = os.path.join(os.path.dirname(__file__), "htmlreport_cfg.json")
-            self.class_logger.info("Set html config file: {0}.".format(value))
+            self.class_logger.info("Set html config file: %s.", value)
             self.__dict__['htmlconf'] = value
             self.__htmlconfig(value)
 
         else:
-            self.class_logger.debug("Setting attr: {0} - {1}.".format(name, value))
+            self.class_logger.debug("Setting attr: %s - %s.", name, value)
             self.__dict__[name] = value
 
     def __htmlconfig(self, configfile):
@@ -219,13 +219,13 @@ class XML(object):
 
         """
         config_file = get_full_path(cfgfile)
-        self.class_logger.info("Loading config from file {0}...".format(config_file))
+        self.class_logger.info("Loading config from file %s...", config_file)
         config = {}
 
         try:
             config = json.loads(open(config_file).read())
         except Exception as err:
-            self.class_logger.error("cannot open configuration file: {0}.".format(err))
+            self.class_logger.error("cannot open configuration file: %s.", err)
 
         if "css" in config:
             self._css = config['css']
@@ -252,7 +252,7 @@ class XML(object):
             value:  Attribute value
 
         """
-        self.class_logger.info("Appending infodict: {0} = {1}".format(attr, value))
+        self.class_logger.info("Appending infodict: %s = %s", attr, value)
         self.infodict[attr] = value
 
     def info(self):
@@ -341,7 +341,7 @@ class XML(object):
             self.class_logger.info("Skip XML opentc step. Test case run isn't finished yet.")
             return
 
-        self.class_logger.info("Processing {0}/{1} with status {2}.".format(classnames, tcname, status))
+        self.class_logger.info("Processing %s/%s with status %s.", classnames, tcname, status)
         if self.prefix:
             classnames.insert(0, self.prefix)
         attrs = {'classname': classnames, 'name': tcname}
@@ -399,7 +399,7 @@ class XML(object):
             _tc_id = self._connector_cmd("get_tcid", [tcname, ])
             if _tc_id is not None:
                 attrs['testid'] = _tc_id
-                self.class_logger.info("TestMgmtSystem TC Id of {0} = {1}".format(tcname, _tc_id))
+                self.class_logger.info("TestMgmtSystem TC Id of %s = %s", tcname, _tc_id)
                 _prev_bug_ids = self._connector_cmd("get_defectids", [tcname, ])
             if self.host is None and config:
                 self.host = config[0]
@@ -437,7 +437,7 @@ class XML(object):
         elif status == "Monitor":
             self.append_monitor(report['monitor'])
         else:
-            self.class_logger.error("Unknown status of TC: {0} - {1}. TC will be marked as \"Blocked\"".format(tcname, status))
+            self.class_logger.error("Unknown status of TC: %s - %s. TC will be marked as \"Blocked\"", tcname, status)
             if self.status_register == [tcname, "Passed"]:
                 # self.failed += 1
                 self.passed -= 1
@@ -561,8 +561,7 @@ class XML(object):
 
         """
         self.class_logger.info("Appending XML report with fail.")
-        for i in range(len(report['sections'])):
-            report['sections'][i] = xml_unescape(report['sections'][i])  # pylint: disable=no-member
+        report['sections'] = [xml_unescape(section) for section in report['sections']]  # pylint: disable=no-member
         sec = dict(report['sections'])
         self.fail_traceback = self.Junit.failure(message="Test failure")  # pylint: disable=no-member
         # Removing BASH escape symbols (decolorizing)
@@ -593,7 +592,7 @@ class XML(object):
             config(dict):  Connectors configuration
 
         """
-        self.class_logger.info("Appending TC with related defects IDs {0}".format(defect_ids))
+        self.class_logger.info("Appending TC with related defects IDs %s", defect_ids)
         _host = None
 
         if config is not None:
@@ -613,33 +612,24 @@ class XML(object):
         self.logfile = get_html_xml_path(self.logfile, self.buildname)
         self.htmlfile = get_html_xml_path(self.htmlfile, self.buildname)
 
-        self.class_logger.info("Dumping XML Log to {0}.".format(self.logfile))
+        self.class_logger.info("Dumping XML Log to %s.", self.logfile)
         # Define xml logfile name.
         dump_logfile = get_uniq_filename(self.logfile)
         if dump_logfile != self.logfile:
-            self.class_logger.info("Dumping XML Log path changed to {0}.".format(dump_logfile))
+            self.class_logger.info("Dumping XML Log path changed to %s.", dump_logfile)
 
-        _path_arr = dump_logfile.split("/")
-        if _path_arr and not os.path.exists(dump_logfile[:-len(_path_arr[-1])]):
-            os.makedirs(dump_logfile[:-len(_path_arr[-1])])
+        os.makedirs(os.path.dirname(dump_logfile), exist_ok=True)
 
-        if py_std.sys.version_info[0] < 3:
-            logfile = py_std.codecs.open(dump_logfile, "w", encoding="utf-8")
-        else:
-            logfile = open(dump_logfile, "w", encoding="utf-8")
-
-        logfile.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>")
+        with open(dump_logfile, "w", encoding="utf-8") as logfile:
+            logfile.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>")
         if self._css:
             logfile.write("<?xml-stylesheet type=\"text/css\" href=\"%s\"?>" % (self._css, ))
         if self._xsl:
             logfile.write("<?xml-stylesheet type=\"text/xsl\" href=\"%s\"?>" % (self._xsl, ))
         if self.infodict:
-            info_nodes = []
-            for info_node in list(self.infodict.keys()):
-                info_nodes.append(
-                    self.Junit.info_node(self.infodict[info_node],  # pylint: disable=no-member
-                                         name=info_node))
-            self.tests.append(self.Junit.header(info_nodes))  # pylint: disable=no-member
+            self.tests.append(
+                self.Junit.header([self.Junit.info_node(value, key) for key, value  # pylint: disable=no-member
+                                   in self.infodict.items()]))
         try:
             logfile.write(self.Junit.testsuite(self.tests,  # pylint: disable=no-member
                                                name="",
@@ -654,18 +644,16 @@ class XML(object):
                                                connector=self._connector,
                                                ).unicode(indent=0))
         except Exception as err:
-            self.class_logger.error("Cannot dump XML report to file {0}. ERRTYPE: {1}, ERR: {2}".format(dump_logfile, type(err), err))
-            logfile.close()
+            self.class_logger.error("Cannot dump XML report to file %s. ERRTYPE: %s, ERR: %s", dump_logfile, type(err), err)
+
         else:
-            self.class_logger.info("XML report is successfully dumped to file {0}.".format(dump_logfile))
+            self.class_logger.info("XML report is successfully dumped to file %s.", dump_logfile)
             self.tests = []
             self.dump_count += 1
 
-            logfile.close()
-
             # Creating HTML report
             if self.htmlfile is not None and self.__html_report is not None:
-                self.class_logger.info("Dumping HTML report to {0}...".format(self.htmlfile))
+                self.class_logger.info("Dumping HTML report to %s...", self.htmlfile)
                 self.__html_report.dump_html(dump_logfile, self.htmlfile)
 
     def _connector_cmd(self, cmd, args):
@@ -703,11 +691,11 @@ class HTMLReport(object):
         self.xslt_concat = None
         self.html_resources = None
 
-        self.class_logger.info("CurDir {0}.".format(os.path.abspath(os.curdir)))
+        self.class_logger.info("CurDir %s.", os.path.abspath(os.curdir))
         # Define config file location if one
         self.__config_file = config_file
         if not os.path.isfile(self.__config_file):
-            self.class_logger.warning("Config file ({0}) for HTML report not found.".format(self.__config_file))
+            self.class_logger.warning("Config file (%s) for HTML report not found.", self.__config_file)
             self.__config_file = None
 
         # Read attributes from config if one
@@ -715,9 +703,8 @@ class HTMLReport(object):
             config = json.loads(open(self.__config_file).read(), encoding="latin-1")
             for key in config:
                 setattr(self, key, os.path.join(os.path.dirname(__file__), config[key]))
-        self.class_logger.info("Resources: xslt - {0}, {1}; html - {2}".
-                               format(self.xslt_style, self.xslt_concat,
-                                      self.html_resources))
+        self.class_logger.info("Resources: xslt - %s, %s; html - %s",
+                               self.xslt_style, self.xslt_concat, self.html_resources)
 
     def dump_html(self, xmlpath, htmlpath):
         """Create the HTML report from an XML.
@@ -733,7 +720,7 @@ class HTMLReport(object):
         temp_file = None
         try:
             temp_file = tempfile.mkstemp(prefix='html_report.', suffix='.tmp', dir=os.curdir)
-            self.class_logger.info("Creating pure html report: {0} ...".format(temp_file))
+            self.class_logger.info("Creating pure html report: %s ...", temp_file)
 
             reporter.create_pure_html(temp_file[1], xmlpath, None, self.xslt_style, self.xslt_concat)
 
@@ -743,14 +730,14 @@ class HTMLReport(object):
 
             htmlpath = get_uniq_filename(os.path.normpath(os.path.join(os.path.realpath(os.curdir),
                                                                        os.path.expanduser(os.path.expandvars(htmlpath)))))
-            self.class_logger.info("Creating single html report: {0} ...".format(htmlpath))
+            self.class_logger.info("Creating single html report: %s ...", htmlpath)
             reporter.create_single_html(htmlpath, temp_file[1], self.html_resources)
         except Exception as err:
-            self.class_logger.info("Creating HTML report failed. ERROR: {0}".format(err))
+            self.class_logger.info("Creating HTML report failed. ERROR: %s", err)
             exc_type, exc_value, exc_traceback = sys.exc_info()
             traceback_message = traceback.format_exception(exc_type, exc_value,
                                                            exc_traceback)
-            self.class_logger.error("Traceback:\n{0}".format("".join(traceback_message)))
+            self.class_logger.error("Traceback:\n%s", "".join(traceback_message))
         finally:
             if temp_file is not None:
                 os.remove(temp_file[1])
