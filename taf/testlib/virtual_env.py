@@ -40,7 +40,7 @@ import json
 import pprint
 import itertools
 from functools import wraps
-import traceback
+from itertools import chain
 
 import netaddr
 import pytest
@@ -935,48 +935,33 @@ class VirtualEnv(object):
             flavors_client = self.handle.os_adm.flavors_client
         flavors_map = self.get_flavors(flavors_client=flavors_client)
 
-        name = None
-        if 'name' in flavor_spec:
-            name = flavor_spec.pop('name')
+        name = flavor_spec.pop('name', None)
 
-        standard_flv_keys = {'ram', 'disk', 'vcpus'}
-        extra_flv_keys = set(flavor_spec.keys()) - standard_flv_keys
+        all_flv_keys = set(flavor_spec)
+        standard_flv_keys = all_flv_keys.intersection({'ram', 'disk', 'vcpus'})
+        extra_flv_keys = all_flv_keys - standard_flv_keys
 
-        def cmp_spec(f):
-            _not_found = object()
-            comp = f
-            for keys_set in [set(flavor_spec.keys()) - extra_flv_keys, extra_flv_keys]:
-                for k in keys_set:
-                    if flavor_spec[k] != comp.get(k, _not_found):
-                        return False
-                comp = f.get('extra_specs', {})
-            return True
+        _not_found = object()
 
-        matching_specs = list(filter(cmp_spec, flavors_map.values()))
+        def make_iter(keys, data):
+            return (value == comp_value for value, comp_value in
+                    (flavor_spec[k], data.get(k, _not_found) for k in keys))
+
+        def filter_test(comp):
+            return all(
+                chain(make_iter(standard_flv_keys, comp), make_iter(extra_flv_keys, comp.get('extra_specs', {}))))
+
+        matching_specs = list(filter(filter_test, flavors_map.values()))
         if matching_specs:
-            if name:
-                try:
-                    # return THE Desired flavor (with the matching name)
-                    return next(f for f in matching_specs if f['name'] == name)
-                except StopIteration:
-                    # return A Desired flavor (with a different name)
-                    return matching_specs[0]
-            else:
-                # return A Desired flavor (with a different name)
-                return matching_specs[0]
-        else:
-            if name:
-                try:
-                    if next(f for f in flavors_map.values() if f['name'] == name):
-                        # except on THE Undesired flavor (with the matching name)
-                        raise Exception('Flavor conflict: EEXIST with different specs')
-                except StopIteration:
-                    pass
-            else:
-                name = 'generic-flavor'
-
-            # create and return THE Desired flavor
-            return self.create_flavor(name=name, **flavor_spec)
+            # return desired flavor (can be with different name)
+            return next((f for f in matching_specs if f['name'] == name), matching_specs[0])
+        elif not name:
+            name = 'generic-flavor'
+        elif all(f['name'] == name for f in flavors_map.values()):
+            # except on THE Undesired flavor (with the matching name)
+            raise Exception('Flavor conflict: EEXIST with different specs')
+        # create and return THE Desired flavor
+        return self.create_flavor(name=name, **flavor_spec)
 
     def get_server_port_map(self, server, ip_addr=None):
         ports = self.handle._list_ports(device_id=server['id'], fixed_ip=ip_addr)  # pylint: disable=protected-access
