@@ -23,8 +23,9 @@
 
 import os
 import sys
-import datetime
 import time
+import datetime
+import importlib
 
 import sphinx_rtd_theme
 
@@ -35,8 +36,8 @@ sys.path.insert(0, os.path.abspath('../../'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.inheritance_diagram',
-              'sphinx.ext.coverage', 'sphinx.ext.ifconfig', 'sphinx.ext.graphviz', 'sphinxcontrib.napoleon', 'autoapi.sphinx',
-              'sphinx.ext.intersphinx', 'sphinx.ext.viewcode']
+              'sphinx.ext.coverage', 'sphinx.ext.ifconfig', 'sphinx.ext.graphviz', 'sphinx.ext.intersphinx',
+              'sphinx.ext.viewcode', 'sphinxcontrib.napoleon', 'autoapi.sphinx']
 
 # Autodoc settings
 # This value contains a list of modules to be mocked up.
@@ -205,3 +206,52 @@ autoapi_modules = {
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/3.4': None}
+
+
+# No need to install 3rd party packages to generate the docs
+class Mock(object):
+
+    __all__ = []
+
+    assign = None
+    apply = None
+    vector = None
+    split = None
+    interpolate = None
+    copy = None
+    __add__ = None
+    __mul__ = None
+    __neg__ = None
+    get_gst = None
+    SolverType_LU = None
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name[0] == name[0].upper():
+            mockType = type(name, (Mock, ), {})
+            mockType.__module__ = __name__
+            return mockType
+        else:
+            return Mock()
+
+
+MOCK_MODULES = ['taf.testlib.TRex.TRex', 'taf.testlib.TRex.TRexHTL', 'taf.testlib.tempest_clients.magnum.sfc_client',
+                'taf.testlib.tempest_clients.magnum.models.clusterpatch_mode', 'oslo_log', 'linux.lldp', 'pcapy',
+                'tempest', 'tempest.lib', 'tempest.lib.exceptions', 'tempest.lib.common',
+                'trex_stl_lib', 'trex_stl_lib.api', 'trex_stl_lib.trex_stl_hltapi',
+                ]
+
+for mod_name in MOCK_MODULES:
+    try:
+        importlib.import_module(mod_name)
+    except ImportError:
+        print("Generating mock module %s" % mod_name)
+        sys.modules[mod_name] = Mock()

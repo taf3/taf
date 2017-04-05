@@ -16,7 +16,7 @@ The current implementation of the testing framework has the following directory 
        + utils
 
 
-Directory **"docs"** contains documentation generated using doxygen and docutils tools, which are described later.
+Directory **"docs"** contains documentation generated using sphinx and readthedocs tools.
 
 Directory **"plugins"** contains TAF related plugins wich extends py.test and TAF testlib functionality and could be enabled/disabled for particular tests ot group of tests.
 
