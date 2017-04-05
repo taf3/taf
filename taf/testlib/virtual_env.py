@@ -957,9 +957,10 @@ class VirtualEnv(object):
             return next((f for f in matching_specs if f['name'] == name), matching_specs[0])
         elif not name:
             name = 'generic-flavor'
-        elif all(f['name'] == name for f in flavors_map.values()):
+        elif any(f['name'] == name for f in flavors_map.values()):
             # except on THE Undesired flavor (with the matching name)
             raise Exception('Flavor conflict: EEXIST with different specs')
+
         # create and return THE Desired flavor
         return self.create_flavor(name=name, **flavor_spec)
 
