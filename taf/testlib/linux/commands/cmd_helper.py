@@ -1,22 +1,23 @@
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``cmd_helper.py``
+
+`Flexible command representation with parsing and building support`
+
 """
-@copyright Copyright (c) 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  cmd_helper.py
-
-@summary  flexible command representation with parsing and building support
-"""
 import copy
 import operator
 import argparse
@@ -90,7 +91,7 @@ class ArgumentBuilder(object):
             _key_out = _val_out = _out = None
             arg_kwargs = {
                 'arg_name': arg_name,
-                'arg_val': arg_val
+                'arg_val': arg_val,
             }
             if key:
                 _key_out = key(params, **arg_kwargs)
@@ -156,7 +157,7 @@ class ArgumentBuilder(object):
 
                 _fmt_kwargs = {
                     'arg_name': arg_name,
-                    'arg_val': arg_val
+                    'arg_val': arg_val,
                 }
                 _out = _fmt(*_fmt_args, **_fmt_kwargs)
                 if _out:
@@ -174,15 +175,15 @@ class ArgumentBuilder(object):
                 {
                     cls.__TRUE__: cls.FORMAT_KEY_FIRST,
                     cls.__FALSE__: cls.FORMAT_NONE,
-                    None: cls.FORMAT_NONE
+                    None: cls.FORMAT_NONE,
                 },
                 default=cls.FORMATTER_JOIN_KEY_VAL(
                     key=cls.FORMAT_KEY_FIRST,
                     joiner=cls.FORMAT_ARG_APPEND_LIST,
                     val=cls.FORMAT_VAL_TRANSFORM(str),
-                )
+                ),
             ),
-            'positional': cls.FORMAT_VAL_TRANSFORM(str)
+            'positional': cls.FORMAT_VAL_TRANSFORM(str),
         }
         return _formatter
 
@@ -191,10 +192,10 @@ class ArgumentBuilder(object):
 
 ArgumentBuilder.__BOOL_MAP__ = {
     False: ArgumentBuilder.__FALSE__,
-    True: ArgumentBuilder.__TRUE__
+    True: ArgumentBuilder.__TRUE__,
 }
 
-ArgumentBuilder.__DEFAULT_FORMATTER = ArgumentBuilder.get_formatter()
+ArgumentBuilder.__DEFAULT_FORMATTER = ArgumentBuilder.get_formatter()  # pylint: disable=protected-access
 
 
 class CommandHelper(object):
@@ -218,9 +219,11 @@ class CommandHelper(object):
 
     @classmethod
     def check_args(cls, **kwargs):
-        """
-        @TODO: abstract
-        @brief: Input command arguments checking API
+        """Input command arguments checking API.
+
+        Todo:
+            abstract
+
         """
         pass
 
@@ -272,20 +275,20 @@ class CommandHelper(object):
         return self.arg_parser.parse_args(args_list)
 
     def get_set_args(self, args_in, args_out=None, args_order=None):
-        """
-        @brief A command builder helper function.
-            Strips the dict off the unset (default) arguments.
-            Learns which fields in 'args_in' (dict or argparse.Namespace instance), possibly
-            parsed earlier, had been set before the parsing took place.
-            If an intermediate dict is provided in 'args_out', mutate in place and overwrite
-            it on collision.
+        """A command builder helper function.
+
+        Strips the dict off the unset (default) arguments.
+        Learns which fields in 'args_in' (dict or argparse.Namespace instance), possibly
+        parsed earlier, had been set before the parsing took place.
+        If an intermediate dict is provided in 'args_out', mutate in place and overwrite it on collision.
+
         """
         if args_out is None:
             args_out = OrderedDict()
 
         assert args_in is not None
         if isinstance(args_in, Command):
-            args_in = args_in._ns
+            args_in = args_in._ns  # pylint: disable=protected-access
         if isinstance(args_in, argparse.Namespace):
             args_in = args_in.__dict__
 
@@ -311,11 +314,11 @@ class CommandHelper(object):
         return args_out
 
     def build_cmd_list(self, **kwargs):
-        """
-        @brief A command builder helper function.
-            Reverse parse_args() functionality.
-            Converts the input sequence of command arguments(key[:value] pairs) to a command
-            options list.
+        """A command builder helper function.
+
+        Reverse parse_args() functionality.
+        Converts the input sequence of command arguments(key[:value] pairs) to a command options list.
+
         """
         return self.arg_builder.build_args(self.optarg_map, self.posarg_map, kwargs)
 
@@ -324,8 +327,8 @@ _DEFAULT_CMD_HELPER = CommandHelper()
 
 
 class Command(Mapping):
-    """
-    @brief Command holder object flexible representation
+    """Command holder object flexible representation.
+
     """
     CMD_HELPER = _DEFAULT_CMD_HELPER
 
@@ -380,7 +383,7 @@ class Command(Mapping):
 
     def _init_cmd(self, cmd_rep):
         if isinstance(cmd_rep, Command):
-            self._ns = copy.deepcopy(cmd_rep._ns)
+            self._ns = copy.deepcopy(cmd_rep._ns)  # pylint: disable=protected-access
         elif isinstance(cmd_rep, argparse.Namespace):
             self._ns = copy.deepcopy(cmd_rep)
         elif isinstance(cmd_rep, dict):
@@ -433,7 +436,7 @@ class Command(Mapping):
 
     @classmethod
     def cmd_2_str(cls, cmd):
-        return cls._ns_2_str(cmd._ns)
+        return cls._ns_2_str(cmd._ns)  # pylint: disable=protected-access
 
     def to_args_list(self):
         return self._ns_2_list(self._ns)
@@ -442,7 +445,7 @@ class Command(Mapping):
     def _to_dict(cls, cmd_rep):
         _cmd_dict = None
         if isinstance(cmd_rep, Command):
-            _cmd_dict = cmd_rep._ns.__dict__
+            _cmd_dict = cmd_rep._ns.__dict__  # pylint: disable=protected-access
         elif isinstance(cmd_rep, argparse.Namespace):
             _cmd_dict = cmd_rep.__dict__
         elif isinstance(cmd_rep, dict):
@@ -519,9 +522,10 @@ class Command(Mapping):
         return cmd
 
     def update(self, *args, **kwargs):
-        """
-        Add new stuff and update existing
+        """Add new stuff and update existing
+
         cmd{a: 1, b: 2, c:3} + (cmd{b: 'b', c: 'c', d: 'd'}) => cmd{a: 1, b: 'b', c: 'c', d: 'd'}
+
         """
         for cmd in args:
             self._update_cmd(cmd)
@@ -537,9 +541,10 @@ class Command(Mapping):
         self._update_kwargs(**self.CMD_HELPER.get_set_args(_cmd_dict))
 
     def extend(self, *args, **kwargs):
-        """
-        Add new stuff only
+        """Add new stuff only
+
         cmd{a: 1, b: 2, c:3} + (cmd{b: 'b', c: 'c', d: 'd'}) => cmd{a: 1, b: 2, c: 3, d: 'd'}
+
         """
         for cmd in args:
             self._extend_cmd(cmd)
@@ -555,9 +560,10 @@ class Command(Mapping):
         self._extend_kwargs(**self.CMD_HELPER.get_set_args(_cmd_dict))
 
     def unset(self, *args, **kwargs):
-        """
-        Remove stuff
+        """Remove stuff
+
         cmd{a: 1, b: 2, c: 3} - {cmd{b: 'b', c: 'c', d: 'd'} => cmd{a: 1}
+
         """
         for cmd in args:
             self._unset_cmd(cmd)
@@ -574,7 +580,7 @@ class Command(Mapping):
 
     def __eq__(self, other):
         if isinstance(other, Command):
-            return self._ns == other._ns
+            return self._ns == other._ns  # pylint: disable=protected-access
         elif isinstance(other, argparse.Namespace):
             return self._ns == other
         elif isinstance(other, dict):

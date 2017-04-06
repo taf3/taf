@@ -10,21 +10,31 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""``cluster_model.py``
+
+"""
+
 from testlib.tempest_clients.magnum.models import models
 
 
 class ClusterData(models.BaseModel):
-    """Data that encapsulates cluster attributes"""
+    """Data that encapsulates cluster attributes
+
+    """
     pass
 
 
 class ClusterEntity(models.EntityModel):
-    """Entity Model that represents a single instance of ClusterData"""
+    """Entity Model that represents a single instance of ClusterData
+
+    """
     ENTITY_NAME = 'cluster'
     MODEL_TYPE = ClusterData
 
 
 class ClusterCollection(models.CollectionModel):
-    """Collection Model that represents a list of ClusterData objects"""
+    """Collection Model that represents a list of ClusterData objects
+
+    """
     COLLECTION_NAME = 'clusterlists'
     MODEL_TYPE = ClusterData

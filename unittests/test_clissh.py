@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_clissh.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Unittests for cli<X>.py modules`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  test_clissh.py
-
-@summary  Unittests for cli<X>.py modules.
 """
 
 import os
@@ -80,20 +80,20 @@ def request_object(request, credentials):
 
 @pytest.mark.unittests
 class TestSSH(object):
-    """
-    @brief  CLISSH unittests.
+    """CLISSH unittests.
+
     """
     def test_login_true(self, credentials, request_object):
-        """
-        @brief  Verify login/logout.
+        """Verify login/logout.
+
         """
         obj = request_object
         obj.login(credentials[1], credentials[2], timeout=5)
         obj.close()
 
     def test_multiple_login_logout(self, credentials, request_object):
-        """
-        @brief  Verify login after logout multiple times.
+        """Verify login after logout multiple times.
+
         """
         for i in range(5):
             request_object.login(credentials[1], credentials[2], timeout=5)
@@ -101,8 +101,8 @@ class TestSSH(object):
 
     @pytest.mark.skipif("'telnet' not in config.option.cli_api", reason="Skip telnet testcase.")
     def test_enter_exit_mode(self, cli_obj, credentials):
-        """
-        @brief  Verify enter/exit mode.
+        """Verify enter/exit mode.
+
         """
         message = "Telnet specific test case"
         if isinstance(cli_obj, clinns.CLISSHNetNS):
@@ -116,8 +116,8 @@ class TestSSH(object):
 
     @pytest.mark.skipif(True, reason="Skip this test because user doesn't have root permission")
     def test_sudo_shell_command_ssh(self, cli_obj, credentials):
-        """
-        @brief  Verify sudo mode for ssh.
+        """Verify sudo mode for ssh.
+
         """
         message = "SSH specific test case"
         if isinstance(cli_obj, clinns.CLISSHNetNS):
@@ -137,8 +137,8 @@ class TestSSH(object):
 
     @pytest.mark.skipif("'telnet' not in config.option.cli_api", reason="Skip telnet testcase.")
     def test_sudo_shell_command_telnet(self, cli_obj, credentials):
-        """
-        @brief  Verify sudo mode for telnet.
+        """Verify sudo mode for telnet.
+
         """
         message = "Telnet specific test case"
         if isinstance(cli_obj, clinns.CLISSHNetNS):
@@ -150,8 +150,8 @@ class TestSSH(object):
         data, ret_code = cli_obj.shell_command(cmd, timeout=5, sudo=True)
 
     def test_login_false_username_ssh(self, credentials):
-        """
-        @brief  Verify AuthenticationException in case Incorrect username for ssh object.
+        """Verify AuthenticationException in case Incorrect username for ssh object.
+
         """
         ssh_conn = clissh.CLISSH(credentials[0])
         with pytest.raises(paramiko.AuthenticationException):
@@ -160,8 +160,8 @@ class TestSSH(object):
 
     @pytest.mark.skipif("'telnet' not in config.option.cli_api", reason="Skip telnet testcase.")
     def test_login_false_username_telnet(self, credentials):
-        """
-        @brief  Verify AuthenticationException in case Incorrect username for telnet object.
+        """Verify AuthenticationException in case Incorrect username for telnet object.
+
         """
         telnet_conn = clitelnet.TelnetCMD(credentials[0])
         with pytest.raises(CLIException):
@@ -169,8 +169,8 @@ class TestSSH(object):
             telnet_conn.login(telnet_conn.randstr(30), credentials[2], timeout=5)
 
     def test_login_false_userpass_ssh(self, credentials):
-        """
-        @brief  Verify AuthenticationException in case Incorrect password for ssh object.
+        """Verify AuthenticationException in case Incorrect password for ssh object.
+
         """
         ssh_conn = clissh.CLISSH(credentials[0])
         with pytest.raises(paramiko.AuthenticationException):
@@ -179,8 +179,8 @@ class TestSSH(object):
 
     @pytest.mark.skipif("'telnet' not in config.option.cli_api", reason="Skip telnet testcase.")
     def test_login_false_userpass_telnet(self, credentials):
-        """
-        @brief  Verify AuthenticationException in case Incorrect password for telnet object.
+        """Verify AuthenticationException in case Incorrect password for telnet object.
+
         """
         telnet_conn = clitelnet.TelnetCMD(credentials[0])
         with pytest.raises(CLIException):
@@ -190,8 +190,8 @@ class TestSSH(object):
     # Negative tests for nns module isn't implemented, because nns module always in 'login' mode
 
     def test_shell_command_1(self, cli_obj):
-        """
-        @brief  Non interactive shell command. No prompt is defined.
+        """Non interactive shell command. No prompt is defined.
+
         """
         cli_obj.open_shell()
         # Clear shell output
@@ -205,8 +205,8 @@ class TestSSH(object):
         assert data
 
     def test_shell_command_2(self, cli_obj):
-        """
-        @brief  Non interactive shell command. Read prompt and set prompt.
+        """Non interactive shell command. Read prompt and set prompt.
+
         """
         if isinstance(cli_obj, clinns.CLISSHNetNS):
             pytest.skip("clinns objects don't have login procedure")
@@ -232,8 +232,8 @@ class TestSSH(object):
         assert "ENV_RET_CODE=0" in data
 
     def test_shell_command_3(self, cli_obj):
-        """
-        @brief  Non interactive shell command. Non 0 exit code
+        """Non interactive shell command. Non 0 exit code.
+
         """
         cli_obj.open_shell()
         # Execute command that has to exit with non 0 exit code
@@ -243,8 +243,8 @@ class TestSSH(object):
         assert ret_code == "1"
 
     def test_put_file(self, cli_obj, credentials):
-        """
-        @brief  Copying file to remote host.
+        """Copying file to remote host.
+
         """
         if isinstance(cli_obj, clitelnet.TelnetCMD):
             pytest.xfail("put_file in not supported by clitelnet objects")
@@ -277,8 +277,8 @@ class TestSSH(object):
         _out, _err, _ = cli_obj.exec_command(rm_command, timeout=3)
 
     def test_get_file(self, tmpdir, cli_obj, credentials):
-        """
-        @brief  Copying file to remote host.
+        """Copying file to remote host.
+
         """
         if isinstance(cli_obj, clitelnet.TelnetCMD):
             pytest.skip("get_file in not supported by clitelnet objects")
@@ -315,8 +315,8 @@ class TestSSH(object):
         _out, _err, _ = cli_obj.exec_command(rm_command, timeout=3)
 
     def test_interactive_command_1(self, cli_obj):
-        """
-        @brief  Interactive shell command with str actions.
+        """Interactive shell command with str actions.
+
         """
         cli_obj.open_shell()
         # Execute command
@@ -335,13 +335,15 @@ class TestSSH(object):
         assert [s for s in data.split("\n") if ">>> exit()" in s]
 
     def test_interactive_command_2(self, cli_obj):
-        """
-        @brief  Interactive shell command with func action.
+        """Interactive shell command with func action.
+
         """
         flag = []
 
         def append_flag():
-            """ Append mutable object to verify that action is called and called only once. """
+            """Append mutable object to verify that action is called and called only once.
+
+            """
             flag.append(1)
 
         cli_obj.open_shell()
@@ -360,8 +362,8 @@ class TestSSH(object):
         assert flag
 
     def test_send_command(self, cli_obj):
-        """
-        @brief  Send command without waiting exit.
+        """Send command without waiting exit.
+
         """
         if isinstance(cli_obj, clinns.CLISSHNetNS):
             pytest.skip("For clinns objects must be created child object first, then shell_read() can be used")
@@ -382,8 +384,8 @@ class TestSSH(object):
         assert "rtt min/avg/max/mdev" in out
 
     def test_cleared_shell_buffer(self, cli_obj):
-        """
-        @brief  Cleared buffer after open_shell().
+        """Cleared buffer after open_shell().
+
         """
         if isinstance(cli_obj, clinns.CLISSHNetNS):
             pytest.skip("For clinns objects open_shell() is not implemented")
@@ -402,8 +404,8 @@ class TestSSH(object):
         assert "Last login:" not in out
 
     def test_exec_command_timeout_telnet(self, cli_obj):
-        """
-        @brief  Verify timeout for exec_command.
+        """Verify timeout for exec_command.
+
         """
         if isinstance(cli_obj, clinns.CLISSHNetNS) or isinstance(cli_obj, clissh.CLISSH):
             pytest.skip("CLISSHException raises only for clitelnet objects")
@@ -414,8 +416,8 @@ class TestSSH(object):
             cli_obj.exec_command(cmd, timeout=1)
 
     def test_exec_command_timeout_ssh(self, cli_obj):
-        """
-        @brief  Verify timeout for exec_command.
+        """Verify timeout for exec_command.
+
         """
         if isinstance(cli_obj, clinns.CLISSHNetNS) or isinstance(cli_obj, clitelnet.TelnetCMD):
             pytest.skip("CLISSHException raises only for clitelnet and clinns objects")
@@ -426,8 +428,8 @@ class TestSSH(object):
             cli_obj.exec_command(cmd, timeout=0.5)
 
     def test_shell_command_timeout(self, cli_obj):
-        """
-        @brief  Verify timeout for shell_command.
+        """Verify timeout for shell_command.
+
         """
         cli_obj.open_shell()
         # The following ping command requires 5s to execute.
@@ -437,8 +439,8 @@ class TestSSH(object):
             cli_obj.shell_command(cmd, timeout=1)
 
     def test_quiet_1(self, cli_obj):
-        """
-        @brief  Verify raising an exception on return code != 0.
+        """Verify raising an exception on return code != 0.
+
         """
         cli_obj.open_shell()
         # The command has to return exit code 2.
@@ -447,8 +449,8 @@ class TestSSH(object):
             cli_obj.shell_command(cmd)
 
     def test_quiet_2(self, cli_obj):
-        """
-        @brief  Check expected_rc parameter.
+        """Check expected_rc parameter.
+
         """
         cli_obj.open_shell()
         # The command has to return exit code 2.
@@ -456,8 +458,8 @@ class TestSSH(object):
         cli_obj.shell_command(cmd, expected_rc="2")
 
     def test_quiet_3(self, cli_obj, monkeypatch):
-        """
-        @brief  Verify an exception isn't raised on return code != 0 and default quiet option.
+        """Verify an exception isn't raised on return code != 0 and default quiet option.
+
         """
         cli_obj.open_shell()
         # The command has to return exit code 2.
@@ -467,8 +469,8 @@ class TestSSH(object):
         assert rc == "2"
 
     def test_alter_in_command(self, cli_obj):
-        """
-        @brief  Verify if prompt present in command it doesn't influence on finding prompt in output data.
+        """Verify if prompt present in command it doesn't influence on finding prompt in output data.
+
         """
         cli_obj.open_shell()
         cmd = "echo some_test_data"
@@ -483,8 +485,8 @@ class TestSSH(object):
 
     @pytest.mark.skipif(True, reason="Stupid fails intermittently due to incomplete reads")
     def test_send_command_continuous_output(self, cli_obj):
-        """
-        @brief  Send command without waiting exit and read continuous output.
+        """Send command without waiting exit and read continuous output.
+
         """
         if isinstance(cli_obj, clinns.CLISSHNetNS):
             pytest.xfail("For clinns objects must be created child object first, then shell_read() can be used")
@@ -590,13 +592,13 @@ mAvF7/+hRzNa4l25lailJFHR7VgwLPo24xNlWgyjn9T5JNnor8TIimoy
             assert ssh_conn.pkey.get_bits() == 2048
 
     def test_probe_port_1(self):
-        """
-        @brief  Test probe_port function
+        """Test probe_port function.
+
         """
         assert clissh.probe_port('127.0.0.1', 22, MagicMock()) is True
 
     def test_probe_port_2(self):
-        """
-        @brief  Test probe_port function negative
+        """Test probe_port function negative.
+
         """
         assert clissh.probe_port('8.8.8.8', 8081, MagicMock()) is False

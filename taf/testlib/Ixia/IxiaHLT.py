@@ -1,22 +1,24 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``IxiaHLT.py``
+
+`Python wrapper to IxNetworkTcl and HLTAPI Ixia modules`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  IxiaHLT.py
-
-@summary  Python wrapper to IxNetworkTcl and HLTAPI Ixia modules.
-"""
 import time
 import os
 
@@ -31,19 +33,19 @@ PROTOCOLS_LIST = ["STP", "BGP", "LACP", "OSPF"]
 
 
 class IxiaMapper(object):
-    """
-    @description  Tcl to Python functions mapper
+    """Tcl to Python functions mapper.
+
     """
 
     class_logger = None
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize IxiaMapper class
-        @param config:  Configuration information
-        @type  config:  dict
-        @param opts:  py.test config.option object which contains all py.test cli options
-        @type  opts:  OptionParser
+        """Initialize IxiaMapper class.
+
+        Args:
+            config(dict):  Configuration information
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options
+
         """
 
         self.class_logger.info("Init Ixia HLTAPI class.")
@@ -66,9 +68,11 @@ class IxiaMapper(object):
         self.tcl_server = config['tcl_server']
 
     def _init_tcl(self):
-        """
-        @brief  Initialize Tcl interpreter
-        @return:  None
+        """Initialize Tcl interpreter.
+
+        Returns:
+            None
+
         """
         try:
             self.Tcl is None
@@ -77,9 +81,11 @@ class IxiaMapper(object):
 
             # Define logger
             def tcl_puts(*args):
-                """
-                @brief  Enables logging for tcl output
-                @return:  None
+                """Enables logging for tcl output.
+
+                Returns:
+                    None
+
                 """
                 if len(args) >= 2:
                     stream = args[0]
@@ -102,20 +108,24 @@ class IxiaMapper(object):
             ixia_helpers.ixtclhal_import(self.Tcl)
 
     def tcl(self, code):
-        """
-        @brief  Log end execute tcl code
-        @param code:  Tcl command
-        @type  code:  str
-        @rtype:  str
-        @return:  Result of execution
+        """Log end execute tcl code.
+
+        Args:
+            code(str):  Tcl command
+
+        Returns:
+            str: Result of execution.
+
         """
         self.class_logger.debug("Exec tcl: {0}".format(code))
         return self.Tcl.eval(code)
 
     def __register_methods(self):
-        """
-        @brief  Register all Ixia.tcl methods
-        @return:  None
+        """Register all Ixia.tcl methods.
+
+        Returns:
+            None
+
         """
 
         def wrap(func, method):
@@ -131,12 +141,14 @@ class IxiaMapper(object):
                     wrap(self.__ixia_tcl_wrapper, f_name))
 
     def __ixia_tcl_wrapper(self, method, *args, **kwargs):
-        """
-        @brief  Execute tcl ::ixia::method
-        @param method:  Method name
-        @type  method:  str
-        @rtype:  str
-        @return:  Result of execution
+        """Execute tcl ::ixia::method.
+
+        Args:
+            method(str):  Method name
+
+        Returns:
+            str: Result of execution.
+
         """
         _tcl_code = "set return_code [::ixia::" + method
         if args:
@@ -151,50 +163,58 @@ class IxiaMapper(object):
         return self.tcl(_tcl_code)
 
     def check_return_code(self):
-        """
-        @brief  Check if ERROR is in return_code
-        @rtype:  str
-        @return:  Error message or empty string
+        """Check if ERROR is in return_code.
+
+        Returns:
+            str: Error message or empty string.
+
         """
         return self.tcl('if {[keylget return_code status] != $::SUCCESS} ' +
                         '{return "Last tcl operation FAIL -  [keylget return_code log]"}')
 
     def set_var(self, **kwargs):
-        """
-        @brief  Set variable in tcl namespace
-        @return:  None
+        """Set variable in tcl namespace.
+
+        Returns:
+            None
+
         """
         for name, value in list(kwargs.items()):
             self.tcl("set {0} {1}".format(name, value))
 
     def get_var(self, var_name):
-        """
-        @brief  Get variable value string representation from tcl namespace
-        @param var_name:  Variable name
-        @type  var_name:  str
-        @rtype:  str
-        @return:  Value of variable
+        """Get variable value string representation from tcl namespace.
+
+        Args:
+            var_name(str):  Variable name
+
+        Returns:
+            str: Value of variable.
+
         """
         return self.tcl("return ${0}".format(var_name))
 
     def puts(self, expr):
-        """
-        @brief  Call tcl puts method
-        @param expr:  Expression
-        @type  expr:  str
-        @return:  None
+        """Call tcl puts method.
+
+        Args:
+            expr(str):  Expression
+
+        Returns:
+            None
+
         """
         self.tcl("puts {0}".format(expr))
 
 
 class IxiaHLTMixin(IxiaMapper):
-    """
-    @description  IxNetwork interaction base class
+    """IxNetwork interaction base class.
+
     """
 
     def __init__(self, *args, **kwargs):
-        """
-        @brief  Initialize IxiaHLTMixin class
+        """Initialize IxiaHLTMixin class.
+
         """
         super(IxiaHLTMixin, self).__init__(*args, **kwargs)
         self.__init_protos()
@@ -216,23 +236,35 @@ class IxiaHLTMixin(IxiaMapper):
         self.last_protocol_interface = None
 
     def __init_protos(self):
-        """
-        @brief  Load protocol modules
-        @return:  None
+        """Load protocol modules.
+
+        Returns:
+            None
+
         """
         for proto in PROTOCOLS_LIST:
             _import = __import__("testlib.Ixia.%s" % (proto, ), fromlist=["testlib.Ixia"])
             setattr(self, proto, getattr(_import, proto)(self))
 
     def check(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::check()
+        """Check if TG object is alive and ready for processing.
+
+        Returns:
+            None or raise and exception.
+
         """
         pass
 
     def create(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::create()
+        """ Perform all necessary procedures to initialize TG device and prepare it for interaction.
+
+        Returns:
+            None or raise and exception.
+
+        Notes:
+            Method has to check --get_only option.
+            Set of steps to configure TG device is related to particular TG type.
+
         """
         # Perform connection.
         self.__connect()
@@ -244,31 +276,51 @@ class IxiaHLTMixin(IxiaMapper):
             self.qt = QuickTests(self.tcl)
 
     def destroy(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::destroy()
+        """Perform all necessary procedures to uninitialize TG device.
+
+        Returns:
+            None or raise and exception.
+
+        Note:
+            Method has to check --get_only and --leave_on options.
+            Set of steps to unconfigure TG device is related to particular TG type.
+            Method has to clear all connections and stop all captures and data streams.
+
         """
         if not self.__opts.leave_on and not self.__opts.get_only:
             self.__disconnect(mode="fast")
 
     def cleanup(self, mode="fast"):
-        """
-        @copydoc testlib::tg_template::GenericTG::cleanup()
+        """This method should do Ixia ports cleanup (remove streams etc).
+
+        Args:
+            mode(str): "fast" or "complete". If mode == "fast", method does not clear streams on the port, but stops them.
+
+        Returns:
+            None or raise and exception.
+
         """
         self.tcl("ixNet exec newConfig")
         self.__connect()
 
     def sanitize(self):
-        """
-        @copydoc testlib::tg_template::GenericTG::sanitize()
+        """This method has to clear all stuff which can cause device inconsistent state after exit or unexpected exception.
+
+        Note:
+            E.g. clear connections, stop threads. This method is called from pytest.softexit
+
         """
         pass
 
     def set_port_list(self, port_list=None):
-        """
-        @brief  Set port_list variable in tcl namespace
-        @param port_list:  List of TG ports
-        @type  port_list:  list
-        @return:  None
+        """Set port_list variable in tcl namespace.
+
+        Args:
+            port_list(list):  List of TG ports
+
+        Returns:
+            None
+
         """
         port_list = port_list or self.ports
         # Convert python ixia ports list to tcl representation for Ixia module
@@ -277,10 +329,14 @@ class IxiaHLTMixin(IxiaMapper):
         self.set_var(port_list=_pl)
 
     def connect(self):
-        """
-        @brief  Perform connection to IxTcl and IxTclNetwork servers
-        @raise  IxiaException:  Connection error
-        @return:  None
+        """Perform connection to IxTcl and IxTclNetwork servers.
+
+        Raises:
+            IxiaException:  Connection error
+
+        Returns:
+            None
+
         """
         self.class_logger.info("Performing connection to IxTcl and IxTclNetwork servers.")
         _t = time.time()
@@ -307,12 +363,17 @@ class IxiaHLTMixin(IxiaMapper):
     __connect = connect
 
     def disconnect(self, mode="fast"):
-        """
-        @brief  Perform session cleanup
-        @param mode:  Type of mode to execute
-        @type  mode:  str
-        @raise  IxiaException:  Cleanup error
-        @return:  None
+        """Perform session cleanup.
+
+        Args:
+            mode(str):  Type of mode to execute
+
+        Raises:
+            IxiaException:  Cleanup error.
+
+        Returns:
+            None
+
         """
         _t = time.time()
         _params = {}
@@ -333,12 +394,17 @@ class IxiaHLTMixin(IxiaMapper):
     __disconnect = disconnect
 
     def load_ixncfg(self, ixncfg_file):
-        """
-        @brief  Load IxNetwork configuration
-        @param ixncfg_file:  Path to ixia configuration file
-        @type  ixncfg_file:  str
-        @raise  IxiaException:  Load error
-        @return:  None
+        """Load IxNetwork configuration.
+
+        Args:
+            ixncfg_file(str):  Path to ixia configuration file
+
+        Raises:
+            IxiaException:  Load error
+
+        Returns:
+            None
+
         """
         _ixncfg_file = os.path.normpath(os.path.realpath(os.path.expandvars(os.path.expanduser(ixncfg_file))))
         if not os.path.exists(_ixncfg_file):
@@ -365,9 +431,11 @@ class IxiaHLTMixin(IxiaMapper):
         self.qt = QuickTests(self.tcl)
 
     def iface_update(self):
-        """
-        @brief  Dynamically update list of assigned ports
-        @return:  None
+        """Dynamically update list of assigned ports.
+
+        Returns:
+            None
+
         """
         self.class_logger.info("Updating ports ownership.")
         self.tcl("ixNet setMultiAttribute [ixNet getRoot]/availableHardware -offChassisHwM {}; ixNet commit;")
@@ -379,12 +447,17 @@ class IxiaHLTMixin(IxiaMapper):
                  "ixNet commit")
 
     def iface_config(self, port, *args, **kwargs):
-        """
-        @brief  Wrapper to Ixia ::ixia::interface_config function
-        @param port:  TG port in format tuple(chassisID, cardId, portId)
-        @type  port:  tuple(int)
-        @raise  AssertionError:  error in executing tcl code
-        @return:  None
+        """Wrapper to Ixia ::ixia::interface_config function.
+
+        Args:
+            port(tuple(int)):  TG port in format tuple(chassisID, cardId, portId)
+
+        Raises:
+            AssertionError:  error in executing tcl code.
+
+        Returns:
+            None
+
         """
 
         # kwargs['port_handle'] = "{0}/{1}/{2}".format(*port)
@@ -414,10 +487,14 @@ class IxiaHLTMixin(IxiaMapper):
         assert self.check_return_code() == ""
 
     def traffic_config(self, *args, **kwargs):
-        """
-        @brief  Wrapper to Ixia ::ixia::traffic_config function
-        @raise  AssertionError:  error in executing tcl code
-        @return:  None
+        """Wrapper to Ixia ::ixia::traffic_config function.
+
+        Raises:
+            AssertionError:  error in executing tcl code.
+
+        Returns:
+            None
+
         """
         # before modifications:
         # self.ixia_traffic_config(**kwargs)
@@ -460,21 +537,30 @@ class IxiaHLTMixin(IxiaMapper):
         copyFromTclList(_slist, self.traffic_item_dictionary[_stream_id])
 
     def traffic_control(self, *args, **kwargs):
-        """
-        @brief  Wrapper to Ixia ::ixia::traffic_control function
-        @raise  AssertionError:  error in executing tcl code
-        @return:  None
+        """Wrapper to Ixia ::ixia::traffic_control function.
+
+        Raises:
+            AssertionError:  error in executing tcl code.
+
+        Returns:
+            None
+
         """
         self.ixia_traffic_control(**kwargs)
         assert self.check_return_code() == ""
 
     def traffic_stats(self, port, *args, **kwargs):
-        """
-        @brief  Wrapper to Ixia ::ixia::traffic_stats function
-        @param port:  TG port in format tuple(chassisID, cardId, portId)
-        @type  port:  tuple(int)
-        @raise  AssertionError:  error in executing tcl code
-        @return:  None
+        """Wrapper to Ixia ::ixia::traffic_stats function.
+
+        Args:
+            port(tuple(int)):  TG port in format tuple(chassisID, cardId, portId)
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            None
+
         """
         port_name = "%s/%s/%s" % port
         # Set empty 'port' item in case it has not been already defined
@@ -519,13 +605,20 @@ class IxiaHLTMixin(IxiaMapper):
             pass
 
     def traffic_stats_traffic_items(self, ti, *args, **kwargs):
-        """
-        @brief  Wrapper to Ixia ::ixia::traffic_stats function
-        @param ti:  Traffic item
-        @type  ti:  str
-        @raise  AssertionError:  error in executing tcl code
-        @return:  None
-        @note:  This version is for traffic item stats
+        """Wrapper to Ixia ::ixia::traffic_stats function.
+
+        Args:
+            ti(str):  Traffic item
+
+        Raises:
+            AssertionError:  error in executing tcl code.
+
+        Returns:
+            None
+
+        Note:
+            This version is for traffic item stats.
+
         """
         ti_name = "%s" % ti
         self.traffic_dictionary.setdefault(ti_name, {})
@@ -550,10 +643,14 @@ class IxiaHLTMixin(IxiaMapper):
                 self.traffic_dictionary[ti_name]['stats'][di_key_item][s_key_item] = _value
 
     def vlan_traffic_stats(self, ports):
-        """
-        @brief  Gets per-port stats and returns per-vlan flow stats
-        Params: ports = dict({id:(chassis, card, port)})
-        Returns: dict({ flow_name:{ vlan_id: , ti_name: , port_rx|tx: , pgid_value_rx|tx: , all other stats... }  })
+        """Gets per-port stats and returns per-vlan flow stats.
+
+        Args:
+            ports(dict): TG port in format dict({id:(chassis, card, port)})
+
+        Returns:
+            dict: dictionary of combined rx and tx statistics for the same flow_name
+
         """
         # Generate stats dictionary for Ixia ports
         for key, port in ports.items():
@@ -602,36 +699,38 @@ class IxiaHLTMixin(IxiaMapper):
         return flow_data_combined
 
     def copy_remote_file(self, remote_path, local_path):
-        """
-        @brief  Copy file from IxNetwork host to local host
-        @param remote_path:  Remote path to file
-        @type  remote_path:  str
-        @param local_path:  Local path to file
-        @type  local_path:  str
-        @rtype:  str
-        @return:  Result of execution
+        """Copy file from IxNetwork host to local host.
+
+        Args:
+            remote_path(str):  Remote path to file
+            local_path(str):  Local path to file
+
+        Returns:
+            str: Result of execution.
+
         """
         remote_path = remote_path.replace("\\", "\\\\")
         return self.tcl("ixNet exec copyFile [ixNet readFrom \"{0}\" -ixNetRelative] [ixNet writeTo {1}]".
                         format(remote_path, local_path))
 
     def copy_local_file(self, local_path, remote_path):
-        """
-        @brief  Copy file from local host to IxNetwork host
-        @param local_path:  Local path to file
-        @type  local_path:  str
-        @param remote_path:  Remote path to file
-        @type  remote_path:  str
-        @rtype:  str
-        @return:  Result of execution
+        """Copy file from local host to IxNetwork host.
+
+        Args:
+            local_path(str):  Local path to file
+            remote_path(str):  Remote path to file
+
+        Returns:
+            str: Result of execution.
+
         """
         return self.tcl("ixNet exec copyFile [ixNet readFrom \"{0}\"] [ixNet writeTo {1} -ixNetRelative]".
                         format(local_path, remote_path))
 
 
 class QuickTests(object):
-    """
-    @description  Class to represent IxNetwork QuickTests
+    """Class to represent IxNetwork QuickTests.
+
     """
 
     class_logger = ClassLogger()
@@ -641,24 +740,29 @@ class QuickTests(object):
     copy_local_file = IxiaHLTMixin.__dict__['copy_local_file']
 
     def __init__(self, tcl):
-        """
-        @brief  Initialize QuickTests class
-        @param tcl: Tcl interpreter
-        @type  tcl:  Tkinter.Tcl
+        """Initialize QuickTests class.
+
+        Args:
+            tcl(Tkinter.Tcl): Tcl interpreter
+
         """
         self.tcl = tcl
         self.tc_list = []
         self.load_tclist()
 
     def load_tclist(self):
-        """
-        @brief  Loading list of QuickTests
-        @return:  None
+        """Loading list of QuickTests.
+
+        Returns:
+            None
+
         """
         def store_tc(qt):
-            """
-            @brief  Store quick test in tc_list
-            @return:  None
+            """Store quick test in tc_list.
+
+            Returns:
+                None
+
             """
             qt_name, qt_id = qt.split(":")
             self.tc_list.append((qt_name, qt_id))
@@ -675,46 +779,47 @@ class QuickTests(object):
             list(map(store_tc, _qtlist))
 
     def start(self, qt_name, qt_id):
-        """
-        @brief  Start QuickTest without waiting for result
-        @param qt_name:  QuickTest name
-        @type  qt_name:  str
-        @param qt_id:  QuickTest id
-        @type  qt_id:  int
-        @rtype:  str
-        @return:  Result of execution
+        """Start QuickTest without waiting for result.
+
+        Args:
+            qt_name(str):  QuickTest name
+            qt_id(int):  QuickTest id
+
+        Returns:
+            str: Result of execution
+
         """
         self.class_logger.info("Launching QT (w/o result waiting): {0}:{1}".format(qt_name, qt_id))
         rc = self.tcl("ixNet exec start [ixNet getRoot]/quickTest/{0}:{1}".format(qt_name, qt_id))
         return rc
 
     def wait(self, qt_name, qt_id, tc_name=None):
-        """
-        @brief  Wait for QuickTest to complete
-        @param qt_name:  QuickTest name
-        @type  qt_name:  str
-        @param qt_id:  QuickTest id
-        @type  qt_id:  int
-        @param tc_name:  test case name
-        @type  tc_name:  str
-        @rtype:  dict
-        @return:  Result of execution
+        """Wait for QuickTest to complete.
+
+        Args:
+            qt_name(str):  QuickTest name
+            qt_id(int):  QuickTest id
+            tc_name(str):  test case name
+
+        Returns:
+            dict: Result of execution.
+
         """
         rc = self.tcl("ixNet exec waitForTest [ixNet getRoot]/quickTest/{0}:{1}".format(qt_name, qt_id))
         self.class_logger.debug("QT Wait return: {0}".format(rc))
         return self.analyze_result(qt_name, qt_id, tc_name)
 
     def run(self, qt_name, qt_id, tc_name=None):
-        """
-        @brief  Run QuickTest until completion
-        @param qt_name:  QuickTest name
-        @type qt_name:  str
-        @param qt_id:  QuickTest id
-        @type  qt_id:  int
-        @param tc_name:  test case name
-        @type  tc_name:  str
-        @rtype:  dict
-        @return:  Result of execution
+        """Run QuickTest until completion.
+
+        Args:
+            qt_name(str):  QuickTest name
+            qt_id(int):  QuickTest id
+            tc_name(str):  test case name
+
+        Returns:
+            dict: Result of execution.
+
         """
         self.class_logger.info("Launching QT: {0}:{1}".format(qt_name, qt_id))
         rc = self.tcl("ixNet exec run [ixNet getRoot]/quickTest/{0}:{1}".format(qt_name, qt_id))
@@ -722,26 +827,31 @@ class QuickTests(object):
         return self.analyze_result(qt_name, qt_id, tc_name)
 
     def report(self, pdf=False):
-        """
-        @brief  Enable/Disable report options
-        @param  pdf:  Enable/Disable PDF report
-        @type  pdf:  bool
-        @return:  None
+        """Enable/Disable report options.
+
+        Args:
+            pdf(bool):  Enable/Disable PDF report
+
+        Returns:
+            None
+
         """
         self.tcl("ixNet setAttribute [ixNet getRoot]/testConfiguration -enableGenerateReportAfterRun {0}".format(pdf))
 
     def analyze_result(self, qt_name, qt_id, tc_name):
-        """
-        @brief  Analyze QuickTest run status
-        @param qt_name:  QuickTest name
-        @type  qt_name:  str
-        @param qt_id:  QuickTest id
-        @type  qt_id:  int
-        @param tc_name:  test case name
-        @type  tc_name:  str
-        @raise  AssertionError:  QuickTest is failed/Report is not generated
-        @rtype:  dict
-        @return:  Result of execution
+        """Analyze QuickTest run status.
+
+        Args:
+            qt_name(str):  QuickTest name
+            qt_id(int):  QuickTest id
+            tc_name(str):  test case name
+
+        Raises:
+            AssertionError:  QuickTest is failed/Report is not generated.
+
+        Returns:
+            dict: Result of execution.
+
         """
         def get_attr(attr):
             return self.tcl("ixNet getAttr [ixNet getRoot]/quickTest/{0}:{1}/results -{2}".format(qt_name, qt_id, attr))
@@ -769,14 +879,18 @@ class QuickTests(object):
         return result
 
     def download_logs(self, r_path, l_path):
-        """
-        @brief  Download QuickTest run logs
-        @param r_path:  Path to report
-        @type  r_path:  str
-        @param l_path:  Name of logs directory to be written
-        @type  l_path:  str
-        @raise  OSError:  Error on folder creation
-        @return:  None
+        """Download QuickTest run logs.
+
+        Args:
+            r_path(str):  Path to report
+            l_path(str):  Name of logs directory to be written
+
+        Raises:
+            OSError:  Error on folder creation.
+
+        Returns:
+            None
+
         """
         file_list = ["AgregateResults.csv",
                      "AgregateResults.csv.idx",

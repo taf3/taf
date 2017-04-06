@@ -1,20 +1,19 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``lldptool.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  lldptool.py
 """
 
 import argparse
@@ -29,6 +28,7 @@ LLDPAD_SERVICE = "lldpad"   # this is "boot.lldpad" on SLES
 LLDPAD_PATH = "/usr/sbin/lldpad"   # this is "boot.lldpad" on SLES
 LLDPTOOL = "lldptool"
 LLDPAD_CONFIG_FILE = "/var/lib/lldpad/lldpad.conf"
+
 
 class TlvNames(object):
     CHASSIS_ID = "Chassis ID TLV"
@@ -55,6 +55,7 @@ class TlvNames(object):
     IEEE_8021QAZ_PFC = "IEEE 8021QAZ PFC TLV"
     CEE_DCBX = "CEE DCBX TLV"
     END_OF_LLDPDU = "End of LLDPDU TLV"
+
 
 lldptool_tni = """
 Chassis ID TLV
@@ -500,7 +501,7 @@ def priority_group_tlv_handler(val):
     handlers = {
         'PGID Priorities': pgid_priorities,
         'PGID Percentages': pgid_percentages,
-        "Number of TC's supported": int
+        "Number of TC's supported": int,
     }
     values = {}
     values.update(parse_enabled_willing_error(val[0]))
@@ -513,7 +514,7 @@ def priority_group_tlv_handler(val):
 def priority_flow_control_tlv_handler(val):
     handlers = {
         'PFC enabled priorities': priority_flow_control_enabled_handler,
-        "Number of TC's supported": int
+        "Number of TC's supported": int,
     }
     values = {}
     values.update(parse_enabled_willing_error(val[0]))
@@ -561,6 +562,7 @@ def application_tlv_handler(val):
         #    pass
     values['Applications'] = dict(selectors)
     return values
+
 
 SUB_TLV_HANDLERS = {
     'Control TLV:': control_tlv_handler,
@@ -668,9 +670,12 @@ def non_subtype_handler(tlvs):
 def subtype_handler(tlvs):
     """
 
-    @param tlvs:
-    @return: list of subtype, value pairs
-    @rtype: list
+    Args:
+        tlvs
+
+    Returns:
+        list: list of subtype, value pairs
+
     """
     values = []
     for tlv in tlvs:
@@ -697,6 +702,7 @@ def sub_tlv_as_dict_handler_factory(sub_tlv_handlers):
 
     return save_tlvs_as_dict
 
+
 IEEE_PFC_HANDLERS = {
     "PFC enabled": ieee_priority_flow_control_enabled_handler,
     "PFC capable traffic classes": int,
@@ -718,6 +724,7 @@ def cee_sub_tlv_handler(val):
 def ieee_app_tlv_handler(val):
     p = IEEEAppTLVParser()
     return dict(p.parse(val))
+
 
 TLV_HANDLERS = {
     TlvNames.SYSTEM_NAME: non_subtype_handler,
@@ -742,7 +749,9 @@ def parse(s):
 
 
 def int_auto_base(n):
-    """Convert string to an int, automatically detecting the base."""
+    """Convert string to an int, automatically detecting the base.
+
+    """
     return int(n, base=0)
 
 
@@ -777,10 +786,10 @@ def parse_set(s):
     parser.add_argument(
         "-g", action="store", default=False, dest="bridge_scope")
     parser.add_argument("-n", choices=("nb", "ncb", "nntpmrb",
-                                     "nearest_bridge",
-                                     "neareast_customer_bridge",
-                                     "nearest_nontpmr_bridge"),
-                      dest="neighboor")
+                                       "nearest_bridge",
+                                       "neareast_customer_bridge",
+                                       "nearest_nontpmr_bridge"),
+                        dest="neighboor")
     parser.add_argument(
         "-T", action="store_true", default=False, dest="set_tlv")
     parser.add_argument(

@@ -1,68 +1,71 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``STP.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`IxNetwork xSTP protocol emulation functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Notes:
+    TCL procedures::
+    ::ixia::emulation_stp_bridge_config
+    ::ixia::emulation_stp_control
+    ::ixia::emulation_stp_info
+    ::ixia::emulation_stp_lan_config
+    ::ixia::emulation_stp_msti_config
+    ::ixia::emulation_stp_vlan_config
 
-@file  STP.py
-
-@summary  IxNetwork xSTP protocol emulation functionality.
-
-@note
-TCL procedures:
-::ixia::emulation_stp_bridge_config
-::ixia::emulation_stp_control
-::ixia::emulation_stp_info
-::ixia::emulation_stp_lan_config
-::ixia::emulation_stp_msti_config
-::ixia::emulation_stp_vlan_config
 """
 
 
 class STP(object):
-    """
-    @description  IxNet STP configuration wrapper
+    """IxNet STP configuration wrapper.
+
     """
 
     def __init__(self, ixia):
-        """
-        @brief  STP class initialization
-        @param ixia:  Ixia traffic generator
-        @type  ixia:  IxiaHLTMixin
+        """STP class initialization.
+
+        Args:
+            ixia(IxiaHLTMixin):  Ixia traffic generator
+
         """
         self.ixia = ixia
         self.stp_dictionary = {}
 
     def configure_bridges(self, port, ifaces=None, bridge_handler_id=None, br_iface_handler_id=None, vlan_msti_handler_id=None, **kwargs):
-        """
-        @brief  Configure/Modify STP bridges on port
-        @param port:  TG port in format tuple(chassisID, cardId, portId)
-        @type  port:  tuple(int)
-        @param ifaces:  STP interface handler name
-        @type  ifaces:  str
-        @param bridge_handler_id:  STP bridge handler name
-        @type  bridge_handler_id:  str
-        @param br_iface_handler_id:  STP bridge interface handler name
-        @type  br_iface_handler_id:  str
-        @param vlan_msti_handler_id:  STP bridge_msti_vlan handler name
-        @type  vlan_msti_handler_id:  str
-        @raise  Exception:  non-existent STP bridge or
-                            not defined STP bridge handler name to modify VLAN MSTI
-        @raise  AssertionError:  error in executing tcl code
-        @rtype:  tuple(dict,dict,dict)
-        @return:  stp bridges handler names, stp bridge interface handler names,
-                  protocol interface handler names for a specific STP bridge
-        @note:  See description of keyword arguments in ixia_stp_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_stp_api.tcl
+        """Configure/Modify STP bridges on port.
+
+        Args:
+            port(tuple(int)):  TG port in format tuple(chassisID, cardId, portId)
+            ifaces(str):  STP interface handler name
+            bridge_handler_id(str):  STP bridge handler name
+            br_iface_handler_id(str):  STP bridge interface handler name
+            vlan_msti_handler_id(str):  STP bridge_msti_vlan handler name
+
+        Raises:
+            Exception:  non-existent STP bridge or not defined STP bridge handler name to modify VLAN MSTI
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            tuple(dict,dict,dict): stp bridges handler names, stp bridge interface handler names,
+                                   protocol interface handler names for a specific STP bridge
+
+        Note:
+            See description of keyword arguments in ixia_stp_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_stp_api.tcl
+
         """
         if port not in list(self.stp_dictionary.keys()):
             self.stp_dictionary[port] = {}
@@ -142,16 +145,23 @@ class STP(object):
             self.stp_dictionary[port]['stp_intf_handler'].copy()
 
     def control(self, port, bridge_handler_id=None, **kwargs):
-        """
-        @brief  Start STP protocol on specified port/bridge
-        @param port:  TG port in format tuple(chassisID, cardId, portId)
-        @type  port:  tuple(int)
-        @param bridge_handler_id:  STP bridge handler name
-        @type  bridge_handler_id:  str
-        @raise  AssertionError:  error in executing tcl code
-        @return:  None
-        @note:  See description of keyword arguments in ixia_stp_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_stp_api.tcl
+        """Start STP protocol on specified port/bridge.
+
+        Args:
+            port(tuple(int)):  TG port in format tuple(chassisID, cardId, portId)
+            bridge_handler_id(str):  STP bridge handler name
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            None
+
+        Note:
+            See description of keyword arguments in ixia_stp_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_stp_api.tcl
+
         """
         if port not in list(self.stp_dictionary.keys()):
             self.stp_dictionary[port] = {}
@@ -169,17 +179,23 @@ class STP(object):
         self.stp_dictionary[port]['stp_control'] = cfg_name
 
     def info(self, port, bridge_handler_id=None, **kwargs):
-        """
-        @brief  Command to retrieve STP statistics
-        @param port:  TG port in format tuple(chassisID, cardId, portId)
-        @type  port:  tuple(int)
-        @param bridge_handler_id:  STP bridge handler name
-        @type  bridge_handler_id:  str
-        @raise  AssertionError:  error in executing tcl code
-        @rtype:  dict
-        @return:  STP statistics
-        @note:  See description of keyword arguments in ixia_stp_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_stp_api.tcl
+        """Command to retrieve STP statistics.
+
+        Args:
+            port(tuple(int)):  TG port in format tuple(chassisID, cardId, portId)
+            bridge_handler_id(str):  STP bridge handler name
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            dict:  STP statistics
+
+        Note:
+            See description of keyword arguments in ixia_stp_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_stp_api.tcl
+
         """
         if port not in list(self.stp_dictionary.keys()):
             self.stp_dictionary[port] = {}
@@ -248,17 +264,23 @@ class STP(object):
         return copy.deepcopy(self.stp_dictionary[port]['info'])
 
     def configure_lans(self, port, lan_bridge_handler_id=None, **kwargs):
-        """
-        @brief  Create/modify/delete/enable/disable an emulated LAN for STP protocol
-        @param port:  TG port in format tuple(chassisID, cardId, portId)
-        @type  port:  tuple(int)
-        @param lan_bridge_handler_id:  STP bridge handler name
-        @type  lan_bridge_handler_id:  str
-        @raise  AssertionError:  error in executing tcl code
-        @rtype:  dict
-        @return:  STP control bridges handler names
-        @note:  See description of keyword arguments in ixia_stp_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_stp_api.tcl
+        """Create/modify/delete/enable/disable an emulated LAN for STP protocol.
+
+        Args:
+            port(tuple(int)):  TG port in format tuple(chassisID, cardId, portId)
+            lan_bridge_handler_id(str):  STP bridge handler name
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            dict: STP control bridges handler names
+
+        Note:
+            See description of keyword arguments in ixia_stp_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_stp_api.tcl
+
         """
         if port not in list(self.stp_dictionary.keys()):
             self.stp_dictionary[port] = {}
@@ -295,19 +317,24 @@ class STP(object):
         return self.stp_dictionary[port]['lan_bridge_handler'].copy()
 
     def configure_msti(self, port, bridge_handler_id=None, msti_handler_id=None, **kwargs):
-        """
-        @brief  Create/modify/delete/enable/disable a STP MSTI object
-        @param port:  TG port in format tuple(chassisID, cardId, portId)
-        @type  port:  tuple(int)
-        @param bridge_handler_id:  STP bridge handler name
-        @type  bridge_handler_id:  str
-        @param msti_handler_id:  STP MSTI handler name
-        @type  msti_handler_id:  str
-        @raise  AssertionError:  error in executing tcl code
-        @rtype:  dict
-        @return:  STP MSTI bridges handler names
-        @note:  See description of keyword arguments in ixia_stp_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_stp_api.tcl
+        """Create/modify/delete/enable/disable a STP MSTI object.
+
+        Args:
+            port(tuple(int)):  TG port in format tuple(chassisID, cardId, portId)
+            bridge_handler_id(str):  STP bridge handler name
+            msti_handler_id(str):  STP MSTI handler name
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            dict:  STP MSTI bridges handler names
+
+        Note:
+            See description of keyword arguments in ixia_stp_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_stp_api.tcl
+
         """
         if port not in list(self.stp_dictionary.keys()):
             self.stp_dictionary[port] = {}
@@ -346,19 +373,24 @@ class STP(object):
         return self.stp_dictionary[port]['msti_handler'].copy()
 
     def configure_vlans(self, port, bridge_handler_id=None, vlan_handler_id=None, **kwargs):
-        """
-        @brief Create/modify/delete/enable/disable a STP VLAN object.
-        @param port:  TG port in format tuple(chassisID, cardId, portId)
-        @type  port:  tuple(int)
-        @param bridge_handler_id:  STP bridge handler name
-        @type  bridge_handler_id:  str
-        @param vlan_handler_id:  VLAN handler name
-        @type  vlan_handler_id:  str
-        @raise  AssertionError:  error in executing tcl code
-        @rtype:  dict
-        @return:  STP VLAN bridges handler names
-        @note:  See description of keyword arguments in ixia_stp_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_stp_api.tcl
+        """Create/modify/delete/enable/disable a STP VLAN object.
+
+        Args:
+            port(tuple(int)):  TG port in format tuple(chassisID, cardId, portId)
+            bridge_handler_id(str):  STP bridge handler name
+            vlan_handler_id(str):  VLAN handler name
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            dict:  STP VLAN bridges handler names
+
+        Note:
+            See description of keyword arguments in ixia_stp_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_stp_api.tcl
+
         """
         if port not in list(self.stp_dictionary.keys()):
             self.stp_dictionary[port] = {}
@@ -397,9 +429,11 @@ class STP(object):
         return self.stp_dictionary[port]['vlan_handler'].copy()
 
     def cleanup(self):
-        """
-        @brief  Clean all TCL variables and stp_dictionary
-        @return:  None
+        """Clean all TCL variables and stp_dictionary
+
+        Returns:
+            None
+
         """
         for port_values in list(self.stp_dictionary.values()):
             for key in list(port_values.keys()):

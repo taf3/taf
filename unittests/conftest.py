@@ -1,22 +1,23 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``conftest.py``
+
+`TAF unittests common options`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  conftest.py
-
-@summary  TAF unittests common options.
-"""
 import sys
 import os
 import time
@@ -71,6 +72,7 @@ def env_setup(request):
     # Define temporary directory which is used in fixture 'testdir'
     test_dir = request.config._tmpdirhandler.getbasetemp().strpath
     # Remove temporary directory after tests execution
+
     def remove_test_dir():
         if os.path.isdir(test_dir):
             shutil.rmtree(test_dir)

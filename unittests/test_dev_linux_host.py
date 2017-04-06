@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_dev_linux_host.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Unittests for dev_linux_host.py`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  test_dev_linux_host.py
-
-@summary  Unittests for dev_linux_host.py
 """
 
 import pytest
@@ -30,10 +30,11 @@ LH_CFG = {"name": "HOST", "instance_type": "generic_linux_host", "id": 19, "ipad
           "ssh_user": "user", "ssh_pass": "pass", "ports": ["xe1"]}
 
 STR_TABLR = [{'discardMode': 'None', 'macAddress': '94:DE:80:AB:01:53', 'pvpt': 0, 'portId': 1, 'description': 'xe1',
-              'operationalStatus':'Down', 'loopback': 'None', 'duplex': 'Full', 'adminMode': 'Down',
+              'operationalStatus': 'Down', 'loopback': 'None', 'duplex': 'Full', 'adminMode': 'Down',
               'autoNegotiate': 'Disabled', 'ingressFiltering': 'Disabled', 'maxFrameSize': 9216, 'pvid': 1,
-              'type': 'Physical', 'macMode': 'Normal','flowControl': 'None', 'learnMode': 'Hardware',
+              'type': 'Physical', 'macMode': 'Normal', 'flowControl': 'None', 'learnMode': 'Hardware',
               'appError': 'False', 'cutThrough': 'Disabled', 'speed': 10000, 'name': 'xe1'}]
+
 
 class FakeOpts(object):
     # fake json file
@@ -60,6 +61,7 @@ class FakeCLISSH(object):
         self.cmd_list.append(command)
         return CmdStatus("", "", 0)
 
+
 @pytest.fixture(autouse=True)
 def patch_clissh(request, monkeypatch):
     if request.module.__name__ == "unittests.test_dev_linux_host":
@@ -77,11 +79,11 @@ def lh(monkeypatch, patch_clissh):
     def m_get_table_ports(self, ports=None, all_params=False, ip_addr=False):
         return STR_TABLR
 
-    def m_generate_port_name(self,port):
+    def m_generate_port_name(self, port):
         return port
 
     def m_cli_set(self, commands, timeout=None, split_lines=True, expected_rcs=frozenset({0}),
-                multicall_treshold=0):
+                  multicall_treshold=0):
         for command in commands:
             cmd_list.append(command[0])
         return [[CmdStatus("", stderr="", rc=0)]]
@@ -100,8 +102,8 @@ def lh(monkeypatch, patch_clissh):
 
 
 def test_ifconfig_1(monkeypatch, lh):
-    """
-    @brief Verify that ifconfig command form correct set of commands when all parameters are used.
+    """Verify that ifconfig command form correct set of commands when all parameters are used.
+
     """
     cmd_list_expected = ['ip addr add 1.1.1.1 dev xe1', 'ip addr add 2002:: dev xe1', 'ip link set xe1 up', 'ip link set dev xe1 address 00:12:13:15:45:78']
     lh.ifconfig("up", ["xe1"], ['1.1.1.1'], ['2002::'], ["00:12:13:15:45:78"])
@@ -110,8 +112,8 @@ def test_ifconfig_1(monkeypatch, lh):
 
 
 def test_ifconfig_2():
-    """
-    @brief Verify that ifconfig command return exception when lengths of ipaddr, ip6addr, mac parameters is not correct.
+    """Verify that ifconfig command return exception when lengths of ipaddr, ip6addr, mac parameters is not correct.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     commands = [('up', ['xe1'], ['1.1.1.1', "2.2.2.2"], None, None, "ipaddr"), ('up', ['xe1'], None, ['2002::', '3000::'], None, "ip6addr"),
@@ -124,8 +126,8 @@ def test_ifconfig_2():
 
 
 def test_ifconfig_4():
-    """
-    @brief Verify that ifconfig command return exception when stats parameter without ports is given.
+    """Verify that ifconfig command return exception when stats parameter without ports is given.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     with pytest.raises(Exception) as excepinfo:
@@ -135,8 +137,8 @@ def test_ifconfig_4():
 
 
 def test_ifconfig_5():
-    """
-    @brief Verify that ifconfig command return exception when improper mode is set.
+    """Verify that ifconfig command return exception when improper mode is set.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     mode = "upfg"
@@ -146,9 +148,9 @@ def test_ifconfig_5():
     assert excepinfo.value.parameter == expect_result
 
 
-def test_ifconfig_6(monkeypatch,lh):
-    """
-    @brief Verify that ifconfig function return proper dictionary when 'stat' parameter is used.
+def test_ifconfig_6(monkeypatch, lh):
+    """Verify that ifconfig function return proper dictionary when 'stat' parameter is used.
+
     """
 
     result_expected = {'xe1': {'RX-OK': '13', 'TX-OVR': '0', 'Iface': 'veth1', 'TX-OK': '13', 'MTU': '1500',
@@ -167,8 +169,8 @@ def test_ifconfig_6(monkeypatch,lh):
 
 
 def test_ifconfig_7(monkeypatch, lh):
-    """
-    @brief Verify that exec command works with root privileges.
+    """Verify that exec command works with root privileges.
+
     """
     cmd_list_expected = ['ip addr add 1.1.1.1 dev lo', 'ip addr add 2.2.2.2 dev xe1', 'ip link set lo up', 'ip link set xe1 up']
 
@@ -178,8 +180,8 @@ def test_ifconfig_7(monkeypatch, lh):
 
 
 def test_routes_1(monkeypatch, lh):
-    """
-    @brief Verify that routes forms correct set of commands when all parameters are used.
+    """Verify that routes forms correct set of commands when all parameters are used.
+
     """
 
     cmd_list_expected = ['ip link set dev xe1 up', 'ip -4 route add 10.10.10.10 via 20.20.20.20 dev xe1', 'ip -6 route add 1000:: via 2000:: dev xe1',
@@ -190,8 +192,8 @@ def test_routes_1(monkeypatch, lh):
 
 
 def test_routes_2():
-    """
-    @brief Verify that routes command return exception when incorrect mode value is set.
+    """Verify that routes command return exception when incorrect mode value is set.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     mode = "upf"
@@ -202,8 +204,8 @@ def test_routes_2():
 
 
 def test_routes_3():
-    """
-    @brief Verify that routes function return exception when length of nexthop and netwrk lists is not equal.
+    """Verify that routes function return exception when length of nexthop and netwrk lists is not equal.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     with pytest.raises(Exception) as excepinfo:
@@ -213,8 +215,8 @@ def test_routes_3():
 
 
 def test_routes_4():
-    """
-    @brief Verify that routes function return exception when length of nexthop and ports lists is not equal.
+    """Verify that routes function return exception when length of nexthop and ports lists is not equal.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     with pytest.raises(Exception) as excepinfo:
@@ -224,8 +226,8 @@ def test_routes_4():
 
 
 def test_routes_5(monkeypatch, lh):
-    """
-    @brief Verify that route function return correct set of commands when ports parameter is None.
+    """Verify that route function return correct set of commands when ports parameter is None.
+
     """
     cmd_list_expected = ['ip link set dev lo up', 'ip link set dev xe1 up', 'ip -4 route add 10.10.10.10 via 20.20.20.20 dev lo',
                          'ip -4 route add 30.30.30.30 via 40.40.40.40 dev xe1']
@@ -235,8 +237,8 @@ def test_routes_5(monkeypatch, lh):
 
 
 def test_routes_6(monkeypatch, lh):
-    """
-    @brief Verify that route function return correct set of commands.
+    """Verify that route function return correct set of commands.
+
     """
     cmd_list_expected = ['ip link set dev xe1 up', 'ip -4 default via 20.20.20.20 dev xe1']
     lh.routes("up", ["default"], None, ["xe1"], ["20.20.20.20"])
@@ -245,8 +247,8 @@ def test_routes_6(monkeypatch, lh):
 
 
 def test_routes_7(monkeypatch, lh):
-    """
-    @brief Verify that route function return correct set of commands.
+    """Verify that route function return correct set of commands.
+
     """
     cmd_list_expected = ['ip link set dev xe1 up', 'ip -6 route add default via 3003:: dev xe1']
     lh.routes("up", None, ["default"], ["xe1"], None, ["3003::"])
@@ -255,8 +257,8 @@ def test_routes_7(monkeypatch, lh):
 
 
 def test_routes_8(monkeypatch, lh):
-    """
-    @brief Verify that route function return correct set of commands.
+    """Verify that route function return correct set of commands.
+
     """
     cmd_list_expected = ['ip link set dev xe1 up', 'ip -6 route add default via 3003:: dev xe1']
     lh.routes("up", None, ["default"], ["xe1"], None, ["3003::"], "option")
@@ -265,8 +267,8 @@ def test_routes_8(monkeypatch, lh):
 
 
 def test_ipforwrd_1(monkeypatch, lh):
-    """
-    @brief Verify that ip_forward function return correct set of commands when correct parameters are used.
+    """Verify that ip_forward function return correct set of commands when correct parameters are used.
+
     """
     cmd_list_expected = ["sysctl -w net.ipv4.ip_forward=1", "sysctl -w net.ipv6.conf.all.forwarding=1"]
     ipfrw_param = ["-4", "-6"]
@@ -277,8 +279,8 @@ def test_ipforwrd_1(monkeypatch, lh):
 
 
 def test_ipforward_2():
-    """
-    @brief Verify that ipforward command return exception when incorrect version value is set.
+    """Verify that ipforward command return exception when incorrect version value is set.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     inc_ver = "-8"
@@ -289,8 +291,8 @@ def test_ipforward_2():
 
 
 def test_ipforward_3(monkeypatch, lh):
-    """
-    @brief Verify that ipforward command return correct set of commands when version is None.
+    """Verify that ipforward command return correct set of commands when version is None.
+
     """
     cmd_list_expected = ["sysctl -w net.ipv4.ip_forward=1"]
     lh.ipforward(None)
@@ -298,8 +300,8 @@ def test_ipforward_3(monkeypatch, lh):
 
 
 def test_brctl_1(monkeypatch):
-    """
-    @brief Verify that brctl command return correct set of commands when add parameter with stp_cfg  is defined.
+    """Verify that brctl command return correct set of commands when add parameter with stp_cfg  is defined.
+
     """
     expected_commands = ["ifconfig -s -a | grep ^lhbr | awk '{print $1}'", 'sudo brctl addbr lhbr1', 'sudo brctl addif lhbr1 xe1',
                          'sudo brctl stp lhbr1 on', 'sudo brctl setbridgeprio lhbr1 1000', 'sudo ifconfig lhbr1 up']
@@ -316,8 +318,8 @@ def test_brctl_1(monkeypatch):
 
 
 def test_brctl_2(monkeypatch):
-    """
-    @brief Verify that brctl command return correct set of commands when add command is used.
+    """Verify that brctl command return correct set of commands when add command is used.
+
     """
     expected_brname = "lhbr1"
     expected_commands = ["ifconfig -s -a | grep ^lhbr | awk '{print $1}'", 'sudo brctl addbr lhbr1', 'sudo brctl addif lhbr1 xe1', 'sudo brctl stp lhbr1 on',
@@ -336,8 +338,8 @@ def test_brctl_2(monkeypatch):
 
 
 def test_brctl_3(monkeypatch, lh):
-    """
-    @brief Verify that brctl command return correct set of commands when cfg parameter is used.
+    """Verify that brctl command return correct set of commands when cfg parameter is used.
+
     """
     cmd_list_expected = ['brctl stp br0 on', 'brctl addif br0 xe1', 'brctl setbridgeprio br0 1000', 'brctl setpathcost br0 xe1 1', 'brctl setmaxage br0 10',
                          'brctl setfd br0 7', 'brctl setportprio br0 xe2 15', 'brctl sethello br0 100']
@@ -347,8 +349,8 @@ def test_brctl_3(monkeypatch, lh):
 
 
 def test_brctl_4(monkeypatch):
-    """
-    @brief Verify cfg parameter in brctl return exception when bridge name is not given.
+    """Verify cfg parameter in brctl return exception when bridge name is not given.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     mode = "cfg"
@@ -359,8 +361,8 @@ def test_brctl_4(monkeypatch):
 
 
 def test_brctl_5():
-    """
-    @brief Verify brctl command return exception when bridge name is not given as parameter.
+    """Verify brctl command return exception when bridge name is not given as parameter.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     mode = "delif"
@@ -371,8 +373,8 @@ def test_brctl_5():
 
 
 def test_brctl_6():
-    """
-    @brief Verify brctl command with delif parameter return exception when ports are not given
+    """Verify brctl command with delif parameter return exception when ports are not given.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     mode = "delif"
@@ -383,8 +385,8 @@ def test_brctl_6():
 
 
 def test_brctl_7(monkeypatch, lh):
-    """
-    @brief Verify that brctl command with delif parameter return correct set of commands when all needed parameters are given.
+    """Verify that brctl command with delif parameter return correct set of commands when all needed parameters are given.
+
     """
     cmd_list_expected = ["brctl delif br0 xe1"]
     lh.brctl("delif", ["xe1"], "br0")
@@ -393,8 +395,8 @@ def test_brctl_7(monkeypatch, lh):
 
 
 def test_brctl_8(monkeypatch, lh):
-    """
-    @brief Verify that brctl command with del parameter return correct set of commands when all needed parameters are given.
+    """Verify that brctl command with del parameter return correct set of commands when all needed parameters are given.
+
     """
     cmd_list_expected = ["ifconfig br0 down", "brctl delbr br0"]
     mode = "del"
@@ -404,8 +406,8 @@ def test_brctl_8(monkeypatch, lh):
 
 
 def test_brctl_9():
-    """
-    @brief Verify that brctl command return exception when br name is not set.
+    """Verify that brctl command return exception when br name is not set.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     mode = "del"
@@ -416,8 +418,8 @@ def test_brctl_9():
 
 
 def test_brctl_10():
-    """
-    @brief Verify brctl command return exception when incorrect mode is set.
+    """Verify brctl command return exception when incorrect mode is set.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     mode = "upfg"
@@ -428,8 +430,8 @@ def test_brctl_10():
 
 
 def test_brctl_11(monkeypatch):
-    """
-    @brief Verify that brctl function return proper dictionary when 'stpstat' parameter is set.
+    """Verify that brctl function return proper dictionary when 'stpstat' parameter is set.
+
     """
     result_expected = {'': {}, 'proxy1': {'designated root': '01f4.001b2189ac4c', 'state': 'forwarding', 'port id': '0000', 'path cost': '2',
                        'port number': '0'}, 'proxy0': {'port number': '2'}, 'lhbr2': {'max age': '20.00', 'designated root': '05dc.4aa38155aa0f',
@@ -450,8 +452,8 @@ def test_brctl_11(monkeypatch):
 
 
 def test_brctl_12(monkeypatch):
-    """
-    @brief Verify that brctl function return dictionary when "macs" parameter is set.
+    """Verify that brctl function return dictionary when "macs" parameter is set.
+
     """
     result_expected = {'1': [{'ageing timer': '119.25', 'no mac addr': '00:10:4b:b6:c6:e4', 'is local?': 'no'}],
                        '4': [{'ageing timer': '0.00', 'no mac addr': '08:00:09:fc:d2:11', 'is local?': 'yes'}]}
@@ -468,8 +470,8 @@ def test_brctl_12(monkeypatch):
 
 
 def test_brctl_13():
-    """
-    @brief Verify that brctl function with stpstat parameter return exception when bridge name is not set.
+    """Verify that brctl function with stpstat parameter return exception when bridge name is not set.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     with pytest.raises(Exception) as excepinfo:
@@ -479,8 +481,8 @@ def test_brctl_13():
 
 
 def test_brctl_14():
-    """
-    @brief Verify that brctl function with mac parameter return exception when bridge name is not set.
+    """Verify that brctl function with mac parameter return exception when bridge name is not set.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     with pytest.raises(Exception) as excepinfo:
@@ -490,8 +492,8 @@ def test_brctl_14():
 
 
 def test_getmac_1(monkeypatch):
-    """
-    @brief Verify that getmac function return interface mac address.
+    """Verify that getmac function return interface mac address.
+
     """
     result_expected = "94:de:80:b0:25:f8"
     cmd_list = []
@@ -508,8 +510,8 @@ def test_getmac_1(monkeypatch):
 
 
 def test_ethtool_1():
-    """
-    @brief Verify ethtool function return exception when improper mode is set.
+    """Verify ethtool function return exception when improper mode is set.
+
     """
     lh = GenericLinuxHost(LH_CFG, OPTS)
     inc_mode = "genericc"
@@ -520,8 +522,8 @@ def test_ethtool_1():
 
 
 def test_ethtool_2(monkeypatch, lh):
-    """
-    @brief Verify ethtool function return correct set of commands when correct parameters are set.
+    """Verify ethtool function return correct set of commands when correct parameters are set.
+
     """
     cmd_list_expected = ["ethtool -s xe1 speed 40"]
     lh.ethtool("xe1", "generic", speed=40)
@@ -532,8 +534,8 @@ def test_ethtool_2(monkeypatch, lh):
 
 
 def test_vconf_1(monkeypatch):
-    """
-    @brief Verify vconf function return correct command when rem parameter is set.
+    """Verify vconf function return correct command when rem parameter is set.
+
     """
     commands_expected = ['vconfig rem xe1.3']
 
@@ -554,8 +556,8 @@ def test_vconf_1(monkeypatch):
 
 
 def test_vconf_2(monkeypatch):
-    """
-    @brief Verify vconf function return correct command when add parameter is set.
+    """Verify vconf function return correct command when add parameter is set.
+
     """
     commands_expected = ['vconfig add xe1 3']
 
@@ -575,8 +577,8 @@ def test_vconf_2(monkeypatch):
 
 
 def test_vconf_3(monkeypatch):
-    """
-    @brief Verify vconf function return exception after creating vlan which is already exist.
+    """Verify vconf function return exception after creating vlan which is already exist.
+
     """
     expected_result = "Port xe1 already in 3 vlan"
 
@@ -598,8 +600,8 @@ def test_vconf_3(monkeypatch):
 
 
 def test_vconf_4(monkeypatch):
-    """
-    @brief Verify that vconfig function return exception when mode is incorrect
+    """Verify that vconfig function return exception when mode is incorrect.
+
     """
     def mockreturn_8021q(self):
         pass
@@ -614,8 +616,8 @@ def test_vconf_4(monkeypatch):
 
 
 def test_enable_8021q_1(monkeypatch):
-    """
-    @brief Verify that enable_802q_1 function return exception when 802.1q is not supported by current os.
+    """Verify that enable_802q_1 function return exception when 802.1q is not supported by current os.
+
     """
     def mockreturn(command):
         return CmdStatus("", "", 0)
@@ -629,8 +631,8 @@ def test_enable_8021q_1(monkeypatch):
 
 
 def test_enable_8021q_2(monkeypatch):
-    """
-    @brief Verify that enable_802q_1 function return correct set of commands when 8021q is already loaded.
+    """Verify that enable_802q_1 function return correct set of commands when 8021q is already loaded.
+
     """
     comm_expected = ['modprobe -l | grep 8021q', 'lsmod | grep ^8021q']
     cmd_list = []
@@ -647,8 +649,8 @@ def test_enable_8021q_2(monkeypatch):
 
 
 def test_enable_8021q_3(monkeypatch):
-    """
-    @brief Verify that enable_802q_1 function return exception if 8021q can not be loaded.
+    """Verify that enable_802q_1 function return exception if 8021q can not be loaded.
+
     """
     cmd_list = []
 
@@ -667,8 +669,8 @@ def test_enable_8021q_3(monkeypatch):
 
 
 def test_cleanup_1(monkeypatch, lh):
-    """
-    @brief Verify that cleanup function clear route configurations.
+    """Verify that cleanup function clear route configurations.
+
     """
     def mockreturn(self, command):
         pass
@@ -679,8 +681,8 @@ def test_cleanup_1(monkeypatch, lh):
 
 
 def test_cleanup_2(monkeypatch, lh):
-    """
-    @brief Verify that cleanup function clear ifconfig configurations.
+    """Verify that cleanup function clear ifconfig configurations.
+
     """
     def mockreturn(self, command):
         pass
@@ -690,9 +692,9 @@ def test_cleanup_2(monkeypatch, lh):
     assert len(lh.ifconf_addrs) == 0
 
 
-def test_cleanup_3(monkeypatch,lh):
-    """
-    @brief Verify that cleanup function clear vconfig configurations.
+def test_cleanup_3(monkeypatch, lh):
+    """Verify that cleanup function clear vconfig configurations.
+
     """
     def mockreturn_8021q(self):
         pass
@@ -707,8 +709,8 @@ def test_cleanup_3(monkeypatch,lh):
 
 
 def test_cleanup_4(monkeypatch, lh):
-    """
-    @brief Verify that cleanup function form correct set of commands to delete brctl bridges.
+    """Verify that cleanup function form correct set of commands to delete brctl bridges.
+
     """
     expected_result = ['ifconfig br0 down', 'brctl delbr br0']
     cmd_list = []
@@ -724,8 +726,8 @@ def test_cleanup_4(monkeypatch, lh):
 
 
 def test_start_1(monkeypatch):
-    """
-    @brief Verify that start function return exception when namespace is already created
+    """Verify that start function return exception when namespace is already created.
+
     """
     output_result = "Namespace is already created"
 
@@ -741,8 +743,8 @@ def test_start_1(monkeypatch):
 
 
 def test_start_2(monkeypatch):
-    """
-    @brief Verify that start function exception when network namespace was not created.
+    """Verify that start function exception when network namespace was not created.
+
     """
     result_output = "Cannot create network namespace. Return code = 5"
 
@@ -764,8 +766,8 @@ def test_start_2(monkeypatch):
 
 
 def test_check_mgmt_bridge_1(monkeypatch):
-    """
-    @brief Verify that check_mgmt_bridge check that mgmt bridge is already created.
+    """Verify that check_mgmt_bridge check that mgmt bridge is already created.
+
     """
     comm_expect = ['ifconfig mgmt111']
     cmd_list = []
@@ -783,8 +785,8 @@ def test_check_mgmt_bridge_1(monkeypatch):
 
 
 def test_check_mgmt_bridge_2(monkeypatch):
-    """
-    @brief Verify that check_mgmt_bridge check that mgmt bridge is already created.
+    """Verify that check_mgmt_bridge check that mgmt bridge is already created.
+
     """
     cmd_list = []
 
@@ -799,8 +801,8 @@ def test_check_mgmt_bridge_2(monkeypatch):
 
 
 def test_add_mgmt_bridge_1(monkeypatch):
-    """
-    @brief Verify that add_mgmt_bridge function generate correct set of commands to add mgmt bridge.
+    """Verify that add_mgmt_bridge function generate correct set of commands to add mgmt bridge.
+
     """
     comm_expect = ['brctl addbr mbrlocalhos254', 'ifconfig mbrlocalhos254 localhos.254 up', "ifconfig mbrlocalhos254"]
     cmd_list = []
@@ -820,8 +822,8 @@ def test_add_mgmt_bridge_1(monkeypatch):
 
 
 def test_add_mgmt_bridge_2(monkeypatch):
-    """
-    @brief Verify that add_mgmt_bridge function return exception when managment bridge can not be created.
+    """Verify that add_mgmt_bridge function return exception when managment bridge can not be created.
+
     """
     output_result = "Failed to create management bridge for Network namespaces.\n" + "Stdout: , Stderr: Error"
 
@@ -842,8 +844,8 @@ def test_add_mgmt_bridge_2(monkeypatch):
 
 
 def test_del_mgmt_bridge_1(monkeypatch):
-    """
-    @brief Verify that del_mgmt_bridge function return correct set of commands to delete mgmt bridge.
+    """Verify that del_mgmt_bridge function return correct set of commands to delete mgmt bridge.
+
     """
     comm_expect = ['ifconfig mbrlocalhos254 down', 'brctl delbr mbrlocalhos254']
     cmd_list = []
@@ -865,8 +867,8 @@ def test_del_mgmt_bridge_1(monkeypatch):
 
 
 def test_del_mgmt_bridge_2(monkeypatch):
-    """
-    @brief Verify that del_mgmt_bridge function return exception when management bridge can not be deleted.
+    """Verify that del_mgmt_bridge function return exception when management bridge can not be deleted.
+
     """
     output_result = "Failed to delete management bridge for Network namespaces.\n" + "Stdout: , Stderr: Error"
     cmd_list = []
@@ -890,8 +892,8 @@ def test_del_mgmt_bridge_2(monkeypatch):
 
 
 def test_add_mgmt_iface_1(monkeypatch):
-    """
-    @brief Verify that mgmt interface return correct set of commands for adding mgmt interface
+    """Verify that mgmt interface return correct set of commands for adding mgmt interface.
+
     """
     comm_expect = ['ip link add veth19 type veth peer name veth19 netns HOST', 'brctl addif mbrlocalhos254 veth19', 'ifconfig veth19 up',
                    'ifconfig veth19 localhost up']
@@ -913,8 +915,8 @@ def test_add_mgmt_iface_1(monkeypatch):
 
 
 def test_add_mgmt_iface_2(monkeypatch):
-    """
-    @brief Verify that add_mgmt_iface function return exception when mgmt iface can't be deleted.
+    """Verify that add_mgmt_iface function return exception when mgmt iface can't be deleted.
+
     """
     output_exept = "Failed to create management iface for HOST.\n"
 
@@ -927,8 +929,8 @@ def test_add_mgmt_iface_2(monkeypatch):
 
 
 def test_del_mgmt_iface_1(monkeypatch):
-    """
-    @brief Verify that del_mgmt_iface function return correct set of commands and exceptions when mgmt interface can not be deleted.
+    """Verify that del_mgmt_iface function return correct set of commands and exceptions when mgmt interface can not be deleted.
+
     """
     comm_expect = ['ip link delete veth19']
     cmd_list = []
@@ -944,8 +946,8 @@ def test_del_mgmt_iface_1(monkeypatch):
 
 
 def test_del_mgmt_iface_2(monkeypatch):
-    """
-    @brief Verify that del_mgmt_iface function return correct set of commands and exceptions when mgmt interface can not be deleted.
+    """Verify that del_mgmt_iface function return correct set of commands and exceptions when mgmt interface can not be deleted.
+
     """
     comm_expect = ['ip link delete veth19']
     output_expect = "Failed to delete management iface for HOST.\n"

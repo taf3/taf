@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``syslog.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Class for remote loggin functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  syslog.py
-
-@summary  Class for remote loggin functionality.
 """
 
 import re
@@ -28,23 +27,21 @@ from .custom_exceptions import SysLogException
 
 
 class SystemLog(object):
-    """
-    @description  syslog object class
+    """Syslog object class.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, host=None, user=None, pasw=None, log_path=None):
-        """
-        @brief  Initialize SystemLog class
-        @param  host:  Host IP address
-        @type  host:  str
-        @param  user:  Host user
-        @type  user:  str
-        @param  pasw:  Host password
-        @type  pasw:  str
-        @param  log_path:  Path to logs
-        @type  log_path:  str
+        """Initialize SystemLog class.
+
+        Args:
+            host(str):  Host IP address
+            user(str):  Host user
+            pasw(str):  Host password
+            log_path(str):  Path to logs
+
         """
         self.host = host
         self.user = user
@@ -53,24 +50,26 @@ class SystemLog(object):
         self.ssh = clissh.CLISSH(self.host)
 
     def __del__(self):
-        """
-        @brief  Try to close CLI connection on object destroy.
+        """Try to close CLI connection on object destroy.
+
         """
         self.ssh.close()
 
     def get_checkpoint(self):
-        """
-        @brief Get syslog checkpoint
+        """Get syslog checkpoint.
 
-        @note  checkpoint it's an integer value which can be used for log reading from checkpoint till the end.
+        Notes:
+            Checkpoint it's an integer value which can be used for log reading from checkpoint till the end.
 
-        @return  checkpoint (integer)
-        @par  Example:
-        @code{.py}
-        syslog_1 = syslog.SystemLog("1.1.1.1", "usr", "PaSsWd", "/some/path")
-        cp = syslog_1.get_checkpoint()
-        # cp = 57899427
-        @endcode
+        Returns:
+            int: checkpoint
+
+        Examples::
+
+            syslog_1 = syslog.SystemLog("1.1.1.1", "usr", "PaSsWd", "/some/path")
+            cp = syslog_1.get_checkpoint()
+            # cp = 57899427
+
         """
         try:
             check_alive_ssh = self.ssh.client.open_sftp()
@@ -94,20 +93,25 @@ class SystemLog(object):
         return checkpoint
 
     def get_log(self, checkpoint=None, timeout=60):
-        """
-        @brief  Read log from remote host.
-        @param checkpoint:  Log file checkpoint
-        @type checkpoint:  int
-        @param timeout:  Get log timeout
-        @type timeout:  int
-        @raise  SysLogException:  syslog timeout exceeded
-        @rtype:  tuple
-        @return:  log_list (list), new_checkpoint (integer)
-        @note  If checkpoint present read from checkpoint till the end, if not read full file.
-        @par  Example:
-        @code{.py}
-        log_list, checkpoint = get_log(34134654, 30)
-        @endcode
+        """Read log from remote host.
+
+        Args:
+            checkpoint(int):  Log file checkpoint
+            timeout(int):  Get log timeout
+
+        Raises:
+            SysLogException:  syslog timeout exceeded
+
+        Returns:
+            tuple: log_list (list), new_checkpoint (integer)
+
+        Notes:
+            If checkpoint present read from checkpoint till the end, if not read full file.
+
+        Examples::
+
+            log_list, checkpoint = get_log(34134654, 30)
+
         """
         log_list = []
         checkpoint_temp = 0
@@ -128,7 +132,7 @@ class SystemLog(object):
             log_list = remote_log_file.readlines()
             checkpoint_new = remote_log_file.tell()
         else:
-            # wait untill new records appear; compare checkpoint with temp_checkpoint
+            # wait until new records appear; compare checkpoint with temp_checkpoint
             end_time = time.time() + timeout
             while checkpoint >= checkpoint_temp:
                 if time.time() >= end_time:
@@ -154,21 +158,22 @@ class SystemLog(object):
         return log_list, checkpoint_new
 
     def search(self, log_list, paterntuple):
-        """
-        @brief  Find command records in log file
-        @param log_list:  logfiles
-        @type log_list:  list
-        @param paterntuple:  commands part what function should find in loglist
-        @type log_list:  tuple
-        @rtype:  list
-        @return:  find_list_result
-        @par  Example:
-        @code{.py}
-        \>>> test_command = 'sshd', '', 'Accepted password'
-        \>>> syslog_1.search(test_log, test_command)
-        ['Aug 10 08:54:03 <platform> sshd[13275]: Accepted password for root from 127.0.0.1 port 59212 ssh2\n',
-         'Aug 10 08:54:03 <platform> sshd[13275]: Accepted password for root from 127.0.0.1 port 59212 ssh2\n']
-        @endcode
+        """Find command records in log file.
+
+        Args:
+            log_list(list):  logfiles
+            paterntuple(tuple):  commands part what function should find in loglist
+
+        Returns:
+            list:  find_list_result
+
+        Examples::
+
+            \>>> test_command = 'sshd', '', 'Accepted password'
+            \>>> syslog_1.search(test_log, test_command)
+            ['Aug 10 08:54:03 <platform> sshd[13275]: Accepted password for root from 127.0.0.1 port 59212 ssh2\n',
+             'Aug 10 08:54:03 <platform> sshd[13275]: Accepted password for root from 127.0.0.1 port 59212 ssh2\n']
+
         """
         # create empty list for search result:
         find_list_result = []
@@ -180,12 +185,14 @@ class SystemLog(object):
         return find_list_result
 
     def find_duplicated_records(self, log_list):
-        """
-        @brief  Find duplicated records in log file
-        @param log_list:  logfiles
-        @type log_list:  list
-        @rtype:  list
-        @return  None or list of duplicated records
+        """Find duplicated records in log file.
+
+        Args:
+            log_list(list):  logfiles
+
+        Returns:
+            list: None or list of duplicated records
+
         """
         # compare list length:
         if len(set(log_list)) == len(log_list):

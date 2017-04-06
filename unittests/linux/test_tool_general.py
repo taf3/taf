@@ -1,22 +1,22 @@
 #!/usr/bin/env python
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_tool_generate.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`ToolGeneral Unittests`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  test_tool_generate.py
-
-@summary  ToolGeneral Unittests
 """
 from unittest.mock import Mock, MagicMock
 
@@ -34,15 +34,16 @@ from testlib.linux.tool_general import GenericTool, RC_SERVICE_INACTIVE
 
 
 class CmdExecSimul(object):
-    """
-    @brief  Simulate clissh (blackbox).
-            Specify commands behavior - an (sequence of) input command(s) to output(s)
-            including side effect(s).
+    """Simulate clissh (blackbox).
+
+    Specify commands behavior - an (sequence of) input command(s) to output(s)
+    including side effect(s).
+
     """
 
     MAKE_ITER_MAP = [
         iter,
-        itertools.cycle
+        itertools.cycle,
     ]
 
     def __init__(self, cmd_exec_sim, cycle=False):
@@ -61,9 +62,10 @@ class CmdExecSimul(object):
         self.sim_cmd_iter = make_iterable(cmd_exec_sim)
 
     def __call__(self, *args, **kwargs):
-        """
-        @breif  Any exception raised is considered an expected behavior (side_effect).
+        """Any exception raised is considered an expected behavior (side_effect).
+
         The mocked signature: exec_command(command, timeout=None)
+
         """
         if args:
             command = args[0]
@@ -135,7 +137,7 @@ class FakeLinuxHost(GenericLinuxHost):
         'instance_type': 'generic_linux_host',
         'ipaddr': 'localhost',
         'ssh_user': 'fake_user',
-        'ssh_pass': 'fake_pass'
+        'ssh_pass': 'fake_pass',
     }
 
     def __init__(self, config=None, opts=None):
@@ -188,7 +190,7 @@ def tool(gen_tool, systemctl):
     tool = {
         'instance_id': tool_iid,
         'service_name': SERVICE_NAME,
-        'service_manager': systemctl
+        'service_manager': systemctl,
     }
     gen_tool.instances[tool_iid] = tool
     return tool
@@ -197,14 +199,14 @@ def tool(gen_tool, systemctl):
 class TestToolGeneral(object):
     ARG_SYSTEMCTL_STOP = 'systemctl stop {0}.service'.format(SERVICE_NAME)
     RET_VAL_INACTIVE = {
-        'return_value': CmdStatus('stdout', 'stderr', RC_SERVICE_INACTIVE)
+        'return_value': CmdStatus('stdout', 'stderr', RC_SERVICE_INACTIVE),
     }
 
     def test_stop_raises_when_ignore_false(self, lh, gen_tool, tool):
         cmd_exec_simul = [
             {
-                self.ARG_SYSTEMCTL_STOP: MagicMock(**self.RET_VAL_INACTIVE)
-            }
+                self.ARG_SYSTEMCTL_STOP: MagicMock(**self.RET_VAL_INACTIVE),
+            },
         ]
         lh.ssh.set_simul(cmd_exec_simul)
 
@@ -214,8 +216,8 @@ class TestToolGeneral(object):
     def test_stop_doesnt_raises_when_ignore_true(self, lh, gen_tool, tool):
         cmd_exec_simul = [
             {
-                self.ARG_SYSTEMCTL_STOP: MagicMock(**self.RET_VAL_INACTIVE)
-            }
+                self.ARG_SYSTEMCTL_STOP: MagicMock(**self.RET_VAL_INACTIVE),
+            },
         ]
         lh.ssh.set_simul(cmd_exec_simul)
 
@@ -230,7 +232,7 @@ class TestToolGeneral(object):
     def test_start_with_prefix(self, lh, gen_tool, tool):
         cmd_exec_simul = [
             MagicMock(return_value=CmdStatus("active", "", 0)),  # systemd-run
-            MagicMock(return_value=CmdStatus("active", "", 0))   # systemctl is-active
+            MagicMock(return_value=CmdStatus("active", "", 0)),  # systemctl is-active
         ]
         lh.ssh.set_simul(cmd_exec_simul)
 

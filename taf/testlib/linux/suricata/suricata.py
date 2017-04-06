@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``suricata.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Suricata support and helpers`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  suricata.py
-
-@summary  Suricata support and helpers
 """
 import os
 import yaml
@@ -29,26 +29,25 @@ class Suricata(tool_general.GenericTool):
     """
     """
     def __init__(self, run_command):
-        """
-        @brief  Initialize Suricata class
-        @param run_command: function that runs the actual commands
-        @type run_command: function
+        """Initialize Suricata class.
+
+        Args:
+            run_command(function): function that runs the actual commands
+
         """
         super(Suricata, self).__init__(run_command, 'suricata')
 
     def start(self, prefix=None, options=None, command=None, **kwargs):
-        """
-        @brief  Generate suricata command, launch it and store results in the file
-        @param prefix: command prefix
-        @type  prefix: str
+        """Generate suricata command, launch it and store results in the file.
 
-        @param options: intermediate iperf options list
-        @type  options: list of str
-        @param command: intermediate iperf command object
-        @type  command: Command
+        Args:
+            prefix(str): command prefix
+            options(list of str): intermediate iperf options list
+            command(Command): intermediate iperf command object
 
-        @rtype:  dict
-        @return:  suricata instance process info
+        Returns:
+            dict:  suricata instance process info
+
         """
         # intermediate operands in 'command' and 'options', if any,  prevail in this
         # respective order and overrule the (both default and set) method arguments
@@ -109,8 +108,8 @@ class SuricataHelper(object):
 
     @classmethod
     def config_update(cls, ssh_obj, yaml_file, yaml_mods=None, rule_mods=None):
-        """
-        @brief  Suricata yaml and rule files config management.
+        """Suricata yaml and rule files config management.
+
         """
         if yaml_mods or rule_mods:
             pass

@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``IxLoadHL.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`IxLoad HL API`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  IxLoadHL.py
-
-@summary  IxLoad HL API.
 """
 
 import os
@@ -28,8 +27,8 @@ from ..loggers import ClassLogger
 
 
 class IxLoadHelpersMixin(object):
-    """
-    @brief  The cass contains helpers methods for IxLoad configuration.
+    """The cass contains helpers methods for IxLoad configuration.
+
     """
 
     # Default network configuration parameters.
@@ -92,13 +91,14 @@ class IxLoadHelpersMixin(object):
     DNS_CFG = {"domain": "", "_Stale": False, "timeout": 30}
 
     def config_ethernet(self, network, **ethcfg):
-        """
-        @brief  Performs standard L1 configuration for network object.
+        """Performs standard L1 configuration for network object.
 
-        @param  network:
-        @param  ethcfg: (kwargs)
-        @param  elm:  Optional ELM params (dict)
-        @param  phy:  Optional Phy params (dict)
+        Args:
+            network(str):  RouteInterface network
+            ethcfg(kwargs): configuration params for network object
+            elm(dict):  Optional ELM params (dict)
+            phy(dict):  Optional Phy params (dict)
+
         """
 
         elm = ethcfg.pop("elm") if "elm" in ethcfg else None
@@ -127,8 +127,8 @@ class IxLoadHelpersMixin(object):
         return ethernet
 
     def config_network(self, network, name, tcp=None, grat_arp=None, dns=None, nsettings=None, nfilter=None):
-        """
-        @brief  Configure ARP, TCP, DNS default network settings.
+        """Configure ARP, TCP, DNS default network settings.
+
         """
         settings_cfg = {"teardownInterfaceWithUser": False, "_Stale": False, "interfaceBehavior": 0}
         filter_cfg = {"all": False, "pppoecontrol": False, "isis": False, "auto": True,
@@ -165,13 +165,15 @@ class IxLoadHelpersMixin(object):
         network.config(name=name)
 
     def add_ip_ranges(self, ip, ipr=None, macr=None, vlanr=None):
-        """
-        @brief  Create and add IP(and lower MAC/VLAN) ranges to TG IP object.
+        """Create and add IP(and lower MAC/VLAN) ranges to TG IP object.
 
-        @param  ip:  TG IP plugin object.
-        @param  ipr:  IP range.
-        @param  macr:  MAC range.
-        @param  vlanr:  Vlan range.
+        Args:
+
+            ip:  TG IP plugin object.
+            ipr:  IP range.
+            macr:  MAC range.
+            vlanr:  Vlan range.
+
         """
         ipr_cfg = self.IP_RANGE_CFG.copy()
         macr_cfg = self.MAC_RANGE_CFG.copy()
@@ -198,8 +200,8 @@ class IxLoadHelpersMixin(object):
         return ip_range
 
     def config_http_client(self, http_client, sustain_time, objective_value, objective_type, dst, page_name):
-        """
-        @brief  Config standard HTTP Client.
+        """Config standard HTTP Client.
+
         """
         timeline = http_client.config_timeline(sustainTime=sustain_time,
                                                rampUpValue=10,
@@ -221,8 +223,8 @@ class IxLoadHelpersMixin(object):
         http_client.config_percentagecmdlist()
 
     def config_http_server(self, http_server, page_list=None):
-        """
-        @brief  Perform standard HTTP server configuration.
+        """Perform standard HTTP server configuration.
+
         """
         http_server.config_timeline()
 
@@ -261,13 +263,14 @@ class IxLoadHelpersMixin(object):
         http_server.config_agent()
 
     def get_stat_files(self, res_path, dst_path, file_list, silent=False):
-        """
-        @brief  Get stat files from IxLoad host.
+        """Get stat files from IxLoad host.
 
-        @param  res_path:  Origin folder.
-        @param  dst_path:  Destination folder.
-        @param  file_list:  List of files to be copied.
-        @param  silent:  If True then an exception won't be raised in case files aren't downloaded.
+        Args:
+            res_path(str):  Origin folder.
+            dst_path(str):  Destination folder.
+            file_list(list[str]):  List of files to be copied.
+            silent(bool):  If True then an exception won't be raised in case files aren't downloaded.
+
         """
         try:
             for file_name in file_list:
@@ -282,10 +285,11 @@ class IxLoadHelpersMixin(object):
             return True
 
     def wait_test_start(self, res_path, temp_dir=None, timeout=180, interval=10, file_list=None):
-        """
-        @brief  Wait until test is started.
+        """Wait until test is started.
 
-        @note  Method will wait until report file is appear.
+        Note:
+            Method will wait until report file is appear.
+
         """
         if not temp_dir:
             temp_dir = "/tmp/taf_temp.{0}".format(os.getpid())
@@ -349,24 +353,25 @@ class IxLoadHL(IxLoadTclAPI.IxLoadTclAPI, IxLoadHelpersMixin):
             self.__init__(self.__config, self.__opts)
 
     def create(self):
-        """
-        @brief  Obligatory class for entry_type = tg
+        """Obligatory class for entry_type = tg.
+
         """
         return self.connect()
 
     def destroy(self):
-        """
-        @brief  Obligatory class for entry_type = tg
+        """Obligatory class for entry_type = tg.
+
         """
         self.cleanup(mode="fast")
         self.logger_delete()
         self.disconnect()
 
     def cleanup(self, mode="complete"):
-        """
-        @brief  This method should do IxLoad config cleanup.
+        """This method should do IxLoad config cleanup.
 
-        @param mode: "fast" or "complete". Not implemented (str).
+        Args:
+            mode(str): "fast" or "complete". Not implemented.
+
         """
         # TODO: Implement proper config cleanup method.
         self.test_controller.cleanup()
@@ -375,8 +380,8 @@ class IxLoadHL(IxLoadTclAPI.IxLoadTclAPI, IxLoadHelpersMixin):
         # ::IxLoad delete $repository
 
     def sanitize(self):
-        """
-        @brief  Clear ownership before exit.
+        """Clear ownership before exit.
+
         """
         self.test_controller.cleanup()
         self.disconnect()

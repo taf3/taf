@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``iperf_cmd.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`iperf command parsing and building support`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  iperf_cmd.py
-
-@summary  iperf command parsing and building support
 """
 
 import itertools
@@ -137,7 +137,7 @@ IPERF_CLIENT_OPTS = {
     'bandwidth': {
         'names': {'short': '-b', 'long': '--bandwidth'},
         'help': '\\d+[KM] set target bandwidth to N bits/sec (default 1 Mbit.sec)\
-                This setting requires UDP (-u)'
+                This setting requires UDP (-u)',
     },
     'client': {
         'names': {'short': '-c', 'long': '--client'},
@@ -212,15 +212,15 @@ class IperfArgumentBuilder(ArgumentBuilder):
                 {
                     cls.__TRUE__: cls.FORMAT_KEY_BY_TAG('long'),
                     cls.__FALSE__: cls.FORMAT_NONE,
-                    None: cls.FORMAT_NONE
+                    None: cls.FORMAT_NONE,
                 },
                 default=cls.FORMATTER_JOIN_KEY_VAL(
                     key=cls.FORMAT_KEY_BY_TAG('long'),
                     joiner=cls.FORMAT_ARG_APPEND_LIST,
                     val=cls.FORMAT_VAL_TRANSFORM(str),
-                )
+                ),
             ),
-            'positional': cls.FORMAT_VAL_TRANSFORM(str)
+            'positional': cls.FORMAT_VAL_TRANSFORM(str),
         }
         return _formatter
 
@@ -234,8 +234,8 @@ class CmdIperfHelper(CommandHelper):
     """
     @classmethod
     def check_args(cls, **kwargs):
-        """
-        @brief: Input command arguments checking API
+        """Input command arguments checking API
+
         """
         __kwargs = cls._encode_args(**kwargs)
         return cls._check_args(**__kwargs)
@@ -284,10 +284,10 @@ IPERF_BUILDER = IperfArgumentBuilder()
 
 _params_dict = dict(dict(IPERF_GENERAL_OPTS, **IPERF_SERVER_OPTS), **IPERF_CLIENT_OPTS)
 iperf_cmd_kwargs = {
-    'arg_parser':  IPERF_PARSER,
-    'params':      _params_dict,
+    'arg_parser': IPERF_PARSER,
+    'params': _params_dict,
     'arg_builder': IPERF_BUILDER,
-    'default_list': []
+    'default_list': [],
 }
 IPERF_CMD_HELPER = CmdIperfHelper(**iperf_cmd_kwargs)
 

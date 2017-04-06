@@ -1,26 +1,27 @@
-"""
-@copyright Copyright (c) 2016 - 2017, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_trextg.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`TRex traffic generator's unittests`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file test_trextg.py
-
-@summary TRex traffic generator's unittests.
-
-@note To run TRex unittests:
+Notes:
+    To run TRex unittests:
         1. Install TRex client package
         2. Configure and start TRex server
         3. Specify IP address and ports in the following variables: TREX_HLT_CONFIG, TREX_CONFIG
+
 """
 
 import time
@@ -73,8 +74,8 @@ class TestTrexTg(object):
                              {"TCP": {"sport": 10, "dport": 50}},)
 
     def test_single_stream_trex(self, trex):
-        """
-        @brief  Send single stream using send_stream method
+        """Send single stream using send_stream method.
+
         """
         # Define interface and packet
         iface = trex.ports[0]
@@ -91,8 +92,8 @@ class TestTrexTg(object):
         assert data['opackets'] == packet_count
 
     def test_send_2_streams_trex(self, trex):
-        """
-        @brief  Send 2 streams using send_stream method on different interfaces
+        """Send 2 streams using send_stream method on different interfaces.
+
         """
         # Define interface and packet
         iface1 = trex.ports[0]
@@ -115,8 +116,8 @@ class TestTrexTg(object):
         assert data2['opackets'] == packet_count2
 
     def test_send_2_streams_on_same_interface_trex(self, trex):
-        """
-        @brief  Send 2 streams using send_stream method on same interface
+        """Send 2 streams using send_stream method on same interface.
+
         """
         # Define interface and packet
         iface = trex.ports[0]
@@ -139,8 +140,8 @@ class TestTrexTg(object):
         assert data['opackets'] == packet_count1 + packet_count2
 
     def test_start_2_streams_trex(self, trex):
-        """
-        @brief  Send 2 streams using start_streams method on different interfaces
+        """Send 2 streams using start_streams method on different interfaces.
+
         """
         # Define interfaces and packets
         iface1 = trex.ports[0]
@@ -161,8 +162,8 @@ class TestTrexTg(object):
         assert data2['opackets'] == packet_count
 
     def test_start_2_streams_on_same_interface_trex(self, trex):
-        """
-        @brief  Send 2 streams using start_streams method on same interface
+        """Send 2 streams using start_streams method on same interface.
+
         """
         # Define interface and packets
         iface = trex.ports[0]
@@ -181,8 +182,8 @@ class TestTrexTg(object):
         assert data['opackets'] == packet_count1 + packet_count2
 
     def test_start_2_continuous_streams_trex(self, trex):
-        """
-        @brief  Send 2 continuous streams using start_streams method on different interfaces
+        """Send 2 continuous streams using start_streams method on different interfaces.
+
         """
         # Define interfaces and packets size
         iface1 = trex.ports[0]
@@ -206,8 +207,8 @@ class TestTrexTg(object):
         assert data2['obytes'] == data2['opackets'] * size2
 
     def test_start_2_continuous_on_same_interface_streams_trex(self, trex):
-        """
-        @brief  Send 2 continuous streams using start_streams method on same interface
+        """Send 2 continuous streams using start_streams method on same interface.
+
         """
         # Define interfaces and packet size
         iface = trex.ports[0]
@@ -226,8 +227,8 @@ class TestTrexTg(object):
         assert data['obytes'] == data['opackets'] * size
 
     def test_single_stream_with_packet_interval_trex(self, trex):
-        """
-        @brief  Send single stream with packets interval
+        """Send single stream with packets interval.
+
         """
         # Define interface, packet and interval
         iface = trex.ports[1]
@@ -246,8 +247,8 @@ class TestTrexTg(object):
         assert sleep / interval - 1 <= data['opackets'] <= sleep / interval + 1
 
     def test_clear_statistics(self, trex):
-        """
-        @brief  Clear interface statistics
+        """Clear interface statistics.
+
         """
         # Define interface and packets
         iface = trex.ports[0]
@@ -269,9 +270,11 @@ class TestTrexTg(object):
         assert trex.get_sent_frames_count(iface) == 0
 
     def test_increment_required_size_1(self, trex):
-        """
-        @brief  Set stream with 'required_size' increment and send it
-        @note  Two TRex interfaces should be connected to each other
+        """Set stream with 'required_size' increment and send it.
+
+        Notes:
+            Two TRex interfaces should be connected to each other
+
         """
         # Define interface and packet
         iface1 = trex.ports[0]
@@ -295,9 +298,11 @@ class TestTrexTg(object):
         assert data2['ibytes'] == min_size + max_size
 
     def test_random_required_size(self, trex):
-        """
-        @brief  Set stream with random 'required_size' and send it
-        @note  Two TRex interfaces should be connected to each other
+        """Set stream with random 'required_size' and send it.
+
+        Notes:
+            Two TRex interfaces should be connected to each other
+
         """
         # Define interface and packet
         iface1 = trex.ports[0]
@@ -321,9 +326,11 @@ class TestTrexTg(object):
         assert data2['ibytes'] > max_size
 
     def test_increment_required_size_in_loop(self, trex):
-        """
-        @brief  Set stream with increment 'required_size' and verify that size is wrapped back to min value
-        @note  Two TRex interfaces should be connected to each other
+        """Set stream with increment 'required_size' and verify that size is wrapped back to min value.
+
+        Notes:
+            Two TRex interfaces should be connected to each other
+
         """
         # Define interface and packet
         iface1 = trex.ports[0]
@@ -347,9 +354,11 @@ class TestTrexTg(object):
         assert data2['ibytes'] == min_size * 2 + max_size
 
     def test_increment_src_ip(self, trex):
-        """
-        @brief  Set stream with source ip increment and send it
-        @note  Two TRex interfaces should be connected to each other
+        """Set stream with source ip increment and send it.
+
+        Notes:
+            Two TRex interfaces should be connected to each other
+
         """
         # Define interface and packet
         iface1 = trex.ports[0]
@@ -370,9 +379,12 @@ class TestTrexTg(object):
         assert data2['ipackets'] == packets_count
 
     def test_increment_dst_ip(self, trex):
+        """Set stream with destination ip increment and send it.
+
+        Notes:
+            Two TRex interfaces should be connected to each other
+
         """
-        @brief  Set stream with destination ip increment and send it
-        @note  Two TRex interfaces should be connected to each other"""
         # Define interface and packet
         iface1 = trex.ports[0]
         iface2 = trex.ports[1]
@@ -392,9 +404,12 @@ class TestTrexTg(object):
         assert data2['ipackets'] == packets_count
 
     def test_increment_tcp_src_port(self, trex):
+        """Set stream with TCP source port increment and send it.
+
+        Notes:
+            Two TRex interfaces should be connected to each other
+
         """
-        @brief  Set stream with TCP source port increment and send it
-        @note  Two TRex interfaces should be connected to each other"""
         # Define interface and packet
         iface1 = trex.ports[0]
         iface2 = trex.ports[1]
@@ -414,9 +429,11 @@ class TestTrexTg(object):
         assert data2['ipackets'] == packets_count
 
     def test_increment_tcp_dst_port(self, trex):
-        """
-        @brief  Set stream with TCP destination port increment and send it
-        @note  Two TRex interfaces should be connected to each other
+        """Set stream with TCP destination port increment and send it.
+
+        Notes:
+            Two TRex interfaces should be connected to each other
+
         """
         # Define interface and packet
         iface1 = trex.ports[0]
@@ -437,9 +454,11 @@ class TestTrexTg(object):
         assert data2['ipackets'] == packets_count
 
     def test_increment_udp_src_port(self, trex):
-        """
-        @brief  Set stream with UDP source port increment and send it
-        @note  Two TRex interfaces should be connected to each other
+        """Set stream with UDP source port increment and send it.
+
+        Notes:
+            Two TRex interfaces should be connected to each other
+
         """
         # Define interface and packet
         iface1 = trex.ports[0]
@@ -460,9 +479,11 @@ class TestTrexTg(object):
         assert data2['ipackets'] == packets_count
 
     def test_increment_udp_dst_port(self, trex):
-        """
-        @brief  Set stream with UDP destination port increment and send it
-        @note  Two TRex interfaces should be connected to each other
+        """Set stream with UDP destination port increment and send it.
+
+        Notes:
+            Two TRex interfaces should be connected to each other
+
         """
         # Define interface and packet
         iface1 = trex.ports[0]
@@ -483,9 +504,11 @@ class TestTrexTg(object):
         assert data2['ipackets'] == packets_count
 
     def test_all_supported_increments_simultaneously(self, trex):
-        """
-        @brief  Set stream with all supported increments simultaneously and send it
-        @note  Two TRex interfaces should be connected to each other
+        """Set stream with all supported increments simultaneously and send it
+
+        Notes:
+            Two TRex interfaces should be connected to each other
+
         """
         # Define interface and packet
         iface1 = trex.ports[0]
@@ -515,8 +538,8 @@ class TestTrexTg(object):
 class TestTrexHLTTg(object):
 
     def test_simple_udp(self, trex_hlt):
-        """
-        @brief  Send bidirectional UDP stream
+        """Send bidirectional UDP stream.
+
         """
         iface1 = trex_hlt.ports[0]
         iface2 = trex_hlt.ports[1]
@@ -524,23 +547,23 @@ class TestTrexHLTTg(object):
         rate = 100
         # Creating traffic
         trex_hlt.traffic_config(
-                                mode='create',
-                                bidirectional=True,
-                                port_handle=iface1,
-                                port_handle2=iface2,
-                                frame_size=64,
-                                mac_src="00:50:56:b9:de:75",
-                                mac_dst="00:50:56:b9:34:f3",
-                                mac_src2="00:50:56:b9:34:f3",
-                                mac_dst2="00:50:56:b9:de:75",
-                                l3_protocol='ipv4',
-                                ip_src_addr='10.0.0.1',
-                                ip_dst_addr='8.0.0.1',
-                                l4_protocol='udp',
-                                udp_dst_port=12,
-                                udp_src_port=1025,
-                                stream_id=1,
-                                rate_pps=rate)
+            mode='create',
+            bidirectional=True,
+            port_handle=iface1,
+            port_handle2=iface2,
+            frame_size=64,
+            mac_src="00:50:56:b9:de:75",
+            mac_dst="00:50:56:b9:34:f3",
+            mac_src2="00:50:56:b9:34:f3",
+            mac_dst2="00:50:56:b9:de:75",
+            l3_protocol='ipv4',
+            ip_src_addr='10.0.0.1',
+            ip_dst_addr='8.0.0.1',
+            l4_protocol='udp',
+            udp_dst_port=12,
+            udp_src_port=1025,
+            stream_id=1,
+            rate_pps=rate)
         trex_hlt.clear_statistics(trex_hlt.ports)
         # Starting traffic
         trex_hlt.traffic_control(action='run', port_handle=trex_hlt.ports)

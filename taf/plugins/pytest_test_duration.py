@@ -1,22 +1,23 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``pytest_test_duration.py``
+
+`Plugin is controlling test execution by time or count of iteration`
+
 """
-@copyright Copyright (c) 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_test_duration.py
-
-@summary  Plugin is controlling test execution by time or count of iteration.
-"""
 import re
 import pytest
 import datetime
@@ -26,8 +27,8 @@ _PLUGIN_NAME = "_test_duration"
 
 
 def pytest_addoption(parser):
-    """
-    @brief  Plugin specific options
+    """Plugin specific options.
+
     """
     group = parser.getgroup("Test duration", "plugin test duration")
     group.addoption("--test_duration", action="store", default=None,
@@ -36,15 +37,15 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin.
+    """Registering plugin.
+
     """
     config.pluginmanager.register(TestDurationPlugin(), _PLUGIN_NAME)
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin.
+    """Unregistering plugin.
+
     """
     dur = getattr(config, _PLUGIN_NAME, None)
     if dur:
@@ -53,23 +54,25 @@ def pytest_unconfigure(config):
 
 
 class Duration(object):
-    """
-    @brief  Main functionality for test duration manipulation
+    """Main functionality for test duration manipulation.
+
     """
 
     def __init__(self, option=None):
-        """
-        @brief  Initialize Duration object instance.
-        @param option:  time to interrupt test(cmd option)
-        @type  option:  str, e.g "30s", "2.5H"
+        """Initialize Duration object instance.
+
+        Args:
+            option(str, e.g "30s", "2.5H"): time to interrupt test(cmd option)
+
         """
         self.opt_duration = self._parse_and_define_delta_time(option)
 
     def _parse_and_define_delta_time(self, timing):
-        """
-        @brief  Parse time string.
-        @param timing:  time to interrupt test
-        @type  timing:  str, e.g "30s", "2.5H"
+        """Parse time string.
+
+        Args:
+            timing(str, e.g "30s", "2.5H"): time to interrupt test
+
         """
         if timing:
             time_int = re.search(r'^\d+', timing)
@@ -90,12 +93,12 @@ class Duration(object):
                     return datetime.timedelta(hours=test_number)
 
     def control_duration(self, timing=None, count=None):
-        """
-        @brief  Control duration test by timing, option or count.
-        @param timing:  time to interrupt test
-        @type  timing:  str, e.g "30s", "2.5H"
-        @param count:  interrupt test after iterated count
-        @type  count:  int|float
+        """Control duration test by timing, option or count.
+
+        Args:
+            timing(str, e.g "30s", "2.5H"): time to interrupt test
+            count(int|float): interrupt test after iterated count
+
         """
         default_duration = self._parse_and_define_delta_time(timing)
         current_time = datetime.datetime.now()
@@ -126,13 +129,13 @@ class Duration(object):
 
 
 class TestDurationPlugin(object):
-    """
-    @brief  TestDurationPlugin implementation.
+    """TestDurationPlugin implementation.
+
     """
 
     @pytest.fixture
     def duration(self, request):
-        """
-        @brief  Initialize Duration fixture
+        """Initialize Duration fixture.
+
         """
         return Duration(request.config.option.test_duration)

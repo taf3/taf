@@ -1,22 +1,23 @@
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``stresstool.py``
+
+`Run stress tool on the remote host and parse output`
+
 """
-@copyright Copyright (c) 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  stresstool.py
-
-@summary  Run stress tool on the remote host and parse output
-"""
 import re
 from collections import namedtuple
 
@@ -30,59 +31,59 @@ STRESS_LINE_RE = re.compile(r'stress: (?P<loglevel>\w*): \[(?P<worker>\d*)\] (?P
 
 
 class StressParser(object):
-    """
-    @description  Class for parsing stress output
+    """Class for parsing stress output.
+
     """
 
     def __init__(self):
-        """
-        @brief  Initialize StressParser class
+        """Initialize StressParser class.
+
         """
         super(StressParser, self).__init__()
 
     @staticmethod
     def parse(output):
-        """
-        @brief  Parse output from stress execution
-        @param output: stress output
-        @type  output: str
-        @rtype:  list
-        @return:  list of parsed stress results
+        """Parse output from stress execution.
+
+        Args:
+            output(str): stress output
+
+        Returns:
+            list:  list of parsed stress results
+
         """
         return [Line(*m.group('loglevel', 'worker', 'message'))
                 for m in STRESS_LINE_RE.finditer(output)]
 
 
 class StressTool(tool_general.GenericTool):
-    """
-    @description  Class for Stress tool functionality
+    """Class for Stress tool functionality.
+
     """
 
     def __init__(self, run_command):
-        """
-        @brief  Initialize StressTool class
-        @param run_command: function that runs the actual commands
-        @type run_command: function
+        """Initialize StressTool class.
+
+        Args:
+            run_command(function): function that runs the actual commands
+
         """
         super(StressTool, self).__init__(run_command, 'stress')
 
     def start(self, cpu=None, vm=None, vm_bytes=None, io=None, disk=None, time=10, **kwargs):
-        """
-        @brief  Generate stress command, launch stress and store results in the file
-        @param cpu:  number of CPU workers
-        @type  cpu:  int
-        @param vm:  number of memory workers
-        @type  vm:  int
-        @param vm_bytes: amount of used memory
-        @type  vm_bytes:  str
-        @param io:  number of IO workers
-        @type  io:  int
-        @param disk: number of disk workers
-        @type  disk:  str
-        @param time: time of execution
-        @type  time:  int
-        @rtype:  int
-        @return:  tool instance ID
+        """Generate stress command, launch stress and store results in the file.
+
+        Args:
+            cpu(int):  number of CPU workers
+            vm(int):  number of memory workers
+            vm_bytes(str): amount of used memory
+            io(int):  number of IO workers
+            disk(str): number of disk workers
+            time(int): time of execution
+
+        Returns:
+            int:  tool instance ID
+
         """
         c_options = ['stress',
                      '--verbose',
@@ -98,11 +99,13 @@ class StressTool(tool_general.GenericTool):
         return super(StressTool, self).start(command, timeout=10)
 
     def parse(self, output):
-        """
-        @brief  Parse the stress output
-        @param output:  stress origin output
-        @type  output: str
-        @rtype:  list
-        @return:  list of parsed stress results
+        """Parse the stress output.
+
+        Args:
+            output(str):  stress origin output
+
+        Returns:
+            list:  list of parsed stress results
+
         """
         return StressParser.parse(output)

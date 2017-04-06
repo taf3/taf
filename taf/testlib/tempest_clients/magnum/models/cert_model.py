@@ -10,15 +10,23 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""``cert_model.py``
+
+"""
+
 from testlib.tempest_clients.magnum.models import models
 
 
 class CertData(models.BaseModel):
-    """Data that encapsulates  cert attributes"""
+    """Data that encapsulates  cert attributes
+
+    """
     pass
 
 
 class CertEntity(models.EntityModel):
-    """Entity Model that represents a single instance of CertData"""
+    """Entity Model that represents a single instance of CertData
+
+    """
     ENTITY_NAME = 'certificate'
     MODEL_TYPE = CertData

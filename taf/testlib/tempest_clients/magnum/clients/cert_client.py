@@ -12,44 +12,62 @@
 #
 # Based on OpenStack Magnum (https://github.com/openstack/magnum.git)
 
+"""``cert_client``
+
+"""
+
 from testlib.tempest_clients.magnum.models import cert_model
 from testlib.tempest_clients.magnum.clients import client
 
 
 class CertClient(client.MagnumClient):
-    """Encapsulates REST calls and maps JSON to/from models"""
+    """Encapsulates REST calls and maps JSON to/from models
+
+    """
 
     url = "/certificates"
 
     @classmethod
     def cert_uri(cls, cluster_id):
-        """Construct cluster uri
+        """Construct cluster uri.
 
-        :param cluster_id: cluster uuid or name
-        :returns: url string
+        Args:
+            cluster_id: cluster uuid or name
+
+        Returns:
+            url string
+
         """
 
         return "{0}/{1}".format(cls.url, cluster_id)
 
     def get_cert(self, cluster_id, **kwargs):
-        """Makes GET /certificates/cluster_id request and returns CertEntity
+        """Makes GET /certificates/cluster_id request and returns CertEntity.
 
         Abstracts REST call to return a single cert based on uuid or name
 
-        :param cluster_id: cluster uuid or name
-        :returns: response object and ClusterCollection object
+        Args:
+            cluster_id: cluster uuid or name
+
+        Returns:
+            response object and ClusterCollection object
+
         """
 
         resp, body = self.get(self.cert_uri(cluster_id))
         return self.deserialize(resp, body, cert_model.CertEntity)
 
     def post_cert(self, model, **kwargs):
-        """Makes POST /certificates request and returns CertEntity
+        """Makes POST /certificates request and returns CertEntity.
 
         Abstracts REST call to sign new certificate
 
-        :param model: CertEntity
-        :returns: response object and CertEntity object
+        Args:
+            model: CertEntity
+
+        Returns:
+            response object and CertEntity object
+
         """
 
         resp, body = self.post(

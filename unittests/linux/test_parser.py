@@ -1,22 +1,22 @@
 #!/usr/bin/env python
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_parser.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Parse tools Unittests`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  test_parser.py
-
-@summary  parse tools Unittests
 """
 
 import operator
@@ -81,7 +81,7 @@ class TestParser(object):
         CIDR_B = '207.244.76.0/24'
         HOME_NET = '200.244.76.0/24'
         SYMBOL_TABLE = {
-            '$HOME_NET': HOME_NET
+            '$HOME_NET': HOME_NET,
         }
         INPUT_STR = '[{0}, [{1}], !{2}]'.format(CIDR_A, CIDR_B, '$HOME_NET')
 
@@ -96,7 +96,7 @@ class TestParser(object):
         CIDR_B = '207.244.76.0/24'
         HOME_NET = CIDR_B
         SYMBOL_TABLE = {
-            '$HOME_NET': HOME_NET
+            '$HOME_NET': HOME_NET,
         }
         INPUT_STR = '[{0}, [{1}], !{2}]'.format(CIDR_A, CIDR_B, '$HOME_NET')
 

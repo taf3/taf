@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""''iperf_cmd.py''
 
-    http://www.apache.org/licenses/LICENSE-2.0
+'iperf command parsing and building support'
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  iperf_cmd.py
-
-@summary  iperf command parsing and building support
 """
 
 from argparse import ArgumentParser
@@ -28,14 +28,14 @@ MKDIR_OPTS = {
     'mode': {
         'names': {
             'short': '-m',
-            'long': '--mode'
+            'long': '--mode',
         },
         'help': 'set file mode (as in chmod), not a=rwx - umask',
     },
     'parents': {
         'names': {
             'short': '-p',
-            'long': '--parents'
+            'long': '--parents',
         },
         'help': 'no error if existing, make parent directories as needed',
         'action': 'store_true',
@@ -43,7 +43,7 @@ MKDIR_OPTS = {
     'verbose': {
         'names': {
             'short': '-v',
-            'long': '--verbose'
+            'long': '--verbose',
         },
         'help': 'print a message for each created directory',
         'action': 'store_true',
@@ -51,20 +51,20 @@ MKDIR_OPTS = {
     'context': {
         'names': {
             'short': '-Z',
-            'long': '--context'
+            'long': '--context',
         },
         'help': 'set the SELinux security context of each created directory to CTX',
     },
     'help': {
         'names': {
-            'long': '--help'
+            'long': '--help',
         },
         'help': 'display this help and exit',
         'action': 'store_true',
     },
     'version': {
         'names': {
-            'long': '--version'
+            'long': '--version',
         },
         'help': 'output version information and exit',
         'action': 'store_true',
@@ -72,7 +72,7 @@ MKDIR_OPTS = {
     'name': {
         # 'required': True,
         'help': 'the name of the directory to be created',
-    }
+    },
 }
 
 # specify the order of the output arguments when buildinig up a command
@@ -107,9 +107,9 @@ class MkdirArgumentBuilder(ArgumentBuilder):
                     key=cls.GET_KEY_TAG_SHORT_IF_EXIST_ELSE_LONG,
                     joiner=cls.FORMAT_ARG_JOIN_STR('='),
                     val=cls.FORMAT_VAL_TRANSFORM(str),
-                )
+                ),
             ),
-            'positional': cls.FORMAT_VAL_TRANSFORM(str)
+            'positional': cls.FORMAT_VAL_TRANSFORM(str),
         }
         return _formatter
 

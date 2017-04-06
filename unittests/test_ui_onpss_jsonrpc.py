@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2015 - 2016, Intel Corporation.
+# Copyright (c) 2015 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_ui_onp_jsonrpc.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Unittests for JSONRPC UI wrappers`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file test_ui_onp_jsonrpc.py
-
-@summary Unittests for JSONRPC UI wrappers.
 """
 
 import os
@@ -38,8 +38,8 @@ REPLY = {"state": "Enabled"}
 
 @pytest.fixture(scope="module")
 def server(request):
-    """
-    @brief  Fixture of environment with Json-Rpc server.
+    """Fixture of environment with Json-Rpc server.
+
     """
 
     def close():
@@ -62,8 +62,8 @@ def server(request):
 
 @pytest.fixture()
 def ui(request, server):
-    """
-    @brief  Fixture of environment for unittests JSONRPC UI wrappers.
+    """Fixture of environment for unittests JSONRPC UI wrappers.
+
     """
     ui = ui_onpss_jsonrpc.UiOnpssJsonrpc(MagicMock(**CONFIG))
     url = urllib.parse.urlunsplit(('http', '{0}:{1}'.format(CONFIG["ip_host"], CONFIG["json_port"]), '', '', ''))
@@ -74,15 +74,15 @@ def ui(request, server):
 class TestClientRequest(object):
 
     def test_request(self, ui, server):
-        """
-        @brief  Verify that request() method sends and receives the JSON-RPC strings.
+        """Verify that request() method sends and receives the JSON-RPC strings.
+
         """
         res = ui.request("getSwitchInfo", {})
         assert res == REPLY
 
     def test_response_with_error(self, ui, server):
-        """
-        @brief  Verify UIException in case server is responding with error.
+        """Verify UIException in case server is responding with error.
+
         """
         method = "echo"
         params = []
@@ -97,16 +97,16 @@ class TestClientRequest(object):
         assert excinfo.value.parameter == expected_err_msg
 
     def test_multicall(self, ui, server):
-        """
-        @brief  Verify that request() method sends and receives the JSON-RPC strings.
+        """Verify that request() method sends and receives the JSON-RPC strings.
+
         """
         calls_list = [{} for i in range(1, 5)]
         res = ui.multicall([{"method": "getSwitchInfo", "params": calls_list}])
         assert len(res) == len(calls_list)
 
     def test_multicall_reply_with_error(self, ui, server):
-        """
-        @brief  Verify UIException in case server is responding with error for multicall.
+        """Verify UIException in case server is responding with error for multicall.
+
         """
         method = "echo"
         param = {"data": ""}

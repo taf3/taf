@@ -1,28 +1,29 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``pytest_multiple_run.py``
+
+`Re-run test case n times`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  pytest_multiple_run.py
-
-@summary  Re-run test case n times .
-"""
 import copy
 
 
 def pytest_addoption(parser):
-    """
-    @brief  Plugin specific options.
+    """Plugin specific options.
+
     """
     group = parser.getgroup("multiplerun", "plugin multiple run")
     group.addoption("--multiple_run", type="int", default=1, dest="multiplerun",
@@ -30,16 +31,16 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    """
-    @brief  Registering plugin.
+    """Registering plugin.
+
     """
     if config.option.multiplerun:
         config.pluginmanager.register(MultipleRun(config), "_multiple_run")
 
 
 def pytest_unconfigure(config):
-    """
-    @brief  Unregistering plugin.
+    """Unregistering plugin.
+
     """
     multiple_run = getattr(config, "_multiple_run", None)
     if multiple_run:

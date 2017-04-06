@@ -1,22 +1,23 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``test_skip_filter.py``
+
+`Unittests for pytest_skip_filter plugin`
+
 """
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file test_skip_filter.py
-
-@summary Unittests for pytest_skip_filter plugin.
-"""
 from collections import namedtuple
 
 import pytest
@@ -215,8 +216,8 @@ class TestPluginSkipFilter(object):
 
     @pytest.mark.parametrize(argnames, argvalues, ids=ids)
     def test_boolean_condition(self, testdir, name, file_text, counts):
-        """
-        Test if we can use boolean conditions instead of string conditions
+        """Test if we can use boolean conditions instead of string conditions.
+
         """
         file_text = file_text.replace('"True"', 'True').replace('"False"', 'False')
         test_file = testdir.makepyfile(file_text)
@@ -226,8 +227,8 @@ class TestPluginSkipFilter(object):
 
     @pytest.mark.parametrize(argnames, argvalues, ids=ids)
     def test_boolean_config_getoption(self, testdir, name, file_text, counts):
-        """
-        Test if we can use pytest.config.getoption in a non-string condition
+        """Test if we can use pytest.config.getoption in a non-string condition.
+
         """
         file_text = file_text.replace('"True"', 'pytest.config.getoption("nosuch", default=True)')
         file_text = file_text.replace('"False"', 'False')

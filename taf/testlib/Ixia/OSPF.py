@@ -1,29 +1,30 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``OSPF.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`IxNetwork OSPF protocol emulation functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Note:
+    TCL procedures::
 
-@file  OSPF.py
+        ::ixia::emulation_ospf_config
+        ::ixia::emulation_ospf_topology_route_config
+        ::ixia::emulation_ospf_control
+        ::ixia::emulation_ospf_lsa_config
+        ::ixia::emulation_ospf_info
 
-@summary  IxNetwork OSPF protocol emulation functionality.
-
-@note
-TCL procedures:
-::ixia::emulation_ospf_config
-::ixia::emulation_ospf_topology_route_config
-::ixia::emulation_ospf_control
-::ixia::emulation_ospf_lsa_config
-::ixia::emulation_ospf_info
 """
 
 import copy
@@ -31,29 +32,37 @@ import re
 
 
 class OSPF(object):
-    """
-    @description  IxNet OSPF configuration wrapper
+    """IxNet OSPF configuration wrapper.
+
     """
 
     def __init__(self, ixia):
-        """
-        @brief  OSPF class initialization
-        @param ixia:  Ixia traffic generator
-        @type  ixia:  IxiaHLTMixin
+        """OSPF class initialization.
+
+        Args:
+            ixia(IxiaHLTMixin):  Ixia traffic generator
+
         """
         self.ixia = ixia
         self.ospf_dict = {}
 
     def config(self, port, *args, **kwargs):
-        """
-        @brief  Configure OSPF routers
-        @param port:  TG port in format tuple(chassisID, cardId, portId)
-        @type  port:  tuple(int)
-        @raise  AssertionError:  error in executing tcl code
-        @rtype:  str
-        @return:  OSPF session handler name
-        @note:  See description of keyword arguments in ixia_ospf_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_ospf_api.tcl
+        """Configure OSPF routers.
+
+        Args:
+            port(tuple(int)):  TG port in format tuple(chassisID, cardId, portId)
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            str:  OSPF session handler name
+
+        Note:
+            See description of keyword arguments in ixia_ospf_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_ospf_api.tcl
+
         """
         # kwargs['port_handle'] = "/".join(map(str, port))
         if "mode" not in list(kwargs.keys()):
@@ -92,15 +101,22 @@ class OSPF(object):
         return self.ospf_dict[port]['session_handle']
 
     def topology_route_config(self, handle, *args, **kwargs):
-        """
-        @brief  Configure OSPF routes topology
-        @param handle:  OSPF session handler name
-        @type  handle:  str
-        @raise  AssertionError:  error in executing tcl code
-        @rtype:  str
-        @return:  OSPF route handler name
-        @note:  See description of keyword arguments in ixia_ospf_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_ospf_api.tcl
+        """Configure OSPF routes topology.
+
+        Args:
+            handle(str):  OSPF session handler name
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            str:  OSPF route handler name
+
+        Note:
+            See description of keyword arguments in ixia_ospf_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_ospf_api.tcl
+
         """
         kwargs['handle'] = "$" + handle
         if "mode" not in list(kwargs.keys()):
@@ -126,14 +142,22 @@ class OSPF(object):
         return self.ospf_dict[port]['router_handle']
 
     def ospf_control(self, handle, *args, **kwargs):
-        """
-        @brief  Turning OSPF on\off
-        @param handle:  OSPF session handler name
-        @type  handle:  str
-        @raise  AssertionError:  error in executing tcl code
-        @return:  None
-        @note:  See description of keyword arguments in ixia_ospf_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_ospf_api.tcl
+        """Turning OSPF on\off.
+
+        Args:
+            handle(str):  OSPF session handler name
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            None
+
+        Note:
+            See description of keyword arguments in ixia_ospf_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_ospf_api.tcl
+
         """
         kwargs['handle'] = "$" + handle
         if "mode" not in list(kwargs.keys()):
@@ -148,15 +172,22 @@ class OSPF(object):
         self.ixia.puts("$return_code")
 
     def ospf_lsa_config(self, handle, *args, **kwargs):
-        """
-        @brief  Configure OSPF LSA
-        @param handle:  OSPF session handler name
-        @type  handle:  str
-        @raise  AssertionError:  error in executing tcl code
-        @rtype:  str
-        @return:  OSPF LSA handler name
-        @note:  See description of keyword arguments in ixia_ospf_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_ospf_api.tcl
+        """Configure OSPF LSA.
+
+        Args:
+            handle(str):  OSPF session handler name
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            str:  OSPF LSA handler name
+
+        Note:
+            See description of keyword arguments in ixia_ospf_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_ospf_api.tcl
+
         """
         kwargs['handle'] = "$" + handle
         if "mode" not in list(kwargs.keys()):
@@ -181,15 +212,22 @@ class OSPF(object):
         return self.ospf_dict[port]['lsa_handle']
 
     def ospf_info(self, handle, **kwargs):
-        """
-        @brief  Command to retrieve OSPF statistics.
-        @param handle:  OSPF session handler name
-        @type  handle:  str
-        @raise  AssertionError:  error in executing tcl code
-        @rtype:  dict
-        @return:  OSPF statistics
-        @note:  See description of keyword arguments in ixia_ospf_api.tcl
-                Full path: /opt/ixos/lib/hltapi/library/ixia_ospf_api.tcl
+        """Command to retrieve OSPF statistics.
+
+        Args:
+            handle(str):  OSPF session handler name
+
+        Raises:
+            AssertionError:  error in executing tcl code
+
+        Returns:
+            dict: OSPF statistics
+
+        Note:
+            See description of keyword arguments in ixia_ospf_api.tcl
+
+            Full path: /opt/ixos/lib/hltapi/library/ixia_ospf_api.tcl
+
         """
         # define what the type of handle:
         if isinstance(handle, tuple):

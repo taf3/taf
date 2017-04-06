@@ -12,11 +12,17 @@
 
 # pylint: disable=E1101
 
+"""``models.py``
+
+"""
+
 import json
 
 
 class BaseModel(object):
-    """Superclass Responsible for converting json data to/from model"""
+    """Superclass Responsible for converting json data to/from model
+
+    """
 
     MODEL_TYPE = object
 
@@ -47,7 +53,9 @@ class BaseModel(object):
 
 
 class EntityModel(BaseModel):
-    """Superclass resposible from converting dict to instance of model"""
+    """Superclass resposible from converting dict to instance of model
+
+    """
 
     ENTITY_NAME = ""
 
@@ -61,7 +69,9 @@ class EntityModel(BaseModel):
 
 
 class CollectionModel(BaseModel):
-    """Superclass resposible from converting dict to list of models"""
+    """Superclass resposible from converting dict to list of models
+
+    """
 
     COLLECTION_NAME = ""
 

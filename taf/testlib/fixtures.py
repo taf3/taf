@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``fixtures.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Useful fixture functions/patterns for TAF`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  fixtures.py
-
-@summary  Useful fixture functions/patterns for TAF.
 """
 import functools
 import os
@@ -32,53 +31,50 @@ from .dev_linux_host import GenericLinuxHost
 
 
 def sshlog(request, env_name=None, env_obj=None, instance_class=GenericLinuxHost):
-    """
-    @brief  Register additional file handler for linux_host ssh loggers per test case.
+    """Register additional file handler for linux_host ssh loggers per test case.
 
-    @param  request:  fixture request object.
-    @type  request:  pytest.request
-    @param  env_name:  Name of Environment class instance [optional].
-    @type  env_name:  str
-    @param  env_obj:  Environment instance [optional].
-    @type  env_obj:  Environment
-    @param  instance_class:  SSH logger has to be crated only for environment attributes which are instances of this class [optional].
-    @type  instance_class:  object
+    Args:
+        request(pytest.request):  fixture request object.
+        env_name(str):  Name of Environment class instance [optional].
+        env_obj(Environment):  Environment instance [optional].
+        instance_class(object):  SSH logger has to be crated only for environment attributes which are instances of this class [optional].
 
-    @par  Example:
-    Define your fixture based on this function:
-    @code{.py}
+    Examples:
 
-    # My Environment fixture
-    @pytest.fixture
-    def my_env(request):
-        env = Environment(...)
-        request.addfinalizer(env.shutdown)
-        env.initialize()
-        return env
+    Define your fixture based on this function::
 
-    @pytest.fixture(autouse=True)
-    def ssh_logger(request):
-        fixtures.sshlog(request, "my_env")
+        # My Environment fixture
+        @pytest.fixture
+        def my_env(request):
+            env = Environment(...)
+            request.addfinalizer(env.shutdown)
+            env.initialize()
+            return env
 
-    def test_something(my_env):
-        my_env.lhost[1].ssh.exec_command("command_to_be_executed")
-    @endcode
+        @pytest.fixture(autouse=True)
+        def ssh_logger(request):
+            fixtures.sshlog(request, "my_env")
+
+        def test_something(my_env):
+            my_env.lhost[1].ssh.exec_command("command_to_be_executed")
+
     After that you have to see additional files in defined with \--logdir option folder.\n
-    Also you can use it like function to modify existing env fixture:
-    @code{.py}
-    @pytest.fixture(autouse=True)
-    def env_new(request, env):
-        fixtures.sshlog(request, env_obj=env)
-        return env
-    @endcode
+
+    Also you can use it like function to modify existing env fixture::
+
+        @pytest.fixture(autouse=True)
+        def env_new(request, env):
+            fixtures.sshlog(request, env_obj=env)
+            return env
+
     """
     # Skip fixture if logdir isn't set.
     if not loggers.LOG_DIR:
         return
 
     def add_handler(log_adapter, log_file):
-        """
-        @brief  Register new file handler.
+        """Register new file handler.
+
         """
         log_file_handler = loggers.logging.FileHandler(log_file)
         # Set the same formatter
@@ -88,8 +84,8 @@ def sshlog(request, env_name=None, env_obj=None, instance_class=GenericLinuxHost
         return log_file_handler
 
     def remove_handlers(env, log_handlers):
-        """
-        @brief  Remove all created and saved in log_handlers list additional file handlers.
+        """Remove all created and saved in log_handlers list additional file handlers.
+
         """
         for obj in list(env.id_map.values()):
             if obj.id in log_handlers:
@@ -118,25 +114,26 @@ def sshlog(request, env_name=None, env_obj=None, instance_class=GenericLinuxHost
 
 
 def autolog(request, logger_name="suite_logger"):
-    """
-    @brief  Inject logger object to test class.
-    @param  request:  py.test request object.
-    @type  request:  pytest.request
-    @param  logger_name:  name of logger class attribute to create
-    @type  logger_name:  str
-    @note  This fixture has to have scope level "class".
-           You do not need to pass this fixture to test function in case you set autouse.
+    """Inject logger object to test class.
 
-    @par  Example:
-    @code{.py}
-    @pytest.fixture(scope="class", autouse=True)
-    def autolog(request):
-        return fixtures.autolog(request, "wishful_logger_instance_name")
-    @endcode
+    Args:
+        request(pytest.request):  py.test request object.
+        logger_name(str):  name of logger class attribute to create
+
+    Notes:
+        This fixture has to have scope level "class".
+        You do not need to pass this fixture to test function in case you set autouse.
+
+    Examples::
+
+        @pytest.fixture(scope="class", autouse=True)
+        def autolog(request):
+            return fixtures.autolog(request, "wishful_logger_instance_name")
+
     """
     def remove_logger(cls):
-        """
-        @brief  Explicit close log handlers.
+        """Explicit close log handlers.
+
         """
         while getattr(cls, logger_name).logger.handlers:
             getattr(cls, logger_name).logger.handlers[0].flush()
@@ -166,12 +163,14 @@ class LagIdGenerator(object):
 
     @classmethod
     def id_to_key(cls, lag_id):
-        """
-        @brief  Get LAG key by LAG ID
-        @param  lag_id:  LAG ID
-        @type  lag_id:  int
-        @rtype:  int
-        @return:  LAG key
+        """Get LAG key by LAG ID.
+
+        Args:
+            lag_id(int):  LAG ID
+
+        Returns:
+            int:  LAG key
+
         """
         return lag_id - cls.INITIAL_LAG
 
@@ -182,13 +181,17 @@ class LagIdGenerator(object):
         return set(range(self.INITIAL_LAG, self.INITIAL_LAG + max_lags - 1))
 
     def generate_lag(self, *args):
-        """
-        @brief  Get lag ID for specific device
-        @param args: list of devices to generate lag ids for
-        @type args: list[SwitchGeneral]
-        @raise  StopIteration:  if cross part contains more than 2 devices
-        @rtype:  int|None
-        @return:  LAG ID
+        """Get lag ID for specific device.
+
+        Args:
+            args(list[SwitchGeneral]): list of devices to generate lag ids for
+
+        Raises:
+            StopIteration:  if cross part contains more than 2 devices
+
+        Returns:
+            int|None:  LAG ID
+
         """
         non_empty = [_f for _f in args if _f]
         if not non_empty:
@@ -210,8 +213,8 @@ class LagIdGenerator(object):
 
 
 class LagPortEnv(object):
-    """
-    @description  Class for fixture that replaces ports with LAGs
+    """Class for fixture that replaces ports with LAGs.
+
     """
 
     def __init__(self, request, env):
@@ -226,13 +229,17 @@ class LagPortEnv(object):
         self.creates = {}
 
     def get_cross_part_lag(self, cross_part):
-        """
-        @brief  Get LAG ID for cross connection
-        @param  cross_part:  connection from setup file, e.g. ["03", 1, "1", 1]
-        @type  cross_part:  list
-        @raise  StopIteration:  if port is already in LAG
-        @rtype:  tuple(dict{device_id: link_id}, LAG_ID)
-        @return:  dictionary of device_id: port_id and LAG ID
+        """Get LAG ID for cross connection.
+
+        Args:
+            cross_part(list):  connection from setup file, e.g. ["03", 1, "1", 1]
+
+        Raises:
+            StopIteration:  if port is already in LAG
+
+        Returns:
+            tuple(dict{device_id: link_id}, LAG_ID):  dictionary of device_id: port_id and LAG ID
+
         """
         device_dict = {}  # store device.id: link_id pairs
         get_lag_args = []  # store  device objects
@@ -274,10 +281,12 @@ class LagPortEnv(object):
                             device.start = self.add_lags(device, device.start)
 
     def setup_lags(self):
-        """
-        @brief  Define LAGs that will be created
-        @note:  this method changes initial device's attributes (ports and port_list).
-                Initial configuration should be restored after test execution
+        """Define LAGs that will be created.
+
+        Notes:
+            This method changes initial device's attributes (ports and port_list).
+            Initial configuration should be restored after test execution
+
         """
         for cross in self.env.setup["cross"].values():
             for cross_part in cross:
@@ -313,8 +322,8 @@ class LagPortEnv(object):
                             cross_part[cross_part.index(dev_id) + 1] = len(device.ports)
 
     def teardown(self):
-        """
-        @brief  Restore initial configuration
+        """Restore initial configuration.
+
         """
         # Restore setup JSON file
         for cross_id in self.env.setup["cross"]:
@@ -332,8 +341,8 @@ class LagPortEnv(object):
             device.start = self.creates[dev_id]
 
     def add_lags(self, device, func):
-        """
-        @brief  Wrap original device's method e.g. clearconfig or restart
+        """Wrap original device's method e.g. clearconfig or restart.
+
         """
         def wrapper(*args, **kwargs):
             func(*args, **kwargs)
@@ -350,20 +359,24 @@ class LagPortEnv(object):
 
 
 def env_lag(request, env):
-    """
-    @brief  Replace physical ports in setup file with LAGs
-    @param  request:  pytest request fixture
-    @type  request:  pytest.Request
-    @param  env:  env fixture
-    @type  env:  Environment
-    @note  For correct functioning new fixture for test cases should be created.
-       E.g.
-       # Code in conftest file or test module
-       from testlib.fixtures import env_lag
+    """Replace physical ports in setup file with LAGs.
 
-       @pytest.fixture(scope='module', autouse=True)
-       def env_replace_lag(request, env_init):
-           env_lag(request, env_init)
+    Args:
+        request(pytest.Request):  pytest request fixture
+        env(Environment):  env fixture
+
+    Notes:
+        For correct functioning new fixture for test cases should be created.
+
+    Examples::
+
+        # Code in conftest file or test module
+        from testlib.fixtures import env_lag
+
+        @pytest.fixture(scope='module', autouse=True)
+        def env_replace_lag(request, env_init):
+            env_lag(request, env_init)
+
     """
     lag_env = LagPortEnv(request, env)
     request.addfinalizer(lag_env.teardown)
@@ -371,16 +384,20 @@ def env_lag(request, env):
 
 
 def lhost_to_switch(request, env_init):
-    """
-    @brief  Add Linux Hosts as Switch devices into environment
-    @note  For correct functioning new fixture for test cases should be created.
-       E.g.
-       # Code in conftest file or test module
-       from testlib.fixtures import lhost_to_switch
+    """Add Linux Hosts as Switch devices into environment.
 
-       @pytest.fixture(scope='module', autouse=True)
-       def env_switch_lhost(request, env_init):
-           lhost_to_switch(request, env_init)
+    Notes:
+        For correct functioning new fixture for test cases should be created.
+
+    Examples::
+
+        # Code in conftest file or test module
+        from testlib.fixtures import lhost_to_switch
+
+        @pytest.fixture(scope='module', autouse=True)
+        def env_switch_lhost(request, env_init):
+            lhost_to_switch(request, env_init)
+
     """
     # Get initial version of Environment object
     added_switches = []
@@ -408,19 +425,25 @@ def lhost_to_switch(request, env_init):
 
 
 def chef_prep(request, env_main, cll):
-    """
-    @brief  Do steps required by configuration management system tests
-    @note  For correct functioning new fixture for test cases should be created.
-       E.g.
-       # Code in conftest file or test module
-       from testlib.fixtures import chef_prep
+    """Do steps required by configuration management system tests.
 
-       @pytest.fixture(scope='class', autouse=True)
-       def suite_prep(request, env_main):
-           chef_prep(request, env_main)
+    Notes:
+        For correct functioning new fixture for test cases should be created.
+
+    Examples::
+
+        # Code in conftest file or test module
+        from testlib.fixtures import chef_prep
+
+        @pytest.fixture(scope='class', autouse=True)
+        def suite_prep(request, env_main):
+            chef_prep(request, env_main)
+
     """
     def _remove_chef_client():
-        """Uninstall chef client and do cleanup of chef dir"""
+        """Uninstall chef client and do cleanup of chef dir.
+
+        """
         assert env_main.switch[1].ui.cli_send_command('yum erase -y chef*')[-1] == 0
         assert env_main.switch[1].ui.cli_send_command('rm -rf /etc/chef/')[-1] == 0
         env_main.chef[1].delete_node(cll.fqdn_hostname)

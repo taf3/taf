@@ -1,22 +1,21 @@
-#! /usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``clissh.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Module contains classes for managing device using SSH connection or SSH connection emulation for Linux Network Namespaces`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  clissh.py
-
-@summary Module contains classes for managing device using SSH connection or SSH connection emulation for Linux Network Namespaces.
 """
 
 import socket
@@ -34,17 +33,19 @@ from .cli_template import CmdStatus
 
 
 def probe_port(ipaddr, port, logger):
-    """
-    @brief  Check if device listen on port.
-    @param ipaddr: IP address
-    @type  ipaddr:  str
-    @param port:  SSH port
-    @type  port:  int
-    @param logger:  logger instance
-    @type  logger:  loggers.ClassLogger
-    @rtype:  bool
-    @return:  True or False
-    @note  This verification is necessary before establishing ssh connection.
+    """Check if device listen on port.
+
+    Args:
+        ipaddr(str): IP address
+        port(int):  SSH port
+        logger(loggers.ClassLogger):  logger instance
+
+    Returns:
+        bool: True or False
+
+    Notes:
+        This verification is necessary before establishing ssh connection.
+
     """
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
         sock.settimeout(3)
@@ -60,13 +61,13 @@ def probe_port(ipaddr, port, logger):
 
 
 class CLISSH(CLIGenericMixin):
-    """
-    @description  Class for configure device using CLI over ssh with paramiko. Unused parameters added to support the same interface for other CLI classes.
+    """Class for configure device using CLI over ssh with paramiko. Unused parameters added to support the same interface for other CLI classes.
 
-    @code{.py}
-    client = CLISSH("1.1.1.1", 22)
-    client.login("username", "paSSword")
-    @endcode
+    Examples::
+
+        client = CLISSH("1.1.1.1", 22)
+        client.login("username", "paSSword")
+
     """
 
     class_logger = loggers.ClassLogger()
@@ -74,35 +75,23 @@ class CLISSH(CLIGenericMixin):
     def __init__(self, host, port=22, username=None, password=None,
                  page_break=None, prompt=None, pass_prompt="Password:", sudo_prompt=None, login_prompt=None, page_break_lines=None,
                  exit_cmd=None, timeout=60, quiet=False, pkey=None, key_filename=None):
-        """
-        @brief  Initialize CLISSH class
+        """Initialize CLISSH class.
 
-        @param  host:  Target host IP address.
-        @type  host:  str
-        @param  port:  SSH port (integer).
-        @type  port:  int
-        @param  username:  SSH login user.
-        @type  username:  str
-        @param  password:  SSH user password.
-        @type  password:  str
-        @param  page_break:  Page brake marker.
-        @type  page_break:  str
-        @param  prompt:  Shell prompt or list of shell prompts.
-        @type  prompt:  str, list[str]
-        @param  pass_prompt:  Login password prompt.
-        @type  pass_prompt:  str
-        @param  sudo_prompt:  Sudo password prompt.
-        @type  sudo_prompt:  str
-        @param  timeout:  Default timeout for commands.
-        @type  timeout:  int
-        @param login_prompt:  Login prompt (str).
-        @type  login_prompt:  str
-        @param page_break_lines:  Number of page brake lines (int).
-        @type  page_break_lines:  int
-        @param exit_cmd:  Command to perform telnet exit (str).
-        @type  exit_cmd:  str
-        @param  quiet:  Flag for return code verification.
-        @type  quiet:  bool
+        Agrs:
+            host(str):  Target host IP address.
+            port(int):  SSH port.
+            username(str):  SSH login user.
+            password(str):  SSH user password.
+            page_break(str):  Page brake marker.
+            prompt(str, list[str]):  Shell prompt or list of shell prompts.
+            pass_prompt(str):  Login password prompt.
+            sudo_prompt(str):  Sudo password prompt.
+            timeout(int):  Default timeout for commands.
+            login_prompt(str):  Login prompt.
+            page_break_lines(int):  Number of page brake lines.
+            exit_cmd(str):  Command to perform telnet exit.
+            quiet(bool):  Flag for return code verification.
+
         """
 
         super(CLISSH, self).__init__()
@@ -133,8 +122,16 @@ class CLISSH(CLIGenericMixin):
         self.quiet = quiet
 
     def login(self, username=None, password=None, timeout=None):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::login()
+        """Do CLI object login procedure.
+
+        Args:
+            username(str):  Host login (string).
+            password(str): Host password(string).
+            timeout(int): Time to execute login procedure (integer).
+
+        Returns:
+            None
+
         """
         if self.login_status:
             self.class_logger.debug("SSH client is already opened.")
@@ -161,8 +158,8 @@ class CLISSH(CLIGenericMixin):
         self.login_status = True
 
     def check_client(self):
-        """
-        @brief  Check if SSH client is alive.
+        """Check if SSH client is alive.
+
         """
         try:
             transport = self.client.get_transport()
@@ -172,8 +169,8 @@ class CLISSH(CLIGenericMixin):
             return False
 
     def close(self):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::close()
+        """Close CLI object connection.
+
         """
         self.class_logger.debug("Closing connection to {0}@{1}...".format(self.username, self.host))
         self.client.close()
@@ -181,14 +178,15 @@ class CLISSH(CLIGenericMixin):
         self.login_status = False
 
     def open_shell(self, timeout=20, raw_output=False):
-        """
-        @brief  Create interactive SSH shell on existing connection.
+        """Create interactive SSH shell on existing connection.
 
-        @param  timeout: Timeout until prompt is appeared.
-        @type  timeout:  int
-        @param  raw_output: Flag whether to read output buffer.
-        @type  raw_output:  bool
-        @raise  CLISSHException:  not connected
+        Args:
+            timeout(int): Timeout until prompt is appeared.
+            raw_output(bool): Flag whether to read output buffer.
+
+        Raises:
+            CLISSHException:  not connected
+
         """
         output = ""
         if self.login_status and self.check_client():
@@ -217,30 +215,39 @@ class CLISSH(CLIGenericMixin):
             raise CLISSHException("Cannot invoke shell before connecting.")
 
     def close_shell(self):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::close_shell()
+        """Close interactive CLI shell on existing connection.
+
         """
         if self.shell and not self.shell.closed:
             self.class_logger.debug("Closing shell for {0}@{1} ...".format(self.username, self.host))
             self.shell.close()
 
     def check_shell(self):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::close_shell()
+        """Check if CLI connection is alive.
+
         """
         return not getattr(self.shell, "closed", True)
 
     def _check_shell_obj(self):
-        """
-        @brief  Check if shell object exists.
-        @raise  CLISSHException:  shell is not open
+        """Check if shell object exists.
+
+        Raises:
+            CLISSHException:  shell is not open
+
         """
         if not self.check_shell():
             raise CLISSHException("Cannot execute command. Shell is not open.")
 
     def exec_command(self, command, timeout=None):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::exec_command()
+        """Execute command without shell (tty).
+
+        Args:
+            command(str):  Command to be executed.
+            timeout(int):  Timeout for command execution.
+
+        Returns:
+            tuple(str, str, int): tuple of stdout, stderr, rc
+
         """
         self.class_logger.debug("{0}@{1}: {2}".format(self.username, self.host, command))
 
@@ -257,13 +264,26 @@ class CLISSH(CLIGenericMixin):
 
     def shell_command(self, command, alternatives=None, timeout=None, sudo=False, ret_code=True, expected_rc="0",
                       quiet=None, raw_output=False, interval=0.1, tabulation=None):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::shell_command()
-        @param  interval:  Interval between read data cycles.
-        @type  interval:  int | float
-        @param  tabulation:  Tabulation characters.
-        @type  tabulation:  str
-        @raise  CLISSHException:  unexpected return code
+        """Run interactive command on previously created shell (tty).
+
+        Args:
+            command(str):  Command to be executed.
+            alternatives(tuple):  Tuples of ("expected line", "action if line is found", <Exit execution? (bool)>, <Use ones? (bool)>).
+                                  action can be:
+                                      - str - in case this is just command;
+                                      - function - callable object to execute without parameters;
+            timeout(int):  Expecting timeout.
+            sudo(bool):  Flag if sudo should be added to the list of alternatives.
+            ret_code(bool):  Flag if return code should be added to the list of alternatives.
+            expected_rc(int): Sets return code and verifies if return code of executed command the same as expected return code (int or str).
+            quiet(bool):  Flag to verify if expected return equals expected.
+            raw_output(bool):  Flag whether to return 'pure' output.
+            interval(int | float):  Interval between read data cycles.
+            tabulation(str):  Tabulation characters.
+
+        Raises:
+            CLISSHException:  unexpected return code
+
         """
         self._check_shell_obj()
         self.class_logger.debug("{0}@{1}: {2}".format(self.username, self.host, command))
@@ -309,8 +329,12 @@ class CLISSH(CLIGenericMixin):
         return data, return_code
 
     def shell_read(self, timeout=0, interval=0.1):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::shell_read()
+        """Read data from output buffer.
+
+        Args:
+            timeout(int):  Increases time to read data from output buffer.
+            interval(int):  Time delay between attempts to read data from output buffer.
+
         """
         self._check_shell_obj()
         data = ""
@@ -326,9 +350,12 @@ class CLISSH(CLIGenericMixin):
         return data
 
     def send_command(self, command):
-        """
-        @copydoc testlib::cli_template::CLIGenericMixin::send_command()
-        """
+        """Run command without waiting response.
+
+         Args:
+             command(str):  Command to be executed.
+
+         """
         self.class_logger.debug("{0}@{1}: {2}".format(self.username, self.host, command))
         self._check_shell_obj()
         if isinstance(command, self.Raw):
@@ -337,17 +364,17 @@ class CLISSH(CLIGenericMixin):
             self.shell.sendall(command + "\n")
 
     def _transfer_file(self, direction, src, dst, proto="scp"):
-        """
-        @brief  Transfer file from/to remote host.
-        @param  direction:  transfer direction. set/get.
-        @type  direction:  str
-        @param  src:  Source file location.
-        @type  src:  str
-        @param  dst:  Destination file location.
-        @type  dst:  str
-        @param  proto:  Protocol to be used for file transfer. scp(default)/sftp.
-        @type  proto:  str
-        @raise  CLISSHException:  direction not in {"put", "get"}
+        """Transfer file from/to remote host.
+
+        Args:
+            direction(str):  transfer direction. set/get.
+            src(str):  Source file location.
+            dst(str):  Destination file location.
+            proto(str):  Protocol to be used for file transfer. scp(default)/sftp.
+
+        Raises:
+            CLISSHException:  direction not in {"put", "get"}
+
         """
         if direction not in {"put", "get"}:
             raise CLISSHException("Incorrect file transfer direction '%s'." %
@@ -358,15 +385,16 @@ class CLISSH(CLIGenericMixin):
             self._sftp_trans_file(direction, src, dst)
 
     def _scp_trans_file(self, direction, src, dst):
-        """
-        @brief  Transfer file from/to remote host using scp.
-        @param  direction:  transfer direction. set/get.
-        @type  direction:  str
-        @param  src:  Source file location.
-        @type  src:  str
-        @param  dst:  Destination file location.
-        @type  dst:  str
-        @raise  CLISSHException:  not supported direction "put"
+        """Transfer file from/to remote host using scp.
+
+        Args:
+            direction(str):  transfer direction. set/get.
+            src(str):  Source file location.
+            dst(str):  Destination file location.
+
+        Raises:
+            CLISSHException:  not supported direction "put"
+
         """
         if direction == "get":
             with open(dst, 'wb') as local_file:
@@ -376,14 +404,13 @@ class CLISSH(CLIGenericMixin):
             raise CLISSHException("Currently 'put' method is not supported for 'scp'")
 
     def _sftp_trans_file(self, direction, src, dst):
-        """
-        @brief  Transfer file from/to remote host using sftp.
-        @param  direction:  transfer direction. set/get.
-        @type  direction:  str
-        @param  src:  Source file location.
-        @type  src:  str
-        @param  dst:  Destination file location.
-        @type  dst:  str
+        """Transfer file from/to remote host using sftp.
+
+        Args:
+            direction(str):  transfer direction. set/get.
+            src(str):  Source file location.
+            dst(str):  Destination file location.
+
         """
         ftp = None
         try:
@@ -398,25 +425,23 @@ class CLISSH(CLIGenericMixin):
                 ftp.close()
 
     def get_file(self, src, dst, proto="sftp"):
-        """
-        @brief  Get file from remote host using sftp.
-        @param  src:  Source file location.
-        @type  src:  str
-        @param  dst:  Destination file location.
-        @type  dst:  str
-        @param  proto:  Protocol to be used for file transfer. sftp(default)/scp.
-        @type  proto:  str
+        """Get file from remote host using sftp.
+
+        Args:
+            src(str):  Source file location.
+            dst(str):  Destination file location.
+            proto(str):  Protocol to be used for file transfer. sftp(default)/scp.
+
         """
         self._transfer_file("get", src, dst, proto=proto)
 
     def put_file(self, src, dst, proto="sftp"):
-        """
-        @brief  Put file to remote host using sftp.
-        @param  src:  Source file location.
-        @type  src:  str
-        @param  dst:  Destination file location.
-        @type  dst:  str
-        @param  proto:  Protocol to be used for file transfer. sftp(default)/scp.
-        @type  proto:  str
+        """Put file to remote host using sftp.
+
+        Args:
+            src(str):  Source file location.
+            dst(str):  Destination file location.
+            proto(str):  Protocol to be used for file transfer. sftp(default)/scp.
+
         """
         self._transfer_file("put", src, dst, proto=proto)

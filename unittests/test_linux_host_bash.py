@@ -1,23 +1,22 @@
 # coding=utf-8
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+"""``test_ui_onpss_shell.py``
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+`Unittests for UI ONPSS Shell`
 
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file test_ui_onpss_shell.py
-
-@summary Unittests for UI ONPSS Shell.
 """
 
 from unittest.mock import MagicMock
@@ -149,9 +148,9 @@ def test_get_table_ports(ui):
                                            OnpssRawOutput.RAW_ETHTHOOL_NO_LINK_OUTPUT,
                                            OnpssRawOutput.RAW_READLINK_OUTPUT))
     ui.cli_multicall = MagicMock(
-            side_effect=make_multicall_ports_side_effect(OnpssRawOutput.RAW_IPLINK_DETAIL_OUTPUT,
-                                                         OnpssRawOutput.RAW_ETHTHOOL_NO_LINK_OUTPUT,
-                                                         OnpssRawOutput.RAW_READLINK_OUTPUT))
+        side_effect=make_multicall_ports_side_effect(OnpssRawOutput.RAW_IPLINK_DETAIL_OUTPUT,
+                                                     OnpssRawOutput.RAW_ETHTHOOL_NO_LINK_OUTPUT,
+                                                     OnpssRawOutput.RAW_READLINK_OUTPUT))
     table = ui.get_table_ports()
     assert table == [
         {'adminMode': 'Unknown',
@@ -225,14 +224,15 @@ def test_get_table_ports(ui):
          'pci': '03:00.0',
          'portId': 'virbr0',
          'speed': 40000,
-         'type': 'Physical'}
+         'type': 'Physical'},
     ]
+
 
 def test_get_table_ports_no_ethtool(ui):
     ui.host.ssh.exec_command = MagicMock(
-            side_effect=make_ports_side_effect(OnpssRawOutput.RAW_IPLINK_DETAIL_OUTPUT,
-                                               "",
-                                               OnpssRawOutput.RAW_READLINK_OUTPUT))
+        side_effect=make_ports_side_effect(OnpssRawOutput.RAW_IPLINK_DETAIL_OUTPUT,
+                                           "",
+                                           OnpssRawOutput.RAW_READLINK_OUTPUT))
     ui.cli_multicall = MagicMock(
             side_effect=make_multicall_ports_side_effect(OnpssRawOutput.RAW_IPLINK_DETAIL_OUTPUT,
                                                          "",
@@ -310,5 +310,5 @@ def test_get_table_ports_no_ethtool(ui):
          'pci': '03:00.0',
          'portId': 'virbr0',
          'speed': 0,
-         'type': 'Physical'}
+         'type': 'Physical'},
     ]

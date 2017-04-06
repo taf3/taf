@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``test_synapsert.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Unittests for synapsert functions`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file test_synapsert.py
-
-@summary Unittests for synapsert functions.
 """
 
 import sys
@@ -28,9 +28,10 @@ import pytest
 
 @pytest.fixture(scope="module", autouse=True)
 def synapsert(request):
-    """
-    Return synapsert instant."--synapsert_config" option set path to synapsert config file,
-    if not defined, current synapsert config will be use
+    """Return synapsert instant.
+
+    "--synapsert_config" option set path to synapsert config file, if not defined, current synapsert config will be use
+
     """
     if not request.config.option.with_jira:
         pytest.skip("--with_jira option is not set to run JIRA unittests")
@@ -82,8 +83,8 @@ def test_jira_exist(synapsert):
 
 
 def test_get_issue_type(synapsert):
-    """
-    @brief: Verify if issue exists
+    """Verify if issue exists.
+
     """
     issue_type = None
     from jira.exceptions import JIRAError
@@ -97,8 +98,8 @@ def test_get_issue_type(synapsert):
 
 
 def test_get_custom_fields(synapsert):
-    """
-    @brief: Verify if all customfields created
+    """Verify if all customfields created.
+
     """
     custom_fields = synapsert.get_custom_fields("Test Case")
 
@@ -161,8 +162,8 @@ def test_create_test_case(synapsert, tc_issue):
 
 
 def test_get_suite_value(synapsert):
-    """
-    @brief: Verify value of suites
+    """Verify value of suites.
+
     """
     value = synapsert._get_suite_value("ons_tests.functional_l2.dcbx.test_synapsert")
     assert value == "functional_l2.dcbx.synapsert"

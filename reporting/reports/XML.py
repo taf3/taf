@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``XML.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`XML and HTML report classes`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  XML.py
-
-@summary  XML and HTML report classes.
 """
 
 import json
@@ -36,9 +35,10 @@ from . import _reporter as reporter
 from plugins.pytest_helpers import get_failure_reason, get_skipped_reason, get_html_xml_path
 import loggers
 
+
 def str2dict(dictstr):
-    """
-    @brief  Convert string to dictionary
+    """Convert string to dictionary
+
     """
     _dict = ast.literal_eval(dictstr)
     if not isinstance(_dict, dict):
@@ -51,12 +51,14 @@ def str2dict(dictstr):
 
 
 def get_full_path(fname):
-    """
-    @brief  Return full file path by given relative.
-    @param  fname:  File name
-    @type  fname:  str
-    @rtype:  str
-    @return:  Full path to file
+    """Return full file path by given relative.
+
+    Args:
+        fname(str):  File name
+
+    Returns:
+        str: Full path to file
+
     """
     fname = os.path.normpath(os.path.expanduser(os.path.expandvars(fname)))
     abs_path = os.path.normpath(os.path.join(os.path.realpath(os.curdir), fname))
@@ -67,12 +69,14 @@ def get_full_path(fname):
 
 
 def get_uniq_filename(filename):
-    """
-    @brief  If file with given name exists return file with -N suffix.
-    @param  filename:  File name
-    @type  filename:  str
-    @rtype:  str
-    @return:  File with modified name
+    """If file with given name exists return file with -N suffix.
+
+    Args:
+        filename(str):  File name
+
+    Returns:
+        str: File with modified name
+
     """
     _file = filename
     flag = False
@@ -90,20 +94,20 @@ def get_uniq_filename(filename):
 
 # TODO: add processing of xfail TCs
 class XML(object):
-    """
-    @description  XML report specific functionality.
+    """XML report specific functionality.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, connectors=None):
-        """
-        @brief  Initialize XML class
+        """Initialize XML class
+
         """
 
         class Junit(Namespace):
-            """
-            @description  Junit is a child of abstract Namespace class.
+            """Junit is a child of abstract Namespace class.
+
             """
             pass
 
@@ -156,65 +160,72 @@ class XML(object):
         self.__html_report = None
 
     def __setattr__(self, name, value):
-        """
-        @brief  Perform additional configuration procedures on setting some attributes.
-        @param  name:  Attribute name
-        @type  name:  str
-        @param  value:  Attribute value
+        """Perform additional configuration procedures on setting some attributes.
+
+        Args:
+            name(str):  Attribute name
+            value:  Attribute value
+
         """
         if name == "logfile" and value is not None:
             self.__dict__[name] = os.path.normpath(os.path.join(os.path.realpath(os.curdir),
                                                                 os.path.expanduser(os.path.expandvars(value))))
-            self.class_logger.info("Set XML logfile: {0}.".format(self.__dict__[name]))
+            self.class_logger.info("Set XML logfile: %s.", self.__dict__[name])
 
         elif name == "cfgfile":
             if value is None:
                 value = os.path.join(os.path.dirname(__file__), "xmlreport_cfg.json")
             self.__dict__[name] = value
-            self.class_logger.info("Set config file: {0}.".format(value))
+            self.class_logger.info("Set config file: %s.", value)
             self.__configinit(value)
 
         elif name == "info_dict" and isinstance(value, list):
             self.__dict__["infodict"][value[0]] = value[1]
-            self.class_logger.info("Appending InfoDict: {0} - {1}.".format(value[0], value[1]))
+            self.class_logger.info("Appending InfoDict: %s - %s.", value[0], value[1])
 
         elif name == "htmlcfg":
             self.__dict__[name] = value
             if value is None:
                 value = os.path.join(os.path.dirname(__file__), "htmlreport_cfg.json")
-            self.class_logger.info("Set html config file: {0}.".format(value))
+            self.class_logger.info("Set html config file: %s.", value)
             self.__dict__['htmlconf'] = value
             self.__htmlconfig(value)
 
         else:
-            self.class_logger.debug("Setting attr: {0} - {1}.".format(name, value))
+            self.class_logger.debug("Setting attr: %s - %s.", name, value)
             self.__dict__[name] = value
 
     def __htmlconfig(self, configfile):
-        """
-        @brief  Create HTMLReport instance.
-        @param  configfile:  Path to HTML report configuration file.
-        @type  configfile:  str
-        @return:  None
+        """Create HTMLReport instance.
+
+        Args:
+            configfile(str):  Path to HTML report configuration file.
+
+        Returns:
+            None
+
         """
         self.class_logger.debug("Creating HTMLReport instance.")
         self.__html_report = HTMLReport(configfile)
 
     def __configinit(self, cfgfile):
-        """
-        @brief  Read XML report configuration from file.
-        @param  cfgfile:  Path to XML report config file.
-        @type  cfgfile:  str
-        @return:  None
+        """Read XML report configuration from file.
+
+        Args:
+            cfgfile(str):  Path to XML report config file.
+
+        Returns:
+            None
+
         """
         config_file = get_full_path(cfgfile)
-        self.class_logger.info("Loading config from file {0}...".format(config_file))
+        self.class_logger.info("Loading config from file %s...", config_file)
         config = {}
 
         try:
             config = json.loads(open(config_file).read())
         except Exception as err:
-            self.class_logger.error("cannot open configuration file: {0}.".format(err))
+            self.class_logger.error("cannot open configuration file: %s.", err)
 
         if "css" in config:
             self._css = config['css']
@@ -234,20 +245,22 @@ class XML(object):
 #            self.class_logger.info("Use connector: {0}.".format(self._connector.name))
 
     def append_infodict(self, attr, value):
+        """Append xml report infodict (it's shown in report header).
+
+        Args:
+            attr(str):  Attribute name
+            value:  Attribute value
+
         """
-        @brief  Append xml report infodict (it's shown in report header).
-        @param  attr:  Attribute name
-        @type  attr:  str
-        @param  value:  Attribute value
-        """
-        self.class_logger.info("Appending infodict: {0} = {1}".format(attr, value))
+        self.class_logger.info("Appending infodict: %s = %s", attr, value)
         self.infodict[attr] = value
 
     def info(self):
-        """
-        @brief  Return dict of report settings.
-        @rtype:  dict
-        @return:  Report settings
+        """Return dict of report settings.
+
+        Returns:
+            dict: Report settings
+
         """
         return {'xml file': self.logfile,
                 'html file': self.htmlfile,
@@ -255,10 +268,11 @@ class XML(object):
                 'dump count': self.dump_count}
 
     def process_cmd(self, cmd):
-        """
-        @brief  Get and process command from client.
-        @param  cmd:  Command
-        @type  cmd:  dict
+        """Get and process command from client.
+
+        Args:
+            cmd(dict):  Command
+
         """
         if (self.platform is None or self.platform == 'undetermined') and 'build_info' in list(cmd.keys()):
             self.platform = cmd['build_info']['platform']
@@ -275,26 +289,27 @@ class XML(object):
             self.dump_xmllog(cmd['duration'], cmd.get('detailed_duration'))
 
     def append_prev_reason(self, value):
+        """Append failure reason.
+
+        Args:
+            value(str):  Failure reason
+
         """
-        @brief  Append failure reason
-        @param  value:  Failure reason
-        @type  value:  str
-        """
-        res = self.Junit.results(message="Failure Reason")
+        res = self.Junit.results(message="Failure Reason")  # pylint: disable=no-member
         res.append(value)
         self.append(res)
 
     def _get_failure_res(self, current_status, previous_freason, current_freason):
-        """
-        @brief  Get failure reason
-        @param  current_status:  Current test case's status
-        @type  current_status:  str
-        @param  previous_freason:  Previous failure reason
-        @type  previous_freason:  str
-        @param  current_freason:  Current failure reason
-        @type  current_freason:  str
-        @rtype:  str
-        @return:  Failure reason
+        """Get failure reason
+
+        Args:
+            current_status(str):  Current test case's status
+            previous_freason(str):  Previous failure reason
+            current_freason(str):  Current failure reason
+
+        Returns:
+            str: Failure reason
+
         """
         if current_status == 'Failed' and previous_freason == current_freason:
             return "Same Failure"
@@ -304,33 +319,29 @@ class XML(object):
             return "Failure"
 
     def opentc(self, classnames, tcname, status, report, prev_data=None):
-        """
-        @brief  Adding TC to xml report.
+        """Adding TC to xml report.
 
-        @param  classnames:  py.test dot separated module/class names
-        @type  classnames:  str
-        @param  tcname:  test case name
-        @type  tcname:  str
-        @param  status:  TC run status
-        @type  status:  str
-        @param  report:  TC status report. It's generated by py.test and depends on TC status
-        @type  report:  dict
+        Args:
+            classnames(str):  py.test dot separated module/class names
+            tcname(str):  test case name
+            status(str):  TC run status
+            report(dict):  TC status report. It's generated by py.test and depends on TC status
 
-        @par Example:
-        @code
-        classnames = "functional_tests.feature.test_module.TestClass"
-        tcname = "test_some_feature_behaviour"
-        status = "Passed"
-        report = {"duration": 123}
-        xml_report.opentc(classnames, tcname, status, report)
-        @endcode
+        Example::
+
+            classnames = "functional_tests.feature.test_module.TestClass"
+            tcname = "test_some_feature_behaviour"
+            status = "Passed"
+            report = {"duration": 123}
+            xml_report.opentc(classnames, tcname, status, report)
+
         """
         if not isinstance(report, dict):
             # Exit method if report are not ready
             self.class_logger.info("Skip XML opentc step. Test case run isn't finished yet.")
             return
 
-        self.class_logger.info("Processing {0}/{1} with status {2}.".format(classnames, tcname, status))
+        self.class_logger.info("Processing %s/%s with status %s.", classnames, tcname, status)
         if self.prefix:
             classnames.insert(0, self.prefix)
         attrs = {'classname': classnames, 'name': tcname}
@@ -388,7 +399,7 @@ class XML(object):
             _tc_id = self._connector_cmd("get_tcid", [tcname, ])
             if _tc_id is not None:
                 attrs['testid'] = _tc_id
-                self.class_logger.info("TestMgmtSystem TC Id of {0} = {1}".format(tcname, _tc_id))
+                self.class_logger.info("TestMgmtSystem TC Id of %s = %s", tcname, _tc_id)
                 _prev_bug_ids = self._connector_cmd("get_defectids", [tcname, ])
             if self.host is None and config:
                 self.host = config[0]
@@ -399,7 +410,7 @@ class XML(object):
                                     (self.host, self.project, _platform, tcname)
         # Creating TC xml element
         if 'when' in list(report.keys()) and not report['when'] == "teardown":
-            self.tests.append(self.Junit.testcase(**attrs))
+            self.tests.append(self.Junit.testcase(**attrs))  # pylint: disable=no-member
             self.total += 1
             self.fail_traceback = None
         if status == "Passed":
@@ -426,7 +437,7 @@ class XML(object):
         elif status == "Monitor":
             self.append_monitor(report['monitor'])
         else:
-            self.class_logger.error("Unknown status of TC: {0} - {1}. TC will be marked as \"Blocked\"".format(tcname, status))
+            self.class_logger.error("Unknown status of TC: %s - %s. TC will be marked as \"Blocked\"", tcname, status)
             if self.status_register == [tcname, "Passed"]:
                 # self.failed += 1
                 self.passed -= 1
@@ -446,10 +457,11 @@ class XML(object):
             self.append_defectids(_prev_bug_ids, config)
 
     def append(self, obj):
-        """
-        @brief  General method for appending xml object. It's used in append_<status> methods().
-        @param  obj:  Junit object to be appended
-        @type  obj:  Junit
+        """General method for appending xml object. It's used in append_<status> methods().
+
+        Args:
+            obj(Junit):  Junit object to be appended
+
         """
         self.tests[-1].append(obj)
 
@@ -459,17 +471,19 @@ class XML(object):
         for file_name in images:
             with open(file_name, 'rb') as f:
                 image_src = base64.b64encode(f.read()).decode('utf-8')
-                file_nodes.append(self.Junit.file(src="data:image/png;base64,{}".format(image_src)))
-        monitor = self.Junit.monitor(file_nodes)
+                file_nodes.append(
+                    self.Junit.file(src="data:image/png;base64,{}".format(image_src)),  # pylint: disable=no-member
+                )
+        monitor = self.Junit.monitor(file_nodes)  # pylint: disable=no-member
         self.append(monitor)
 
     def append_error(self, report, when=""):
-        """
-        @brief  Append xml report with error (in case TC failed on setup or teardown).
-        @param  report:  Error report
-        @type  report:  dict
-        @param  when:  Error occurance stage (setup|call|teardown)
-        @type  when:  str
+        """Append xml report with error (in case TC failed on setup or teardown).
+
+        Args:
+            report(dict):  Error report
+            when(str):  Error occurance stage (setup|call|teardown)
+
         """
         self.class_logger.info("Appending XML report with error.")
         if 'longrepr' in list(report.keys()):
@@ -484,30 +498,38 @@ class XML(object):
                         self.tests[-1].pop()
                     except IndexError:
                         pass
-                self.append(self.Junit.error(longrepr, message="Test error on %s and Test failure" % (when, )))
+                self.append(
+                    self.Junit.error(longrepr,  # pylint: disable=no-member
+                                     message="Test error on %s and Test failure" % (when, )))
                 if hasattr(failure_reason.attr, "message") and failure_reason.attr.message == "Failure Reason":
                     self.tests[-1].append(failure_reason)
                 self.tests[-1][0].extend("\n" + "-" * 80 + "\nTest Case Failure\n" + "-" * 80 + "\n")
                 self.tests[-1][0].extend(self.fail_traceback)
             else:
-                self.append(self.Junit.error(longrepr, message="Test error on %s" % (when, )))
+                self.append(
+                    self.Junit.error(longrepr,  # pylint: disable=no-member
+                                     message="Test error on %s" % (when, )))
         self.errors += 1
         self.failed += 1
 
     def append_xfail(self, report):
-        """
-        @brief  Append xml report with xfailed TC.
-        @param  report:  XFail report
-        @type  report:  dict
+        """Append xml report with xfailed TC.
+
+        Args:
+            report(dict):  XFail report
+
         """
         self.class_logger.info("Appending XML report with xfail.")
-        self.append(self.Junit.skipped(str(xml_unescape(report['keywords']['xfail'])), message="expected test failure"))
+        self.append(
+            self.Junit.skipped(str(xml_unescape(report['keywords']['xfail'])),  # pylint: disable=no-member
+                               message="expected test failure"))
 
     def append_skipped(self, report):
-        """
-        @brief  Append xml reports with skipped TC.
-        @param  report:  Skipped report
-        @type  report:  dict
+        """Append xml reports with skipped TC.
+
+        Args:
+            report(dict):  Skipped report
+
         """
         self.class_logger.info("Appending XML report with skip.")
         # filename, lineno, skipreason = report['longrepr']
@@ -515,31 +537,33 @@ class XML(object):
         longrepr = xml_unescape(report['longrepr'])
         # TODO: fixed bug with longrepr crashing
         skipreason = get_skipped_reason(report['longrepr'])
-        self.append(self.Junit.skipped("%s" % longrepr, type="pytest.skip", message=skipreason))
+        self.append(self.Junit.skipped("%s" % longrepr,  # pylint: disable=no-member
+                                       type="pytest.skip", message=skipreason))
 #        self.append(self.Junit.skipped("%s:%s: %s" % longrepr, type="pytest.skip", message=skipreason))
         self.skipped += 1
 
     def append_pass(self, report):
-        """
-        @brief  Append xml report with passed TC.
-        @param  report:  Passed report
-        @type  report:  dict
+        """Append xml report with passed TC.
+
+        Args:
+            report(dict):  Passed report
+
         """
         self.class_logger.info("Appending XML report with pass.")
-        self.append(self.Junit.passed(message="Test passed"))
+        self.append(self.Junit.passed(message="Test passed"))  # pylint: disable=no-member
         self.passed += 1
 
     def append_failure(self, report):
-        """
-        @brief  Append xml report with failed TC.
-        @param  report:  Failure report
-        @type  report:  dict
+        """Append xml report with failed TC.
+
+        Args:
+            report(dict):  Failure report
+
         """
         self.class_logger.info("Appending XML report with fail.")
-        for i in range(len(report['sections'])):
-            report['sections'][i] = xml_unescape(report['sections'][i])
+        report['sections'] = [xml_unescape(section) for section in report['sections']]  # pylint: disable=no-member
         sec = dict(report['sections'])
-        self.fail_traceback = self.Junit.failure(message="Test failure")
+        self.fail_traceback = self.Junit.failure(message="Test failure")  # pylint: disable=no-member
         # Removing BASH escape symbols (decolorizing)
         # longrepr = xml_unescape(re_sub(r"\x1b.*?m", "", report['longrepr']))
         longrepr = xml_unescape(report['longrepr'])
@@ -561,60 +585,53 @@ class XML(object):
         self.failed += 1
 
     def append_defectids(self, defect_ids, config=None):
+        """Add defect ids to report.
+
+        Args:
+            defect_ids(list):  Defect IDs
+            config(dict):  Connectors configuration
+
         """
-        @brief  Add defect ids to report.
-        @param  defect_ids:  Defect IDs
-        @type  defect_ids:  list
-        @param  config:  Connectors configuration
-        @type  config:  dict
-        """
-        self.class_logger.info("Appending TC with related defects IDs {0}".format(defect_ids))
+        self.class_logger.info("Appending TC with related defects IDs %s", defect_ids)
         _host = None
 
         if config is not None:
             _host = config[0]
 
         for defect_id in defect_ids:
-            self.append(self.Junit.defect(d_id=defect_id, d_host=_host))
+            self.append(self.Junit.defect(d_id=defect_id, d_host=_host))  # pylint: disable=no-member
 
     def dump_xmllog(self, totaltime=None, detailed_duration=None):
-        """
-        @brief  Generating xml file.
-        @param  totaltime:  Total execution time of TCs in report. (It should be returned by py.test.)
-        @type  totaltime:  int
-        @param  detailed_duration:  Detailed execution time of TCs in report.
-        @type  detailed_duration:  dict
+        """Generating xml file.
+
+        Args:
+            totaltime(int):  Total execution time of TCs in report. (It should be returned by py.test.)
+            detailed_duration(dict):  Detailed execution time of TCs in report.
+
         """
         self.logfile = get_html_xml_path(self.logfile, self.buildname)
         self.htmlfile = get_html_xml_path(self.htmlfile, self.buildname)
 
-        self.class_logger.info("Dumping XML Log to {0}.".format(self.logfile))
+        self.class_logger.info("Dumping XML Log to %s.", self.logfile)
         # Define xml logfile name.
         dump_logfile = get_uniq_filename(self.logfile)
         if dump_logfile != self.logfile:
-            self.class_logger.info("Dumping XML Log path changed to {0}.".format(dump_logfile))
+            self.class_logger.info("Dumping XML Log path changed to %s.", dump_logfile)
 
-        _path_arr = dump_logfile.split("/")
-        if _path_arr and not os.path.exists(dump_logfile[:-len(_path_arr[-1])]):
-            os.makedirs(dump_logfile[:-len(_path_arr[-1])])
+        os.makedirs(os.path.dirname(dump_logfile), exist_ok=True)
 
-        if py_std.sys.version_info[0] < 3:
-            logfile = py_std.codecs.open(dump_logfile, "w", encoding="utf-8")
-        else:
-            logfile = open(dump_logfile, "w", encoding="utf-8")
-
-        logfile.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>")
+        with open(dump_logfile, "w", encoding="utf-8") as logfile:
+            logfile.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>")
         if self._css:
             logfile.write("<?xml-stylesheet type=\"text/css\" href=\"%s\"?>" % (self._css, ))
         if self._xsl:
             logfile.write("<?xml-stylesheet type=\"text/xsl\" href=\"%s\"?>" % (self._xsl, ))
         if self.infodict:
-            info_nodes = []
-            for info_node in list(self.infodict.keys()):
-                info_nodes.append(self.Junit.info_node(self.infodict[info_node], name=info_node))
-            self.tests.append(self.Junit.header(info_nodes))
+            self.tests.append(
+                self.Junit.header([self.Junit.info_node(value, key) for key, value  # pylint: disable=no-member
+                                   in self.infodict.items()]))
         try:
-            logfile.write(self.Junit.testsuite(self.tests,
+            logfile.write(self.Junit.testsuite(self.tests,  # pylint: disable=no-member
                                                name="",
                                                errors=self.errors,
                                                failures=self.failed,
@@ -627,28 +644,28 @@ class XML(object):
                                                connector=self._connector,
                                                ).unicode(indent=0))
         except Exception as err:
-            self.class_logger.error("Cannot dump XML report to file {0}. ERRTYPE: {1}, ERR: {2}".format(dump_logfile, type(err), err))
-            logfile.close()
+            self.class_logger.error("Cannot dump XML report to file %s. ERRTYPE: %s, ERR: %s", dump_logfile, type(err), err)
+
         else:
-            self.class_logger.info("XML report is successfully dumped to file {0}.".format(dump_logfile))
+            self.class_logger.info("XML report is successfully dumped to file %s.", dump_logfile)
             self.tests = []
             self.dump_count += 1
 
-            logfile.close()
-
             # Creating HTML report
             if self.htmlfile is not None and self.__html_report is not None:
-                self.class_logger.info("Dumping HTML report to {0}...".format(self.htmlfile))
+                self.class_logger.info("Dumping HTML report to %s...", self.htmlfile)
                 self.__html_report.dump_html(dump_logfile, self.htmlfile)
 
     def _connector_cmd(self, cmd, args):
-        """
-        @brief  Call connector method.
-        @param  cmd:  connector method name
-        @type  cmd:  str
-        @param  args:  connector method arguments
-        @type  args:  list
-        @return:  Connector method return code or None in case exception.
+        """Call connector method.
+
+        Args:
+            cmd(str):  connector method name
+            args(list):  connector method arguments
+
+        Returns:
+            Connector method return code or None in case exception.
+
         """
         try:
             ret = getattr(self._connector, cmd)(*args)
@@ -660,25 +677,25 @@ class XML(object):
 
 
 class HTMLReport(object):
-    """
-    @brief  Class for generating HTML reports from xml files.
+    """Class for generating HTML reports from xml files.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config_file):
-        """
-        @brief  Initialize HTMLReport class.
+        """Initialize HTMLReport class.
+
         """
         self.xslt_style = None
         self.xslt_concat = None
         self.html_resources = None
 
-        self.class_logger.info("CurDir {0}.".format(os.path.abspath(os.curdir)))
+        self.class_logger.info("CurDir %s.", os.path.abspath(os.curdir))
         # Define config file location if one
         self.__config_file = config_file
         if not os.path.isfile(self.__config_file):
-            self.class_logger.warning("Config file ({0}) for HTML report not found.".format(self.__config_file))
+            self.class_logger.warning("Config file (%s) for HTML report not found.", self.__config_file)
             self.__config_file = None
 
         # Read attributes from config if one
@@ -686,23 +703,24 @@ class HTMLReport(object):
             config = json.loads(open(self.__config_file).read(), encoding="latin-1")
             for key in config:
                 setattr(self, key, os.path.join(os.path.dirname(__file__), config[key]))
-        self.class_logger.info("Resources: xslt - {0}, {1}; html - {2}".
-                               format(self.xslt_style, self.xslt_concat,
-                                      self.html_resources))
+        self.class_logger.info("Resources: xslt - %s, %s; html - %s",
+                               self.xslt_style, self.xslt_concat, self.html_resources)
 
     def dump_html(self, xmlpath, htmlpath):
-        """
-        @brief  Create the HTML report from an XML.
-        @param  xmlpath:  Path to input xml report
-        @type  xmlpath:  str
-        @param  htmlpath:  Path to output html report
-        @type  htmlpath:  str
-        @return:  None
+        """Create the HTML report from an XML.
+
+        Args:
+            xmlpath(str):  Path to input xml report
+            htmlpath(str):  Path to output html report
+
+        Returns:
+            None
+
         """
         temp_file = None
         try:
             temp_file = tempfile.mkstemp(prefix='html_report.', suffix='.tmp', dir=os.curdir)
-            self.class_logger.info("Creating pure html report: {0} ...".format(temp_file))
+            self.class_logger.info("Creating pure html report: %s ...", temp_file)
 
             reporter.create_pure_html(temp_file[1], xmlpath, None, self.xslt_style, self.xslt_concat)
 
@@ -712,14 +730,14 @@ class HTMLReport(object):
 
             htmlpath = get_uniq_filename(os.path.normpath(os.path.join(os.path.realpath(os.curdir),
                                                                        os.path.expanduser(os.path.expandvars(htmlpath)))))
-            self.class_logger.info("Creating single html report: {0} ...".format(htmlpath))
+            self.class_logger.info("Creating single html report: %s ...", htmlpath)
             reporter.create_single_html(htmlpath, temp_file[1], self.html_resources)
         except Exception as err:
-            self.class_logger.info("Creating HTML report failed. ERROR: {0}".format(err))
+            self.class_logger.info("Creating HTML report failed. ERROR: %s", err)
             exc_type, exc_value, exc_traceback = sys.exc_info()
             traceback_message = traceback.format_exception(exc_type, exc_value,
                                                            exc_traceback)
-            self.class_logger.error("Traceback:\n{0}".format("".join(traceback_message)))
+            self.class_logger.error("Traceback:\n%s", "".join(traceback_message))
         finally:
             if temp_file is not None:
                 os.remove(temp_file[1])

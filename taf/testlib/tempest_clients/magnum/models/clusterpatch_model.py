@@ -10,24 +10,34 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""``clusterpatch_model.py``
+
+"""
+
 import json
 
 from testlib.tempest_clients.magnum.models import models
 
 
 class ClusterPatchData(models.BaseModel):
-    """Data that encapsulates  clusterpatch attributes"""
+    """Data that encapsulates  clusterpatch attributes
+
+    """
     pass
 
 
 class ClusterPatchEntity(models.EntityModel):
-    """Entity Model that represents a single instance of ClusterPatchData"""
+    """Entity Model that represents a single instance of ClusterPatchData
+
+    """
     ENTITY_NAME = 'clusterpatch'
     MODEL_TYPE = ClusterPatchData
 
 
 class ClusterPatchCollection(models.CollectionModel):
-    """Collection Model that represents a list of ClusterPatchData objects"""
+    """Collection Model that represents a list of ClusterPatchData objects
+
+    """
     MODEL_TYPE = ClusterPatchData
     COLLECTION_NAME = 'clusterpatchlist'
 
@@ -40,7 +50,9 @@ class ClusterPatchCollection(models.CollectionModel):
         This is required due to COLLECTION_NAME holding a list of objects that
         needed to be converted to dict individually
 
-        :returns: json object
+        Returns:
+            json object
+
         """
 
         data = getattr(self, ClusterPatchCollection.COLLECTION_NAME)
@@ -56,7 +68,7 @@ class ClusterPatchCollection(models.CollectionModel):
         Converts data dict to list of ClusterPatchData objects and stores it
         in COLLECTION_NAME
 
-        Example of dict data:
+        Example of dict data::
 
             [{
                 "path": "/name",
@@ -64,8 +76,12 @@ class ClusterPatchCollection(models.CollectionModel):
                 "op": "replace"
             }]
 
-        :param data: dict of patch data
-        :returns: json object
+        Args:
+            data(dict): dict of patch data
+
+        Returns:
+            json object
+
         """
 
         model = cls()

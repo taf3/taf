@@ -1,22 +1,23 @@
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``test_pp.py``
+
+`Packet Processor's unittests`
+
 """
-@copyright Copyright (c) 2011 - 2017, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file test_pp.py
-
-@summary Packet Processor's unittests.
-"""
 import pytest
 
 from testlib.custom_exceptions import PypackerException
@@ -34,15 +35,17 @@ class TestPacketProcessor(object):
             assert tg.check_packet_field(packet=packet, layer=layer, field=field, value=value)
 
     def test_packet_with_empty_layer(self, tg):
-        """
-        @brief  Test building packet with empty layer
+        """Test building packet with empty layer.
+
         """
         packet = tg._build_pypacker_packet(PACKET_DEFS[2])
 
         assert tg.get_packet_layer(packet, "IP") is not None
 
     def test_pproc_packet_field_setting(self, tg):
-        """ Check packet field setting """
+        """Check packet field setting.
+
+        """
         fragments = tg.packet_fragment(ETH_IP_ICMP, required_size=200)
         assert len(fragments) == 1
         src = '12:34:56:78:98:76'
@@ -53,7 +56,9 @@ class TestPacketProcessor(object):
         assert load == tg.get_packet_field(fragments[0], 'Raw', 'load')
 
     def test_assembling_dot1q_icmp_packet_1(self, tg):
-        """ Check assembling of Dot1Q.ICMP fragmented packet """
+        """Check assembling of Dot1Q.ICMP fragmented packet.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
@@ -79,7 +84,9 @@ class TestPacketProcessor(object):
         assert len(data[iface][0]) == 996
 
     def test_assembling_dot1q_icmp_packet_2(self, tg):
-        """ Check assembling of Dot1Q.ICMP fragmented packet. Overlapped fragments"""
+        """ Check assembling of Dot1Q.ICMP fragmented packet. Overlapped fragments.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
@@ -97,7 +104,9 @@ class TestPacketProcessor(object):
         assert len(data_1) == 5
 
     def test_assembling_dot1q_icmp_packet_3(self, tg):
-        """Check assembling of Dot1Q.ICMP fragmented packet. Missed fragment 1"""
+        """Check assembling of Dot1Q.ICMP fragmented packet. Missed fragment 1.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
@@ -114,7 +123,9 @@ class TestPacketProcessor(object):
         assert len(data_1) == 4
 
     def test_assembling_dot1q_icmp_packet_4(self, tg):
-        """Check assembling of Dot1Q.ICMP fragmented packet. Wrong frag in Fragment 1"""
+        """Check assembling of Dot1Q.ICMP fragmented packet. Wrong frag in Fragment 1.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
@@ -131,7 +142,9 @@ class TestPacketProcessor(object):
         assert len(data_1) == 5
 
     def test_assembling_dot1q_icmp_packet_5(self, tg):
-        """Check assembling of Dot1Q.ICMP fragmented packet. Wrong flags in Fragment 1"""
+        """Check assembling of Dot1Q.ICMP fragmented packet. Wrong flags in Fragment 1.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
@@ -148,7 +161,9 @@ class TestPacketProcessor(object):
         assert len(data_1) == 5
 
     def test_assembling_dot1q_icmp_packet_6(self, tg):
-        """Check assembling of Dot1Q.ICMP fragmented packet. Missed last fragment"""
+        """Check assembling of Dot1Q.ICMP fragmented packet. Missed last fragment.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
@@ -165,7 +180,9 @@ class TestPacketProcessor(object):
         assert len(data_1) == 4
 
     def test_assembling_dot1q_icmp_packet_7(self, tg):
-        """Check assembling of Dot1Q.ICMP fragmented packet. Wrong frag in last fragment"""
+        """Check assembling of Dot1Q.ICMP fragmented packet. Wrong frag in last fragment.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
@@ -182,7 +199,9 @@ class TestPacketProcessor(object):
         assert len(data_1) == 5
 
     def test_assembling_dot1q_icmp_packet_8(self, tg):
-        """Check assembling of Dot1Q.ICMP fragmented packet. Wrong flags in last fragment"""
+        """Check assembling of Dot1Q.ICMP fragmented packet. Wrong flags in last fragment.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
@@ -199,7 +218,9 @@ class TestPacketProcessor(object):
         assert len(data_1) == 5
 
     def test_assembling_dot1q_icmp_packet_9(self, tg):
-        """Check assembling of Dot1Q.ICMP fragmented packet. Missed fragment after 2"""
+        """Check assembling of Dot1Q.ICMP fragmented packet. Missed fragment after 2.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
@@ -216,7 +237,9 @@ class TestPacketProcessor(object):
         assert len(data_1) == 4
 
     def test_assembling_dot1q_icmp_packet_10(self, tg):
-        """Check assembling of Dot1Q.ICMP fragmented packet. Duplicate fragment 2"""
+        """Check assembling of Dot1Q.ICMP fragmented packet. Duplicate fragment 2.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
@@ -247,7 +270,9 @@ class TestPacketProcessor(object):
         assert len(data[iface][0]) == 996
 
     def test_assembling_dot1q_icmp_packet_11(self, tg):
-        """Check assembling of Dot1Q.ICMP fragmented packet. Two packets"""
+        """Check assembling of Dot1Q.ICMP fragmented packet. Two packets.
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
@@ -283,7 +308,9 @@ class TestPacketProcessor(object):
         assert len(data[iface][1]) == 1196
 
     def test_assembling_dot1q_icmp_packet_12(self, tg):
-        """Check assembling of Dot1Q.ICMP fragmented packet. Four packets (fragmented and not)"""
+        """Check assembling of Dot1Q.ICMP fragmented packet. Four packets (fragmented and not).
+
+        """
         iface = tg.ports[0]
 
         stream_id_1 = tg.set_stream(DOT1Q_IP_ICMP, count=1,
@@ -336,8 +363,9 @@ class TestPacketProcessor(object):
         assert len(data[iface][3]) == 796
 
     def test_get_packet_field_negative_1(self, tg):
-        """ Verify that method get_packet_field returns Error message when layer is not defined in packet(1). """
+        """Verify that method get_packet_field returns Error message when layer is not defined in packet(1).
 
+        """
         packet_pypacker = tg._build_pypacker_packet(IP_TCP)
         with pytest.raises(PypackerException) as excepinfo:
             tg.get_packet_field(packet=packet_pypacker, layer="Ethernet")
@@ -347,8 +375,9 @@ class TestPacketProcessor(object):
         assert exception_message == result
 
     def test_get_packet_field_negative_2(self, tg):
-        """ Verify that method get_packet_field returns Error message when layer is not defined in packet(2). """
+        """Verify that method get_packet_field returns Error message when layer is not defined in packet(2).
 
+        """
         packet_pypacker = tg._build_pypacker_packet(IP_TCP)
         with pytest.raises(PypackerException) as excepinfo:
             tg.get_packet_field(packet=packet_pypacker, layer="Ip")
@@ -358,8 +387,9 @@ class TestPacketProcessor(object):
         assert exception_message == result
 
     def test_get_packet_field_negative_3(self, tg):
-        """ Verify that method get_packet_field returns Error message when field is not defined in packet(1). """
+        """Verify that method get_packet_field returns Error message when field is not defined in packet(1).
 
+        """
         packet_pypacker = tg._build_pypacker_packet(IP_TCP)
         with pytest.raises(PypackerException) as excepinfo:
             tg.get_packet_field(packet=packet_pypacker, layer="IP", field="Src")
@@ -369,32 +399,36 @@ class TestPacketProcessor(object):
         assert exception_message == result
 
     def test_get_packet_field_4(self, tg):
-        """ Verify that method get_packet_field returns correct value(4). """
+        """Verify that method get_packet_field returns correct value(4).
 
+        """
         packet_pypacker = tg._build_pypacker_packet(IP_TCP)
         flag = tg.get_packet_field(packet=packet_pypacker, layer="IP", field="flags")
         # verify expected result
         assert flag == IP_FLAGS
 
     def test_get_packet_field_1(self, tg):
-        """ Verify that method get_packet_field returns correct value(1). """
+        """Verify that method get_packet_field returns correct value(1).
 
+        """
         packet_pypacker = tg._build_pypacker_packet(IP_TCP)
         ttl = tg.get_packet_field(packet=packet_pypacker, layer="IP", field="ttl")
         # verify expected result
         assert ttl == IP_TTL
 
     def test_get_packet_field_2(self, tg):
-        """ Verify that method get_packet_field returns correct value(2). """
+        """Verify that method get_packet_field returns correct value(2).
 
+        """
         packet_pypacker = tg._build_pypacker_packet(IP_TCP)
         proto = tg.get_packet_field(packet=packet_pypacker, layer="IP", field="p")
         # verify expected result
         assert proto == IP_PROTO_TCP
 
     def test_get_packet_field_3(self, tg):
-        """ Verify that method get_packet_field returns correct value(3). """
+        """Verify that method get_packet_field returns correct value(3).
 
+        """
         packet_pypacker = tg._build_pypacker_packet(IP_TCP)
         version = tg.get_packet_field(packet=packet_pypacker, layer="IP", field="v")
         # verify expected result
@@ -402,8 +436,9 @@ class TestPacketProcessor(object):
 
     @pytest.mark.skip("Pypacker does not support")
     def test_set_field(self, tg):
-        """ Verify that method set_field sets correct field value. """
+        """Verify that method set_field sets correct field value.
 
+        """
         packet = ({"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "flags": 0}}, {"TCP": {"flags": 1}})
         packet_pypacker = tg._build_pypacker_packet(packet)
         packet_pypacker.set_field('IP', 'src', '10.10.10.10')
@@ -423,8 +458,9 @@ class TestPacketProcessor(object):
 
     @pytest.mark.skip("Pypacker does not support")
     def test_get_lcount(self, tg):
-        """ Verify that method get_lcount returns correct count of layers. """
+        """Verify that method get_lcount returns correct count of layers.
 
+        """
         packet = ({"Dot1Q": {"vlan": 1}}, {"Dot1Q": {"vlan": 2}},
                   {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "flags": 0}}, {"TCP": {"flags": 1}})
         packet_pypacker = tg._build_pypacker_packet(packet)
@@ -436,8 +472,9 @@ class TestPacketProcessor(object):
 
     @pytest.mark.skip("Pypacker does not support")
     def test_get_lfield(self, tg):
-        """ Verify that method get_lfield returns correct value. """
+        """Verify that method get_lfield returns correct value.
 
+        """
         packet = ({"Dot1Q": {"vlan": 1}}, {"Dot1Q": {"vlan": 2}},
                   {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "flags": 0}}, {"TCP": {"flags": 1}})
         packet_pypacker = tg._build_pypacker_packet(packet)
@@ -452,8 +489,9 @@ class TestPacketProcessor(object):
 
     @pytest.mark.skip("Pypacker does not support")
     def test_rechecksum(self, tg):
-        """ Verify that method rechecksum returns correct value. """
+        """Verify that method rechecksum returns correct value.
 
+        """
         packet = ({"Dot1Q": {"vlan": 1}}, {"Dot1Q": {"vlan": 2}},
                   {"IP": {"src": "20.0.10.2", "dst": "10.10.10.1", "flags": 0}}, {"TCP": {"flags": 1}})
         packet_pypacker = tg._build_pypacker_packet(packet)

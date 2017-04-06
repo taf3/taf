@@ -1,24 +1,23 @@
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""``etcd_helper.py``
+
 """
-@copyright Copyright (c) 2016 - 2017, Intel Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file: etcd_helper.py
-
-"""
 import itertools
 from contextlib import suppress
-import time
 
 import etcd
 from plugins import loggers
@@ -43,7 +42,7 @@ class EtcdHelper(object):
             self.etcd_config = {
                 'host': etcd_address,
                 'port': int(etcd_port),
-                'protocol': etcd_protocol
+                'protocol': etcd_protocol,
             }
         elif isinstance(endpoint, dict):
             self.etcd_config = endpoint
@@ -87,14 +86,14 @@ class EtcdHelper(object):
     @property
     def latest_id(self):
         with suppress(AttributeError):
-            return self._latest_id
+            return self._latest_id  # NOQA pylint: disable=access-member-before-definition
         for _ in range(2):
             with suppress(etcd.EtcdKeyNotFound):
-                self._latest_id = int(self.etcd.read(self._latest_id_key).value)  # pylint: disable=no-member
+                self._latest_id = int(self.etcd.read(  # pylint: disable=no-member, attribute-defined-outside-init
+                    self._latest_id_key).value)
                 return self._latest_id
             self.init_etcd()
         raise EtcdHelperException("Failed to find test_id")
-
 
     def read_list(self, key):
         return self.etcd.read(key).leaves

@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``read_csv.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Reading Ixia CSV files`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  read_csv.py
-
-@summary  Reading Ixia CSV files
 """
 
 import csv
@@ -28,18 +27,21 @@ from . import loggers
 
 
 class ReadCsv(object):
-    """
-    @description  Class to read Ixia CSV files.
+    """Class to read Ixia CSV files.
+
     """
 
     logger = loggers.ClassLogger()
 
     def __init__(self, filename):
-        """
-        @brief  Initialize ReadCsv class
-        @param  filename:  File name.
-        @type  filename:  str
-        @raise  Exception:  error on openning/reading csv file
+        """Initialize ReadCsv class.
+
+        Args:
+            filename(str):  File name.
+
+        Raises:
+            Exception:  error on openning/reading csv file
+
         """
         self.content = []
         self.line_number = 0
@@ -78,14 +80,15 @@ class ReadCsv(object):
             _file.close()
 
     def get_cell(self, row, col):
-        """
-        @brief  Get cell.
-        @param  row:  Row ID.
-        @type  row:  int
-        @param  col:  Column ID.
-        @type  col:  int
-        @rtype:  str
-        @return:  Column value
+        """Get cell.
+
+        Args:
+            row(int):  Row ID.
+            col(int):  Column ID.
+
+        Returns:
+            str:  Column value
+
         """
         try:
             ret = self.content[row][col]
@@ -101,30 +104,31 @@ class ReadCsv(object):
         return ret
 
     def get_cell_by_name(self, row, name):
-        """
-        @brief  Get cell by name.
-        @param  row:  Row ID.
-        @type  row:  int
-        @param  name:  Column name.
-        @type  name:  str
-        @rtype:  str
-        @return:  Column value
+        """Get cell by name.
+
+        Args:
+            row(int):  Row ID.
+            name(str):  Column name.
+
+        Returns:
+            str:  Column value
+
         """
         col = self.key[name]
         self.logger.debug("get cell by name %s, row = %d, col = %d" % (name, row, col))
         return self.get_cell(row, self.key[name])
 
     def get_ave_max_min(self, start, stop, name):
-        """
-        @brief  Get average, maximum, minimum cell.
-        @param  start:  Start row ID value.
-        @type  start:  int
-        @param  stop:  Stop row ID value.
-        @type  stop:  int
-        @param  name:  Column name.
-        @type  name:  str
-        @rtype:  tuple
-        @return:  average, maximum, minimum cell values
+        """Get average, maximum, minimum cell.
+
+        Args:
+            start(int):  Start row ID value.
+            stop(int):  Stop row ID value.
+            name(str):  Column name.
+
+        Returns:
+            tuple:  average, maximum, minimum cell values
+
         """
         average = float(0)
         n = stop - start

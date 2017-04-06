@@ -12,19 +12,29 @@
 #
 # Based on OpenStack Magnum (https://github.com/openstack/magnum.git)
 
+"""``cluster_template_client.py``
+
+"""
+
 from testlib.tempest_clients.magnum.models import cluster_template_model
 from testlib.tempest_clients.magnum.clients import client
 
 
 class ClusterTemplateClient(client.MagnumClient):
-    """Encapsulates REST calls and maps JSON to/from models"""
+    """Encapsulates REST calls and maps JSON to/from models
+
+    """
 
     @classmethod
     def cluster_templates_uri(cls, filters=None):
-        """Construct clustertemplates uri with optional filters
+        """Construct clustertemplates uri with optional filters.
 
-        :param filters: Optional k:v dict that's converted to url query
-        :returns: url string
+        Args:
+            filters: Optional k:v dict that's converted to url query
+
+        Returns:
+            url string
+
         """
 
         url = "/clustertemplates"
@@ -34,22 +44,30 @@ class ClusterTemplateClient(client.MagnumClient):
 
     @classmethod
     def cluster_template_uri(cls, cluster_template_id):
-        """Construct cluster_template uri
+        """Construct cluster_template uri.
 
-        :param cluster_template_id: cluster_template uuid or name
-        :returns: url string
+        Args:
+            cluster_template_id: cluster_template uuid or name
+
+        Returns:
+            url string
+
         """
 
         return "{0}/{1}".format(cls.cluster_templates_uri(),
                                 cluster_template_id)
 
     def list_cluster_templates(self, filters=None, **kwargs):
-        """Makes GET /clustertemplates request
+        """Makes GET /clustertemplates request.
 
-        Abstracts REST call to return all clustertemplates
+        Abstracts REST call to return all clustertemplates.
 
-        :param filters: Optional k:v dict that's converted to url query
-        :returns: response object and ClusterTemplateCollection object
+        Args:
+            filters: Optional k:v dict that's converted to url query
+
+        Returns:
+            Response object and ClusterTemplateCollection object
+
         """
 
         resp, body = self.get(self.cluster_templates_uri(filters), **kwargs)
@@ -57,13 +75,17 @@ class ClusterTemplateClient(client.MagnumClient):
         return self.deserialize(resp, body, collection)
 
     def get_cluster_template(self, cluster_template_id, **kwargs):
-        """Makes GET /clustertemplate request and returns ClusterTemplateEntity
+        """Makes GET /clustertemplate request and returns ClusterTemplateEntity.
 
         Abstracts REST call to return a single clustertempalte based on uuid
-        or name
+        or name.
 
-        :param cluster_template_id: clustertempalte uuid or name
-        :returns: response object and ClusterTemplateCollection object
+        Args:
+            cluster_template_id: clustertempalte uuid or name
+
+        Returns:
+            Response object and ClusterTemplateCollection object
+
         """
 
         resp, body = self.get(self.cluster_template_uri(cluster_template_id))
@@ -75,8 +97,12 @@ class ClusterTemplateClient(client.MagnumClient):
 
         Abstracts REST call to create new clustertemplate
 
-        :param model: ClusterTemplateEntity
-        :returns: response object and ClusterTemplateEntity object
+        Args:
+            model: ClusterTemplateEntity
+
+        Returns:
+            Response object and ClusterTemplateEntity object
+
         """
 
         resp, body = self.post(
@@ -91,9 +117,13 @@ class ClusterTemplateClient(client.MagnumClient):
 
         Abstracts REST call to update clustertemplate attributes
 
-        :param cluster_template_id: UUID of clustertemplate
-        :param cluster_templatepatch_listmodel: ClusterTemplatePatchCollection
-        :returns: response object and ClusterTemplateEntity object
+        Args:
+            cluster_template_id: UUID of clustertemplate
+            cluster_templatepatch_listmodel: ClusterTemplatePatchCollection
+
+        Returns:
+            Response object and ClusterTemplateEntity object
+
         """
 
         resp, body = self.patch(
@@ -107,8 +137,12 @@ class ClusterTemplateClient(client.MagnumClient):
 
         Abstracts REST call to delete clustertemplate based on uuid or name
 
-        :param cluster_template_id: UUID or name of clustertemplate
-        :returns: response object
+        Args:
+            cluster_template_id: UUID or name of clustertemplate
+
+        Returns:
+            Response object
+
         """
 
         return self.delete(self.cluster_template_uri(cluster_template_id),

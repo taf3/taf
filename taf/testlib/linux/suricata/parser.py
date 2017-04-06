@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``parser.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Suricata rules parsing support`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  parser.py
-
-@summary  Suricata rules parsing support
 """
 
 import itertools
@@ -74,8 +74,8 @@ class AST_Node(TreeNode):
 
 
 class AST_Node_Pred(object):
-    """
-    AST Node predicates helper
+    """AST Node predicates helper.
+
     """
     @classmethod
     def NP_IS_TERMINAL(cls, node):
@@ -96,8 +96,8 @@ class AST_Node_Pred(object):
 
 
 class AST_T_Node(AST_Node):
-    """
-    AST Terminal - leaf nodes
+    """AST Terminal - leaf nodes.
+
     """
 
     def is_leaf(self):
@@ -108,8 +108,8 @@ class AST_T_Node(AST_Node):
 
 
 class AST_N_Node(AST_Node):
-    """
-    AST Nonterminal nodes
+    """AST Nonterminal nodes.
+
     """
 
     @classmethod
@@ -523,8 +523,8 @@ class HostLexer(lexer.RegexLexer):
 
             (r'\d+\.\d+\.\d+\.\d+/\d+', TT_IPv4_MASK),
             (r'\d+\.\d+\.\d+\.\d+', TT_IPv4_ADDR),
-            (r'\$[\w_][\w_\d]*', TT_VARIABLE)
-        ]
+            (r'\$[\w_][\w_\d]*', TT_VARIABLE),
+        ],
     }
 
 
@@ -539,12 +539,12 @@ class HostParser(LL_Parser):
             TT_BR_LEFT,
             TT_BR_RIGHT,
             TT_EXCLMARK,
-            TT_COMMA
+            TT_COMMA,
         },
         'N': {
             '<HOST_GRP>',
             '<HOST_EXPR>',
-            '<HOST_PARENS_CONTD>'
+            '<HOST_PARENS_CONTD>',
         },
         'R': {
             (('<HOST_GRP>', ), ('<HOST_EXPR>', )),
@@ -555,9 +555,9 @@ class HostParser(LL_Parser):
             (('<HOST_EXPR>', ), (TT_VARIABLE, )),
 
             (('<HOST_PARENS_CONTD>', ), ()),
-            (('<HOST_PARENS_CONTD>', ), (TT_COMMA, '<HOST_GRP>', '<HOST_PARENS_CONTD>'))
+            (('<HOST_PARENS_CONTD>', ), (TT_COMMA, '<HOST_GRP>', '<HOST_PARENS_CONTD>')),
         },
-        'S': '<HOST_GRP>'
+        'S': '<HOST_GRP>',
     }
 
     def __init__(self):

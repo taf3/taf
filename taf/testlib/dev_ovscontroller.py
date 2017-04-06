@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``dev_ovscontroller.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`OVS Nox controller specific functionality`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  dev_ovscontroller.py
-
-@summary  OVS Nox controller specific functionality.
 """
 # TODO track creation of separate module to work with external processes and use it's functionality.
 
@@ -45,16 +44,17 @@ NoneType = type(None)
 
 
 class OvsControllerGeneralMixin(entry_template.GenericEntry):
-    """
-    @description  General pattern class for OVS Controller objects
+    """General pattern class for OVS Controller objects.
+
     """
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config):
-        """
-        @brief  Initialize OvsControllerGeneralMixin class
-        @param  config:  Configuration information.
-        @type  config:  dict
+        """Initialize OvsControllerGeneralMixin class.
+
+        Args:
+            config(dict):  Configuration information.
+
         """
         self.val = config['related_id'][0]
         self.sw_type = config['related_conf'][self.val]['instance_type']
@@ -74,12 +74,14 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
         self.status = False
 
     def __get_ovs_controller_iface(self, switchtype):
-        """
-        @brief  Get OVS controller interface.
-        @param  switchtype:  Switch type.
-        @type  switchtype:  str
-        @rtype:  str
-        @return:  OVS controller interface
+        """Get OVS controller interface.
+
+        Args:
+            switchtype(str):  Switch type.
+
+        Returns:
+            str:  OVS controller interface
+
         """
         ifaces_list = []
         cmd = "ifconfig"
@@ -117,18 +119,19 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
             return ifaces_dict['eth1']
 
     def get_ovs_controller_ports(self, cport=None, port=None):
-        """
-        @brief  Get OVS controller ports.
-        @param  cport:  Controller's port.
-        @type  cport:  int
-        @param  port:  Device's port.
-        @type  port:  int
-        @rtype:  tuple(int, int)
-        @return:  Controller's port and device's port
+        """Get OVS controller ports.
+
+        Args:
+            cport(int):  Controller's port.
+            port(int):  Device's port.
+
+        Returns:
+            tuple(int, int):  Controller's port and device's port
+
         """
         def _check_if_port_if_free(port):
-            """
-            @brief  Check if port is free.
+            """Check if port is free.
+
             """
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
@@ -168,10 +171,11 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
         return cport, port
 
     def probe_port(self):
-        """
-        @brief  Establishing a connection to a remote host.
-        @rtype:  bool
-        @return:  True if connection is established
+        """Establishing a connection to a remote host.
+
+        Returns:
+            bool:  True if connection is established
+
         """
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
@@ -182,10 +186,11 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
             return False
 
     def probe(self):
-        """
-        @brief  Check Ovs Controller instance.
-        @rtype:  dict
-        @return:  Ovs Controller status
+        """Check Ovs Controller instance.
+
+        Returns:
+            dict:  Ovs Controller status
+
         """
         _object = {'isup': False, 'type': "unknown", 'prop': {}}
         if self.probe_port():
@@ -203,13 +208,17 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
         return _object
 
     def waiton(self, timeout=30):
-        """
-        @brief  Waiting until Ovs Controller is up.
-        @param  timeout:  Waiting timeout
-        @type  timeout:  int
-        @raise  OvsControllerException:  timeout exceededd
-        @rtype:  dict
-        @return:  Ovs Controller status
+        """Waiting until Ovs Controller is up.
+
+        Args:
+            timeout(int):  Waiting timeout
+
+        Raises:
+            OvsControllerException:  timeout exceeded
+
+        Returns:
+            dict:  Ovs Controller status
+
         """
         status = None
         message = "Waiting until OVS controller on %s port #%s is up." % (self.json_ipaddr, self.port, )
@@ -240,13 +249,17 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
         return status
 
     def waitoff(self, timeout=30):
-        """
-        @brief  Waiting until Ovs Controller is down.
-        @param  timeout:  Waiting timeout
-        @type  timeout:  int
-        @raise  OvsControllerException:  timeout exceeded
-        @rtype:  dict
-        @return:  Ovs Controller status
+        """Waiting until Ovs Controller is down.
+
+        Args:
+            timeout(int):  Waiting timeout
+
+        Raises:
+            OvsControllerException:  timeout exceeded
+
+        Returns:
+            dict:  Ovs Controller status
+
         """
         status = None
         message = "Waiting until OVS controller on %s port #%s is down." % (self.ipaddr, self.port, )
@@ -270,56 +283,56 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
         return status
 
     def cleanup(self):
-        """
-        @brief  Mandatory method for environment specific switch classes.
+        """Mandatory method for environment specific switch classes.
+
         """
         pass
 
     def setprop(self, command, values):
-        """
-        @brief  Configuring command.
-        @param  command:  XML-RPC command
-        @type  command:  str
-        @param  values:  command arguments
-        @type  values:  list
+        """Configuring command.
+
+        Args:
+            command(str):  XML-RPC command
+            values(list):  command arguments
+
         """
         return getattr(self.cmdproxy, "%s" % (command, ))(*values)
 
     def getprop(self, command, values):
-        """
-        @brief  Mandatory method for environment specific switch classes.
-        @param  command:  XML-RPC command
-        @type  command:  str
-        @param  values:  command arguments
-        @type  values:  list
+        """Mandatory method for environment specific switch classes.
+
+        Args:
+            command(str):  XML-RPC command
+            values(list):  command arguments
+
         """
         pass
 
     def start(self):
-        """
-        @brief  Mandatory method for environment specific switch classes.
+        """Mandatory method for environment specific switch classes.
+
         """
         pass
 
     def stop(self):
-        """
-        @brief  Mandatory method for environment specific switch classes.
+        """Mandatory method for environment specific switch classes.
+
         """
         pass
 
     def restart(self):
-        """
-        @brief  Mandatory method for environment specific switch classes.
+        """Mandatory method for environment specific switch classes.
+
         """
         pass
 
     def get(self, init_start=False, retry_count=5):
-        """
-        @brief  Checking OVS Controller.
-        @param  init_start:  Flag to start OVS Controller
-        @type  init_start:  bool
-        @param  retry_count:  Retry attempts count
-        @type  retry_count:  int
+        """Checking OVS Controller.
+
+        Args:
+            init_start(bool):  Flag to start OVS Controller
+            retry_count(int):  Retry attempts count
+
         """
         first_loop = True
         # Try to restart if necessary at least several times
@@ -356,10 +369,11 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
                         pytest.fail(message)
 
     def check(self):
-        """
-        @brief  Checking OVS Controller.
-        @rtype:  dict
-        @return:  OVS Controller status
+        """Checking OVS Controller.
+
+        Returns:
+            dict:  OVS Controller status
+
         """
         if not self.status:
             self.class_logger.info("Skip OVS Controller id:%s(%s) check because it's has Off status." % (self.id, self.name))
@@ -367,8 +381,8 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
         return self.waiton()
 
     def create(self):
-        """
-        @brief  Start OVS Controller.
+        """Start OVS Controller.
+
         """
         if not self.opts.get_only:
             init_start = True
@@ -377,8 +391,8 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
         return self.get(init_start=init_start)
 
     def destroy(self):
-        """
-        @brief  Destroy OVS Controller.
+        """Destroy OVS Controller.
+
         """
         if not self.status:
             self.class_logger.info("Skip OVS Controller id:%s(%s) destroying because it's has already Off status." % (self.id, self.name))
@@ -387,18 +401,20 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
             return self.stop()
 
     def sanitize(self):
-        """
-        @brief  Perform any operations to leave device in consistent state after py.test interruption.
+        """Perform any operations to leave device in consistent state after py.test interruption.
+
         """
         pass
 
     def _get_pid(self, name):
-        """
-        @brief  Get pid of OVS controller process
-        @param  name:  Process's name
-        @type  name:  str
-        @rtype:  int
-        @return:  Process ID
+        """Get pid of OVS controller process.
+
+        Args:
+            name(str):  Process's name
+
+        Returns:
+            int:  Process ID
+
         """
         running_processes = os.popen("ps -ef | grep -v grep | grep %s" % (name, ))
         process_list = running_processes.read().split('\n')
@@ -412,10 +428,11 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
             return None
 
     def _check_pid(self):
-        """
-        @brief  Check for the existence of a unix pid.
-        @rtype:  bool
-        @return:  True if process exists
+        """Check for the existence of a unix pid.
+
+        Returns:
+            bool:  True if process exists
+
         """
         try:
             if self.pid:
@@ -428,11 +445,14 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
             return True
 
     def waitpid(self, timeout=45):
-        """
-        @brief  Wait until OVS Controller process terminates
-        @param  timeout:  Waiting timeout
-        @type  timeout:  int
-        @raise  OvsControllerException:  timeout exceeded
+        """Wait until OVS Controller process terminates.
+
+        Args:
+            timeout(int):  Waiting timeout
+
+        Raises:
+            OvsControllerException:  timeout exceeded
+
         """
         stop_flag = False
         stop_time = time.time() + timeout
@@ -447,18 +467,18 @@ class OvsControllerGeneralMixin(entry_template.GenericEntry):
 
 
 class NoxControllerLocal(OvsControllerGeneralMixin):
-    """
-    @description  Local Nox Controller class
+    """Local Nox Controller class.
+
     """
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize NoxControllerLocal class
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
+        """Initialize NoxControllerLocal class.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
         """
         super(NoxControllerLocal, self).__init__(config)
         self.popen = None
@@ -471,9 +491,11 @@ class NoxControllerLocal(OvsControllerGeneralMixin):
         self.status = self.opts.get_only
 
     def start(self):
-        """
-        @brief  Starts Nox Controller on specified host
-        @raise  Exception:  error on start
+        """Starts Nox Controller on specified host.
+
+        Raises:
+            Exception:  error on start
+
         """
         process = None
         if self.json_ipaddr not in ["localhost", "127.0.0.1"]:
@@ -510,9 +532,11 @@ class NoxControllerLocal(OvsControllerGeneralMixin):
         self.popen = process
 
     def stop(self):
-        """
-        @brief  Stops Nox Controller.
-        @raise  OvsControllerException:  error on stop
+        """Stops Nox Controller.
+
+        Raises:
+            OvsControllerException:  error on stop
+
         """
         try:
             # Try to stop
@@ -563,20 +587,22 @@ class NoxControllerLocal(OvsControllerGeneralMixin):
         self.status = False
 
     def restart(self):
-        """
-        @brief  Restarts Nox Controller.
+        """Restarts Nox Controller.
+
         """
         self.stop()
         return self.start()
 
     def getprop(self, command, values):
-        """
-        @brief  Configure command.
-        @param  command:  XML-RPC command
-        @type  command:  str
-        @param  values:  command arguments
-        @type  values:  list
-        @return:  Property value
+        """Configure command.
+
+        Args:
+            command(str):  XML-RPC command
+            values(list):  command arguments
+
+        Returns:
+            Property value
+
         """
         prop = json.loads(getattr(self.cmdproxy, "%s" % (command, ))(*values))
         if "data" in list(prop.keys()):
@@ -587,18 +613,18 @@ class NoxControllerLocal(OvsControllerGeneralMixin):
 
 
 class FloodlightControllerLocal(OvsControllerGeneralMixin):
-    """
-    @description  Local Floodlight Controller class
+    """Local Floodlight Controller class.
+
     """
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize FloodlightControllerLocal class
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
+        """Initialize FloodlightControllerLocal class.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
         """
         super(FloodlightControllerLocal, self).__init__(config)
         self.popen = None
@@ -612,10 +638,12 @@ class FloodlightControllerLocal(OvsControllerGeneralMixin):
         self.status = self.opts.get_only
 
     def start(self):
-        """
-        @brief  Starts Floodlight Controller on specified host
-        @raise  OvsControllerException:  not local environment
-        @raise  Exception:  error on start
+        """Starts Floodlight Controller on specified host.
+
+        Raises:
+            OvsControllerException:  not local environment
+            Exception:  error on start
+
         """
         log_wrap_out, log_wrap_err = loggers.pipe_loggers("ovscontroller%s" % (self.id, ), self.popen_logfile)
 
@@ -655,9 +683,11 @@ class FloodlightControllerLocal(OvsControllerGeneralMixin):
         self.popen = process
 
     def stop(self):
-        """
-        @brief  Stops Floodlight Controller.
-        @raise  OvsControllerException:  error on stop
+        """Stops Floodlight Controller.
+
+        Raises:
+            OvsControllerException:  error on stop
+
         """
         try:
             # Try to stop
@@ -712,37 +742,39 @@ class FloodlightControllerLocal(OvsControllerGeneralMixin):
         self.status = False
 
     def restart(self):
-        """
-        @brief  Restarts Floodlight Controller.
+        """Restarts Floodlight Controller.
+
         """
         self.stop()
         return self.start()
 
     def getprop(self, command, values):
-        """
-        @brief  Configure command.
-        @param  command:  XML-RPC command
-        @type  command:  str
-        @param  values:  command arguments
-        @type  values:  list
-        @return:  Property value
+        """Configure command.
+
+        Args:
+            command(str):  XML-RPC command
+            values(list):  command arguments
+
+        Returns:
+            Property value
+
         """
         return getattr(self.cmdproxy, "%s" % (command, ))(*values)
 
 
 class OFtestControllerLocal(OvsControllerGeneralMixin):
-    """
-    @description  Local OFtest Controller class
+    """Local OFtest Controller class.
+
     """
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize OFtestControllerLocal class
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
+        """Initialize OFtestControllerLocal class.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
         """
         super(OFtestControllerLocal, self).__init__(config)
         self.popen = None
@@ -755,10 +787,12 @@ class OFtestControllerLocal(OvsControllerGeneralMixin):
         self.status = self.opts.get_only
 
     def start(self):
-        """
-        @brief  Starts OFtest Controller on specified host
-        @raise  OvsControllerException:  not local environment
-        @raise  Exception:  error on start
+        """Starts OFtest Controller on specified host.
+
+        Raises:
+            OvsControllerException:  not local environment
+            Exception:  error on start
+
         """
         log_wrap_out, log_wrap_err = loggers.pipe_loggers("ovscontroller%s" % (self.id, ), self.popen_logfile)
 
@@ -784,9 +818,11 @@ class OFtestControllerLocal(OvsControllerGeneralMixin):
         self.popen = process
 
     def stop(self):
-        """
-        @brief  Stops OFtest Controller.
-        @raise  OvsControllerException:  error on stop
+        """Stops OFtest Controller.
+
+        Raises:
+            OvsControllerException:  error on stop
+
         """
         try:
             # Try to stop
@@ -841,38 +877,40 @@ class OFtestControllerLocal(OvsControllerGeneralMixin):
         self.status = False
 
     def restart(self):
-        """
-        @brief  Restarts OFtest Controller.
+        """Restarts OFtest Controller.
+
         """
         self.stop()
         return self.start()
 
     def getprop(self, command, values):
-        """
-        @brief  Configure command.
-        @param  command:  XML-RPC command
-        @type  command:  str
-        @param  values:  command arguments
-        @type  values:  list
-        @return:  Property value
+        """Configure command.
+
+        Args:
+            command(str):  XML-RPC command
+            values(list):  command arguments
+
+        Returns:
+            Property value
+
         """
         return json.loads(getattr(self.cmdproxy, "%s" % (command, ))(*values))
 
 
 class OvsControllerRemote(OvsControllerGeneralMixin):
-    """
-    @description  Remote Controller class
+    """Remote Controller class.
+
     """
     # TODO: Add functionality for remote Ovs Controller instances using paramiko.
     class_logger = loggers.ClassLogger()
 
     def __init__(self, config, opts):
-        """
-        @brief  Initialize OvsControllerRemote class
-        @param  config:  Configuration information.
-        @type  config:  dict
-        @param  opts:  py.test config.option object which contains all py.test cli options.
-        @type  opts:  OptionParser
+        """Initialize OvsControllerRemote class.
+
+        Args:
+            config(dict):  Configuration information.
+            opts(OptionParser):  py.test config.option object which contains all py.test cli options.
+
         """
         super(OvsControllerRemote, self).__init__(config)
         self.popen = None
@@ -883,36 +921,37 @@ class OvsControllerRemote(OvsControllerGeneralMixin):
         self.status = self.opts.get_only
 
     def _check_pid(self):
-        """
-        @brief  Check For the existence of a unix pid.
+        """Check For the existence of a unix pid.
+
         """
         pass
 
     def waitpid(self, timeout=45):
-        """
-        @brief  Wait until Nox Controller process terminates
-        @param  timeout:  Waiting timeout
-        @type  timeout:  int
+        """Wait until Nox Controller process terminates.
+
+        Args:
+            timeout(int):  Waiting timeout
+
         """
         pass
 
     def start(self):
-        """
-        @brief  Starts Nox Controller on specified host
+        """Starts Nox Controller on specified host.
+
         """
         # Set On(True) status
         self.status = True
 
     def stop(self):
-        """
-        @brief  Stops Nox Controller.
+        """Stops Nox Controller.
+
         """
         # Set Off(False) status
         self.status = False
 
     def restart(self):
-        """
-        @brief  Restarts Nox Controller on specified host
+        """Restarts Nox Controller on specified host.
+
         """
         pass
 

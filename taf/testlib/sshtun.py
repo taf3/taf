@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-"""
-@copyright Copyright (c) 2011 - 2016, Intel Corporation.
+# Copyright (c) 2011 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""``sshtun.py``
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Setup ssh tunnel with local port forwarding`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  sshtun.py
-
-@summary  Setup ssh tunnel with local port forwarding.
 """
 
 import select
@@ -31,8 +30,8 @@ from . import loggers
 
 
 def get_local_port():
-    """
-    @brief  Get port.
+    """Get port.
+
     """
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind(("", 0))
@@ -43,20 +42,20 @@ def get_local_port():
 
 
 class ForwardHandlerMixin(socketserver.BaseRequestHandler):
-    """
-    @description  Base class of port forwarding handler.
+    """Base class of port forwarding handler.
+
     """
     class_logger = loggers.ClassLogger()
 
     def setup(self):
-        """
-        @brief  Set connection timeout.
+        """Set connection timeout.
+
         """
         self.request.settimeout(3)
 
     def handle(self):
-        """
-        @brief  Processing incoming request.
+        """Processing incoming request.
+
         """
         peername = self.request.getpeername()
 
@@ -105,35 +104,31 @@ class ForwardHandlerMixin(socketserver.BaseRequestHandler):
 
 
 class ForwardServer(socketserver.TCPServer):
-    """
-    @brief  Preconfigured SocketServer.TCPServer.
+    """Preconfigured SocketServer.TCPServer.
+
     """
     daemon_threads = True
     allow_reuse_address = True
 
 
 class SSHTunnel(object):
-    """
-    @description  Main class for creating ssh tunnel.
+    """Main class for creating ssh tunnel.
+
     """
 
     class_logger = loggers.ClassLogger()
 
     def __init__(self, server, user, passwd, remote, local_port=None, local_host="127.0.0.1"):
-        """
-        @brief  Initialize SSHTunnel class
-        @param  server:  Server information in format [ip, port]
-        @type  server:  list | tuple
-        @param user:  Username
-        @type  user:  str
-        @param passwd:  Password
-        @type  passwd:  str
-        @param remote:  Remote server information in format [ip, port]
-        @type  remote:  list | tuple
-        @param local_port:  Local port assigned for forwarding
-        @type  local_port:  int
-        @param local_host: Local IP to listen on, defaults to 127.0.0.1
-        @type local_host: str
+        """Initialize SSHTunnel class.
+
+        Args:
+            server(list | tuple):  Server information in format [ip, port]
+            user(str):  Username
+            passwd(str):  Password
+            remote(list | tuple):  Remote server information in format [ip, port]
+            local_port(int):  Local port assigned for forwarding
+            local_host(str): Local IP to listen on, defaults to 127.0.0.1
+
         """
         self.srv = server
         self.usr = user
@@ -148,15 +143,15 @@ class SSHTunnel(object):
         self.thr = None
 
     def fwdport(self):
-        """
-        @brief  Launch port forwarding server.
+        """Launch port forwarding server.
+
         """
         # Taken from paramiko examples.
         # SocketServer doesn't give Handlers any way to access the outer server normally.
 
         class FHandler(ForwardHandlerMixin):
-            """
-            @description  Get configuration of  forwarding server.
+            """Get configuration of forwarding server.
+
             """
             remote_host = self.remote[0]
             remote_port = self.remote[1]
@@ -171,9 +166,11 @@ class SSHTunnel(object):
         self.server.serve_forever()
 
     def connect(self):
-        """
-        @brief  Perform ssh connection.
-        @raise  Exception:  error on connect
+        """Perform ssh connection.
+
+        Raises:
+            Exception:  error on connect
+
         """
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -196,11 +193,14 @@ class SSHTunnel(object):
         self.transport.set_keepalive(15)
 
     def start(self, timeout=60):
-        """
-        @brief  Perform ssh connection and start port forwarding server in thread.
-        @param  timeout:  Port forwarding configuration timeout
-        @type  timeout:  int
-        @raise  Exception:  timeout exceeded on start
+        """Perform ssh connection and start port forwarding server in thread.
+
+        Args:
+            timeout(int):  Port forwarding configuration timeout
+
+        Raises:
+            Exception:  timeout exceeded on start
+
         """
         self.connect()
         if self.ssh_client and self.transport:
@@ -218,8 +218,8 @@ class SSHTunnel(object):
             self.transport = None
 
     def stop(self):
-        """
-        @brief  Stop port forwarding server and thread.
+        """Stop port forwarding server and thread.
+
         """
         if self.server is not None:
             self.class_logger.debug("Stop port forwarding: {0} -> {1}:{2}".
@@ -239,11 +239,14 @@ class SSHTunnel(object):
         self.thr = None
 
     def establish(self):
-        """
-        @brief  Start sshtun server and wait while connection is established.
-        @raise  Exception:  timeout exceeded
-        @rtype:  int
-        @return:  local port
+        """Start sshtun server and wait while connection is established.
+
+        Raises:
+            Exception:  timeout exceeded
+
+        Returns:
+            int:  local port
+
         """
         if self.thr is not None and self.thr.is_alive():
             self.class_logger.info("fwdport thread already started. Checking ...")
@@ -266,15 +269,15 @@ class SSHTunnel(object):
         return self.server.socket.getsockname()[1]
 
     def close(self):
-        """
-        @brief  Close sshtun server.
+        """Close sshtun server.
+
         """
         self.class_logger.info("Stopping fwdport thread ...")
         self.stop()
 
     def check(self):
-        """
-        @brief  Return True if connection is established.
+        """Return True if connection is established.
+
         """
         if self.transport:
             return self.transport.is_active()
@@ -282,8 +285,8 @@ class SSHTunnel(object):
             return False
 
     def __del__(self):
-        """
-        @brief  Try to close connection on object destroy.
+        """Try to close connection on object destroy.
+
         """
         self.class_logger.debug("SSHTunnel object has to be deleted. Try to stop forwarding if it is active.")
         self.stop()

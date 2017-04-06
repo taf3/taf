@@ -12,19 +12,29 @@
 #
 # Based on OpenStack Magnum (https://github.com/openstack/magnum.git)
 
+"""``magnum_service_client.py``
+
+"""
+
 from testlib.tempest_clients.magnum.models import magnum_service_model
 from testlib.tempest_clients.magnum.clients import client
 
 
 class MagnumServiceClient(client.MagnumClient):
-    """Encapsulates REST calls and maps JSON to/from models"""
+    """Encapsulates REST calls and maps JSON to/from models
+
+    """
 
     @classmethod
     def magnum_service_uri(cls, filters=None):
         """Construct magnum services uri with optional filters
 
-        :param filters: Optional k:v dict that's converted to url query
-        :returns: url string
+        Args:
+            filters: Optional k:v dict that's converted to url query
+
+        Returns:
+            url string
+
         """
 
         url = "/mservices"
@@ -37,8 +47,12 @@ class MagnumServiceClient(client.MagnumClient):
 
         Abstracts REST call to return all magnum services.
 
-        :param filters: Optional k:v dict that's converted to url query
-        :returns: response object and MagnumServiceCollection object
+        Args:
+            filters: Optional k:v dict that's converted to url query
+
+        Returns:
+            Response object and MagnumServiceCollection object
+
         """
 
         resp, body = self.get(self.magnum_service_uri(filters), **kwargs)

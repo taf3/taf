@@ -1,21 +1,21 @@
-"""
-@copyright Copyright (c) 2016, Intel Corporation.
+# Copyright (c) 2016 - 2017, Intel Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""''suricata_cmd.py''
 
-    http://www.apache.org/licenses/LICENSE-2.0
+`Suricata command parsing and building support`
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-@file  suricata_cmd.py
-
-@summary  suricata command parsing and building support
 """
 
 import itertools
@@ -73,80 +73,80 @@ SURICATA_OPTS = {
     'build_info': {
         'names': {'long': '--build-info'},
         'help': 'display build information',
-    }
+    },
 }
 
 
 SURICATA_KEYWORDS = {
     'config': {
         'names': {'short': '-c'},
-        'help': '<path>: path to configuration file'
+        'help': '<path>: path to configuration file',
     },
     'pcap_live_mode': {
         'names': {'short': '-i'},
-        'help': '<dev or ip>: run in pcap live mode'
+        'help': '<dev or ip>: run in pcap live mode',
     },
     'bpf_filter': {
         'names': {'short': '-F'},
-        'help': '<bpf filter file>: bpf filter file'
+        'help': '<bpf filter file>: bpf filter file',
     },
     'pcap_offline_mode': {
         'names': {'short': '-r'},
-        'help': '<path>: run in pcap file/offline mode'
+        'help': '<path>: run in pcap file/offline mode',
     },
     'inline_nfqueue_mode': {
         'names': {'short': '-q'},
-        'help': '<qid>: run in inline nfqueue mode'
+        'help': '<qid>: run in inline nfqueue mode',
     },
     'sig_file': {
         'names': {'short': '-s'},
-        'help':  '<path>: path to signature file loaded in addition to suricata.yaml \
-                 settings (optional)'
+        'help': '<path>: path to signature file loaded in addition to suricata.yaml \
+                 settings (optional)',
     },
     'sig_exc_file': {
         'names': {'short': '-S'},
-        'help': '<path>: path to signature file loaded exclusively (optional)'
+        'help': '<path>: path to signature file loaded exclusively (optional)',
     },
     'log_dir': {
         'names': {'short': '-l'},
-        'help': '<dir>: default log directory'
+        'help': '<dir>: default log directory',
     },
     'checksum_check': {
         'names': {'short': '-k'},
         'help': '[all|none]: force checksum check (all) or disabled it (none)',
-        'choices': ['all', 'none']
+        'choices': ['all', 'none'],
     },
     'runmode': {
         'names': {'long': '--runmode'},
         'help': '<unmode_id>: specific runmode modification the engine should run.  The argument \
                               supplied should be the id for the runmode obtained by running \
-                              --list-runmodes'
+                              --list-runmodes',
     },
     'pid_file': {
         'names': {'long': '--pidfile'},
-        'help': '<file>: write pid to this file'
+        'help': '<file>: write pid to this file',
     },
     'pcap_buf_size': {
         'names': {'long': '--pcap-buffer-size'},
         'help': '<size>: size of the pcap buffer value from 0 - 2147483647',
-        'type': int
+        'type': int,
     },
     'user': {
         'names': {'long': '--user'},
-        'help': '<user>: run suricata as this user after init'
+        'help': '<user>: run suricata as this user after init',
     },
     'group': {
         'names': {'long': '--group'},
-        'help': '<group>: run suricata as this group after init'
+        'help': '<group>: run suricata as this group after init',
     },
     'erf_in': {
         'names': {'long': '--erf-in'},
-        'help': '<path>: process an ERF file'
+        'help': '<path>: process an ERF file',
     },
     'set': {
         'names': {'long': '--set'},
-        'help': 'name=value: set a configuration value'
-    }
+        'help': 'name=value: set a configuration value',
+    },
 }
 
 
@@ -179,7 +179,7 @@ __NO_OPTKW_VAL__ = object()
 __NO_OPTKW_VAL_KWARGS = {
     'nargs': '?',
     'const': __NO_OPTKW_VAL__,
-    'default': __NO_OPTKW_VAL__
+    'default': __NO_OPTKW_VAL__,
 }
 for v in SURICATA_OPT_KEYWORDS.values():
     v.update(__NO_OPTKW_VAL_KWARGS)
@@ -214,9 +214,9 @@ class SuricataArgumentBuilder(ArgumentBuilder):
                         key=cls.FORMAT_KEY_FIRST,
                         joiner=cls.FORMAT_ARG_JOIN_BY_KEY_CLASS,
                         val=cls.FORMAT_VAL_TRANSFORM(str),
-                    )
+                    ),
                 ),
-                'positional': cls.FORMAT_VAL_TRANSFORM(str)
+                'positional': cls.FORMAT_VAL_TRANSFORM(str),
             }
         return cls.ARGS_FORMATTER
 
@@ -288,10 +288,10 @@ SURICATA_PARSER = ArgumentParser(prog='suricata', conflict_handler='resolve')
 SURICATA_BUILDER = SuricataArgumentBuilder()
 
 suricata_cmd_kwargs = {
-    'arg_parser':    SURICATA_PARSER,
-    'params':        _SURICATA_ARGS_ORDERED,
-    'arg_builder':   SURICATA_BUILDER,
-    'default_list': []
+    'arg_parser': SURICATA_PARSER,
+    'params': _SURICATA_ARGS_ORDERED,
+    'arg_builder': SURICATA_BUILDER,
+    'default_list': [],
 }
 SURICATA_CMD_HELPER = CmdSuricataHelper(**suricata_cmd_kwargs)
 

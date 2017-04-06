@@ -10,24 +10,34 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""``cluster_templatepatch_model.py``
+
+"""
+
 import json
 
 from testlib.tempest_clients.magnum.models import models
 
 
 class ClusterTemplatePatchData(models.BaseModel):
-    """Data that encapsulates  clustertemplatepatch attributes"""
+    """Data that encapsulates  clustertemplatepatch attributes
+
+    """
     pass
 
 
 class ClusterTemplatePatchEntity(models.EntityModel):
-    """Model that represents a single instance of ClusterTemplatePatchData"""
+    """Model that represents a single instance of ClusterTemplatePatchData
+
+    """
     ENTITY_NAME = 'clustertemplatepatch'
     MODEL_TYPE = ClusterTemplatePatchData
 
 
 class ClusterTemplatePatchCollection(models.CollectionModel):
-    """Model that represents a list of ClusterTemplatePatchData objects"""
+    """Model that represents a list of ClusterTemplatePatchData objects
+
+    """
     MODEL_TYPE = ClusterTemplatePatchData
     COLLECTION_NAME = 'clustertemplatepatchlist'
 
@@ -41,7 +51,9 @@ class ClusterTemplatePatchCollection(models.CollectionModel):
         This is required due to COLLECTION_NAME holding a list of objects that
         needed to be converted to dict individually
 
-        :returns: json object
+        Returns:
+            json object
+
         """
 
         data = getattr(self, ClusterTemplatePatchCollection.COLLECTION_NAME)
@@ -57,7 +69,7 @@ class ClusterTemplatePatchCollection(models.CollectionModel):
         Converts data dict to list of ClusterTemplatePatchData objects and
         stores it in COLLECTION_NAME
 
-        Example of dict data:
+        Example of dict data::
 
             [{
                 "path": "/name",
@@ -65,8 +77,12 @@ class ClusterTemplatePatchCollection(models.CollectionModel):
                 "op": "replace"
             }]
 
-        :param data: dict of patch data
-        :returns: json object
+        Args:
+            data(dict): dict of patch data
+
+        Returns:
+            json object
+
         """
 
         model = cls()
