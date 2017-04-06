@@ -945,7 +945,7 @@ class VirtualEnv(object):
 
         def make_iter(keys, data):
             return (value == comp_value for value, comp_value in
-                    (flavor_spec[k], data.get(k, _not_found) for k in keys))
+                    ((flavor_spec[k], data.get(k, _not_found)) for k in keys))
 
         def filter_test(comp):
             return all(
