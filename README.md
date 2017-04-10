@@ -27,7 +27,7 @@ The **TAF** framework follows the "principle of atomicity" by splitting complex 
 
 ### System architecture
 
-![TAF architecture](https://github.com/IrynaBarna/taf/blob/master/docs/images/taf_architecture.png "Test Automation Framework Architecture")
+![TAF architecture](https://github.com/taf3/taf/blob/master/docs/images/taf_architecture.png "Test Automation Framework Architecture")
 
 The **TAF** is based on [py.test](http://pytest.org/latest/). The basic concept is to create libraries with all necessary functionality, to define how the environment configuration will be supplied to test suites, and to create a reporting processing functionality.
 
@@ -124,12 +124,12 @@ Link to repository [testcases](https://github.com/taf3/testcases)
 
      setup – provide path to the setup*.json file.
 
- * More **detailed information** can be found by the following link: [Test execution preconfiguration](http://taf.readthedocs.io/en/sphinx_docs/test_execution_preconfiguration.html)
+ * More **detailed information** can be found by the following link: [Test execution preconfiguration](http://taf-docs.readthedocs.io/en/latest/test_execution_preconfiguration.html)
 
 
 ## Support and contact
 
-Link to wiki [Сontribution guidelines](http://taf.readthedocs.io/en/sphinx_docs/contribution_guidelines.html).
+Link to wiki [Сontribution guidelines](http://taf-docs.readthedocs.io/en/latest/contribution_guidelines.html).
 
 ## License
 
