@@ -620,41 +620,43 @@ class XML(object):
 
         os.makedirs(os.path.dirname(dump_logfile), exist_ok=True)
 
-        with open(dump_logfile, "w", encoding="utf-8") as logfile:
-            logfile.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>")
-        if self._css:
-            logfile.write("<?xml-stylesheet type=\"text/css\" href=\"%s\"?>" % (self._css, ))
-        if self._xsl:
-            logfile.write("<?xml-stylesheet type=\"text/xsl\" href=\"%s\"?>" % (self._xsl, ))
         if self.infodict:
             self.tests.append(
                 self.Junit.header([self.Junit.info_node(value, key) for key, value  # pylint: disable=no-member
                                    in self.infodict.items()]))
         try:
-            logfile.write(self.Junit.testsuite(self.tests,  # pylint: disable=no-member
-                                               name="",
-                                               errors=self.errors,
-                                               failures=self.failed,
-                                               setupfailures=self.setupfailed,
-                                               skips=self.skipped,
-                                               test_plan_id=self.test_plan_id,
-                                               test_plan_link=self.test_plan_link,
-                                               tests=self.total,
-                                               time="%.3f" % totaltime,
-                                               connector=self._connector,
-                                               ).unicode(indent=0))
+            testsuite = self.Junit.testsuite(self.tests,  # pylint: disable=no-member
+                                             name="",
+                                             errors=self.errors,
+                                             failures=self.failed,
+                                             setupfailures=self.setupfailed,
+                                             skips=self.skipped,
+                                             test_plan_id=self.test_plan_id,
+                                             test_plan_link=self.test_plan_link,
+                                             tests=self.total,
+                                             time="%.3f" % totaltime,
+                                             connector=self._connector,
+                                             ).unicode(indent=0)
         except Exception as err:
             self.class_logger.error("Cannot dump XML report to file %s. ERRTYPE: %s, ERR: %s", dump_logfile, type(err), err)
+            return
 
-        else:
-            self.class_logger.info("XML report is successfully dumped to file %s.", dump_logfile)
-            self.tests = []
-            self.dump_count += 1
+        with open(dump_logfile, "w", encoding="utf-8") as logfile:
+            logfile.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>")
+            if self._css:
+                logfile.write("<?xml-stylesheet type=\"text/css\" href=\"%s\"?>" % (self._css, ))
+            if self._xsl:
+                logfile.write("<?xml-stylesheet type=\"text/xsl\" href=\"%s\"?>" % (self._xsl, ))
+            logfile.write(testsuite)
 
-            # Creating HTML report
-            if self.htmlfile is not None and self.__html_report is not None:
-                self.class_logger.info("Dumping HTML report to %s...", self.htmlfile)
-                self.__html_report.dump_html(dump_logfile, self.htmlfile)
+        self.class_logger.info("XML report is successfully dumped to file %s.", dump_logfile)
+        self.tests = []
+        self.dump_count += 1
+
+        # Creating HTML report
+        if self.htmlfile is not None and self.__html_report is not None:
+            self.class_logger.info("Dumping HTML report to %s...", self.htmlfile)
+            self.__html_report.dump_html(dump_logfile, self.htmlfile)
 
     def _connector_cmd(self, cmd, args):
         """Call connector method.
