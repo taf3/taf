@@ -1,4 +1,6 @@
 ## TAF overview
+[![Documentation Status](https://readthedocs.org/projects/taf-docs/badge/?version=latest)](http://taf-docs.readthedocs.io/en/latest/?badge=latest)
+[![Travis](https://img.shields.io/travis/rust-lang/rust.svg)](https://travis-ci.org/taf3/taf)
 
 **TAF** is an integrated cross-platform system that sets the guidelines and provides tools for automation testing. The function libraries, test data sources, test object details, and various reusable modules are all integrated in one system. The platform provides an outline of the test automation process and reduces automation efforts. With this framework, an automation or validation engineer may run testing suites in different environments and obtain test results with detailed reports.
 
