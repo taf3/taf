@@ -21,6 +21,7 @@
 import time
 import copy
 import random
+import itertools
 from collections import namedtuple
 
 import pytest
@@ -38,17 +39,21 @@ from .packet_constants import (PACKET_DEFINITION, PACKET_DEFS,
                                SRC_MAC, DST_MAC, BROADCAT_MAC, IP_SRC, IP_DST,
                                DOT1Q_DEFAULT_CFI, VLAN_1, PAUSE_CODE,
                                PFC_CODE, PAUSE_TIME, PFC_LS, PFC_TIME,
-                               PFC_MS, IP_PROTO_IP)
+                               PFC_MS, IP_PROTO_IP, LLDP_DCBX, ETHER_TYPE_LLDP,
+                               LLDP_DST_MAC, LLDP_DCBX_APP_PRIO, LLDP_CHASSIS_ID_TLV,
+                               LLDP_PORT_ID_TLV, LLDP_TTL_TLV, LLDP_END_TLV,
+                               LLDP_CHASSIS_ID_TLV_TYPE, LLDP_MAC_SUBTYPE,
+                               LLDP_PORT_ID_TLV_TYPE, LLDP_PORT_ID_INTERFACE_SUBTYPE,
+                               LLDP_PORT_ID_INTERFACE_VALUE, LLDP_TTL_TLV_TYPE,
+                               LLDP_TTL_SECONDS, LLDP_SYS_CAPAB_TLV, LLDP_MAN_ADDR_TLV,
+                               LACP_DST_MAC, LACP)
 
 
 @pytest.mark.unittests
 class TestTGs(object):
 
-    @staticmethod
-    def verify_packets_data(initial_packet_def, received_packet_def):
-        """Check 2 packet definitions.
-
-        """
+    def verify_packets_data(self, initial_packet_def, received_packet_def):
+        """ Check 2 packet definitions """
 
         initial_packet_layers = [layer for p in initial_packet_def for layer in p]
         received_packet_layers = [layer for p in received_packet_def for layer in p]
@@ -63,9 +68,20 @@ class TestTGs(object):
                                   for (field, value) in p[layer].items()]
 
         for init_param in initial_packet_params:
-            assert init_param in received_packet_params, \
-                "Field '{packet.field}' with value {packet.value} from " \
-                "layer '{packet.layer}' is not found in received packet".format(packet=init_param)
+            if not isinstance(init_param.value, list):
+                assert init_param in received_packet_params, \
+                    "Field '{packet.field}' with value {packet.value} from " \
+                    "layer '{packet.layer}' is not found in received packet".format(packet=init_param)
+                continue
+            for received_param in received_packet_params:
+                if init_param.layer == received_param.layer and init_param.field == received_param.field:
+                    for initial_value, received_value in itertools.zip_longest(init_param.value, received_param.value):
+                        if not isinstance(initial_value, dict):
+                            assert initial_value == received_value
+                        elif len(initial_value.values()) > 1:
+                            assert initial_value == received_value
+                        else:
+                            self.verify_packets_data((initial_value,), (received_value,))
 
     def test_stream(self, tg):
         """Verify that send stream send exact packets count.
@@ -524,7 +540,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src macs
-        src_mac_set = set([tg.get_packet_field(packet, "Ethernet", "src") for packet in packets])
+        src_mac_set = set(tg.get_packet_field(packet, "Ethernet", "src") for packet in packets)
         assert len(src_mac_set) == packet_count
 
     def test_sa_incrementation_2(self, tg):
@@ -542,7 +558,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src macs
-        src_mac_set = set([tg.get_packet_field(packet, "Ethernet", "src") for packet in packets])
+        src_mac_set = set(tg.get_packet_field(packet, "Ethernet", "src") for packet in packets)
         assert len(src_mac_set) == packet_count // 2
 
     def test_da_incrementation_1(self, tg):
@@ -560,7 +576,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different dst macs
-        dst_mac_set = set([tg.get_packet_field(packet, "Ethernet", "dst") for packet in packets])
+        dst_mac_set = set(tg.get_packet_field(packet, "Ethernet", "dst") for packet in packets)
         assert len(dst_mac_set) == packet_count
 
     def test_da_incrementation_2(self, tg):
@@ -578,7 +594,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different dst macs
-        dst_mac_set = set([tg.get_packet_field(packet, "Ethernet", "dst") for packet in packets])
+        dst_mac_set = set(tg.get_packet_field(packet, "Ethernet", "dst") for packet in packets)
         assert len(dst_mac_set) == packet_count // 2
 
     def test_sa_incrementation_and_packet_fragmentation(self, tg):
@@ -599,7 +615,7 @@ class TestTGs(object):
         assert len(packets) == packet_count * 2, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count * 2)
         # Verify that all packets with different src macs
-        src_mac_set = set([tg.get_packet_field(packet, "Ethernet", "src") for packet in packets])
+        src_mac_set = set(tg.get_packet_field(packet, "Ethernet", "src") for packet in packets)
         assert len(src_mac_set) == 5
 
     def test_packet_random_size_1(self, tg):
@@ -724,7 +740,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src ip
-        src_ip_set = set([tg.get_packet_field(packet, "IP", "src") for packet in packets])
+        src_ip_set = set(tg.get_packet_field(packet, "IP", "src") for packet in packets)
         assert len(src_ip_set) == packet_count
 
     def test_src_ip_incrementation_dot1q_disabled_2(self, tg):
@@ -742,7 +758,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src ip
-        src_ip_set = set([tg.get_packet_field(packet, "IP", "src") for packet in packets])
+        src_ip_set = set(tg.get_packet_field(packet, "IP", "src") for packet in packets)
         assert len(src_ip_set) == packet_count // 2
 
     def test_src_ip_incrementation_dot1q_enabled_1(self, tg):
@@ -760,7 +776,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src ip
-        src_ip_set = set([tg.get_packet_field(packet, "IP", "src") for packet in packets])
+        src_ip_set = set(tg.get_packet_field(packet, "IP", "src") for packet in packets)
         assert len(src_ip_set) == packet_count
 
     def test_src_ip_incrementation_dot1q_enabled_2(self, tg):
@@ -778,7 +794,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src ip
-        src_ip_set = set([tg.get_packet_field(packet, "IP", "src") for packet in packets])
+        src_ip_set = set(tg.get_packet_field(packet, "IP", "src") for packet in packets)
         assert len(src_ip_set) == packet_count
 
     def test_dst_ip_incrementation_dot1q_disabled_1(self, tg):
@@ -796,7 +812,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different dst ip
-        dst_ip_set = set([tg.get_packet_field(packet, "IP", "dst") for packet in packets])
+        dst_ip_set = set(tg.get_packet_field(packet, "IP", "dst") for packet in packets)
         assert len(dst_ip_set) == packet_count
 
     def test_dst_ip_incrementation_dot1q_disabled_2(self, tg):
@@ -814,7 +830,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different dst ip
-        dst_ip_set = set([tg.get_packet_field(packet, "IP", "dst") for packet in packets])
+        dst_ip_set = set(tg.get_packet_field(packet, "IP", "dst") for packet in packets)
         assert len(dst_ip_set) == packet_count // 2
 
     def test_dst_ip_incrementation_dot1q_enabled_1(self, tg):
@@ -832,7 +848,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different dst ip
-        dst_ip_set = set([tg.get_packet_field(packet, "IP", "dst") for packet in packets])
+        dst_ip_set = set(tg.get_packet_field(packet, "IP", "dst") for packet in packets)
         assert len(dst_ip_set) == packet_count
 
     def test_dst_ip_incrementation_dot1q_enabled_2(self, tg):
@@ -850,7 +866,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different dst ip
-        dst_ip_set = set([tg.get_packet_field(packet, "IP", "dst") for packet in packets])
+        dst_ip_set = set(tg.get_packet_field(packet, "IP", "dst") for packet in packets)
         assert len(dst_ip_set) == packet_count // 2
 
     def test_clear_and_check_statistics(self, tg):
@@ -897,9 +913,9 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src ip, src mac and hwsrc
-        src_ip_set = set([tg.get_packet_field(packet, "ARP", "spa") for packet in packets])
-        src_mac_set = set([tg.get_packet_field(packet, "Ethernet", "src") for packet in packets])
-        hwsrc_set = set([tg.get_packet_field(packet, "ARP", "sha") for packet in packets])
+        src_ip_set = set(tg.get_packet_field(packet, "ARP", "spa") for packet in packets)
+        src_mac_set = set(tg.get_packet_field(packet, "Ethernet", "src") for packet in packets)
+        hwsrc_set = set(tg.get_packet_field(packet, "ARP", "sha") for packet in packets)
         assert len(src_ip_set) == packet_count
         assert len(src_mac_set) == packet_count
         assert len(hwsrc_set) == packet_count
@@ -920,9 +936,9 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src ip, src mac and hwsrc
-        src_ip_set = set([tg.get_packet_field(packet, "ARP", "spa") for packet in packets])
-        src_mac_set = set([tg.get_packet_field(packet, "Ethernet", "src") for packet in packets])
-        hwsrc_set = set([tg.get_packet_field(packet, "ARP", "sha") for packet in packets])
+        src_ip_set = set(tg.get_packet_field(packet, "ARP", "spa") for packet in packets)
+        src_mac_set = set(tg.get_packet_field(packet, "Ethernet", "src") for packet in packets)
+        hwsrc_set = set(tg.get_packet_field(packet, "ARP", "sha") for packet in packets)
         assert len(src_ip_set) == packet_count
         assert len(src_mac_set) == packet_count
         assert len(hwsrc_set) == packet_count
@@ -943,9 +959,9 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src ip, src mac and hwsrc
-        src_ip_set = set([tg.get_packet_field(packet, "ARP", "spa") for packet in packets])
-        src_mac_set = set([tg.get_packet_field(packet, "Ethernet", "src") for packet in packets])
-        hwsrc_set = set([tg.get_packet_field(packet, "ARP", "sha") for packet in packets])
+        src_ip_set = set(tg.get_packet_field(packet, "ARP", "spa") for packet in packets)
+        src_mac_set = set(tg.get_packet_field(packet, "Ethernet", "src") for packet in packets)
+        hwsrc_set = set(tg.get_packet_field(packet, "ARP", "sha") for packet in packets)
         assert len(src_ip_set) == packet_count // 2
         assert len(src_mac_set) == packet_count // 2
         assert len(hwsrc_set) == packet_count // 2
@@ -966,7 +982,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src ip, src mac and hwsrc
-        vlan_set = set([tg.get_packet_field(packet, "S-Dot1Q", "vid") for packet in packets])
+        vlan_set = set(tg.get_packet_field(packet, "S-Dot1Q", "vid") for packet in packets)
         assert len(vlan_set) == packet_count
 
     def test_vlan_incrementation_increment_count_2(self, tg):
@@ -984,7 +1000,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src ip, src mac and hwsrc
-        vlan_set = set([tg.get_packet_field(packet, "S-Dot1Q", "vid") for packet in packets])
+        vlan_set = set(tg.get_packet_field(packet, "S-Dot1Q", "vid") for packet in packets)
         assert len(vlan_set) == packet_count // 2
 
     def test_da_incrementation_continuous_traffic(self, tg):
@@ -1006,7 +1022,7 @@ class TestTGs(object):
         assert len(packets) >= min_packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), min_packet_count)
         # Verify that all packets with 5 different dst macs
-        dst_mac_set = set([tg.get_packet_field(packet, "Ethernet", "dst") for packet in packets])
+        dst_mac_set = set(tg.get_packet_field(packet, "Ethernet", "dst") for packet in packets)
         assert len(dst_mac_set) == min_packet_count
 
     def test_sniffed_packets_timestamp(self, tg):
@@ -1043,7 +1059,7 @@ class TestTGs(object):
         assert len(packets) == packet_count // 2, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with specified srcMac are sniffed
-        src_set = set([tg.get_packet_field(packet, "Ethernet", "src") for packet in packets])
+        src_set = set(tg.get_packet_field(packet, "Ethernet", "src") for packet in packets)
         assert len(src_set) == 1
 
     def test_dstmac_filter(self, tg):
@@ -1062,7 +1078,7 @@ class TestTGs(object):
         assert len(packets) == packet_count // 2, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with specified dstMac are sniffed
-        dst_set = set([tg.get_packet_field(packet, "Ethernet", "dst") for packet in packets])
+        dst_set = set(tg.get_packet_field(packet, "Ethernet", "dst") for packet in packets)
         assert len(dst_set) == 1
 
     def test_srcmac_and_dstmac_filter(self, tg):
@@ -1081,8 +1097,8 @@ class TestTGs(object):
         assert len(packets) == packet_count // 2, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with specified dstMac and srcMac are sniffed
-        dst_set = set([tg.get_packet_field(packet, "Ethernet", "dst") for packet in packets])
-        src_set = set([tg.get_packet_field(packet, "Ethernet", "src") for packet in packets])
+        dst_set = set(tg.get_packet_field(packet, "Ethernet", "dst") for packet in packets)
+        src_set = set(tg.get_packet_field(packet, "Ethernet", "src") for packet in packets)
         assert len(dst_set) == 1
         assert len(src_set) == 1
 
@@ -1103,121 +1119,97 @@ class TestTGs(object):
         assert packets == [], \
             "Captured packets count {0} does not match expected {1}".format(len(packets), 0)
 
-    @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_incrementation_increment_count_1(self, tg):
         """Check lldp incrementation. Count == Increment count.
 
         """
         iface = tg.ports[0]
+        packet_count = 5
+        stream_id = tg.set_stream(LLDP, count=packet_count, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
 
-        stream_id = tg.set_stream(LLDP, count=5, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
-
-        tg.start_sniff([iface], sniffing_time=5, dst_filter="01:80:c2:00:00:0e")
+        tg.start_sniff([iface], sniffing_time=3, dst_filter=LLDP_DST_MAC)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface])
+        packets = data.get(iface, [])
 
-        assert iface in list(data.keys())
+        assert len(packets) == packet_count, \
+            "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
-        # Verify that sniffed count == count
-        assert len(data[iface]) == 5
+        # Verify that LLDP Chassis macs are different
+        mac_set = set(tg.get_packet_field(packet, "Ethernet", "src") for packet in packets)
+        lldp_set = set(tg.get_packet_field(packet, "LLDPChassisId", "value") for packet in packets)
+        assert len(mac_set) == packet_count
+        assert len(lldp_set) == packet_count
 
-        # Verify that LLDP mac are different
-        mac_set = set()
-        lldp_set = set()
-        for packet in data[iface]:
-            mac_set.add(tg.get_packet_field(packet, "Ethernet", "src"))
-            lldp_set.add(tg.get_packet_field(packet, "LLDPChassisId", "macaddr"))
-
-        assert len(mac_set) == 5
-        assert len(lldp_set) == 5
-
-    @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_incrementation_increment_count_2(self, tg):
         """Check lldp incrementation. Count == 2*Increment count.
 
         """
         iface = tg.ports[0]
+        packet_count = 10
+        stream_id = tg.set_stream(LLDP, count=packet_count, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
 
-        stream_id = tg.set_stream(LLDP, count=10, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
-
-        tg.start_sniff([iface], sniffing_time=5, dst_filter="01:80:c2:00:00:0e")
+        tg.start_sniff([iface], sniffing_time=3, dst_filter=LLDP_DST_MAC)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface])
+        packets = data.get(iface, [])
 
-        assert iface in list(data.keys())
+        assert len(packets) == packet_count, \
+            "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
-        # Verify that sniffed count == count
-        assert len(data[iface]) == 10
+        # Verify that LLDP Chassis macs are different
+        mac_set = set(tg.get_packet_field(packet, "Ethernet", "src") for packet in packets)
+        lldp_set = set(tg.get_packet_field(packet, "LLDPChassisId", "value") for packet in packets)
+        assert len(mac_set) == packet_count // 2
+        assert len(lldp_set) == packet_count // 2
 
-        # Verify that LLDP mac are different
-        mac_set = set()
-        lldp_set = set()
-        for packet in data[iface]:
-            mac_set.add(tg.get_packet_field(packet, "Ethernet", "src"))
-            lldp_set.add(tg.get_packet_field(packet, "LLDPChassisId", "macaddr"))
-
-        assert len(mac_set) == 5
-        assert len(lldp_set) == 5
-
-    @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_incrementation_continuous_traffic_1(self, tg):
         """Check lldp incrementation. Continuous traffic.
 
         """
         iface = tg.ports[0]
-
+        packet_count = 20
         stream_id = tg.set_stream(LLDP, continuous=True, sa_increment=(1, 5), lldp_sa_increment=(1, 5), iface=iface)
 
-        tg.start_sniff([iface], sniffing_time=5, packets_count=20, filter_layer="LLDP", dst_filter="01:80:c2:00:00:0e")
+        tg.start_sniff([iface], sniffing_time=5, packets_count=packet_count, filter_layer="LLDP", dst_filter=LLDP_DST_MAC)
         tg.start_streams([stream_id])
         time.sleep(5)
         tg.stop_streams([stream_id])
         data = tg.stop_sniff([iface])
+        packets = data.get(iface, [])
 
-        assert iface in data
+        assert len(packets) >= packet_count, \
+            "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
-        # Verify that sniffed count == count
-        assert len(data[iface]) >= 20
+        # Verify that LLDP Chassis macs are different
+        mac_set = set(tg.get_packet_field(packet, "Ethernet", "src") for packet in packets)
+        lldp_set = set(tg.get_packet_field(packet, "LLDPChassisId", "value") for packet in packets)
+        assert len(mac_set) == packet_count // 4
+        assert len(lldp_set) == packet_count // 4
 
-        # Verify that LLDP mac are different
-        mac_set = set()
-        lldp_set = set()
-        for packet in data[iface]:
-            mac_set.add(tg.get_packet_field(packet, "Ethernet", "src"))
-            lldp_set.add(tg.get_packet_field(packet, "LLDPChassisId", "macaddr"))
-
-        assert len(mac_set) == 5
-        assert len(lldp_set) == 5
-
-    @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_incrementation_continuous_traffic_2(self, tg):
         """Check lldp incrementation. Continuous traffic.
 
         """
         iface = tg.ports[0]
-
+        packet_count = 20
         stream_id = tg.set_stream(LLDP, continuous=True, sa_increment=(1, 0), lldp_sa_increment=(1, 0), iface=iface)
 
-        tg.start_sniff([iface], sniffing_time=5, packets_count=20, dst_filter="01:80:c2:00:00:0e")
+        tg.start_sniff([iface], sniffing_time=5, packets_count=packet_count, dst_filter=LLDP_DST_MAC)
         tg.start_streams([stream_id])
         time.sleep(5)
         tg.stop_streams([stream_id])
         data = tg.stop_sniff([iface])
+        packets = data.get(iface, [])
 
-        assert iface in data
+        assert len(packets) >= packet_count, \
+            "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
 
-        # Verify that sniffed count == count
-        assert len(data[iface]) >= 20
-
-        # Verify that LLDP mac are different
-        mac_set = set()
-        lldp_set = set()
-        for packet in data[iface]:
-            mac_set.add(tg.get_packet_field(packet, "Ethernet", "src"))
-            lldp_set.add(tg.get_packet_field(packet, "LLDPChassisId", "macaddr"))
-
-        assert len(mac_set) >= 20
-        assert len(lldp_set) >= 20
+        # Verify that LLDP Chassis macs are different
+        mac_set = set(tg.get_packet_field(packet, "Ethernet", "src") for packet in packets)
+        lldp_set = set(tg.get_packet_field(packet, "LLDPChassisId", "value") for packet in packets)
+        assert len(mac_set) >= packet_count
+        assert len(lldp_set) >= packet_count
 
     def test_src_udp_incrementation_dot1q_disabled_1(self, tg):
         """Check source_udp incrementation. Count == Increment count. Dot1Q disabled.
@@ -1234,7 +1226,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different src udp
-        src_udp_set = set([tg.get_packet_field(packet, "UDP", "sport") for packet in packets])
+        src_udp_set = set(tg.get_packet_field(packet, "UDP", "sport") for packet in packets)
         assert len(src_udp_set) == packet_count
 
     def test_src_tcp_incrementation_dot1q_disabled_1(self, tg):
@@ -1252,7 +1244,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src tcp
-        src_tcp_set = set([tg.get_packet_field(packet, "TCP", "sport") for packet in packets])
+        src_tcp_set = set(tg.get_packet_field(packet, "TCP", "sport") for packet in packets)
         assert len(src_tcp_set) == packet_count
 
     def test_src_udp_incrementation_dot1q_disabled_2(self, tg):
@@ -1271,7 +1263,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different src udp
-        src_udp_set = set([tg.get_packet_field(packet, "UDP", "sport") for packet in packets])
+        src_udp_set = set(tg.get_packet_field(packet, "UDP", "sport") for packet in packets)
         assert len(src_udp_set) == packet_count // 2
 
     def test_src_tcp_incrementation_dot1q_disabled_2(self, tg):
@@ -1289,7 +1281,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different src udp
-        src_tcp_set = set([tg.get_packet_field(packet, "TCP", "sport") for packet in packets])
+        src_tcp_set = set(tg.get_packet_field(packet, "TCP", "sport") for packet in packets)
         assert len(src_tcp_set) == packet_count // 2
 
     def test_src_udp_incrementation_dot1q_enabled(self, tg):
@@ -1307,7 +1299,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different src udp
-        src_udp_set = set([tg.get_packet_field(packet, "UDP", "sport") for packet in packets])
+        src_udp_set = set(tg.get_packet_field(packet, "UDP", "sport") for packet in packets)
         assert len(src_udp_set) == packet_count
 
     def test_src_tcp_incrementation_dot1q_enabled(self, tg):
@@ -1325,7 +1317,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different src tcp
-        src_tcp_set = set([tg.get_packet_field(packet, "TCP", "sport") for packet in packets])
+        src_tcp_set = set(tg.get_packet_field(packet, "TCP", "sport") for packet in packets)
         assert len(src_tcp_set) == packet_count
 
     def test_dst_udp_incrementation_dot1q_disabled_1(self, tg):
@@ -1343,7 +1335,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different dst udp
-        dst_udp_set = set([tg.get_packet_field(packet, "UDP", "dport") for packet in packets])
+        dst_udp_set = set(tg.get_packet_field(packet, "UDP", "dport") for packet in packets)
         assert len(dst_udp_set) == packet_count
 
     def test_dst_udp_incrementation_dot1q_disabled_2(self, tg):
@@ -1361,7 +1353,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different dst udp
-        dst_udp_set = set([tg.get_packet_field(packet, "UDP", "dport") for packet in packets])
+        dst_udp_set = set(tg.get_packet_field(packet, "UDP", "dport") for packet in packets)
         assert len(dst_udp_set) == packet_count // 2
 
     def test_dst_udp_incrementation_dot1q_enabled(self, tg):
@@ -1380,7 +1372,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different dst udp
-        dst_udp_set = set([tg.get_packet_field(packet, "UDP", "dport") for packet in packets])
+        dst_udp_set = set(tg.get_packet_field(packet, "UDP", "dport") for packet in packets)
         assert len(dst_udp_set) == packet_count
 
     def test_src_udp_and_dst_udp_incrementation_dot1q_disabled_1(self, tg):
@@ -1398,8 +1390,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different dst and src udp
-        dst_udp_set = set([tg.get_packet_field(packet, "UDP", "dport") for packet in packets])
-        src_udp_set = set([tg.get_packet_field(packet, "UDP", "sport") for packet in packets])
+        dst_udp_set = set(tg.get_packet_field(packet, "UDP", "dport") for packet in packets)
+        src_udp_set = set(tg.get_packet_field(packet, "UDP", "sport") for packet in packets)
         assert len(dst_udp_set) == packet_count
         assert len(src_udp_set) == packet_count
 
@@ -1419,8 +1411,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different dst and src tcp
-        dst_tcp_set = set([tg.get_packet_field(packet, "TCP", "dport") for packet in packets])
-        src_tcp_set = set([tg.get_packet_field(packet, "TCP", "sport") for packet in packets])
+        dst_tcp_set = set(tg.get_packet_field(packet, "TCP", "dport") for packet in packets)
+        src_tcp_set = set(tg.get_packet_field(packet, "TCP", "sport") for packet in packets)
         assert len(dst_tcp_set) == packet_count
         assert len(src_tcp_set) == packet_count
 
@@ -1440,8 +1432,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different dst and src udp
-        dst_udp_set = set([tg.get_packet_field(packet, "UDP", "dport") for packet in packets])
-        src_udp_set = set([tg.get_packet_field(packet, "UDP", "sport") for packet in packets])
+        dst_udp_set = set(tg.get_packet_field(packet, "UDP", "dport") for packet in packets)
+        src_udp_set = set(tg.get_packet_field(packet, "UDP", "sport") for packet in packets)
         assert len(dst_udp_set) == packet_count // 2
         assert len(src_udp_set) == packet_count // 2
 
@@ -1460,8 +1452,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different dst and src tcp
-        dst_tcp_set = set([tg.get_packet_field(packet, "TCP", "dport") for packet in packets])
-        src_tcp_set = set([tg.get_packet_field(packet, "TCP", "sport") for packet in packets])
+        dst_tcp_set = set(tg.get_packet_field(packet, "TCP", "dport") for packet in packets)
+        src_tcp_set = set(tg.get_packet_field(packet, "TCP", "sport") for packet in packets)
         assert len(dst_tcp_set) == packet_count // 2
         assert len(src_tcp_set) == packet_count // 2
 
@@ -1480,8 +1472,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different dst and src udp
-        dst_udp_set = set([tg.get_packet_field(packet, "UDP", "dport") for packet in packets])
-        src_udp_set = set([tg.get_packet_field(packet, "UDP", "sport") for packet in packets])
+        dst_udp_set = set(tg.get_packet_field(packet, "UDP", "dport") for packet in packets)
+        src_udp_set = set(tg.get_packet_field(packet, "UDP", "sport") for packet in packets)
         assert len(dst_udp_set) == packet_count
         assert len(src_udp_set) == packet_count
 
@@ -1500,8 +1492,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different dst and src tcp
-        dst_tcp_set = set([tg.get_packet_field(packet, "TCP", "dport") for packet in packets])
-        src_tcp_set = set([tg.get_packet_field(packet, "TCP", "sport") for packet in packets])
+        dst_tcp_set = set(tg.get_packet_field(packet, "TCP", "dport") for packet in packets)
+        src_tcp_set = set(tg.get_packet_field(packet, "TCP", "sport") for packet in packets)
         assert len(dst_tcp_set) == packet_count
         assert len(src_tcp_set) == packet_count
 
@@ -1520,7 +1512,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different ip proto
-        proto_ip_set = set([tg.get_packet_field(packet, "IP", "p") for packet in packets])
+        proto_ip_set = set(tg.get_packet_field(packet, "IP", "p") for packet in packets)
         assert len(proto_ip_set) == packet_count
 
     def test_ip_protocol_incrementation_dot1q_disabled_2(self, tg):
@@ -1538,7 +1530,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different ip proto
-        proto_ip_set = set([tg.get_packet_field(packet, "IP", "p") for packet in packets])
+        proto_ip_set = set(tg.get_packet_field(packet, "IP", "p") for packet in packets)
         assert len(proto_ip_set) == packet_count // 2
 
     def test_ip_protocol_incrementation_dot1q_enabled(self, tg):
@@ -1556,7 +1548,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different ip proto
-        proto_ip_set = set([tg.get_packet_field(packet, "IP", "p") for packet in packets])
+        proto_ip_set = set(tg.get_packet_field(packet, "IP", "p") for packet in packets)
         assert len(proto_ip_set) == packet_count
 
     def test_ip_protocol_and_sip_increment_dot1q_disabled(self, tg):
@@ -1574,8 +1566,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different ip proto and src ip.
-        proto_ip_set = set([tg.get_packet_field(packet, "IP", "p") for packet in packets])
-        src_ip_set = set([tg.get_packet_field(packet, "IP", "src") for packet in packets])
+        proto_ip_set = set(tg.get_packet_field(packet, "IP", "p") for packet in packets)
+        src_ip_set = set(tg.get_packet_field(packet, "IP", "src") for packet in packets)
         assert len(proto_ip_set) == packet_count // 2
         assert len(src_ip_set) == packet_count // 2
 
@@ -1594,8 +1586,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different ip proto and src ip.
-        proto_ip_set = set([tg.get_packet_field(packet, "IP", "p") for packet in packets])
-        src_ip_set = set([tg.get_packet_field(packet, "IP", "src") for packet in packets])
+        proto_ip_set = set(tg.get_packet_field(packet, "IP", "p") for packet in packets)
+        src_ip_set = set(tg.get_packet_field(packet, "IP", "src") for packet in packets)
         assert len(proto_ip_set) == packet_count
         assert len(src_ip_set) == packet_count
 
@@ -1614,7 +1606,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different ether type
-        eth_type_set = set([tg.get_packet_field(packet, "Ethernet", "type") for packet in packets])
+        eth_type_set = set(tg.get_packet_field(packet, "Ethernet", "type") for packet in packets)
         assert len(eth_type_set) == packet_count
 
     def test_ether_incrementation_dot1q_disabled_2(self, tg):
@@ -1632,7 +1624,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different ether type
-        eth_type_set = set([tg.get_packet_field(packet, "Ethernet", "type") for packet in packets])
+        eth_type_set = set(tg.get_packet_field(packet, "Ethernet", "type") for packet in packets)
         assert len(eth_type_set) == packet_count // 2
 
     def test_dscp_incrementation_dot1q_disabled_1(self, tg):
@@ -1650,7 +1642,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different ip dscp
-        dscp_set = set([tg.get_packet_field(packet, "IP", "tos") for packet in packets])
+        dscp_set = set(tg.get_packet_field(packet, "IP", "tos") for packet in packets)
         assert len(dscp_set) == packet_count
 
     def test_dscp_incrementation_dot1q_disabled_2(self, tg):
@@ -1668,7 +1660,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different ip dscp
-        dscp_set = set([tg.get_packet_field(packet, "IP", "tos") for packet in packets])
+        dscp_set = set(tg.get_packet_field(packet, "IP", "tos") for packet in packets)
         assert len(dscp_set) == packet_count // 2
 
     def test_ip_dscp_incrementation_dot1q_enabled(self, tg):
@@ -1686,7 +1678,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different ip dscp
-        dscp_set = set([tg.get_packet_field(packet, "IP", "tos") for packet in packets])
+        dscp_set = set(tg.get_packet_field(packet, "IP", "tos") for packet in packets)
         assert len(dscp_set) == packet_count
 
     def test_ip_dscp_and_sip_increment_dot1q_disabled_1(self, tg):
@@ -1704,8 +1696,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different ip dscp and src
-        dscp_set = set([tg.get_packet_field(packet, "IP", "tos") for packet in packets])
-        src_ip_set = set([tg.get_packet_field(packet, "IP", "src") for packet in packets])
+        dscp_set = set(tg.get_packet_field(packet, "IP", "tos") for packet in packets)
+        src_ip_set = set(tg.get_packet_field(packet, "IP", "src") for packet in packets)
         assert len(dscp_set) == packet_count
         assert len(src_ip_set) == packet_count
 
@@ -1725,10 +1717,10 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only packets with different ip dscp, src, dst and proto
-        dscp_set = set([tg.get_packet_field(packet, "IP", "tos") for packet in packets])
-        src_ip_set = set([tg.get_packet_field(packet, "IP", "src") for packet in packets])
-        dst_ip_set = set([tg.get_packet_field(packet, "IP", "dst") for packet in packets])
-        proto_ip_set = set([tg.get_packet_field(packet, "IP", "p") for packet in packets])
+        dscp_set = set(tg.get_packet_field(packet, "IP", "tos") for packet in packets)
+        src_ip_set = set(tg.get_packet_field(packet, "IP", "src") for packet in packets)
+        dst_ip_set = set(tg.get_packet_field(packet, "IP", "dst") for packet in packets)
+        proto_ip_set = set(tg.get_packet_field(packet, "IP", "p") for packet in packets)
         assert len(dscp_set) == packet_count
         assert len(src_ip_set) == packet_count
         assert len(dst_ip_set) == packet_count
@@ -1750,10 +1742,10 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only 9 different packets received
-        dscp_set = set([tg.get_packet_field(packet, "IP", "tos") for packet in packets])
-        src_ip_set = set([tg.get_packet_field(packet, "IP", "src") for packet in packets])
-        dst_ip_set = set([tg.get_packet_field(packet, "IP", "dst") for packet in packets])
-        packet_set = set([packet.bin() for packet in packets])
+        dscp_set = set(tg.get_packet_field(packet, "IP", "tos") for packet in packets)
+        src_ip_set = set(tg.get_packet_field(packet, "IP", "src") for packet in packets)
+        dst_ip_set = set(tg.get_packet_field(packet, "IP", "dst") for packet in packets)
+        packet_set = set(packet.bin() for packet in packets)
         assert len(dscp_set) == 3
         assert len(src_ip_set) == 3
         assert len(dst_ip_set) == 3
@@ -1776,10 +1768,10 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only 27 different packets received
-        dscp_set = set([tg.get_packet_field(packet, "IP", "tos") for packet in packets])
-        src_ip_set = set([tg.get_packet_field(packet, "IP", "src") for packet in packets])
-        dst_ip_set = set([tg.get_packet_field(packet, "IP", "dst") for packet in packets])
-        packet_set = set([packet.bin() for packet in packets])
+        dscp_set = set(tg.get_packet_field(packet, "IP", "tos") for packet in packets)
+        src_ip_set = set(tg.get_packet_field(packet, "IP", "src") for packet in packets)
+        dst_ip_set = set(tg.get_packet_field(packet, "IP", "dst") for packet in packets)
+        packet_set = set(packet.bin() for packet in packets)
         assert len(dscp_set) == 3
         assert len(src_ip_set) == 3
         assert len(dst_ip_set) == 3
@@ -1802,10 +1794,10 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that only 9 different packets received
-        dscp_set = set([tg.get_packet_field(packet, "IP", "tos") for packet in packets])
-        src_ip_set = set([tg.get_packet_field(packet, "IP", "src") for packet in packets])
-        dst_ip_set = set([tg.get_packet_field(packet, "IP", "dst") for packet in packets])
-        packet_set = set([packet.bin() for packet in packets])
+        dscp_set = set(tg.get_packet_field(packet, "IP", "tos") for packet in packets)
+        src_ip_set = set(tg.get_packet_field(packet, "IP", "src") for packet in packets)
+        dst_ip_set = set(tg.get_packet_field(packet, "IP", "dst") for packet in packets)
+        packet_set = set(packet.bin() for packet in packets)
         assert len(dscp_set) == 3
         assert len(src_ip_set) == 3
         assert len(dst_ip_set) == 3
@@ -1826,7 +1818,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 src address
-        sipv6_set = set([tg.get_packet_field(packet, "IP6", "src") for packet in packets])
+        sipv6_set = set(tg.get_packet_field(packet, "IP6", "src") for packet in packets)
         assert len(sipv6_set) == packet_count
 
     def test_src_ipv6_incrementation_dot1q_disabled_2(self, tg):
@@ -1844,7 +1836,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 src address
-        sipv6_set = set([tg.get_packet_field(packet, "IP6", "src") for packet in packets])
+        sipv6_set = set(tg.get_packet_field(packet, "IP6", "src") for packet in packets)
         assert len(sipv6_set) == packet_count // 2
 
     def test_src_ipv6_incrementation_dot1q_enabled_1(self, tg):
@@ -1862,7 +1854,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 src address
-        sipv6_set = set([tg.get_packet_field(packet, "IP6", "src") for packet in packets])
+        sipv6_set = set(tg.get_packet_field(packet, "IP6", "src") for packet in packets)
         assert len(sipv6_set) == packet_count
 
     def test_src_ipv6_incrementation_dot1q_enabled_2(self, tg):
@@ -1880,7 +1872,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 src address
-        sipv6_set = set([tg.get_packet_field(packet, "IP6", "src") for packet in packets])
+        sipv6_set = set(tg.get_packet_field(packet, "IP6", "src") for packet in packets)
         assert len(sipv6_set) == packet_count // 2
 
     def test_src_and_dst_ipv6_incrementation_dot1q_disabled(self, tg):
@@ -1899,8 +1891,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 src and dst address
-        sipv6_set = set([tg.get_packet_field(packet, "IP6", "src") for packet in packets])
-        dipv6_set = set([tg.get_packet_field(packet, "IP6", "dst") for packet in packets])
+        sipv6_set = set(tg.get_packet_field(packet, "IP6", "src") for packet in packets)
+        dipv6_set = set(tg.get_packet_field(packet, "IP6", "dst") for packet in packets)
         assert len(sipv6_set) == packet_count
         assert len(dipv6_set) == packet_count
 
@@ -1919,8 +1911,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 src and dst address
-        sipv6_set = set([tg.get_packet_field(packet, "IP6", "src") for packet in packets])
-        dipv6_set = set([tg.get_packet_field(packet, "IP6", "dst") for packet in packets])
+        sipv6_set = set(tg.get_packet_field(packet, "IP6", "src") for packet in packets)
+        dipv6_set = set(tg.get_packet_field(packet, "IP6", "dst") for packet in packets)
         assert len(sipv6_set) == packet_count
         assert len(dipv6_set) == packet_count
 
@@ -1939,7 +1931,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 dst address
-        dipv6_set = set([tg.get_packet_field(packet, "IP6", "dst") for packet in packets])
+        dipv6_set = set(tg.get_packet_field(packet, "IP6", "dst") for packet in packets)
         assert len(dipv6_set) == packet_count
 
     def test_dst_ipv6_incrementation_dot1q_disabled_2(self, tg):
@@ -1957,7 +1949,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 dst address
-        dipv6_set = set([tg.get_packet_field(packet, "IP6", "dst") for packet in packets])
+        dipv6_set = set(tg.get_packet_field(packet, "IP6", "dst") for packet in packets)
         assert len(dipv6_set) == packet_count // 2
 
     def test_dst_ipv6_incrementation_dot1q_enabled_1(self, tg):
@@ -1975,7 +1967,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 dst address
-        dipv6_set = set([tg.get_packet_field(packet, "IP6", "dst") for packet in packets])
+        dipv6_set = set(tg.get_packet_field(packet, "IP6", "dst") for packet in packets)
         assert len(dipv6_set) == packet_count
 
     def test_dst_ipv6_incrementation_dot1q_enabled_2(self, tg):
@@ -1993,7 +1985,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 dst address
-        dipv6_set = set([tg.get_packet_field(packet, "IP6", "dst") for packet in packets])
+        dipv6_set = set(tg.get_packet_field(packet, "IP6", "dst") for packet in packets)
         assert len(dipv6_set) == packet_count // 2
 
     def test_flow_label_ipv6_incrementation_dot1q_disabled_1(self, tg):
@@ -2011,7 +2003,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 flow
-        fl_set = set([tg.get_packet_field(packet, "IP6", "flow") for packet in packets])
+        fl_set = set(tg.get_packet_field(packet, "IP6", "flow") for packet in packets)
         assert len(fl_set) == packet_count
 
     def test_flow_label_ipv6_incrementation_dot1q_disabled_2(self, tg):
@@ -2029,7 +2021,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 flow
-        fl_set = set([tg.get_packet_field(packet, "IP6", "flow") for packet in packets])
+        fl_set = set(tg.get_packet_field(packet, "IP6", "flow") for packet in packets)
         assert len(fl_set) == packet_count // 2
 
     def test_flow_label_ipv6_incrementation_dot1q_enabled(self, tg):
@@ -2047,7 +2039,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 flow
-        fl_set = set([tg.get_packet_field(packet, "IP6", "flow") for packet in packets])
+        fl_set = set(tg.get_packet_field(packet, "IP6", "flow") for packet in packets)
         assert len(fl_set) == packet_count
 
     def test_flow_label_src_ipv6_incrementation(self, tg):
@@ -2065,8 +2057,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 flow and src address
-        fl_set = set([tg.get_packet_field(packet, "IP6", "flow") for packet in packets])
-        sipv6_set = set([tg.get_packet_field(packet, "IP6", "src") for packet in packets])
+        fl_set = set(tg.get_packet_field(packet, "IP6", "flow") for packet in packets)
+        sipv6_set = set(tg.get_packet_field(packet, "IP6", "src") for packet in packets)
         assert len(fl_set) == packet_count // 2
         assert len(sipv6_set) == packet_count // 2
 
@@ -2085,8 +2077,8 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 flow and dst address
-        fl_set = set([tg.get_packet_field(packet, "IP6", "flow") for packet in packets])
-        dipv6_set = set([tg.get_packet_field(packet, "IP6", "dst") for packet in packets])
+        fl_set = set(tg.get_packet_field(packet, "IP6", "flow") for packet in packets)
+        dipv6_set = set(tg.get_packet_field(packet, "IP6", "dst") for packet in packets)
         assert len(fl_set) == packet_count
         assert len(dipv6_set) == packet_count
 
@@ -2105,7 +2097,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 next header
-        nxt_set = set([tg.get_packet_field(packet, "IP6", "nxt") for packet in packets])
+        nxt_set = set(tg.get_packet_field(packet, "IP6", "nxt") for packet in packets)
         assert len(nxt_set) == packet_count
 
     def test_next_header_ipv6_incrementation_dot1q_disabled_2(self, tg):
@@ -2123,7 +2115,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 next header
-        nxt_set = set([tg.get_packet_field(packet, "IP6", "nxt") for packet in packets])
+        nxt_set = set(tg.get_packet_field(packet, "IP6", "nxt") for packet in packets)
         assert len(nxt_set) == packet_count // 2
 
     def test_next_header_ipv6_incrementation_dot1q_enabled(self, tg):
@@ -2141,7 +2133,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 next header
-        nxt_set = set([tg.get_packet_field(packet, "IP6", "nxt") for packet in packets])
+        nxt_set = set(tg.get_packet_field(packet, "IP6", "nxt") for packet in packets)
         assert len(nxt_set) == packet_count
 
     def test_traffic_class_ipv6_incrementation_dot1q_disabled(self, tg):
@@ -2159,7 +2151,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 traffic class
-        tc_set = set([tg.get_packet_field(packet, "IP6", "fc") for packet in packets])
+        tc_set = set(tg.get_packet_field(packet, "IP6", "fc") for packet in packets)
         assert len(tc_set) == packet_count
 
     def test_traffic_class_ipv6_incrementation_dot1q_disabled_2(self, tg):
@@ -2177,7 +2169,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 traffic class
-        tc_set = set([tg.get_packet_field(packet, "IP6", "fc") for packet in packets])
+        tc_set = set(tg.get_packet_field(packet, "IP6", "fc") for packet in packets)
         assert len(tc_set) == packet_count // 2
 
     def test_traffic_class_ipv6_incrementation_dot1q_enabled(self, tg):
@@ -2195,7 +2187,7 @@ class TestTGs(object):
         assert len(packets) == packet_count, \
             "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
         # Verify that all packets with different IPv6 traffic class
-        tc_set = set([tg.get_packet_field(packet, "IP6", "fc") for packet in packets])
+        tc_set = set(tg.get_packet_field(packet, "IP6", "fc") for packet in packets)
         assert len(tc_set) == packet_count
 
     def test_qos_vlan_stat(self, tg):
@@ -3591,7 +3583,7 @@ class TestTGs(object):
         pack = copy.deepcopy(PAUSE)
         pack[1]["FlowControl"]["opcode"] = opcode
         stream_id = tg.set_stream(pack, count=packet_count, iface=iface, adjust_size=False)
-        tg.start_sniff([iface], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=3)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface])
         packets = data.get(iface, [])
@@ -3602,302 +3594,166 @@ class TestTGs(object):
         # Verify received packet is equal to sent packet
         self.verify_packets_data(pack, received)
 
-    @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_build_capture(self, tg):
         """Verify that LLDP packets are builded and sniffed correctly.
 
         """
         iface = tg.ports[0]
+        packet_count = 1
+        lldp_managment_with_oid = copy.deepcopy(LLDP_MAN_ADDR_TLV)
+        lldp_managment_with_oid["LLDPManagementAddress"]["oid"] = b"1.3.6.1.4.1.731.3.2.30.1.1.7"
+        lldp_org_spec_tlv_1 = {"LLDPOrgSpecGeneric": {"subtype": 3, "tlv_type": 127, "oui": 4623,
+                                                      "value": b"\x01\x00\x00\x00\x00"},
+                               }
+        lldp_org_spec_tlv_2 = {"LLDPOrgSpecGeneric": {"subtype": 10, "tlv_type": 127, "oui": 4795,
+                                                      "value": b"System Product Name"},
+                               }
+        lldp_pack = copy.deepcopy(LLDP)
+        lldp_pack[1]['LLDP']['tlvlist'][-1:-1] = [lldp_managment_with_oid,
+                                                  lldp_org_spec_tlv_1,
+                                                  lldp_org_spec_tlv_2,
+                                                  ]
+        stream_id = tg.set_stream(lldp_pack, count=packet_count, iface=iface, adjust_size=False)
 
-        dst_mac = "01:80:c2:00:00:0e"
-        src_mac = "00:00:00:00:00:aa"
-        pack = ({'Ether': {'src': src_mac, 'dst': dst_mac, 'type': 35020}},
-                {'LLDP': {'tlvlist': [{'LLDPChassisId': {'subtype': 4, 'length': 7, 'macaddr': '00:11:11:11:11:11',
-                                                         'type': 1, 'value': None}},
-                                      {'LLDPPortId': {'subtype': 3, 'length': 7, 'macaddr': '00:01:7c:d7:de:c9',
-                                                      'type': 2, 'value': None}},
-                                      {'LLDPTTL': {'seconds': 20, 'length': 2, 'type': 3}},
-                                      {'LLDPSystemName': {'length': 8, 'type': 5, 'value': 'windws01'}},
-                                      {'LLDPSystemDescription': {'length': 71, 'type': 6,
-                                                                 'value': 'Linux 2.6.32-38-generic #83-Ubuntu SMP Wed Jan 4 11:13:04 UTC 2012 i686'}},
-                                      {'LLDPSystemCapabilities': {'enabled': 0, 'length': 4, 'type': 7,
-                                                                  'capabilities': 28}},
-                                      {'LLDPManagementAddress': {'ip6addr': None, 'macaddr': None, 'addrval': None,
-                                                                 'ifsubtype': 2, 'ifnumber': 2, 'oid': '1.3.6.1.4.1.731.3.2.30.1.1.7',
-                                                                 'ipaddr': '172.20.20.202', 'addrlen': 5,
-                                                                 'length': 25, 'oidlen': 13, 'type': 8,
-                                                                 'addrsubtype': 1}},
-                                      {'LLDPPortDescription': {'length': 4, 'type': 4, 'value': 'imp0'}},
-                                      {'LLDPOrgSpecGeneric': {'subtype': 3, 'length': 9, 'type': 127, 'oui': 4623,
-                                                              'value': '\x01\x00\x00\x00\x00'}},
-                                      {'LLDPOrgSpecGeneric': {'subtype': 1, 'length': 9, 'type': 127, 'oui': 4623,
-                                                              'value': '\x00\x00\x00\x00\x0b'}},
-                                      {'LLDPOrgSpecGeneric': {'subtype': 4, 'length': 6, 'type': 127, 'oui': 4623,
-                                                              'value': '\x05\xdc'}},
-                                      {'LLDPOrgSpecGeneric': {'subtype': 1, 'length': 7, 'type': 127, 'oui': 4795,
-                                                              'value': '\x00\x00\x00'}},
-                                      {'LLDPOrgSpecGeneric': {'subtype': 5, 'length': 18, 'type': 127, 'oui': 4795,
-                                                              'value': 'System Version'}},
-                                      {'LLDPOrgSpecGeneric': {'subtype': 6, 'length': 11, 'type': 127, 'oui': 4795,
-                                                              'value': '0406   '}},
-                                      {'LLDPOrgSpecGeneric': {'subtype': 7, 'length': 21, 'type': 127, 'oui': 4795,
-                                                              'value': '2.6.32-38-generic'}},
-                                      {'LLDPOrgSpecGeneric': {'subtype': 8, 'length': 24, 'type': 127, 'oui': 4795,
-                                                              'value': 'System Serial Number'}},
-                                      {'LLDPOrgSpecGeneric': {'subtype': 9, 'length': 23, 'type': 127, 'oui': 4795,
-                                                              'value': 'System manufacturer'}},
-                                      {'LLDPOrgSpecGeneric': {'subtype': 10, 'length': 23, 'type': 127, 'oui': 4795,
-                                                              'value': 'System Product Name'}},
-                                      {'LLDPOrgSpecGeneric': {'subtype': 11, 'length': 20, 'type': 127, 'oui': 4795,
-                                                              'value': 'Asset-1234567890'}},
-                                      {'LLDPDUEnd': {'length': 0, 'type': 0}}]}})
-        stream_id = tg.set_stream(pack, count=1, iface=iface, adjust_size=False)
-
-        tg.start_sniff([iface], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=2, dst_filter=LLDP_DST_MAC)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface])
+        packets = data.get(iface, [])
 
-        assert iface in data, "No packets were sniffed."
-        # filter our packets from data
-        data[iface] = [x for x in data[iface] if x.get_lfield("Ether", "dst") == dst_mac and x.get_lfield("Ether", "src") == src_mac]
-        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
+        assert len(packets) == packet_count, \
+            "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
+        received = tg.packet_dictionary(packets[0])
+        # Verify received packet is equal to sent packet
+        self.verify_packets_data(lldp_pack, received)
 
-        assert data[iface][0].haslayer("Ether")
-        assert data[iface][0].haslayer("LLDP")
-        assert data[iface][0].haslayer("LLDPChassisId")
-        assert data[iface][0].haslayer("LLDPPortId")
-        assert data[iface][0].haslayer("LLDPTTL")
-        assert data[iface][0].haslayer("LLDPSystemName")
-        assert data[iface][0].haslayer("LLDPSystemDescription")
-        assert data[iface][0].haslayer("LLDPSystemCapabilities")
-        assert data[iface][0].haslayer("LLDPManagementAddress")
-        assert data[iface][0].haslayer("LLDPPortDescription")
-        assert data[iface][0].haslayer("LLDPOrgSpecGeneric")
-        assert data[iface][0].haslayer("LLDPDUEnd")
-
-    @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_dcbx(self, tg):
         """Verify that DCBX packets are built and captured correctly.
 
         """
         iface = tg.ports[0]
+        packet_count = 1
+        stream_id = tg.set_stream(LLDP_DCBX, count=packet_count, iface=iface, adjust_size=False)
 
-        dst_mac = "01:80:c2:00:00:0e"
-        src_mac = "00:00:00:00:00:ee"
-        pack_dcbx = ({"Ether": {"dst": dst_mac, "src": src_mac, "type": 0x88cc}},
-                     {"LLDP": {"tlvlist": [{"LLDPChassisId": {"type": 1, "length": 7, "subtype": "MAC address", "macaddr": "00:00:01:02:03:04"}},
-                                           {"LLDPPortId": {"type": 2, "length": 4, "subtype": "Interface alias", "value": 'ge0'}},
-                                           {"LLDPTTL": {"type": 3, "length": 2, "seconds": 40}},
-                                           {"LLDPPortDescription": {"type": 4, "length": 0, "value": ""}},
-                                           {"LLDPSystemName": {"type": 5, "length": 10, "value": '<sys-name>'}},
-                                           {"LLDPSystemDescription": {"type": 6, "length": 10, "value": '<sys-desc>'}},
-                                           {"LLDPSystemCapabilities": {"type": 7, "length": 4, "capabilities": "bridge", "enabled": "bridge"}},
-                                           {"DCBXConfiguration": {"type": 127, "length": 25, "oui": 0x80c2,
-                                                                  "subtype": "ETS Configuration", "willing": 0, "cbs": 0,
-                                                                  "reserved": 0, "maxtcs": 3, "priority": [0, 1, 2, 3, 3, 3, 3, 3],
-                                                                  "tcbandwith": [50, 50, 0, 0, 0, 0, 0, 0],
-                                                                  "tsaassigment": [2, 2, 2, 2, 2, 2, 2, 2]}},
-                                           {"DCBXRecommendation": {"type": 127, "length": 25, "oui": 0x80c2,
-                                                                   "subtype": "ETS Recommendation", "reserved": 0,
-                                                                   "priority": [0, 1, 2, 3, 3, 3, 3, 3],
-                                                                   "tcbandwith": [50, 50, 0, 0, 0, 0, 0, 0],
-                                                                   "tsaassigment": [2, 2, 2, 2, 2, 2, 2, 2]}},
-                                           {"DCBXPriorityBasedFlowControlConfiguration": {"type": 127, "length": 6, "oui": 0x80c2,
-                                                                                          "subtype": "Priority-based Flow Control Configuration",
-                                                                                          "willing": 0, "mbc": 0, "reserved": 0, "pfccap": 0,
-                                                                                          "pfcenable": [0, 0, 0, 0, 0, 0, 0, 0]}},
-                                           {"DCBXApplicationPriority": {"type": 127, "length": 5, "oui": 0x80c2,
-                                                                        "subtype": "Application Priority", "reserved": 0,
-                                                                        "apppriotable": []}},
-                                           {"LLDPDUEnd": {"type": 0, "length": 0}}]}})
-        stream_id = tg.set_stream(pack_dcbx, count=1, iface=iface, adjust_size=False)
-
-        tg.start_sniff([iface], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=2, dst_filter=LLDP_DST_MAC)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface])
+        packets = data.get(iface, [])
 
-        assert iface in data, "No packets were sniffed."
-        # filter our packets from data
-        data[iface] = [x for x in data[iface] if x.get_lfield("Ether", "dst") == dst_mac and x.get_lfield("Ether", "src") == src_mac]
-        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
+        assert len(packets) == packet_count, \
+            "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
+        received = tg.packet_dictionary(packets[0])
+        # Verify received packet is equal to sent packet
+        self.verify_packets_data(LLDP_DCBX, received)
 
-        assert data[iface][0].haslayer("Ether")
-        assert data[iface][0].haslayer("LLDP")
-        assert data[iface][0].haslayer("LLDPChassisId")
-        assert data[iface][0].haslayer("LLDPPortId")
-        assert data[iface][0].haslayer("LLDPTTL")
-        assert data[iface][0].haslayer("LLDPSystemName")
-        assert data[iface][0].haslayer("LLDPSystemDescription")
-        assert data[iface][0].haslayer("LLDPSystemCapabilities")
-        assert data[iface][0].haslayer("DCBXConfiguration")
-        assert data[iface][0].haslayer("DCBXRecommendation")
-        assert data[iface][0].haslayer("DCBXPriorityBasedFlowControlConfiguration")
-        assert data[iface][0].haslayer("DCBXApplicationPriority")
-        assert data[iface][0].haslayer("LLDPDUEnd")
-
-    @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_dcbx_app_prio_table(self, tg):
         """Verify that DCBX packets with Application Priority Tables are built and captured correctly.
 
         """
         iface = tg.ports[0]
+        packet_count = 1
+        stream_id = tg.set_stream(LLDP_DCBX_APP_PRIO, count=packet_count, iface=iface, adjust_size=False)
 
-        dst_mac = "01:80:c2:00:00:0e"
-        src_mac = "00:00:00:00:00:44"
-        pack_dcbx = ({'Ether': {'src': src_mac, 'dst': dst_mac, 'type': 35020}},
-                     {'LLDP': {'tlvlist': [{'LLDPChassisId': {'subtype': 4, 'length': 7, 'macaddr': '00:01:04:05:06:22', 'type': 1}},
-                                           {'LLDPPortId': {'subtype': 1, 'length': 4, 'type': 2, 'value': 'ge0'}},
-                                           {'LLDPTTL': {'seconds': 40, 'length': 2, 'type': 3}},
-                                           {'LLDPPortDescription': {'length': 0, 'type': 4, 'value': ''}},
-                                           {'LLDPSystemName': {'length': 10, 'type': 5, 'value': '<sys-name>'}},
-                                           {'LLDPSystemDescription': {'length': 10, 'type': 6, 'value': '<sys-desc>'}},
-                                           {'LLDPSystemCapabilities': {'enabled': 4, 'length': 4, 'type': 7,
-                                                                       'capabilities': 4}},
-                                           {'DCBXApplicationPriority': {'oui': 0x80c2, 'reserved': 128,
-                                                                        'apppriotable': [{'DCBXApplicationPriorityTable': {'priority': 0, 'protocolid': 884,
-                                                                                                                           'sel': 2, 'reserved': 0}},
-                                                                                         {'DCBXApplicationPriorityTable': {'priority': 0, 'protocolid': 53,
-                                                                                                                           'sel': 3, 'reserved': 0}}]}},
-                                           {'LLDPDUEnd': {'length': 0, 'type': 0}}]}})
-
-        stream_id = tg.set_stream(pack_dcbx, count=1, iface=iface, adjust_size=False)
-
-        tg.start_sniff([iface], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=2, dst_filter=LLDP_DST_MAC)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface])
+        packets = data.get(iface, [])
 
-        assert iface in data, "No packets were sniffed."
-        # filter our packets from data
-        data[iface] = [x for x in data[iface] if x.get_lfield("Ether", "dst") == dst_mac and x.get_lfield("Ether", "src") == src_mac]
-        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
+        assert len(packets) == packet_count, \
+            "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
+        received = tg.packet_dictionary(packets[0])
+        # Verify received packet is equal to sent packet
+        self.verify_packets_data(LLDP_DCBX_APP_PRIO, received)
 
-        assert data[iface][0].haslayer("Ether")
-        assert data[iface][0].haslayer("LLDP")
-        assert data[iface][0].haslayer("LLDPChassisId")
-        assert data[iface][0].haslayer("LLDPPortId")
-        assert data[iface][0].haslayer("LLDPTTL")
-        assert data[iface][0].haslayer("DCBXApplicationPriority")
-        assert data[iface][0].haslayer("DCBXApplicationPriorityTable")
-        assert tg.check_packet_field(data[iface][0], "DCBXApplicationPriorityTable", "protocolid", 884)
-        assert tg.check_packet_field(data[iface][0], "DCBXApplicationPriorityTable", "protocolid", 53)
-        assert data[iface][0].haslayer("LLDPDUEnd")
-
-    @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_sys_capabilities(self, tg):
         """Verify that LLDP packets with full System capabilities list are built and captured correctly.
 
         """
         iface = tg.ports[0]
+        packet_count = 1
+        # other(1bit)+repeater(2bit)+bridge(3bit)+router(5bit)+telephone(6bit)
+        capabilities = 55
+        # other(1bit)+repeater(2bit)+bridge(3bit)+router(5bit)
+        enabled = 23
+        lldp_sys_capabilietes = copy.deepcopy(LLDP_SYS_CAPAB_TLV)
+        lldp_sys_capabilietes["LLDPSystemCapabilities"]["capabilities"] = capabilities
+        lldp_sys_capabilietes["LLDPSystemCapabilities"]["enabled"] = enabled
+        lldp_pack = ({"Ethernet": {"dst": LLDP_DST_MAC, "src": SRC_MAC, "type": ETHER_TYPE_LLDP}},
+                     {"LLDP": {'tlvlist': [LLDP_CHASSIS_ID_TLV, LLDP_PORT_ID_TLV,
+                                           LLDP_TTL_TLV, lldp_sys_capabilietes, LLDP_END_TLV,
+                                           ],
+                               },
+                      })
+        stream_id = tg.set_stream(lldp_pack, count=packet_count, iface=iface, adjust_size=False)
 
-        dst_mac = "01:80:c2:00:00:0e"
-        src_mac = "00:00:00:00:00:77"
-
-        pack = ({"Ether": {"dst": dst_mac, "src": src_mac, "type": 0x88cc}},
-                {"LLDP": {"tlvlist": [{"LLDPChassisId": {"type": 1, "length": 7, "subtype": "MAC address",
-                                                         "macaddr": "00:01:02:03:04:11"}},
-                                      {"LLDPPortId": {"type": 2, "length": 4, "subtype": "Interface alias", "value": 'ge0'}},
-                                      {"LLDPTTL": {"type": 3, "length": 2, "seconds": 20}},
-                                      {"LLDPPortDescription": {"type": 4, "length": 0, "value": ""}},
-                                      {"LLDPSystemName": {"type": 5, "length": 10, "value": '<sys-name>'}},
-                                      {"LLDPSystemDescription": {"type": 6, "length": 10, "value": '<sys-desc>'}},
-                                      {"LLDPSystemCapabilities": {"type": 7, "length": 4,
-                                                                  "capabilities": "other+repeater+bridge+router+telephone",
-                                                                  "enabled": "other+repeater+bridge+router"}},
-                                      {"LLDPDUEnd": {"type": 0, "length": 0}}]}})
-        stream_id = tg.set_stream(pack, count=1, iface=iface, adjust_size=False)
-
-        tg.start_sniff([iface], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=2, dst_filter=LLDP_DST_MAC)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface])
+        packets = data.get(iface, [])
 
-        assert iface in data, "No packets were sniffed."
-        # filter our packets from data
-        data[iface] = [x for x in data[iface] if x.get_lfield("Ether", "dst") == dst_mac and x.get_lfield("Ether", "src") == src_mac]
-        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
+        assert len(packets) == packet_count, \
+            "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
+        received = tg.packet_dictionary(packets[0])
+        # Verify received packet is equal to sent packet
+        self.verify_packets_data(lldp_pack, received)
 
-        assert data[iface][0].haslayer("Ether")
-        assert data[iface][0].haslayer("LLDP")
-        assert data[iface][0].haslayer("LLDPSystemCapabilities")
-        assert data[iface][0].get_lfield("LLDPSystemCapabilities", "capabilities") == 55
-        assert data[iface][0].get_lfield("LLDPSystemCapabilities", "enabled") == 23
-        assert data[iface][0].haslayer("LLDPDUEnd")
-
-    @pytest.mark.skip("Pypacker does not support LLDP")
     def test_lldp_with_padding(self, tg):
         """Verify that LLDP packets with with padding are built and captured correctly.
 
         """
         iface = tg.ports[0]
+        packet_count = 1
+        padding = b"\x00" * 10
+        lldp_pack = ({"Ethernet": {"dst": LLDP_DST_MAC, "src": SRC_MAC, "type": ETHER_TYPE_LLDP,
+                                   "padding": padding}},
+                     {"LLDP": {'tlvlist': [LLDP_CHASSIS_ID_TLV, LLDP_PORT_ID_TLV,
+                                           LLDP_TTL_TLV, LLDP_END_TLV,
+                                           ],
+                               },
+                      })
+        stream_id = tg.set_stream(lldp_pack, count=packet_count, iface=iface, adjust_size=False)
 
-        dst_mac = "01:80:c2:00:00:0e"
-        src_mac = "00:00:00:00:00:22"
-
-        pack = ({"Ether": {"dst": dst_mac, "src": src_mac, "type": 0x88cc}},
-                {"LLDP": {'tlvlist': [{'LLDPChassisId': {'subtype': 4, 'macaddr': '00:02:10:00:03:02'}},
-                                      {'LLDPPortId': {'subtype': 2, 'value': 'xe1'}},
-                                      {'LLDPTTL': {'seconds': 0}},
-                                      {'LLDPDUEnd': {}}]}},
-                {"Raw": {'load': "\x00" * 10}},
-                {"Padding": {'load': "\x00" * 10}},)
-        stream_id = tg.set_stream(pack, count=1, iface=iface, adjust_size=False)
-
-        tg.start_sniff([iface], sniffing_time=2)
+        tg.start_sniff([iface], sniffing_time=2, dst_filter=LLDP_DST_MAC)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface])
+        packets = data.get(iface, [])
 
-        assert iface in data, "No packets were sniffed."
-        # filter our packets from data
-        data[iface] = [x for x in data[iface] if x.get_lfield("Ether", "dst") == dst_mac and x.get_lfield("Ether", "src") == src_mac]
-        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
+        assert len(packets) == packet_count, \
+            "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
+        packet = packets[0]
+        # Verify received packet
+        assert tg.get_packet_field(packet, "Ethernet", "src") == SRC_MAC
+        assert tg.get_packet_field(packet, "Ethernet", "dst") == LLDP_DST_MAC
+        assert tg.get_packet_field(packet, "Ethernet", "type") == ETHER_TYPE_LLDP
+        assert tg.get_packet_field(packet, "LLDP", "tlvlist")
+        assert tg.get_packet_field(packet, "LLDPChassisId", "tlv_type") == LLDP_CHASSIS_ID_TLV_TYPE
+        assert tg.get_packet_field(packet, "LLDPChassisId", "subtype") == LLDP_MAC_SUBTYPE
+        assert tg.get_packet_field(packet, "LLDPChassisId", "value") == SRC_MAC
+        assert tg.get_packet_field(packet, "LLDPPortId", "tlv_type") == LLDP_PORT_ID_TLV_TYPE
+        assert tg.get_packet_field(packet, "LLDPPortId", "subtype") == LLDP_PORT_ID_INTERFACE_SUBTYPE
+        assert tg.get_packet_field(packet, "LLDPPortId", "value") == LLDP_PORT_ID_INTERFACE_VALUE
+        assert tg.get_packet_field(packet, "LLDPTTL", "tlv_type") == LLDP_TTL_TLV_TYPE
+        assert tg.get_packet_field(packet, "LLDPTTL", "seconds") == LLDP_TTL_SECONDS
+        assert tg.get_packet_field(packet, "LLDPDUEnd", "tlv_type") == 0
+        assert tg.get_packet_field(packet, "LLDPDUEnd", "tlv_len") == 0
 
-        assert data[iface][0].haslayer("Ether")
-        assert data[iface][0].haslayer("LLDP")
-        assert data[iface][0].haslayer("LLDPChassisId")
-        assert data[iface][0].haslayer("LLDPPortId")
-        assert data[iface][0].haslayer("LLDPTTL")
-        assert data[iface][0].haslayer("LLDPDUEnd")
-
-    @pytest.mark.skip("Pypacker does not support LACP")
     def test_lacp_layers(self, tg):
         """Verify that LACP packets are built and captured correctly.
 
         """
         iface = tg.ports[0]
+        packet_count = 1
+        stream_id = tg.set_stream(LACP, count=packet_count, iface=iface, adjust_size=False)
 
-        dst_mac = "01:80:c2:00:00:02"
-        src_mac = "00:00:00:00:11:22"
-
-        pack = ({"Ethernet": {"dst": dst_mac, "src": src_mac, "type": 0x8809}},
-                {"LACP": {'subtype': 1, 'version': 1}},
-                {"LACPActorInfoTlv": {'type': 1, 'length': 20, 'sysprio': 32768, 'sys': "00:11:00:ff:00:aa",
-                                      'key': 0, 'portprio': 32768, "port": 2,
-                                      'expired': 1, 'defaulted': 0, 'distribute': 1, 'collect': 0,
-                                      'synch': 1, 'aggregate': 0, 'timeout': 1, 'activity': 1,
-                                      'reserved': "\x00" * 3}},
-                {"LACPPartnerInfoTlv": {'type': 2, 'length': 20, 'sysprio': 32768, 'sys': "00:ee:00:ff:00:aa",
-                                        'key': 0, 'portprio': 32768, "port": 1,
-                                        'expired': 1, 'defaulted': 0, 'distribute': 1, 'collect': 0,
-                                        'synch': 1, 'aggregate': 1, 'timeout': 0, 'activity': 1,
-                                        'reserved': "\x00" * 3}},
-                {"LACPCollectorInfoTlv": {'type': 3, 'length': 16, 'maxdelay': 10, "reserved": "\x00" * 12}},
-                {"LACPTerminatorTlv": {'type': 0, 'length': 0}},
-                {"LACPReserved": {'reserved': "\x00" * 50}}, )
-        stream_id = tg.set_stream(pack, count=1, iface=iface, adjust_size=False)
-
-        tg.start_sniff([iface], sniffing_time=2, dst_filter=dst_mac, src_filter=src_mac)
+        tg.start_sniff([iface], sniffing_time=2, dst_filter=LACP_DST_MAC, src_filter=SRC_MAC)
         tg.send_stream(stream_id)
         data = tg.stop_sniff([iface])
+        packets = data.get(iface, [])
 
-        assert iface in data, "No packets were sniffed."
-        assert len(data[iface]) == 1, "Expected to sniff 1 packet but sniffed %s" % (len(data[iface]), )
-
-        assert data[iface][0].haslayer("Ether")
-        assert data[iface][0].haslayer("LACP")
-        assert data[iface][0].haslayer("LACPActorInfoTlv")
-        assert data[iface][0].haslayer("LACPPartnerInfoTlv")
-        assert data[iface][0].haslayer("LACPCollectorInfoTlv")
-        assert data[iface][0].haslayer("LACPTerminatorTlv")
-        assert data[iface][0].haslayer("LACPReserved")
+        assert len(packets) == packet_count, \
+            "Captured packets count {0} does not match expected {1}".format(len(packets), packet_count)
+        received = tg.packet_dictionary(packets[0])
+        # Verify received packet is equal to sent packet
+        self.verify_packets_data(LACP, received)
 
     def test_pproc_packet_fragmentation_1(self, tg):
         """Check packet fragmentation.

@@ -20,8 +20,10 @@
 """
 
 import codecs
+import operator
 from functools import reduce
 from contextlib import suppress
+from collections import OrderedDict
 
 import pytest
 import pypacker
@@ -38,7 +40,16 @@ class PacketProcessor(object):
     """
 
     class_logger = loggers.ClassLogger()
-    inner_classes = ["Echo", "Unreach", "Redirect", "Error", "TooBig", "TimeExceed", "ParamProb"]
+    inner_classes = {"Echo", "Unreach", "Redirect", "Error", "TooBig", "TimeExceed", "ParamProb"}
+    lldp_lacp_tlvs = {"LLDPGeneric", "LLDPDUEnd", "LLDPChassisId", "LLDPPortId", "LLDPTTL",
+                      "LLDPPortDescription", "LLDPSystemName", "LLDPSystemDescription",
+                      "LLDPSystemCapabilities", "LLDPManagementAddress", "LLDPOrgSpecGeneric",
+                      "LLDPDot1PortVlanId", "DCBXCongestionNotification", "DCBXConfiguration",
+                      "DCBXRecommendation", "DCBXPriorityBasedFlowControlConfiguration",
+                      "DCBXApplicationPriority", "DCBXApplicationPriorityTable",
+                      "LACPActorInfoTlv", "LACPPartnerInfoTlv", "LACPCollectorInfoTlv",
+                      "LACPTerminatorTlv", "LACPReserved",
+                      }
     flt_patterns = {
         "ARP": {'ptrn1': ["08 06", "00 00", "12"], 'mt1': "matchUser", 'cfp': "pattern1",
                 'lfilter': lambda x: getattr(x, 'arp', None) and not x.vlan},
@@ -60,7 +71,7 @@ class PacketProcessor(object):
                        'lfilter': lambda x: getattr(x, 'ip6', None) and x.vlan},
         "STP": {'ptrn1': ["42 42 03 00 00", "00 00 00 00 00", "14"], 'mt1': "matchUser", 'cfp': "pattern1"},
         "LLDP": {'ptrn1': ["01 80 c2 00 00 0e 00 00 00 00 00 00 88 cc", "00 00 00 00 00 00 FF FF FF FF FF FF 00 00", "0"], 'mt1': "matchUser",
-                 'cfp': "pattern1"},
+                 'cfp': "pattern1", 'lfilter': lambda x: getattr(x, 'lldp', None) and not x.vlan},
         "notSTP": {'ptrn1': ["42 42 03 00 00", "00 00 00 00 00", "14"], 'mt1': "matchUser", 'cfp': "notPattern1"},
         "TCP": {'ptrn1': ["08 00 00 00 00 00 00 00 00 00 00 06", "00 00 FF FF FF FF FF FF FF FF FF 00", "12"],
                 'mt1': "matchUser", 'cfp': "pattern1",
@@ -170,7 +181,7 @@ class PacketProcessor(object):
             layer, inner_layer = layer.split('.')
             pypacker_layer = self._get_pypacker_layer(layer)
             return getattr(pypacker_layer, inner_layer)
-        elif layer in ["Ethernet", "ARP", "LLC", "STP"]:
+        elif layer in ["Ethernet", "ARP", "LLC", "STP", "LLDP", "LACP"]:
             return getattr(getattr(pypacker.layer12, layer.lower()), layer)
         elif layer in ["IP", "IP6", "ICMP", "IGMP"]:
             return getattr(getattr(pypacker.layer3, layer.lower()), layer)
@@ -180,6 +191,10 @@ class PacketProcessor(object):
             return getattr(getattr(pypacker.layer12, "flow_control"), layer)
         elif layer in ["Pause", "PFC"]:
             return getattr(getattr(getattr(pypacker.layer12, "flow_control"), "FlowControl"), layer)
+        elif layer.startswith("LLDP") or layer.startswith("DCBX"):
+            return getattr(getattr(pypacker.layer12, "lldp"), layer)
+        elif layer.startswith("LACP"):
+            return getattr(getattr(pypacker.layer12, "lacp"), layer)
         else:
             raise PypackerException("Pypacker does not support protocol {0}".format(layer))
 
@@ -195,10 +210,9 @@ class PacketProcessor(object):
 
         """
         # Get header fields
-        fields = {field.strip('_') for field in
-                  packet._header_field_names if not field.endswith("_s")}  # pylint: disable=protected-access
+        fields = {field.strip('_') for field in packet._header_field_names}
         # Get subfields that value is less than 1 byte
-        sub_fields = {f for f, v in packet.__class__.__dict__.items() if isinstance(v, property) and not f.endswith("_s")}
+        sub_fields = {f for f, v in packet.__class__.__dict__.items() if isinstance(v, property)}
         return fields.union(sub_fields)
 
     def _build_pypacker_packet(self, packet_definition, adjust_size=True, required_size=64):
@@ -247,6 +261,7 @@ class PacketProcessor(object):
         # Converting packet_definition to pypacker.Packet.
         packet = reduce(lambda a, b: a + b, map(_pypacker_layer, packet_definition))
         # Handle Dot1Q layer and IP options in packet_definition
+        first = operator.itemgetter(0)
         for layer in packet_definition:
             with suppress(KeyError):
                 dot1q_definition = layer["Dot1Q"]
@@ -255,6 +270,30 @@ class PacketProcessor(object):
             with suppress(KeyError):
                 opts = layer["IP"]["opts"]
                 packet.ip.opts = [ip.IPOptMulti(**opt) for opt in opts]
+            with suppress(KeyError):
+                tlvlist_def = layer["LLDP"]["tlvlist"]
+                packet.lldp.tlvlist = []
+                for tlv_dict in tlvlist_def:
+                    tlv_type = next(iter(tlv_dict))
+                    packet.lldp.tlvlist.append(_pypacker_layer(
+                        {tlv_type: OrderedDict(sorted(tlv_dict[tlv_type].items(), key=first))},
+                    ))
+                    with suppress(KeyError):
+                        # Inner list of DCBXApplicationPriorityTable
+                        apppriotables = tlv_dict['DCBXApplicationPriority']['apppriotable']
+                        app_class_name = "DCBXApplicationPriorityTable"
+                        app_tables_list = []
+                        for app_table in apppriotables:
+                            app_tables_list.append(_pypacker_layer(
+                                {app_class_name: OrderedDict(sorted(app_table[app_class_name].items(), key=first))}
+                            ))
+                        packet.lldp.tlvlist[-1].apppriotable = app_tables_list
+            with suppress(KeyError):
+                tlvlist_def = layer["LACP"]["tlvlist"]
+                packet.lacp.tlvlist = []
+                for tlv_dict in tlvlist_def:
+                    tlv_type = next(iter(tlv_dict))
+                    packet.lacp.tlvlist.append(_pypacker_layer({tlv_type: OrderedDict(sorted(tlv_dict[tlv_type].items(), key=first))}))
 
         # Adjust packet size with padding.
         if adjust_size:
@@ -357,9 +396,28 @@ class PacketProcessor(object):
             assert ip_layer_hex[-8:] == '7f000001'
 
         """
+        def search_pypacker_layer_in_packet(packet=None, layer=None):
+            """Search and return packet layer
+
+            Returns:
+                pypacker.Packet, None: pypacker.Packet for success, None otherwise
+
+            """
+            if layer not in self.lldp_lacp_tlvs:
+                pypacker_layer = self._get_pypacker_layer(layer)
+                return packet[pypacker_layer]
+            if layer.startswith("LLDP") or layer.startswith("DCBX"):
+                pypacker_layer = self._get_pypacker_layer("LLDP")
+            elif layer.startswith("LACP"):
+                pypacker_layer = self._get_pypacker_layer("LACP")
+            # Shallow copy is required. In case if copy is not specified tlvlist attribute will be empty
+            for tlv in getattr(packet[pypacker_layer], "tlvlist", [])[:]:
+                if tlv.__class__.__name__ == layer:
+                    return tlv
+            return None
+
         try:
-            pypacker_layer = self._get_pypacker_layer(layer)
-            layer = packet[pypacker_layer]
+            layer = search_pypacker_layer_in_packet(packet, layer)
             if output_format == "pypacker":
                 return layer
             hex_repr = codecs.encode(layer.bin(), "hex_codec").decode('utf-8')
@@ -398,6 +456,7 @@ class PacketProcessor(object):
         packet_def = []
         vlans = []
         opts = []
+        tlvlist = []
         for layer in packet:
             class_name = layer.__class__.__name__
             # Handle inner pypacker class e.g. icmp.ICMP.Echo, icmp6.ICMP6.Echo
@@ -411,10 +470,23 @@ class PacketProcessor(object):
                     for vlan in self.get_packet_field(packet, "Ethernet", "vlan"):
                         vlans.append({"Dot1Q": {f: getattr(vlan, f) for f in self._get_pypacker_layer_fields(vlan)}})
                 elif field == "opts" and class_name in ["IP", "IP6"]:
+                    # Shallow copy is required. In case if copy is not specified opts attribute will be empty
                     pypacker_opts = self.get_packet_field(packet, class_name, "opts")[:]
                     opts_fields = {"len", "type", "body_bytes"}
                     opts.append({f: getattr(opt, f) for opt in pypacker_opts for f in opts_fields})
                     layer_dict[class_name][field] = opts
+                elif field == "tlvlist" and class_name in ["LLDP", "LACP"]:
+                    # Shallow copy is required. In case if copy is not specified tlvlist attribute will be empty
+                    for tlv in self.get_packet_field(packet, class_name, field)[:]:
+                        tlvlist.append({tlv.__class__.__name__: {f: getattr(tlv, f) for f in self._get_pypacker_layer_fields(tlv)}})
+                        if tlv.__class__.__name__ == "DCBXApplicationPriority":
+                            app_tables_list = []
+                            for app_table in tlv.apppriotable:
+                                app_tables_list.append(
+                                    {app_table.__class__.__name__: {f: getattr(app_table, f) for f in self._get_pypacker_layer_fields(app_table)}}
+                                )
+                            tlvlist[-1]['DCBXApplicationPriority']['apppriotable'] = app_tables_list
+                    layer_dict[class_name][field] = tlvlist
                 elif field != "padding":
                     layer_dict[class_name][field] = self.get_packet_field(layer, class_name, field)
             packet_def.append(layer_dict)

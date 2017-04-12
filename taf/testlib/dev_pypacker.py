@@ -109,6 +109,7 @@ class PypackerTG(PacketProcessor, GenericTG):
         ('eth_type_increment', 'Ethernet', 'type', 'PypackerTypeGenerator', 'type'),
         ('vlan_increment', 'S-Dot1Q', 'vid', 'PypackerVlanGenerator', 'S-Dot1Q'),
         ('in_vlan_increment', 'C-Dot1Q', 'vid', 'PypackerVlanGenerator', 'C-Dot1Q'),
+        ('lldp_sa_increment', 'LLDPChassisId', 'value', 'PypackerMacGenerator', 'LLDPChassisId'),
         ('arp_sip_increment', 'ARP', 'spa', 'PypackerIPGenerator', 'arp.spa_s'),
         ('sip_increment', 'IP', 'src', 'PypackerIPGenerator', 'ip.src_s'),
         ('dip_increment', 'IP', 'dst', 'PypackerIPGenerator', 'ip.dst_s'),
@@ -610,7 +611,7 @@ class PypackerTG(PacketProcessor, GenericTG):
         with closing(psocket.SocketHndl(iface_name=iface)) as s, suppress(KeyboardInterrupt):
             for _ in count_iter:
                 with stop_lock:
-                    s.send(next(p).bin())
+                    s.send(next(p).bin())  # pylint: disable=no-member
                     self.sent_statistics.increase(iface)
                 time.sleep(inter)
 
@@ -680,7 +681,7 @@ class PypackerTG(PacketProcessor, GenericTG):
                 try:
                     self.filter_offset, self.filter_data, self.filter_mask = filter_layer  # pylint: disable=attribute-defined-outside-init
                     lambda_filter = self.custom_packet_filter
-                except (TypeError, IndexError):
+                except (TypeError, IndexError, ValueError):
                     message = "Unknown filter_layer '{0}'. Supported layers: {1}".format(filter_layer,
                                                                                          list(PacketProcessor.flt_patterns.keys()))
                     raise PypackerException(message)
@@ -915,7 +916,7 @@ class StoppableThread(threading.Thread):
         """
         if not self.isAlive():
             return
-        tid = next((k for k, v in threading._active.items() if v is self), None) # pylint: disable=protected-access
+        tid = next((k for k, v in threading._active.items() if v is self), None)  # pylint: disable=protected-access
         if tid is None:
             return
         with self._thr_lock:
@@ -1061,6 +1062,8 @@ class PacketGenerator(object):
                         setattr(getattr(self.packet, "vlan", None)[0], "vid", value)
                     elif field == "C-Dot1Q":
                         setattr(getattr(self.packet, "vlan", None)[1], "vid", value)
+                    elif field == "LLDPChassisId":
+                        setattr(getattr(getattr(self.packet, "lldp", None), "tlvlist", None)[0], "value_s", value)
                     elif field == "padding":
                         packet_str = self.packet.bin()
                         if len(packet_str) < value:
