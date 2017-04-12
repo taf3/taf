@@ -18,19 +18,19 @@
 
 """
 
+import os
+import time
 import copy
 import codecs
-import os
 import platform
-import time
-import struct
-
+from contextlib import suppress
 from tkinter import Tcl, TclError
 
+import pytest
+import pypacker
 
 from . import ixia_helpers
 from ..custom_exceptions import IxiaException
-import pypacker
 
 
 class IxiaHALMixin(object):
@@ -42,6 +42,8 @@ class IxiaHALMixin(object):
 
     # Constants in seconds
     DEFAULT_MAX_SNIFF_TIME = 3600
+    # Packet CRC 4 bytes
+    CRC = 4
 
     def __init__(self, config, opts):
         """Initializes connection to IXIA.
@@ -539,7 +541,6 @@ class IxiaHALMixin(object):
             tuple: Dot1Q payload, Tcl commands.
 
         """
-        # TODO: Need to add processing QinQ and other VLAN fields
 
         if in_vlan_increment is not None:
             in_vlan_increment_step, in_vlan_increment_count = self._check_increment(in_vlan_increment, "in_vlan_increment")
@@ -554,18 +555,11 @@ class IxiaHALMixin(object):
         def _set_vlan(payl, vtype, step, count):
             commands = []
             commands.append("vlan setDefault;")
-            # if payl.id == 1:
-            #     commands.append("vlan config -cfi setCFI;")
-            # if vtype == 0x9100:
-            #     commands.append("vlan config -protocolTagId vlanProtocolTag9100;")
-            # elif vtype == 0x9200:
-            #     commands.append("vlan config -protocolTagId vlanProtocolTag9200;")
-            # elif vtype == 0x88A8:
-            #     commands.append("vlan config -protocolTagId vlanProtocolTag88A8;")
-            # elif vtype == 0x9300:
-            #     commands.append("vlan config -protocolTagId vlanProtocolTag9300;")
-            # commands.append("vlan config -userPriority {0};".format(payl.prio))
-            commands.append("vlan config -vlanID {0};".format(vtype[1]))
+            if payl.cfi == 1:
+                commands.append("vlan config -cfi setCFI;")
+            commands.append("vlan config -protocolTagId vlanProtocolTag{0};".format(hex(vtype).upper()[2:]))
+            commands.append("vlan config -userPriority {0};".format(payl.prio))
+            commands.append("vlan config -vlanID {0};".format(payl.vid))
             if step is not None:
                 if step > 0 and continuous and count == 0:
                     incr_type = "vContIncrement"
@@ -582,26 +576,28 @@ class IxiaHALMixin(object):
             return commands
 
         tcl_commands = []
-        dot1 = payload
-        # dot2 = payload.payload
-        # if dot2.__class__.__name__ == "Dot1Q":
-        #     tcl_commands.append("protocol config -enable802dot1qTag vlanStacked;")
-        #     tcl_commands.append("stackedVlan setDefault;")
-        # else:
-        tcl_commands.append("protocol config -enable802dot1qTag vlanSingle;")
+        dot1 = payload.vlan[0]
+        dot2 = None
+        iface = {'chassis': chassis, 'card': card, 'port': port}
+        with suppress(IndexError):
+            dot2 = payload.vlan[1]
+        if dot2:
+            tcl_commands.append("protocol config -enable802dot1qTag vlanStacked;")
+            tcl_commands.append("stackedVlan setDefault;")
+        else:
+            tcl_commands.append("protocol config -enable802dot1qTag vlanSingle;")
 
         tcl_commands.extend(_set_vlan(dot1, vlan_type, vlan_increment_step, vlan_increment_count))
 
-        # if dot2.__class__.__name__ == "Dot1Q":
-        #     tcl_commands.append("stackedVlan setVlan 1;")
-        #     tcl_commands.extend(_set_vlan(dot2, dot1.type, in_vlan_increment_step, in_vlan_increment_count))
-        #     tcl_commands.append("stackedVlan setVlan 2;")
-        #     tcl_commands.append("stackedVlan set %(chassis)s %(card)s %(port)s ;" % {'chassis': chassis, 'card': card, 'port': port})
-        #     dot2 = dot2.payload
-        # else:
-        tcl_commands.append("vlan set %(chassis)s %(card)s %(port)s ;" % {'chassis': chassis, 'card': card, 'port': port})
+        if dot2:
+            tcl_commands.append("stackedVlan setVlan 1;")
+            tcl_commands.extend(_set_vlan(dot2, dot1.type, in_vlan_increment_step, in_vlan_increment_count))
+            tcl_commands.append("stackedVlan setVlan 2;")
+            tcl_commands.append("stackedVlan set {chassis} {card} {port} ;".format(**iface))
+        else:
+            tcl_commands.append("vlan set {chassis} {card} {port} ;".format(**iface))
 
-        return dot1, tcl_commands
+        return tcl_commands
 
     def _configure_ip(self, payload, chassis, card, port):
         """Configure IP layer.
@@ -670,7 +666,7 @@ class IxiaHALMixin(object):
         tcl_commands.append("ip config -identifier {0};".format(payload.id))
 
         # Set up fragment
-        flags = bin(payload.off)[2:].zfill(2)
+        flags = bin(payload.flags)[2:].zfill(2)
         if flags[0] == '0':
             tcl_commands.append("ip config -fragment may;")
         else:
@@ -679,7 +675,7 @@ class IxiaHALMixin(object):
             tcl_commands.append("ip config -lastFragment last;")
         else:
             tcl_commands.append("ip config -lastFragment more;")
-        tcl_commands.append("ip config -fragmentOffset {%s};" % (payload.off, ))
+        tcl_commands.append("ip config -fragmentOffset {%s};" % (payload.offset, ))
 
         # Set up length
         # isssue header len is not updated
@@ -697,7 +693,7 @@ class IxiaHALMixin(object):
         elif isinstance(payload.opts, list):
             options = ""
             for opt in payload.opts:
-                options += codecs.encode(bytes(opt), "hex_codec").decode()
+                options += codecs.encode(opt.bin(), "hex_codec").decode()
         tcl_commands.append("ip config -options {%s};" % (options, ))
 
         # Set up protocol
@@ -870,9 +866,9 @@ class IxiaHALMixin(object):
         elif igmp_type == 23:
             tcl_commands.append("igmp config -type leaveGroup;")
         # Set response time
-        tcl_commands.append("igmp config -maxResponseTime {%s};" % (payload.mrtime,))
+        tcl_commands.append("igmp config -maxResponseTime {%s};" % (payload.maxresp,))
         # Set gaddr
-        tcl_commands.append("igmp config -groupIpAddress {%s};" % (payload.gaddr, ))
+        tcl_commands.append("igmp config -groupIpAddress {%s};" % (payload.group_s, ))
 
         tcl_commands.append("igmp set %(chassis)s %(card)s %(port)s ;" % {'chassis': chassis, 'card': card, 'port': port})
 
@@ -1032,8 +1028,8 @@ class IxiaHALMixin(object):
                 class_name = payl.__class__.__name__
                 if class_name == "Ethernet":
                     if payl.vlan:
-                        vlan_type = struct.unpack('!HH', payl.vlan)
-                        payl, commands = self._configure_vlan(payl, vlan_type, chassis, card, port, vlan_increment, in_vlan_increment, continuous)
+                        vlan_type = self.get_packet_field(packet, "S-Dot1Q", "type")
+                        commands = self._configure_vlan(payl, vlan_type, chassis, card, port, vlan_increment, in_vlan_increment, continuous)
                         tcl_commands.extend(commands)
                     payl = payl.upper_layer
 
@@ -1212,7 +1208,7 @@ class IxiaHALMixin(object):
                     if igmp_ip_increment is not None:
                         igmp_ip_increment_step, igmp_ip_increment_count = self._check_increment(igmp_ip_increment, "igmp_ip_increment")
                         udf_id = len(self.udf_dict) + 1
-                        dst_ip = packet[pypacker.layer3.igmp.IGMP].gaddr.split('.')
+                        dst_ip = packet[pypacker.layer3.igmp.IGMP].group_s.split('.')
                         dip_initval = str(hex(int(dst_ip[0])))[2:].zfill(2) + str(hex(int(dst_ip[1])))[2:].zfill(2) + \
                             str(hex(int(dst_ip[2])))[2:].zfill(2) + str(hex(int(dst_ip[3])))[2:].zfill(2)
                         if packet.vlan:
@@ -1271,11 +1267,12 @@ class IxiaHALMixin(object):
                     raise TypeError("'Increment' max_value is less than min_value.")
             else:
                 raise TypeError("required_size contains wrong values.")
+            tcl_commands.append(
+                "stream config -frameSizeMIN %s; stream config -frameSizeMAX %s;" % (size_increment_min_val,
+                                                                                     size_increment_max_val))
         if size_increment_type == 'random':
-            tcl_commands.append("stream config -frameSizeMIN %s; stream config -frameSizeMAX %s;" % (size_increment_min_val, size_increment_max_val))
             tcl_commands.append("stream config -frameSizeType sizeRandom;")
         elif size_increment_type == 'increment':
-            tcl_commands.append("stream config -frameSizeMIN %s; stream config -frameSizeMAX %s;" % (size_increment_min_val, size_increment_max_val))
             tcl_commands.append("stream config -frameSizeStep %s;" % (size_increment_step,))
             tcl_commands.append("stream config -frameSizeType sizeIncr;")
             tcl_commands.append("stream config -enableIncrFrameBurstOverride true;")
@@ -1337,7 +1334,7 @@ class IxiaHALMixin(object):
                 self.class_logger.warning("IP.fl increment count decreased to 255 for proper IP checksum")
                 fl_increment_count = 1048576
             udf_id = len(self.udf_dict) + 1
-            fl = packet[pypacker.layer3.ip6.IP6].fl
+            fl = packet[pypacker.layer3.ip6.IP6].flow
             fl_initval = hex(int(fl))[2:]
             if packet.vlan:
                 offset = 19
@@ -1381,7 +1378,8 @@ class IxiaHALMixin(object):
                 offset = 66
             else:
                 offset = 62
-            self.udf_dict["dhcp_si"] = {"udf_id": udf_id, "initval": dhcp_si_initval, "offset": offset, "counter_type": 'c32', "step": dhcp_si_increment_step,
+            self.udf_dict["dhcp_si"] = {"udf_id": udf_id, "initval": dhcp_si_initval, "offset": offset,
+                                        "counter_type": 'c32', "step": dhcp_si_increment_step,
                                         "count": dhcp_si_increment_count, "continuous": continuous}
             tcl_commands.extend(self._set_ixia_udf_field(**self.udf_dict["dhcp_si"]))
 
@@ -1389,34 +1387,37 @@ class IxiaHALMixin(object):
         if tc_increment is not None:
             tc_increment_step, tc_increment_count = self._check_increment(tc_increment, "tc_increment")
             udf_id = len(self.udf_dict) + 1
-            tc = packet[pypacker.layer3.ip6.IP6].tc
+            tc = packet[pypacker.layer3.ip6.IP6].fc
             tc_initval = tc
             bit_offset = 4
             if packet.vlan:
                 offset = 18
             else:
                 offset = 14
-            self.udf_dict["ipv6_tc"] = {"udf_id": udf_id, "initval": tc_initval, "offset": offset, "counter_type": 'c8', "bit_offset": bit_offset,
-                                        "step": tc_increment_step, "count": tc_increment_count, "continuous": continuous}
+            self.udf_dict["ipv6_tc"] = {"udf_id": udf_id, "initval": tc_initval, "offset": offset,
+                                        "counter_type": 'c8', "bit_offset": bit_offset, "step": tc_increment_step,
+                                        "count": tc_increment_count, "continuous": continuous}
             tcl_commands.extend(self._set_ixia_udf_field(**self.udf_dict["ipv6_tc"]))
 
         # Set IPv6 NH increment
         if nh_increment is not None:
             nh_increment_step, nh_increment_count = self._check_increment(nh_increment, "nh_increment")
             udf_id = len(self.udf_dict) + 1
-            nh = packet[pypacker.layer3.ip6.IP6].nh
+            nh = packet[pypacker.layer3.ip6.IP6].nxt
             nh_initval = nh
             if packet.vlan:
                 offset = 24
             else:
                 offset = 20
-            self.udf_dict["ipv6_nh"] = {"udf_id": udf_id, "initval": nh_initval, "offset": offset, "counter_type": 'c8',
-                                        "step": nh_increment_step, "count": nh_increment_count, "continuous": continuous}
+            self.udf_dict["ipv6_nh"] = {"udf_id": udf_id, "initval": nh_initval, "offset": offset,
+                                        "counter_type": 'c8', "step": nh_increment_step,
+                                        "count": nh_increment_count, "continuous": continuous}
             tcl_commands.extend(self._set_ixia_udf_field(**self.udf_dict["ipv6_nh"]))
 
         # Set LSP ID increment
         if isis_lspid_increment is not None:
-            lspid_increment_step, lspid_increment_count = self._check_increment(isis_lspid_increment, "isis_lspid_increment")
+            lspid_increment_step, lspid_increment_count = self._check_increment(isis_lspid_increment,
+                                                                                "isis_lspid_increment")
             udf_id = len(self.udf_dict) + 1
             lid_h = packet[pypacker.layer3.ip6.IP6].lspid
             try:
@@ -1427,8 +1428,9 @@ class IxiaHALMixin(object):
                 offset = 37
             else:
                 offset = 33
-            self.udf_dict["lspid"] = {"udf_id": udf_id, "initval": lid_init, "offset": offset, "counter_type": 'c16',
-                                                        "step": lspid_increment_step, "count": lspid_increment_count, "continuous": continuous}
+            self.udf_dict["lspid"] = {"udf_id": udf_id, "initval": lid_init, "offset": offset,
+                                      "counter_type": 'c16', "step": lspid_increment_step,
+                                      "count": lspid_increment_count, "continuous": continuous}
             tcl_commands.extend(self._set_ixia_udf_field(**self.udf_dict["lspid"]))
 
         # self.stream_ids[stream_id]['size'] = packet_size
@@ -1686,7 +1688,8 @@ class IxiaHALMixin(object):
 
         if build_packet:
             if isinstance(required_size, int):
-                packet = self._build_pypacker_packet(packet_def, adjust_size=adjust_size, required_size=required_size - 4)
+                packet = self._build_pypacker_packet(packet_def, adjust_size=adjust_size,
+                                                     required_size=required_size - self.CRC)
             else:
                 packet = self._build_pypacker_packet(packet_def, adjust_size=adjust_size)
         else:
@@ -1714,10 +1717,11 @@ class IxiaHALMixin(object):
         kwargs.pop("is_valid")
         kwargs.pop("build_packet")
         if fragsize is not None:
-            fragments = pypacker.fragment(packet, fragsize)  # pylint: disable=no-member
-            for fragment in fragments:
-                kwargs['packet'] = fragment
-                self.stream_ids[stream_id]['ix_stream_id'].append(self._set_ixia_stream(**kwargs))
+            pytest.skip("Packet fragmentation is not integrated yet")
+            # fragments = pypacker.fragment(packet, fragsize)
+            # for fragment in fragments:
+            #     kwargs['packet'] = fragment
+            #     self.stream_ids[stream_id]['ix_stream_id'].append(self._set_ixia_stream(**kwargs))
         else:
             kwargs['packet'] = packet
             self.stream_ids[stream_id]['ix_stream_id'].append(self._set_ixia_stream(**kwargs))
