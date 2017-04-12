@@ -161,7 +161,7 @@ Arguments
 Docstring
 +++++++++
 
-All files, classes, class methods and first level functions must have properly created docstrings. Note that 'type' syntax in Python docstrings is `Google style <https://google.github.io/styleguide/pyguide.html>`_ .
+All files, classes, class methods and first level functions must have properly created docstrings. Note that 'type' syntax in Python docstrings is `Google style <https://google.github.io/styleguide/pyguide.html?showone=Comments#Comments>`_ .
 
 **Google style** tends to be easier to read for short and simple docstrings.
 
@@ -175,7 +175,7 @@ Each python file in TAF should contain a header where the main information about
 * summary
 * note with example of module usage in tests (optionally)
 
-In accordance to `Google style <https://google.github.io/styleguide/pyguide.html>`_ of docstrings should look as following example:
+In accordance to `Google style <https://google.github.io/styleguide/pyguide.html?showone=Comments#Comments>`_ of docstrings should look as following example or `Sphinx example <http://www.sphinx-doc.org/en/stable/ext/example_google.html?highlight=google%20style>`_:
 
 *Example:*
 
