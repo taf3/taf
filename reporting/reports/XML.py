@@ -622,7 +622,7 @@ class XML(object):
 
         if self.infodict:
             self.tests.append(
-                self.Junit.header([self.Junit.info_node(value, key) for key, value  # pylint: disable=no-member
+                self.Junit.header([self.Junit.info_node(value, name=key) for key, value  # pylint: disable=no-member
                                    in self.infodict.items()]))
         try:
             testsuite = self.Junit.testsuite(self.tests,  # pylint: disable=no-member
