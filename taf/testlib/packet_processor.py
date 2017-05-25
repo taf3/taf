@@ -19,6 +19,7 @@
 
 """
 
+import struct
 import codecs
 import operator
 from functools import reduce
@@ -265,8 +266,9 @@ class PacketProcessor(object):
         for layer in packet_definition:
             with suppress(KeyError):
                 dot1q_definition = layer["Dot1Q"]
-                pypacker_vlan = ethernet.Dot1Q(**dot1q_definition)
-                packet.vlan.append(pypacker_vlan)
+                pypacker_vlan = struct.pack("!H", pypacker.layer12.ethernet.ETH_TYPE_8021Q) + \
+                                struct.pack("!H", dot1q_definition["vlan"])
+                packet.vlan = pypacker_vlan
             with suppress(KeyError):
                 opts = layer["IP"]["opts"]
                 packet.ip.opts = [ip.IPOptMulti(**opt) for opt in opts]
