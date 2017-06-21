@@ -102,8 +102,7 @@ class LinuxHostBash(LinuxHostInterface):
         self.iperf = iperf.Iperf(self.cli_send_command)
         self.testpmd = testpmd.TestPmd(self.host)
         # Collectd tool
-        self.collectd = collectd.Collectd(self.cli_send_command,
-                                          self.host.config.get('collectd_conf_path'))
+        self.collectd = collectd.Collectd(self.cli_send_command)
         # Hugepages
         self.hugepages = hugepages.HugePages(self.cli_send_command)
 
@@ -369,7 +368,8 @@ class LinuxHostBash(LinuxHostInterface):
             results = [r[0].splitlines() for r in results]
         return results
 
-    def process_table_data(self, data, table_keys_mapping):
+    @staticmethod
+    def process_table_data(data, table_keys_mapping):
         """Returns dictionary of items, given a table of elements.
 
         Args:

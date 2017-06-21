@@ -136,6 +136,7 @@ COMMANDS = {
     "is_active",
     "list",
     "daemon_reload",
+    "cat"
 }
 
 

@@ -104,6 +104,7 @@ Restart collectd service::
 
 """
 
+import re
 import collections
 from io import StringIO
 
@@ -183,15 +184,14 @@ class TagContext(object):
 class Collectd(object):
 
     SERVICE = 'collectd'
-    DEFAULT_COLLECTD_CONF = '/etc/collectd.conf'
 
-    def __init__(self, cli_send_command, collectd_conf=None):
+    def __init__(self, cli_send_command):
         """Initialize Collectd class.
 
         """
         super(Collectd, self).__init__()
         self.send_command = cli_send_command
-        self.collectd_conf = collectd_conf if collectd_conf else self.DEFAULT_COLLECTD_CONF
+        self.collectd_conf = None
         self.service_manager = service_lib.SpecificServiceManager(self.SERVICE, self.send_command)
 
         # Data structure presenting content of collectd.conf
@@ -225,6 +225,12 @@ class Collectd(object):
         """Create collectd configuration text and write it to collectd.conf file.
 
         """
+        # Determine collectd.conf location in collectd.service file on DUT
+        out = self.service_manager.cat().stdout
+        try:
+            self.collectd_conf = re.search(r'^\s*ExecStart.*-C\s(.+?)\s', out, re.M).group(1)
+        except AttributeError:
+            raise CustomException("Incorrect collectd service file.")
         # Make provided collectd plugins configuration object accessible
         if not self.plugins_config:
             raise CustomException("No plugins config defined.")
