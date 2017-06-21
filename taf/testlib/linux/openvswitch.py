@@ -33,6 +33,7 @@ import re
 
 from testlib.linux import service_lib
 from testlib.custom_exceptions import CustomException
+from testlib.linux import testpmd
 
 
 class OpenvSwitch(object):
@@ -63,10 +64,27 @@ class OpenvSwitch(object):
             self.switch_map.update({iface_name: iface_name})
             self.name_to_switchid_map.update({iface_name: iface_name})
 
-    def start(self):
-        """Start openvswitch service.
+    def start(self, ovs_dpdk_opts=None):
+        """Start openvswitch service
+
+        Args:
+            ovs_dpdk_opts(dict | None):  option indicating OVS run with or without DPDK
+
+        Note:
+            If ovs_dpdk_opts is provided, a dictionary with EAL parameters is expected.
+            Else it is assumed that vanilla OVS service start is expected.
 
         """
+        if ovs_dpdk_opts:
+            ovs_dpdk_opts = 'DPDK_OPTS=other-config:dpdk-init=true other-config:dpdk-extra="{}"'.format(
+                testpmd.reformat_dpdk_eal_options(**ovs_dpdk_opts))
+        else:
+            ovs_dpdk_opts = 'DPDK_OPTS=other-config:dpdk-init=false'
+
+        _ovs_env_fname = '/etc/default/{}'.format(self.SERVICE)
+        self.cli_send_command(
+            'sed -i "s%DPDK_OPTS=.*%{0}%g" {1} || echo {0} > {1}'.format(ovs_dpdk_opts, _ovs_env_fname))
+
         self.service_manager.start()
         # Update switch map
         bridges, interfaces = self.get_existing_bridges_interfaces()
@@ -137,6 +155,8 @@ class OpenvSwitch(object):
         Args:
             br_name(str):  name of ovs bridge
             iface_name(str):  name of ovs interface
+            iface_type(str):  type of added interface
+            kwargs(dict):  interface options
 
         """
         # options available
@@ -252,7 +272,7 @@ class OpenvSwitch(object):
         [self.del_bridge(bridge) for bridge in bridges]
 
     def add_bond(self, br_name, bond_name, ports):
-        """Method for bonding ovs interfaces.
+        """Bond ovs interfaces.
 
         Args:
             br_name(str):  name of ovs bridge
@@ -264,7 +284,7 @@ class OpenvSwitch(object):
         self.cli_send_command(command)
 
     def set_bridge_port_interface(self, inst_type, name, **kwargs):
-        """Method set parameters for bridge, port ot interface.
+        """Method set parameters for bridge, port or interface.
 
         Args:
             inst_type(str):  could be Bridge, Port or Interface
