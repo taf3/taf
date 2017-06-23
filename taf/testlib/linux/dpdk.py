@@ -21,12 +21,10 @@ Note:
 
         inst.ui.dpdk.modify_iface_status(bind_action='bind', ifaces=["0000:01:00.0", "01:00.0"],
                                          drv='igb_uio', force=False, show_status=True)
-
 """
 
 import re
-
-from testlib.custom_exceptions import CmdArgsException
+from collections import defaultdict
 
 
 class Dpdk(object):
@@ -57,29 +55,22 @@ class Dpdk(object):
             None or list(dict):  None or dictionary with interfaces status information
 
         """
-        if bind_action == 'bind':
-            # Action 'bind' mandatory arguments: ifaces, drv
-            if not (ifaces or drv):
-                raise CmdArgsException("Wrong command options specified.")
-        elif bind_action == 'unbind':
-            # Action 'unbind' mandatory arguments: ifaces
-            if drv or not ifaces:
-                raise CmdArgsException("Wrong command options specified.")
-        else:
-            # If action not in ['bind', 'unbind'], it is expected that show_status=True
-            if not show_status:
-                raise CmdArgsException("Wrong command options specified.")
-
         ifaces = ifaces if ifaces else []
+        params = {'status': ' -s' if show_status else '',
+                  'force': ' --force' if force else '',
+                  'action': ' --{}'.format(bind_action) if bind_action else '',
+                  'drv': ' {}'.format(drv) if drv else '',
+                  'ifaces': ' ' + ' '.join(ifaces)}
+        cmd_template = defaultdict(str, {'bind': '{status}{force}{action}{drv}{ifaces}',
+                                         'unbind': '{status}{force}{action}{ifaces}',
+                                         '': '{status}'})
 
-        command = '"{cmd}"{force}{status} --{action} {drv} {ifaces}'.format(
-            cmd=self.SERVICE, action=bind_action, drv=drv, ifaces=' '.join(ifaces), status=' -s' if show_status else '',
-            force=' --force' if force else '')
+        command = self.SERVICE + cmd_template[bind_action].format(**params)
         outp = self.send_command(command).stdout
 
         if show_status:
-            devbind_fields = ('pci_slot', 'descr', 'iface', 'drv', 'unused', 'active')
-            matched_groups = re.findall(r"(\S*)\s'(.*)'(?:\sif=)?(\S*)?(?:\sdrv=)?(\S*)?\sunused=(\S*)\s(\*.*\*)?", outp)
-            assert matched_groups, 'Interfaces status information not received.'
-            res = [dict(zip(devbind_fields, entry)) for entry in matched_groups]
-            return res
+            r = re.compile(r"(?P<pci>[\da-fA-F.:]*)\s'(?P<descr>.*)'(?:\sif=)?(?P<iface>\S*)?(?:\sdrv=)?"
+                           r"(?P<drv>\S*)?\sunused=(?P<unused>\S*)\s(?P<active>(?:\*.*\*)?)")
+            matched_groups = [x.groupdict() for x in r.finditer(outp)]
+            assert matched_groups, 'Unable to parse interfaces status information.'
+            return matched_groups
