@@ -21,6 +21,8 @@
 import re
 import time
 
+from paramiko.ssh_exception import SSHException
+
 from testlib import loggers
 from testlib import clissh
 from .custom_exceptions import SysLogException
@@ -72,15 +74,12 @@ class SystemLog(object):
 
         """
         try:
-            check_alive_ssh = self.ssh.client.open_sftp()
-            check_alive_ssh.close()
+            sftp = self.ssh.client.open_sftp()
             self.class_logger.debug('SSH session is active.')
-        except Exception:
-            self.class_logger.debug('ERROR: No active SSH.')
-            self.class_logger.debug('Connecting...')
+        except SSHException:
+            self.class_logger.debug('No active SSH. Connecting...')
             self.ssh.login(self.user, self.pasw)
-        # open sftp:
-        sftp = self.ssh.client.open_sftp()
+            sftp = self.ssh.client.open_sftp()
         # get remote logfile:
         remote_log_file = sftp.open(self.log_path)
         # go to end of remote log file:
