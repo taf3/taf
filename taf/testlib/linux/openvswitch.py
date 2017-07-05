@@ -82,9 +82,7 @@ class OpenvSwitch(object):
             ovs_dpdk_opts = 'DPDK_OPTS=other-config:dpdk-init=false'
 
         _ovs_env_fname = '/etc/default/{}'.format(self.SERVICE)
-        self.cli_send_command(
-            'sed -i "s%DPDK_OPTS=.*%{0}%g" {1} || echo {0} > {1}'.format(ovs_dpdk_opts, _ovs_env_fname))
-
+        self.cli_send_command("echo '# Generated' > {1} && sed -i 'a {0}' {1}".format(ovs_dpdk_opts, _ovs_env_fname))
         self.service_manager.start()
         # Update switch map
         bridges, interfaces = self.get_existing_bridges_interfaces()
@@ -155,8 +153,6 @@ class OpenvSwitch(object):
         Args:
             br_name(str):  name of ovs bridge
             iface_name(str):  name of ovs interface
-            iface_type(str):  type of added interface
-            kwargs(dict):  interface options
 
         """
         # options available
@@ -246,7 +242,6 @@ class OpenvSwitch(object):
 
         """
         data = self.get_interface_info(iface_name)
-        # return dict(re.findall(r'{?\"*(\S+)\"*=(\d+)', data["statistics"]))
         return dict(re.findall(r'{?"*(\w+)"*=(\d+)', data["statistics"]))
 
     def get_existing_bridges_interfaces(self):

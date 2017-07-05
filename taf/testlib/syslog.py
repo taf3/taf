@@ -76,7 +76,7 @@ class SystemLog(object):
         try:
             sftp = self.ssh.client.open_sftp()
             self.class_logger.debug('SSH session is active.')
-        except SSHException:
+        except (AttributeError, SSHException):
             self.class_logger.debug('No active SSH. Connecting...')
             self.ssh.login(self.user, self.pasw)
             sftp = self.ssh.client.open_sftp()
