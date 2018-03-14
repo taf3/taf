@@ -211,8 +211,7 @@ class SwitchGeneral(entry_template.GenericEntry):
                 if not self.instance_prop:
                     self.instance_prop = self.ui.get_table_platform()[0]
             except Exception as err:
-                self.class_logger.error("Caught an exception while probing the device: Error type: %s. Error msg: %s" %
-                                        (type(err), err))
+                self.class_logger.exception("Caught an exception while probing the device")
             else:
                 _object['type'] = "switchpp"
                 # Define _object['prop'] only if switch has started correctly
@@ -566,18 +565,18 @@ class SwitchReal(SwitchGeneral):
         self.pwboard_snmp_rw_community_string = 'private'
 
         super(SwitchReal, self).__init__(config, opts)
-        self.pwboard = config["pwboard_host"]
-        self.pwport = config["pwboard_port"]
-        self._sshtun_user = config['sshtun_user']
-        self._sshtun_pass = config['sshtun_pass']
+        self.pwboard = config.get("pwboard_host", "")
+        self.pwport = config.get("pwboard_port", "")
+        self._sshtun_user = config.get('sshtun_user', '')
+        self._sshtun_pass = config.get('sshtun_pass', '')
 
         self.pwboard_snmp_rw_community_string = config.get('pwboard_snmp_rw_community_string', 'private')
 
         # conditional init, this should be set in concrete Switch platform classes
         self.mgmt_iface = getattr(self, "mgmt_iface", "eth0")
 
-        self._default_gw = config['default_gw']
-        self._net_mask = config['net_mask']
+        self._default_gw = config.get('default_gw', '')
+        self._net_mask = config.get('net_mask', '')
 
         self.waiton_err_message = "Device is started but does not respond to queries."
         self.telnet = None
@@ -607,21 +606,22 @@ class SwitchReal(SwitchGeneral):
 
         """
         self.class_logger.info("Starting Real switch device %s(%s) ..." % (self.name, self.ipaddr))
-        self.class_logger.debug("Checking device status on powerboard...")
-        status = self.powerboard.get_status(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string)
-        self.class_logger.debug("Current status %s." % status)
-        if status == "On":
-            # Turn Off Seacliff with halt.
-            if "halt" in self.config and self.config["halt"]:
-                self.halt()
-            self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["Off"])
-            self.class_logger.info("Powercyle latency: {}".format(self.powercycle_timeout))
-            time.sleep(self.powercycle_timeout)
-            self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["On"])
-        elif status == "Off":
-            self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["On"])
-        else:
-            raise SwitchException("Cannot determine device status.")
+        if self.pwboard:
+            self.class_logger.debug("Checking device status on powerboard...")
+            status = self.powerboard.get_status(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string)
+            self.class_logger.debug("Current status %s." % status)
+            if status == "On":
+                # Turn Off Seacliff with halt.
+                if "halt" in self.config and self.config["halt"]:
+                    self.halt()
+                self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["Off"])
+                self.class_logger.info("Powercyle latency: {}".format(self.powercycle_timeout))
+                time.sleep(self.powercycle_timeout)
+                self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["On"])
+            elif status == "Off":
+                self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["On"])
+            else:
+                raise SwitchException("Cannot determine device status.")
 
         # After snmp command is sent APC could restart switch
         # in few seconds. Terefore it's good to wait a little
