@@ -113,6 +113,7 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
             full_out += data
 
             # Update action and exit_flag
+
             for position, expect_re in enumerate(expect_list):
                 if expect_re.search(temp_data) is not None:
                     return position, full_out
@@ -264,7 +265,7 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
             while shell.recv_ready():
                 # += for strings is optimized, don't worry.
                 # we still have to decode here since there can be unicode
-                data += shell.recv(200000).decode()
+                data += shell.recv(200000).decode('utf-8')
             return data
 
         def expect(alternatives=None, timeout=60, interval=0.1, remove_cmd=True, is_shell=False):
@@ -319,10 +320,11 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
         # Removes prompt from output data
         if self.prompt:
             for single_prompt in self.prompt if isinstance(self.prompt, list) else [self.prompt]:
-                if single_prompt in data.split("\n")[-1]:
+                str_prompt = single_prompt.decode('utf-8')
+                if str_prompt in data.split("\n")[-1]:
                     temp_data_list = data.split("\n")
-                    if temp_data_list[-1].endswith(single_prompt):
-                        data_string = temp_data_list[-1].rsplit(single_prompt, 1)[0]
+                    if temp_data_list[-1].endswith(str_prompt):
+                        data_string = temp_data_list[-1].rsplit(str_prompt, 1)[0]
                         temp_data_list[-1] = data_string
                     data = "\n".join(temp_data_list)
                     break
@@ -406,7 +408,7 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
 
             """
             try:
-                data = telnet_obj.read_very_eager()
+                data = telnet_obj.read_very_eager().decode('utf-8')
             except Exception:
                 data = ""
 
@@ -469,9 +471,9 @@ class CLIGenericMixin(object, metaclass=ABCMeta):
         if self.prompt:
             if isinstance(self.prompt, list):
                 for single_prompt in self.prompt:
-                    alternatives.append((single_prompt, None, True, False))
-            elif isinstance(self.prompt, str):
-                alternatives.append((self.prompt, None, True, False))
+                    alternatives.append((single_prompt.decode('utf-8'), None, True, False))
+            else:
+                alternatives.append((self.prompt.decode('utf-8'), None, True, False))
 
         # Append page_break tuple with exit_flag = False.
         if self.page_break:

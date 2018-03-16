@@ -68,11 +68,11 @@ class TelnetCMD(CLIGenericMixin):
 
         self.host = host
         self.port = port
-        self.user = username
-        self.password = password
-        self.prompt = prompt
-        self.pass_prompt = pass_prompt
-        self.login_prompt = login_prompt
+        self.user = username.encode('utf-8')
+        self.password = password.encode('utf-8')
+        self.prompt = prompt.encode('utf-8')
+        self.pass_prompt = pass_prompt.encode('utf-8')
+        self.login_prompt = login_prompt.encode('utf-8')
         self.page_break = page_break
         self.page_break_lines = page_break_lines
         self.timeout = timeout
@@ -128,7 +128,7 @@ class TelnetCMD(CLIGenericMixin):
             if wait_login > 0:
                 _output = self.telnet_obj.expect([prompt_re, login_prompt_re], timeout=wait_login)
             if _output[0] == -1:
-                self.telnet_obj.write("\n")
+                self.telnet_obj.write(b"\n")
                 _output = self.telnet_obj.expect([prompt_re, login_prompt_re], timeout=self.timeout)
             if _output[0] == 1:
                 with_login = True
@@ -142,7 +142,7 @@ class TelnetCMD(CLIGenericMixin):
                 if not self.prompt:
                     raise Exception("Prompt isn't defined. Please set the prompt.")
                 # Send <Enter> to ensure that prompt is appeared
-                self.telnet_obj.write("\n")
+                self.telnet_obj.write(b"\n")
                 _output = self.telnet_obj.read_until(self.prompt, self.timeout)
                 telnet_output += _output
             else:
@@ -198,18 +198,18 @@ class TelnetCMD(CLIGenericMixin):
 
         """
         self.check_shell()
-        data = ""
+        data = b""
         # The following loop has to be executed at least one time.
         end_time = time.time() + timeout
         end_flag = False
-        self.telnet_obj.write("\n")
+        self.telnet_obj.write(b"\n")
         while not end_flag:
             data += self.telnet_obj.read_very_eager()
             if time.time() >= end_time:
                 end_flag = True
             else:
                 time.sleep(interval)
-        return data
+        return data.decode('utf-8', errors='ignore')
 
     def send_command(self, command):
         """Run command without waiting response.
@@ -220,7 +220,7 @@ class TelnetCMD(CLIGenericMixin):
         """
         self.check_shell()
         self.class_logger.debug("{0}@{1}: {2}".format(self.user, self.host, command))
-        self.telnet_obj.write(command + "\n")
+        self.telnet_obj.write(command.encode('utf-8') + b"\n")
 
     def open_shell(self, raw_output=False):
         """Call login method. Added to support other CLI objects interface.
@@ -259,7 +259,11 @@ class TelnetCMD(CLIGenericMixin):
         """
         flag = True
         try:
-            self.telnet_obj.sock.sendall(telnetlib.IAC + telnetlib.NOP)
+            if not self.telnet_obj.sock:
+                return False
+            if isinstance(self.telnet_obj.sock, int):
+                return False
+            self.telnet_obj.sock.sendall(telnetlib.IAC + telnetlib.DONT + telnetlib.NOP)
         except Exception as err:
             self.class_logger.error("Telnet connection failure: %s", err)
             flag = False
@@ -292,7 +296,6 @@ class TelnetCMD(CLIGenericMixin):
 
         if not self.connect_status and connect:
             self.connect(with_login=False, wait_prompt=False)
-
         if self.telnet_obj:
             if self.telnet_obj.sock == 0:
                 self.connect(with_login=False, wait_prompt=False, socket_closed=True)
@@ -309,10 +312,10 @@ class TelnetCMD(CLIGenericMixin):
             action_list.append((self.password if self.password else password, True))
         for alter_item in alternatives:
             expect_list.append(re.compile(alter_item[0]))
-            action_list.append((alter_item[1].encode("ascii"), alter_item[2]))
+            action_list.append((alter_item[1].encode('utf-8'), alter_item[2]))
         for alter_item in self.alternatives_global:
             expect_list.append(re.compile(alter_item[0]))
-            action_list.append((alter_item[1].encode("ascii"), alter_item[2]))
+            action_list.append((alter_item[1].encode('utf-8'), alter_item[2]))
 
         enter_sent = False
         stop_flag = False
@@ -326,7 +329,7 @@ class TelnetCMD(CLIGenericMixin):
                     wait_login = 0
                 if not enter_sent:
                     # Send <Enter> to ensure that login prompt appeared.
-                    self.telnet_obj.write("\n")
+                    self.telnet_obj.write(b"\n")
                     enter_sent = True
                 else:
                     # If <Enter> is already sent and still no response - set error flag.
@@ -334,7 +337,7 @@ class TelnetCMD(CLIGenericMixin):
                     stop_flag = True
                 continue
             self.class_logger.debug("Action: %s" % (action_list[_output[0]], ))
-            self.telnet_obj.write(str("%s\n" % (action_list[_output[0]][0], )))
+            self.telnet_obj.write(action_list[_output[0]][0] + b"\n")
             stop_flag = action_list[_output[0]][1]
 
         if err:
@@ -453,7 +456,7 @@ class TelnetCMD(CLIGenericMixin):
         if new_prompt:
             alternatives.append((new_prompt, None, True, False))
 
-        self.telnet_obj.write(command + "\n")
+        self.telnet_obj.write(command.encode('utf-8') + b"\n")
 
         data = self.action_on_expect(self.telnet_obj_prep, alternatives, timeout, interval)
 
