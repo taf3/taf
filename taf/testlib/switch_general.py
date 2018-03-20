@@ -37,6 +37,7 @@ from . import ui_iss_cli
 from . import ui_onpss_jsonrpc
 from . import lab
 from .custom_exceptions import SwitchException
+from .powerboard import SnmpPowerControl
 
 UI_MAP = {
     "ons_cli": ui_ons_cli.UiOnsCli,
@@ -559,18 +560,10 @@ class SwitchReal(SwitchGeneral):
             opts(OptionParser):  py.test config.option object which contains all py.test cli options.
 
         """
-        from . import powerboard
-        self.powerboard = powerboard
-        self.powercycle_timeout = config.get('reboot_latency', 1)
-        self.pwboard_snmp_rw_community_string = 'private'
-
         super(SwitchReal, self).__init__(config, opts)
-        self.pwboard = config.get("pwboard_host", "")
-        self.pwport = config.get("pwboard_port", "")
+        self.powerboard = SnmpPowerControl(config)
         self._sshtun_user = config.get('sshtun_user', '')
         self._sshtun_pass = config.get('sshtun_pass', '')
-
-        self.pwboard_snmp_rw_community_string = config.get('pwboard_snmp_rw_community_string', 'private')
 
         # conditional init, this should be set in concrete Switch platform classes
         self.mgmt_iface = getattr(self, "mgmt_iface", "eth0")
@@ -606,22 +599,18 @@ class SwitchReal(SwitchGeneral):
 
         """
         self.class_logger.info("Starting Real switch device %s(%s) ..." % (self.name, self.ipaddr))
-        if self.pwboard:
-            self.class_logger.debug("Checking device status on powerboard...")
-            status = self.powerboard.get_status(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string)
-            self.class_logger.debug("Current status %s." % status)
-            if status == "On":
-                # Turn Off Seacliff with halt.
-                if "halt" in self.config and self.config["halt"]:
-                    self.halt()
-                self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["Off"])
-                self.class_logger.info("Powercyle latency: {}".format(self.powercycle_timeout))
-                time.sleep(self.powercycle_timeout)
-                self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["On"])
-            elif status == "Off":
-                self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["On"])
-            else:
-                raise SwitchException("Cannot determine device status.")
+        self.class_logger.debug("Checking device status on powerboard...")
+        status = self.powerboard.get_power_status()
+        self.class_logger.debug("Current status %s." % status)
+        if status == "On":
+            # Turn Off Seacliff with halt.
+            if "halt" in self.config and self.config["halt"]:
+                self.halt()
+            self.powerboard.power_cycle()
+        elif status == "Off":
+            self.powerboard.power_on()
+        else:
+            raise SwitchException("Cannot determine device status.")
 
         # After snmp command is sent APC could restart switch
         # in few seconds. Terefore it's good to wait a little
@@ -651,14 +640,14 @@ class SwitchReal(SwitchGeneral):
 
         self.class_logger.info("Stopping Real switch device %s(%s) ..." % (self.name, self.ipaddr))
         self.class_logger.debug("Checking device status on powerboard...")
-        status = self.powerboard.get_status(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string)
+        status = self.powerboard.get_power_status()
         self.class_logger.debug("Current status %s." % status)
         if status == "On":
             # WORKAROUND BEGIN: Turn Off the device with halt
             if "halt" in self.config and self.config["halt"]:
                 self.halt()
             # WORKAROUND END
-            self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["Off"])
+            self.powerboard.power_off()
         elif status == "Off":
             self.class_logger.info("Nothing to do. Switch is already off.")
         else:
@@ -688,8 +677,8 @@ class SwitchReal(SwitchGeneral):
         if mode == 'powercycle':
             self.class_logger.info("Perform powercycle device reboot")
             self.stop()
-            self.class_logger.info("Powercyle latency: {}".format(self.powercycle_timeout))
-            time.sleep(self.powercycle_timeout)
+            self.class_logger.info("Powercyle latency: {}".format(self.powerboard.powercycle_timeout))
+            time.sleep(self.powerboard.powercycle_timeout)
             self.start(wait_on)
 
         elif mode == 'ui':

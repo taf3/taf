@@ -497,17 +497,15 @@ class SwitchONS(SwitchONSGeneralMixin, SwitchReal):
         """
         self.class_logger.info("Starting Real switch device %s(%s) ..." % (self.name, self.ipaddr))
         self.class_logger.debug("Checking device status on powerboard...")
-        status = self.powerboard.get_status(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string)
+        status = self.powerboard.get_power_status()
         self.class_logger.debug("Current status %s." % status)
         if status == "On":
             # Turn Off Seacliff with halt.
             if "halt" in self.config and self.config["halt"]:
                 self.halt()
-            self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["Off"])
-            time.sleep(1)
-            self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["On"])
+            self.powerboard.power_cycle()
         elif status == "Off":
-            self.powerboard.do_action(self.pwboard, self.pwport, self.pwboard_snmp_rw_community_string, self.powerboard.commands["On"])
+            self.powerboard.power_on()
         else:
             raise SwitchException("Cannot determine device status.")
 
