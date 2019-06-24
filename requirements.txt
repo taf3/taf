@@ -2,7 +2,7 @@ pytest==3.0.0
 pyasn1>=0.1.9
 pysnmp>=4.3.2
 jira>=1.0.3
-Twisted==16.2.0
+Twisted==19.2.1
 pexpect==4.1.0
 enum34>=1.1.6
 jsonrpclib-pelix>=0.2.7
