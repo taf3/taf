@@ -8,7 +8,7 @@ enum34>=1.1.6
 jsonrpclib-pelix>=0.2.7
 netaddr==0.7.18
 paramiko>=2.0.1
-cryptography==1.7.1
+cryptography==3.2
 py2chainmap>=0.1.0
 pytest-xdist>=1.11
 PyYAML==3.11
